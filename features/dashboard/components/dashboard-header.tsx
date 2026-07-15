@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import { Settings } from 'lucide-react-native';
 import { Pressable, useColorScheme, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
@@ -10,9 +11,10 @@ export function DashboardHeader() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
   const { greeting, dateLabel } = useGreeting();
+  const insets = useSafeAreaInsets();
 
   return (
-    <View className="flex-row items-start justify-between px-4 pb-2 pt-2">
+    <View className="flex-row items-start justify-between px-4 pb-2" style={{ paddingTop: insets.top + 8 }}>
       <View className="gap-1">
         <Text variant="heading">{greeting}</Text>
         <Text variant="muted">{dateLabel}</Text>
