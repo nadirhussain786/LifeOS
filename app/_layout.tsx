@@ -26,6 +26,7 @@ export default function RootLayout() {
               <Stack.Screen name="(auth)" />
               <Stack.Screen name="(tabs)" />
               <Stack.Screen name="settings" options={{ headerShown: true, title: 'Settings' }} />
+              <Stack.Screen name="task/new" options={{ presentation: 'modal' }} />
             </Stack>
           </BottomSheetModalProvider>
         </QueryClientProvider>

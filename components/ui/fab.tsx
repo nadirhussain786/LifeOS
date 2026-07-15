@@ -9,9 +9,10 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 type Props = {
   onPress: () => void;
+  accessibilityLabel?: string;
 };
 
-export function Fab({ onPress }: Props) {
+export function Fab({ onPress, accessibilityLabel = 'Quick actions' }: Props) {
   const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
   const scale = useSharedValue(1);
@@ -27,7 +28,7 @@ export function Fab({ onPress }: Props) {
       onPressOut={() => {
         scale.value = withTiming(1, { duration: 100 });
       }}
-      accessibilityLabel="Quick actions"
+      accessibilityLabel={accessibilityLabel}
       accessibilityRole="button"
       style={[
         animatedStyle,
@@ -40,16 +41,16 @@ export function Fab({ onPress }: Props) {
           borderRadius: 28,
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: colors[scheme].primary,
-          shadowColor: '#000',
-          shadowOpacity: 0.2,
-          shadowRadius: 8,
+          backgroundColor: colors[scheme].accent,
+          shadowColor: colors[scheme].accent,
+          shadowOpacity: 0.35,
+          shadowRadius: 10,
           shadowOffset: { width: 0, height: 4 },
           elevation: 4,
         },
       ]}
     >
-      <Plus color={colors[scheme].primaryForeground} size={26} />
+      <Plus color={colors[scheme].accentForeground} size={26} />
     </AnimatedPressable>
   );
 }

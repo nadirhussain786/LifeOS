@@ -14,7 +14,7 @@ export default function LoginScreen() {
         <Text variant="muted">Sign in to continue to your personal operating system.</Text>
       </View>
 
-      <Button label="Continue" disabled />
+      <Button label="Continue" variant="accent" size="lg" disabled />
       <Text variant="caption" className="text-center">
         Authentication will be wired up in the next phase.
       </Text>

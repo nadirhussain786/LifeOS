@@ -1,4 +1,3 @@
-import { sql } from 'drizzle-orm';
 import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
 export const taskCategories = sqliteTable('task_categories', {
@@ -38,7 +37,7 @@ export const tasks = sqliteTable('tasks', {
 
 /** Bootstrap DDL, run once at startup — see database/client.ts for why this
  * is hand-written rather than generated via drizzle-kit migrations. */
-export const BOOTSTRAP_SQL = sql`
+export const BOOTSTRAP_SQL = `
   CREATE TABLE IF NOT EXISTS task_categories (
     id TEXT PRIMARY KEY NOT NULL,
     user_id TEXT NOT NULL,

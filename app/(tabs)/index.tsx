@@ -3,8 +3,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef, useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 
+import { Fab } from '@/components/ui/fab';
 import { DashboardHeader } from '@/features/dashboard/components/dashboard-header';
-import { Fab } from '@/features/dashboard/components/fab';
 import { QuickActionsSheet } from '@/features/dashboard/components/quick-actions-sheet';
 import { useDashboardWidgets } from '@/features/dashboard/hooks/use-dashboard-widgets';
 

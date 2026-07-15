@@ -53,11 +53,11 @@ export function TodayTasksWidget() {
                 <View
                   className="h-5 w-5 items-center justify-center rounded-full border"
                   style={{
-                    borderColor: colors[scheme].border,
-                    backgroundColor: task.done ? colors[scheme].primary : 'transparent',
+                    borderColor: task.done ? colors[scheme].accent : colors[scheme].border,
+                    backgroundColor: task.done ? colors[scheme].accent : 'transparent',
                   }}
                 >
-                  {task.done ? <Check size={12} color={colors[scheme].primaryForeground} /> : null}
+                  {task.done ? <Check size={12} color={colors[scheme].accentForeground} /> : null}
                 </View>
                 <Text className={task.done ? 'flex-1 text-muted-foreground line-through' : 'flex-1'}>
                   {task.title}

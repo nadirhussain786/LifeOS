@@ -19,15 +19,15 @@
     --muted: 0 0% 96%;
     --muted-foreground: 0 0% 45%;
 
-    --accent: 0 0% 94%;
-    --accent-foreground: 0 0% 9%;
+    --accent: 158 70% 32%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 0 0% 90%;
     --input: 0 0% 90%;
-    --ring: 0 0% 9%;
+    --ring: 158 70% 32%;
   }
 
   .dark:root {
@@ -46,14 +46,14 @@
     --muted: 0 0% 15%;
     --muted-foreground: 0 0% 63%;
 
-    --accent: 0 0% 18%;
-    --accent-foreground: 0 0% 96%;
+    --accent: 158 60% 55%;
+    --accent-foreground: 158 40% 10%;
 
     --destructive: 0 63% 40%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 0 0% 20%;
     --input: 0 0% 20%;
-    --ring: 0 0% 83%;
+    --ring: 158 60% 55%;
   }
 }

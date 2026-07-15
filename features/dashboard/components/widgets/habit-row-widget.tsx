@@ -47,8 +47,8 @@ export function HabitRowWidget() {
               <View
                 className="h-16 w-16 items-center justify-center rounded-full border-2"
                 style={{
-                  borderColor: habit.doneToday ? colors[scheme].primary : colors[scheme].border,
-                  backgroundColor: habit.doneToday ? colors[scheme].primary : 'transparent',
+                  borderColor: habit.doneToday ? colors[scheme].accent : colors[scheme].border,
+                  backgroundColor: habit.doneToday ? colors[scheme].accent : 'transparent',
                 }}
               >
                 <Text className="text-2xl">{habit.emoji}</Text>

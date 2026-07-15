@@ -3,7 +3,19 @@ import { openDatabaseSync } from 'expo-sqlite';
 
 import * as schema from '@/database/schema';
 
+type Database = ReturnType<typeof drizzle<typeof schema>>;
+
+let instance: Database | null = null;
+
 /**
+ * Lazily opens the database on first use rather than as a module-level
+ * side effect. Expo Router eagerly evaluates every route file's module
+ * graph at boot to build its route table, so a top-level `openDatabaseSync`
+ * call here would crash the entire app on startup if it ever fails (e.g.
+ * the web platform's WASM build has real environment requirements) —
+ * scoped to a function, a failure only affects the screen that actually
+ * touches the database.
+ *
  * Table creation is a hand-written `CREATE TABLE IF NOT EXISTS` bootstrap
  * rather than drizzle-kit generated migrations. drizzle-kit's migrator
  * needs its generated .sql files loaded as Metro assets, which adds real
@@ -12,8 +24,11 @@ import * as schema from '@/database/schema';
  * Revisit generated migrations once the schema needs versioned changes
  * shipped to existing users' devices.
  */
-const sqliteDb = openDatabaseSync('lifeos.db');
-
-sqliteDb.execSync(schema.BOOTSTRAP_SQL.queryChunks.join(''));
-
-export const db = drizzle(sqliteDb, { schema });
+export function getDb(): Database {
+  if (!instance) {
+    const sqliteDb = openDatabaseSync('lifeos.db');
+    sqliteDb.execSync(schema.BOOTSTRAP_SQL);
+    instance = drizzle(sqliteDb, { schema });
+  }
+  return instance;
+}

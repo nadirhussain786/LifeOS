@@ -1,22 +1,23 @@
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Pressable, type PressableProps } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 
 import { Text } from '@/components/ui/text';
 import { cn } from '@/lib/utils';
 
-const buttonVariants = cva('flex-row items-center justify-center rounded-md active:opacity-90', {
+const buttonVariants = cva('flex-row items-center justify-center rounded-full disabled:opacity-40', {
   variants: {
     variant: {
       primary: 'bg-primary',
       secondary: 'bg-secondary',
       ghost: 'bg-transparent',
       destructive: 'bg-destructive',
+      accent: 'bg-accent',
     },
     size: {
       sm: 'h-9 px-3',
       md: 'h-11 px-4',
-      lg: 'h-12 px-6',
+      lg: 'h-14 px-6',
     },
   },
   defaultVariants: {
@@ -25,13 +26,14 @@ const buttonVariants = cva('flex-row items-center justify-center rounded-md acti
   },
 });
 
-const textVariants = cva('font-medium', {
+const textVariants = cva('font-semibold', {
   variants: {
     variant: {
       primary: 'text-primary-foreground',
       secondary: 'text-secondary-foreground',
       ghost: 'text-foreground',
       destructive: 'text-destructive-foreground',
+      accent: 'text-accent-foreground',
     },
     size: {
       sm: 'text-sm',
@@ -45,6 +47,8 @@ const textVariants = cva('font-medium', {
   },
 });
 
+const SHADOW_VARIANTS = new Set(['primary', 'accent', 'destructive']);
+
 type Props = PressableProps &
   VariantProps<typeof buttonVariants> & {
     label: string;
@@ -55,23 +59,37 @@ type Props = PressableProps &
 // Pressable itself: Animated.createAnimatedComponent(Pressable) creates a
 // component NativeWind hasn't registered className/style interop for, so a
 // className passed directly to it is silently dropped (renders unstyled).
-export function Button({ label, variant, size, className, onPressIn, onPressOut, ...props }: Props) {
+export function Button({ label, variant = 'primary', size, className, disabled, onPressIn, onPressOut, ...props }: Props) {
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
   }));
 
+  const hasShadow = !disabled && SHADOW_VARIANTS.has(variant ?? 'primary');
+
   return (
-    <Animated.View style={animatedStyle}>
+    <Animated.View
+      style={[
+        animatedStyle,
+        hasShadow && {
+          shadowColor: variant === 'accent' ? '#188b61' : '#000',
+          shadowOpacity: 0.22,
+          shadowRadius: 12,
+          shadowOffset: { width: 0, height: 6 },
+          elevation: 4,
+        },
+      ]}
+    >
       <Pressable
+        disabled={disabled}
         className={cn(buttonVariants({ variant, size }), className)}
         onPressIn={(e) => {
-          scale.value = withTiming(0.97, { duration: 100 });
+          scale.value = withSpring(0.96, { damping: 16, stiffness: 400 });
           onPressIn?.(e);
         }}
         onPressOut={(e) => {
-          scale.value = withTiming(1, { duration: 100 });
+          scale.value = withSpring(1, { damping: 12, stiffness: 300 });
           onPressOut?.(e);
         }}
         {...props}
