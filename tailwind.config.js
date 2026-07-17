@@ -56,6 +56,14 @@ module.exports = {
         'sora-semibold': ['Sora_600SemiBold'],
         'sora-bold': ['Sora_700Bold'],
         'sora-extrabold': ['Sora_800ExtraBold'],
+        // Literata — a reading-optimized serif reserved for Journal's actual
+        // written content (entry body, prompts, day snippets), so writing a
+        // journal entry reads as literary rather than filling in a form.
+        // Never used for chrome/labels/buttons — those stay Sora everywhere.
+        journal: ['Literata_400Regular'],
+        'journal-italic': ['Literata_400Regular_Italic'],
+        'journal-medium': ['Literata_500Medium'],
+        'journal-semibold': ['Literata_600SemiBold'],
       },
     },
   },

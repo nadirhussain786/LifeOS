@@ -28,14 +28,15 @@ function PromptField({
   }, [answer]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <View className="gap-1.5">
-      <Text variant="muted">{prompt.text}</Text>
+    <View className="gap-2">
+      <Text className="font-journal-italic text-[15px] text-muted-foreground">{prompt.text}</Text>
       <TextInput
         value={answer}
         onChangeText={setAnswer}
         multiline
         placeholder="Write a few words…"
         placeholderTextColor={colors[scheme].mutedForeground}
+        style={{ fontFamily: 'Literata_400Regular', fontSize: 16, lineHeight: 23 }}
         className="min-h-11 rounded-xl border border-border bg-card p-3 text-foreground"
         textAlignVertical="top"
       />

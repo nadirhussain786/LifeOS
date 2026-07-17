@@ -1,10 +1,11 @@
 import { format, parseISO } from 'date-fns';
 import * as Haptics from 'expo-haptics';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as Location from 'expo-location';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronLeft, MapPin, Trash2 } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, TextInput, useColorScheme, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, TextInput, useColorScheme, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AttachmentStrip } from '@/components/ui/attachment-strip';
@@ -13,6 +14,7 @@ import { VoiceNoteRecorder } from '@/components/ui/voice-note-recorder';
 import { colors } from '@/constants/theme';
 import { MoodCheckin } from '@/features/journal/components/mood-checkin';
 import { ReflectionPromptList } from '@/features/journal/components/reflection-prompt-list';
+import { MOOD_TINT } from '@/features/journal/constants';
 import {
   useJournalAttachments,
   useJournalEntry,
@@ -58,6 +60,8 @@ export default function JournalEntryScreen() {
 
   if (!entry) return null;
 
+  const wash = entry.mood ? `${MOOD_TINT[entry.mood]}33` : `${colors[scheme].accent}1a`;
+
   const toggleReason = (reason: string) => {
     const current = new Set(entry.moodReasons ?? []);
     if (current.has(reason)) current.delete(reason);
@@ -82,17 +86,20 @@ export default function JournalEntryScreen() {
     });
   };
 
+  const date = parseISO(entryDate);
+
   return (
     <View className="flex-1 bg-background">
       <Stack.Screen options={{ headerShown: false }} />
+
+      {/* A soft mood-tinted wash behind the header, reacting live to whichever mood is picked below —
+          the page itself reflects how the day felt, rather than staying neutral chrome regardless. */}
+      <LinearGradient colors={[wash, 'transparent']} style={[StyleSheet.absoluteFillObject, { height: 240 }]} />
 
       <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-4 pb-2">
         <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full bg-muted">
           <ChevronLeft size={20} color={colors[scheme].foreground} />
         </Pressable>
-        <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-          {format(parseISO(entryDate), 'EEEE, MMM d')}
-        </Text>
         <Pressable
           onPress={() => {
             remove.mutate(entry.id);
@@ -104,8 +111,17 @@ export default function JournalEntryScreen() {
         </Pressable>
       </View>
 
+      <View className="gap-1 px-5 pb-5">
+        <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
+          {format(date, 'EEEE')}
+        </Text>
+        <Text style={{ fontSize: 32, lineHeight: 40, fontFamily: 'Literata_600SemiBold' }} className="text-foreground">
+          {format(date, 'MMMM d')}
+        </Text>
+      </View>
+
       <ScrollView
-        contentContainerClassName="gap-6 px-5 pt-3"
+        contentContainerClassName="gap-6 px-5 pt-1"
         contentContainerStyle={{ paddingBottom: keyboardHeight > 0 ? keyboardHeight + 24 : 32 }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -133,7 +149,8 @@ export default function JournalEntryScreen() {
           multiline
           placeholder="How was today?"
           placeholderTextColor={colors[scheme].mutedForeground}
-          className="min-h-32 rounded-2xl border border-border bg-card p-4 text-base text-foreground"
+          style={{ fontFamily: 'Literata_400Regular', fontSize: 17, lineHeight: 25 }}
+          className="min-h-32 rounded-2xl border border-border bg-card p-4 text-foreground"
           textAlignVertical="top"
         />
 

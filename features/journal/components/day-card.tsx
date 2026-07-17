@@ -3,25 +3,8 @@ import { Platform, Pressable, StyleSheet, useColorScheme, View } from 'react-nat
 
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
-import type { JournalEntry, MoodOption } from '@/features/journal/types/journal.types';
-
-const MOOD_EMOJI: Record<MoodOption, string> = {
-  great: '😄',
-  good: '🙂',
-  okay: '😐',
-  low: '😕',
-  rough: '😣',
-};
-
-// A calm, non-judgmental color per mood — never the app's destructive red,
-// so a hard day reads as "noted" rather than "wrong."
-const MOOD_TINT: Record<MoodOption, string> = {
-  great: '#22c55e',
-  good: '#84cc16',
-  okay: '#eab308',
-  low: '#0ea5e9',
-  rough: '#f97316',
-};
+import { MOOD_EMOJI, MOOD_TINT } from '@/features/journal/constants';
+import type { JournalEntry } from '@/features/journal/types/journal.types';
 
 type Props = {
   entry: JournalEntry;
@@ -54,7 +37,10 @@ export function DayCard({ entry, onPress }: Props) {
         </View>
 
         <View className="flex-1 gap-0.5">
-          <Text numberOfLines={1} className="font-sora-medium">
+          <Text
+            numberOfLines={1}
+            className={snippet ? 'font-journal text-[15px]' : 'font-journal-italic text-[15px] text-muted-foreground'}
+          >
             {snippet || 'No reflection written'}
           </Text>
           {isToday(date) && <Text variant="caption">Today</Text>}
