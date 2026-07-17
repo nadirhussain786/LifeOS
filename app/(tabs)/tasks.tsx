@@ -5,19 +5,22 @@ import { useMemo } from 'react';
 import { Pressable, TextInput, useColorScheme, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { EmptyState } from '@/components/ui/empty-state';
 import { Fab } from '@/components/ui/fab';
+import { ListSectionHeader } from '@/components/ui/list-section-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
-import { TaskListSectionHeader } from '@/features/tasks/components/task-list-section-header';
 import { TaskRow } from '@/features/tasks/components/task-row';
 import { useTaskMutations } from '@/features/tasks/hooks/use-task-mutations';
 import { useTasks } from '@/features/tasks/hooks/use-tasks';
 import { groupTasksByDueDate } from '@/features/tasks/services/task-grouping';
 import { useTasksFilterStore } from '@/features/tasks/store/tasks-filter-store';
-import type { Task, TaskListFilter } from '@/features/tasks/types/task.types';
+import type { Task, TaskDueBucket, TaskListFilter } from '@/features/tasks/types/task.types';
 
-type ListItem = { type: 'header'; label: string; count: number } | { type: 'task'; task: Task };
+type ListItem =
+  | { type: 'header'; bucket: TaskDueBucket; label: string; count: number }
+  | { type: 'task'; task: Task };
 
 const FILTER_TABS: { value: TaskListFilter; label: string }[] = [
   { value: 'active', label: 'Active' },
@@ -34,12 +37,19 @@ export default function TasksScreen() {
   const { data: tasks = [], isLoading } = useTasks();
   const { complete, reopen, archive, remove } = useTaskMutations();
 
+  const bucketDotColor: Record<TaskDueBucket, string | undefined> = {
+    overdue: colors[scheme].destructive,
+    today: colors[scheme].accent,
+    upcoming: undefined,
+    'no-date': undefined,
+  };
+
   const items = useMemo<ListItem[]>(() => {
     if (filter !== 'active') {
       return tasks.map((task) => ({ type: 'task', task }) as const);
     }
     return groupTasksByDueDate(tasks).flatMap((section) => [
-      { type: 'header', label: section.label, count: section.tasks.length } as const,
+      { type: 'header', bucket: section.bucket, label: section.label, count: section.tasks.length } as const,
       ...section.tasks.map((task) => ({ type: 'task', task }) as const),
     ]);
   }, [tasks, filter]);
@@ -49,7 +59,7 @@ export default function TasksScreen() {
       <View style={{ paddingTop: insets.top + 8 }} className="gap-3 px-4 pb-2">
         <Text variant="heading">Tasks</Text>
 
-        <View className="flex-row items-center gap-2 rounded-md bg-muted px-3 py-2">
+        <View className="flex-row items-center gap-2 rounded-full bg-muted px-4 py-2.5">
           <Search size={16} color={colors[scheme].mutedForeground} />
           <TextInput
             value={searchQuery}
@@ -60,16 +70,16 @@ export default function TasksScreen() {
           />
         </View>
 
-        <View className="flex-row gap-2">
+        <View className="flex-row gap-1.5 rounded-full bg-muted p-1">
           {FILTER_TABS.map((tab) => {
             const selected = tab.value === filter;
             return (
               <Pressable
                 key={tab.value}
                 onPress={() => setFilter(tab.value)}
-                className={selected ? 'flex-1 items-center rounded-md bg-primary py-2' : 'flex-1 items-center rounded-md bg-transparent py-2'}
+                className={selected ? 'flex-1 items-center rounded-full bg-primary py-2' : 'flex-1 items-center rounded-full py-2'}
               >
-                <Text className={selected ? 'text-primary-foreground' : 'text-muted-foreground'}>{tab.label}</Text>
+                <Text className={selected ? 'font-sora-semibold text-primary-foreground' : 'text-muted-foreground'}>{tab.label}</Text>
               </Pressable>
             );
           })}
@@ -77,27 +87,25 @@ export default function TasksScreen() {
       </View>
 
       {isLoading ? (
-        <View className="gap-2 px-4">
-          <Skeleton className="h-14 w-full" />
-          <Skeleton className="h-14 w-full" />
-          <Skeleton className="h-14 w-full" />
+        <View className="gap-2.5 px-4">
+          <Skeleton className="h-16 w-full rounded-2xl" />
+          <Skeleton className="h-16 w-full rounded-2xl" />
+          <Skeleton className="h-16 w-full rounded-2xl" />
         </View>
       ) : items.length === 0 ? (
-        <View className="flex-1 items-center justify-center gap-3 px-8">
-          <CheckCircle2 color={colors[scheme].mutedForeground} size={32} />
-          <Text variant="heading">{filter === 'active' ? 'Nothing to do' : `No ${filter} tasks`}</Text>
-          <Text variant="muted" className="text-center">
-            {filter === 'active' ? 'Enjoy the calm, or add something new.' : 'Tasks will show up here.'}
-          </Text>
-        </View>
+        <EmptyState
+          icon={CheckCircle2}
+          title={filter === 'active' ? 'Nothing to do' : `No ${filter} tasks`}
+          description={filter === 'active' ? 'Enjoy the calm, or add something new.' : 'Tasks will show up here.'}
+        />
       ) : (
         <FlashList
           data={items}
           keyExtractor={(item) => (item.type === 'header' ? `header-${item.label}` : item.task.id)}
-          contentContainerStyle={{ paddingBottom: 120 }}
+          contentContainerStyle={{ paddingTop: 4, paddingBottom: 120 }}
           renderItem={({ item }) =>
             item.type === 'header' ? (
-              <TaskListSectionHeader label={item.label} count={item.count} />
+              <ListSectionHeader label={item.label} count={item.count} dotColor={bucketDotColor[item.bucket]} />
             ) : (
               <TaskRow
                 task={item.task}

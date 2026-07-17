@@ -6,28 +6,24 @@ import { Pressable, ScrollView, useColorScheme, View } from 'react-native';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
-import { colors } from '@/constants/theme';
+import { colors, habitDoneColor } from '@/constants/theme';
 import { WidgetCard } from '@/features/dashboard/components/widget-card';
 import { WidgetEmptyState } from '@/features/dashboard/components/widget-empty-state';
 import { useHabitRow } from '@/features/dashboard/hooks/use-widget-data';
-import type { HabitRowData } from '@/features/dashboard/types/dashboard.types';
+import { useHabitMutations } from '@/features/habits/hooks/use-habit-mutations';
 
 export function HabitRowWidget() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const scheme = useColorScheme() ?? 'light';
   const { data, isLoading } = useHabitRow();
+  const { logToday, unlogToday } = useHabitMutations();
 
-  const toggleHabit = (id: string) => {
+  const toggleHabit = (id: string, doneToday: boolean) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    queryClient.setQueryData<HabitRowData>(['dashboard', 'habit-row'], (prev) => {
-      if (!prev) return prev;
-      return {
-        habits: prev.habits.map((habit) =>
-          habit.id === id ? { ...habit, doneToday: !habit.doneToday } : habit,
-        ),
-      };
-    });
+    if (doneToday) unlogToday.mutate(id);
+    else logToday.mutate({ habitId: id });
+    queryClient.invalidateQueries({ queryKey: ['dashboard', 'habit-row'] });
   };
 
   return (
@@ -43,12 +39,12 @@ export function HabitRowWidget() {
       ) : (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-3">
           {data.habits.map((habit) => (
-            <Pressable key={habit.id} onPress={() => toggleHabit(habit.id)} className="items-center gap-1.5">
+            <Pressable key={habit.id} onPress={() => toggleHabit(habit.id, habit.doneToday)} className="items-center gap-1.5">
               <View
                 className="h-16 w-16 items-center justify-center rounded-full border-2"
                 style={{
-                  borderColor: habit.doneToday ? colors[scheme].accent : colors[scheme].border,
-                  backgroundColor: habit.doneToday ? colors[scheme].accent : 'transparent',
+                  borderColor: habit.doneToday ? habitDoneColor : colors[scheme].border,
+                  backgroundColor: habit.doneToday ? habitDoneColor : 'transparent',
                 }}
               >
                 <Text className="text-2xl">{habit.emoji}</Text>

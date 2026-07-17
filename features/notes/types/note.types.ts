@@ -12,6 +12,8 @@ export type Note = {
   body: string | null;
   categoryId: string | null;
   isPinned: boolean;
+  isArchived: boolean;
+  wordCount: number;
   createdAt: number;
   updatedAt: number;
 };
@@ -23,4 +25,26 @@ export type CreateNoteInput = {
   isPinned?: boolean;
 };
 
-export type UpdateNoteInput = Partial<CreateNoteInput>;
+export type UpdateNoteInput = Partial<CreateNoteInput> & { isArchived?: boolean };
+
+export type NoteTag = {
+  id: string;
+  name: string;
+  colorToken: string | null;
+};
+
+export type NoteAttachment = {
+  id: string;
+  noteId: string;
+  kind: 'image' | 'audio' | 'pdf' | 'file';
+  uri: string;
+  thumbnailUri: string | null;
+  durationMs: number | null;
+  createdAt: number;
+};
+
+/** A note whose body contains `[[This Note]]` — the seed of the backlink graph. */
+export type NoteBacklink = {
+  id: string;
+  title: string;
+};

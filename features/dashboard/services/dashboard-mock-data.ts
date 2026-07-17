@@ -1,9 +1,7 @@
 import type {
   CalendarPreviewData,
   DailyQuoteData,
-  HabitRowData,
   ProductivitySummaryData,
-  ReflectData,
   TodayTasksData,
   WaterIntakeData,
 } from '@/features/dashboard/types/dashboard.types';
@@ -32,18 +30,6 @@ export function fetchTodayTasks() {
   });
 }
 
-// TODO(habits-module): replace with real Supabase query
-export function fetchHabitRow() {
-  return delay<HabitRowData>({
-    habits: [
-      { id: '1', name: 'Read', emoji: '📖', streak: 12, doneToday: true },
-      { id: '2', name: 'Gym', emoji: '🏋️', streak: 4, doneToday: false },
-      { id: '3', name: 'Meditate', emoji: '🧘', streak: 7, doneToday: false },
-      { id: '4', name: 'Walk', emoji: '🚶', streak: 21, doneToday: true },
-    ],
-  });
-}
-
 // TODO(calendar-module): replace with real Supabase query
 export function fetchCalendarPreview() {
   return delay<CalendarPreviewData>({
@@ -51,15 +37,6 @@ export function fetchCalendarPreview() {
       { id: '1', title: 'Design sync', timeLabel: '11:00 AM', colorToken: 'primary' },
       { id: '2', title: 'Dentist appointment', timeLabel: '4:30 PM', colorToken: 'muted' },
     ],
-  });
-}
-
-// TODO(journal-module): replace with real Supabase query
-export function fetchReflect() {
-  return delay<ReflectData>({
-    todaysMood: null,
-    journalStreak: 5,
-    hasWrittenToday: false,
   });
 }
 

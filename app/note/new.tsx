@@ -9,7 +9,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
-import { AttributeRow } from '@/features/tasks/components/attribute-row';
+import { AttributeRow } from '@/components/ui/attribute-row';
 import { NoteCategoryPicker } from '@/features/notes/components/note-category-picker';
 import { useNoteMutations } from '@/features/notes/hooks/use-note-mutations';
 import { useKeyboardHeight } from '@/hooks/use-keyboard-height';

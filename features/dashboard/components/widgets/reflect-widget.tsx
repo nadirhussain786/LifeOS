@@ -10,7 +10,9 @@ import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import { WidgetCard } from '@/features/dashboard/components/widget-card';
 import { useReflect } from '@/features/dashboard/hooks/use-widget-data';
-import type { MoodOption, ReflectData } from '@/features/dashboard/types/dashboard.types';
+import { useJournalMutations } from '@/features/journal/hooks/use-journal-mutations';
+import { toDateKey } from '@/lib/date';
+import type { MoodOption } from '@/features/dashboard/types/dashboard.types';
 
 const MOODS: { value: MoodOption; emoji: string }[] = [
   { value: 'great', emoji: '😄' },
@@ -25,12 +27,13 @@ export function ReflectWidget() {
   const queryClient = useQueryClient();
   const scheme = useColorScheme() ?? 'light';
   const { data, isLoading } = useReflect();
+  const { upsert } = useJournalMutations();
+  const todayKey = toDateKey(new Date());
 
   const selectMood = (mood: MoodOption) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    queryClient.setQueryData<ReflectData>(['dashboard', 'reflect'], (prev) =>
-      prev ? { ...prev, todaysMood: mood } : prev,
-    );
+    upsert.mutate({ entryDate: todayKey, mood });
+    queryClient.invalidateQueries({ queryKey: ['dashboard', 'reflect'] });
   };
 
   return (
@@ -54,7 +57,7 @@ export function ReflectWidget() {
           <View className="flex-row items-center justify-between">
             <Text variant="muted">🔥 {data.journalStreak}-day journal streak</Text>
             {!data.hasWrittenToday && (
-              <Button label="Write" size="sm" variant="secondary" onPress={() => router.push('/(tabs)/journal')} />
+              <Button label="Write" size="sm" variant="secondary" onPress={() => router.push(`/journal/${todayKey}`)} />
             )}
           </View>
         </View>

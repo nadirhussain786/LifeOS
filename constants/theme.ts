@@ -63,3 +63,12 @@ export const priorityColors = {
   medium: '#f59e0b',
   high: '#dc2828',
 } as const;
+
+/**
+ * "Done today" for habits, deliberately not the brand accent — the accent is
+ * already the app's generic CTA color (buttons, FAB, pin), so reusing it here
+ * would make a completed habit read as "tap me" instead of "already done."
+ * Same green as the category palette's "green" swatch, promoted to a named
+ * semantic token since habit completion needs it in more than one component.
+ */
+export const habitDoneColor = '#22c55e';

@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
-import { AttributeRow } from '@/features/tasks/components/attribute-row';
+import { AttributeRow } from '@/components/ui/attribute-row';
 import { CategoryPicker } from '@/features/tasks/components/category-picker';
 import { DueDateField } from '@/features/tasks/components/due-date-field';
 import { PriorityPicker } from '@/features/tasks/components/priority-picker';

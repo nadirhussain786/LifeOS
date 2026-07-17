@@ -9,6 +9,7 @@ import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { DevErrorBanner } from '@/components/dev/dev-error-banner';
 import { useAuthStore } from '@/features/auth/services/auth-store';
 import { queryClient } from '@/lib/query-client';
 
@@ -45,7 +46,10 @@ export default function RootLayout() {
               <Stack.Screen name="settings" options={{ headerShown: true, title: 'Settings' }} />
               <Stack.Screen name="task/new" options={{ presentation: 'modal' }} />
               <Stack.Screen name="note/new" options={{ presentation: 'modal' }} />
+              <Stack.Screen name="habit/new" options={{ presentation: 'modal' }} />
+              <Stack.Screen name="routine/new" options={{ presentation: 'modal' }} />
             </Stack>
+            <DevErrorBanner />
           </BottomSheetModalProvider>
         </QueryClientProvider>
       </SafeAreaProvider>

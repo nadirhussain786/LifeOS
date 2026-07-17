@@ -30,16 +30,12 @@ function DueDateLabel({ task }: { task: Task }) {
   );
 }
 
-function PriorityDot({ priority }: { priority: Task['priority'] }) {
-  if (priority === 'none') return null;
-  return <View className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: priorityColors[priority] }} />;
-}
-
 export function TaskRow({ task, onPress, onToggleComplete, onArchive, onDelete }: Props) {
   const scheme = useColorScheme() ?? 'light';
   const isCompleted = task.status === 'completed';
   const scale = useSharedValue(1);
   const isMounted = useRef(false);
+  const accentColor = task.priority !== 'none' ? priorityColors[task.priority] : undefined;
 
   useEffect(() => {
     if (!isMounted.current) {
@@ -80,7 +76,8 @@ export function TaskRow({ task, onPress, onToggleComplete, onArchive, onDelete }
         </>
       }
     >
-      <Pressable onPress={onPress} className="flex-row items-center gap-3 px-4 py-3">
+      <Pressable onPress={onPress} className="flex-row items-center gap-3 py-3.5 pl-4 pr-4">
+        {accentColor && <View className="absolute bottom-2 left-0 top-2 w-1 rounded-full" style={{ backgroundColor: accentColor }} />}
         <Pressable
           onPress={handleToggle}
           hitSlop={8}
@@ -90,25 +87,22 @@ export function TaskRow({ task, onPress, onToggleComplete, onArchive, onDelete }
         >
           <Animated.View style={checkboxStyle}>
             <View
-              className="h-6 w-6 items-center justify-center rounded-full border"
+              className="h-7 w-7 items-center justify-center rounded-full border"
               style={{
                 borderColor: isCompleted ? colors[scheme].accent : colors[scheme].border,
                 backgroundColor: isCompleted ? colors[scheme].accent : 'transparent',
               }}
             >
-              {isCompleted ? <Check size={14} color={colors[scheme].accentForeground} /> : null}
+              {isCompleted ? <Check size={15} color={colors[scheme].accentForeground} /> : null}
             </View>
           </Animated.View>
         </Pressable>
 
         <View className="flex-1 gap-1">
-          <Text className={isCompleted ? 'text-muted-foreground line-through' : ''} numberOfLines={1}>
+          <Text className={isCompleted ? 'font-sora-medium text-muted-foreground line-through' : 'font-sora-medium'} numberOfLines={1}>
             {task.title}
           </Text>
-          <View className="flex-row items-center gap-2">
-            <PriorityDot priority={task.priority} />
-            <DueDateLabel task={task} />
-          </View>
+          <DueDateLabel task={task} />
         </View>
       </Pressable>
     </SwipeableRow>

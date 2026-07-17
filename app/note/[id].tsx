@@ -1,14 +1,21 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { ChevronLeft, Star, Tag, Trash2 } from 'lucide-react-native';
+import { Archive, ArchiveRestore, ChevronLeft, Star, Tag, Tags, Trash2 } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, TextInput, useColorScheme, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { AttachmentStrip } from '@/components/ui/attachment-strip';
+import { AttributeRow } from '@/components/ui/attribute-row';
+import { VoiceNoteRecorder } from '@/components/ui/voice-note-recorder';
 import { colors } from '@/constants/theme';
-import { AttributeRow } from '@/features/tasks/components/attribute-row';
+import { BacklinksPanel } from '@/features/notes/components/backlinks-panel';
 import { NoteCategoryPicker } from '@/features/notes/components/note-category-picker';
-import { useNote } from '@/features/notes/hooks/use-note';
+import { NoteEditorBody } from '@/features/notes/components/note-editor-body';
+import { TagPicker } from '@/features/notes/components/tag-picker';
+import { useNote, useNoteAttachments, useNoteBacklinks, useNoteTagsForNote } from '@/features/notes/hooks/use-note';
 import { useNoteMutations } from '@/features/notes/hooks/use-note-mutations';
+import { useNoteTags } from '@/features/notes/hooks/use-notes';
+import { createTag, deleteTag } from '@/features/notes/services/notes-repository';
 import { useKeyboardHeight } from '@/hooks/use-keyboard-height';
 
 const AUTOSAVE_DELAY_MS = 500;
@@ -26,7 +33,11 @@ export default function NoteDetailScreen() {
   const scheme = useColorScheme() ?? 'light';
   const keyboardHeight = useKeyboardHeight();
   const { data: note } = useNote(id);
-  const { update, remove } = useNoteMutations();
+  const { data: noteTags = [], refetch: refetchNoteTags } = useNoteTagsForNote(id);
+  const { data: allTags = [], refetch: refetchAllTags } = useNoteTags();
+  const { data: attachments = [] } = useNoteAttachments(id);
+  const { data: backlinks = [] } = useNoteBacklinks(id);
+  const { update, remove, archive, unarchive, setTags, attach, removeAttachment } = useNoteMutations();
 
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
@@ -52,6 +63,27 @@ export default function NoteDetailScreen() {
 
   if (!note) return null;
 
+  const selectedTagIds = noteTags.map((tag) => tag.id);
+
+  const toggleTag = (tagId: string) => {
+    const next = selectedTagIds.includes(tagId) ? selectedTagIds.filter((id) => id !== tagId) : [...selectedTagIds, tagId];
+    setTags.mutate({ id: note.id, tagIds: next });
+    refetchNoteTags();
+  };
+
+  const handleCreateTag = (name: string) => {
+    const tag = createTag(name);
+    setTags.mutate({ id: note.id, tagIds: [...selectedTagIds, tag.id] });
+    refetchAllTags();
+    refetchNoteTags();
+  };
+
+  const handleDeleteTag = (tagId: string) => {
+    deleteTag(tagId);
+    refetchAllTags();
+    refetchNoteTags();
+  };
+
   return (
     <View className="flex-1 bg-background">
       <Stack.Screen options={{ headerShown: false }} />
@@ -67,6 +99,13 @@ export default function NoteDetailScreen() {
         <View className="flex-row gap-4">
           <Pressable onPress={() => update.mutate({ id: note.id, input: { isPinned: !note.isPinned } })} hitSlop={8}>
             <Star size={20} color={colors[scheme].accent} fill={note.isPinned ? colors[scheme].accent : 'transparent'} />
+          </Pressable>
+          <Pressable onPress={() => (note.isArchived ? unarchive.mutate(note.id) : archive.mutate(note.id))} hitSlop={8}>
+            {note.isArchived ? (
+              <ArchiveRestore size={19} color={colors[scheme].foreground} />
+            ) : (
+              <Archive size={19} color={colors[scheme].foreground} />
+            )}
           </Pressable>
           <Pressable
             onPress={() => {
@@ -101,17 +140,29 @@ export default function NoteDetailScreen() {
               onChange={(categoryId) => update.mutate({ id: note.id, input: { categoryId } })}
             />
           </AttributeRow>
+          <AttributeRow icon={Tags} label="Tags">
+            <TagPicker
+              tags={allTags}
+              selectedTagIds={selectedTagIds}
+              onToggle={toggleTag}
+              onCreateTag={handleCreateTag}
+              onDeleteTag={handleDeleteTag}
+            />
+          </AttributeRow>
         </View>
 
-        <TextInput
-          value={body}
-          onChangeText={setBody}
-          multiline
-          placeholder="Write something…"
-          placeholderTextColor={colors[scheme].mutedForeground}
-          className="min-h-32 rounded-2xl border border-border bg-card p-4 text-base text-foreground"
-          textAlignVertical="top"
-        />
+        <NoteEditorBody value={body} onChangeText={setBody} placeholder="Write something…" />
+
+        <View className="gap-2">
+          <VoiceNoteRecorder onRecorded={(uri, durationMs) => attach.mutate({ id: note.id, kind: 'audio', uri, durationMs })} />
+          <AttachmentStrip
+            attachments={attachments}
+            onAddImage={(uri) => attach.mutate({ id: note.id, kind: 'image', uri })}
+            onRemove={(attachmentId) => removeAttachment.mutate({ id: attachmentId, noteId: note.id })}
+          />
+        </View>
+
+        <BacklinksPanel backlinks={backlinks} />
       </ScrollView>
     </View>
   );

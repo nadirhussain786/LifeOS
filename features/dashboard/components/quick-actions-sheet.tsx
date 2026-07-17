@@ -7,20 +7,19 @@ import { Pressable, useColorScheme } from 'react-native';
 
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
+import { toDateKey } from '@/lib/date';
 
 type Action = {
   label: string;
   icon: LucideIcon;
-  href: '/(tabs)/tasks' | '/(tabs)/notes' | '/(tabs)/journal' | '/(tabs)/habits';
+  getHref: () => '/task/new' | '/note/new' | '/habit/new' | `/journal/${string}`;
 };
 
-// TODO: once each module ships its own creation flow, replace these
-// navigations with opening the module's "create" screen/modal directly.
 const ACTIONS: Action[] = [
-  { label: 'New task', icon: CheckSquare, href: '/(tabs)/tasks' },
-  { label: 'New note', icon: StickyNote, href: '/(tabs)/notes' },
-  { label: 'New journal entry', icon: BookOpen, href: '/(tabs)/journal' },
-  { label: 'New habit', icon: Repeat, href: '/(tabs)/habits' },
+  { label: 'New task', icon: CheckSquare, getHref: () => '/task/new' },
+  { label: 'New note', icon: StickyNote, getHref: () => '/note/new' },
+  { label: 'New journal entry', icon: BookOpen, getHref: () => `/journal/${toDateKey(new Date())}` },
+  { label: 'New habit', icon: Repeat, getHref: () => '/habit/new' },
 ];
 
 export const QuickActionsSheet = forwardRef<BottomSheetModal>(function QuickActionsSheet(_props, ref) {
@@ -34,12 +33,12 @@ export const QuickActionsSheet = forwardRef<BottomSheetModal>(function QuickActi
     [],
   );
 
-  const handleActionPress = (href: Action['href']) => {
+  const handleActionPress = (action: Action) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (ref && 'current' in ref) {
       ref.current?.dismiss();
     }
-    router.push(href);
+    router.push(action.getHref());
   };
 
   return (
@@ -57,7 +56,7 @@ export const QuickActionsSheet = forwardRef<BottomSheetModal>(function QuickActi
         {ACTIONS.map((action) => (
           <Pressable
             key={action.label}
-            onPress={() => handleActionPress(action.href)}
+            onPress={() => handleActionPress(action)}
             className="flex-row items-center gap-3 rounded-md px-2 py-3 active:bg-muted"
           >
             <action.icon color={colors[scheme].foreground} size={20} />

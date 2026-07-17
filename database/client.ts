@@ -44,8 +44,9 @@ function applyAdditiveColumns(sqliteDb: ReturnType<typeof openDatabaseSync>) {
 export function getDb(): Database {
   if (!instance) {
     const sqliteDb = openDatabaseSync('lifeos.db');
-    sqliteDb.execSync(schema.BOOTSTRAP_SQL);
+    sqliteDb.execSync(schema.TABLE_BOOTSTRAP_SQL);
     applyAdditiveColumns(sqliteDb);
+    sqliteDb.execSync(schema.INDEX_BOOTSTRAP_SQL);
     instance = drizzle(sqliteDb, { schema });
   }
   return instance;

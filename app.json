@@ -32,7 +32,28 @@
       "expo-secure-store",
       "expo-sqlite",
       "@react-native-community/datetimepicker",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "LifeOS uses your microphone to record voice notes and journal recordings."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "LifeOS accesses your photos so you can attach them to notes and journal entries.",
+          "cameraPermission": "LifeOS uses your camera so you can capture photos for notes and journal entries."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "LifeOS uses your location to tag where a journal entry was written.",
+          "isIosBackgroundLocationEnabled": false,
+          "isAndroidBackgroundLocationEnabled": false
+        }
+      ]
     ]
   }
 }
