@@ -45,6 +45,18 @@ module.exports = {
         md: '12px',
         sm: '8px',
       },
+      fontFamily: {
+        // Sora Regular as the app-wide default — every Text/TextInput that
+        // doesn't specify otherwise picks this up automatically. RN doesn't
+        // synthesize bold from a single font file the way CSS does, so
+        // heavier weights need their own explicit classes (below), applied
+        // only where real visual weight matters (headings, primary CTAs).
+        sans: ['Sora_400Regular'],
+        'sora-medium': ['Sora_500Medium'],
+        'sora-semibold': ['Sora_600SemiBold'],
+        'sora-bold': ['Sora_700Bold'],
+        'sora-extrabold': ['Sora_800ExtraBold'],
+      },
     },
   },
   plugins: [],

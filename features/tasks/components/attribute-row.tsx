@@ -20,7 +20,7 @@ export function AttributeRow({ icon: Icon, label, isFirst, children }: Props) {
     <View className={isFirst ? 'gap-2.5 py-3.5' : 'gap-2.5 border-t border-border py-3.5'}>
       <View className="flex-row items-center gap-1.5">
         <Icon size={13} color={colors[scheme].mutedForeground} />
-        <Text variant="caption" className="font-semibold uppercase tracking-wide">
+        <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
           {label}
         </Text>
       </View>

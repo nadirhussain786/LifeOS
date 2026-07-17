@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { listCategories, listTasks } from '@/features/tasks/services/tasks-repository';
+import { getCategoryById, listCategories, listTasks } from '@/features/tasks/services/tasks-repository';
 import { useTasksFilterStore } from '@/features/tasks/store/tasks-filter-store';
 
 export function useTasks() {
@@ -18,4 +18,13 @@ export function useTasks() {
 
 export function useTaskCategories() {
   return useQuery({ queryKey: ['task-categories'], queryFn: async () => listCategories() });
+}
+
+/** Resolves a category by id regardless of soft-delete, so an already-assigned task keeps showing its label. */
+export function useTaskCategoryById(id: string | null) {
+  return useQuery({
+    queryKey: ['task-categories', 'detail', id],
+    queryFn: async () => (id ? getCategoryById(id) : null),
+    enabled: !!id,
+  });
 }

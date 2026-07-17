@@ -24,10 +24,28 @@ let instance: Database | null = null;
  * Revisit generated migrations once the schema needs versioned changes
  * shipped to existing users' devices.
  */
+/**
+ * Adds columns introduced after a table's initial CREATE TABLE IF NOT EXISTS
+ * to any database that already has that table from an earlier install —
+ * see schema.ts's ADDITIVE_COLUMNS for why this exists instead of a real
+ * migrator.
+ */
+function applyAdditiveColumns(sqliteDb: ReturnType<typeof openDatabaseSync>) {
+  for (const [table, columns] of Object.entries(schema.ADDITIVE_COLUMNS)) {
+    const existing = new Set(
+      sqliteDb.getAllSync<{ name: string }>(`PRAGMA table_info(${table})`).map((row) => row.name),
+    );
+    for (const column of columns) {
+      if (!existing.has(column.name)) sqliteDb.execSync(column.ddl);
+    }
+  }
+}
+
 export function getDb(): Database {
   if (!instance) {
     const sqliteDb = openDatabaseSync('lifeos.db');
     sqliteDb.execSync(schema.BOOTSTRAP_SQL);
+    applyAdditiveColumns(sqliteDb);
     instance = drizzle(sqliteDb, { schema });
   }
   return instance;

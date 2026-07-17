@@ -1,7 +1,9 @@
 import { type ReactNode } from 'react';
+import { StyleSheet, useColorScheme } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { StyleSheet } from 'react-native';
+
+import { colors } from '@/constants/theme';
 
 const ACTIONS_WIDTH = 144;
 
@@ -12,6 +14,7 @@ type Props = {
 
 /** Swipe-left-to-reveal row, e.g. Mail.app archive/delete actions. */
 export function SwipeableRow({ children, actions }: Props) {
+  const scheme = useColorScheme() ?? 'light';
   const translateX = useSharedValue(0);
   const startX = useSharedValue(0);
 
@@ -35,15 +38,14 @@ export function SwipeableRow({ children, actions }: Props) {
 
   const rowStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
+    backgroundColor: colors[scheme].background,
   }));
 
   return (
     <Animated.View onTouchStart={close} style={styles.container}>
       <Animated.View style={[styles.actions, { width: ACTIONS_WIDTH }]}>{actions}</Animated.View>
       <GestureDetector gesture={pan}>
-        <Animated.View className="bg-background" style={rowStyle}>
-          {children}
-        </Animated.View>
+        <Animated.View style={rowStyle}>{children}</Animated.View>
       </GestureDetector>
     </Animated.View>
   );

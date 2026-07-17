@@ -6,10 +6,11 @@ import {
   fetchHabitRow,
   fetchProductivitySummary,
   fetchReflect,
-  fetchRecentNotes,
   fetchTodayTasks,
   fetchWaterIntake,
 } from '@/features/dashboard/services/dashboard-mock-data';
+import { listRecentNotes } from '@/features/notes/services/notes-repository';
+import type { RecentNotesData } from '@/features/dashboard/types/dashboard.types';
 
 export function useTodayTasks() {
   return useQuery({ queryKey: ['dashboard', 'today-tasks'], queryFn: fetchTodayTasks });
@@ -28,7 +29,17 @@ export function useReflect() {
 }
 
 export function useRecentNotes() {
-  return useQuery({ queryKey: ['dashboard', 'recent-notes'], queryFn: fetchRecentNotes });
+  return useQuery({
+    queryKey: ['dashboard', 'recent-notes'],
+    queryFn: async (): Promise<RecentNotesData> => ({
+      notes: listRecentNotes(3).map((note) => ({
+        id: note.id,
+        title: note.title || 'Untitled note',
+        snippet: note.body?.slice(0, 80) ?? '',
+        updatedAt: new Date(note.updatedAt),
+      })),
+    }),
+  });
 }
 
 export function useWaterIntake() {

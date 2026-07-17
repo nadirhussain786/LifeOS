@@ -4,7 +4,6 @@ import type {
   HabitRowData,
   ProductivitySummaryData,
   ReflectData,
-  RecentNotesData,
   TodayTasksData,
   WaterIntakeData,
 } from '@/features/dashboard/types/dashboard.types';
@@ -61,26 +60,6 @@ export function fetchReflect() {
     todaysMood: null,
     journalStreak: 5,
     hasWrittenToday: false,
-  });
-}
-
-// TODO(notes-module): replace with real Supabase query
-export function fetchRecentNotes() {
-  return delay<RecentNotesData>({
-    notes: [
-      {
-        id: '1',
-        title: 'Product roadmap ideas',
-        snippet: 'Focus on offline-first sync before adding collaboration features…',
-        updatedAt: new Date(Date.now() - 1000 * 60 * 45),
-      },
-      {
-        id: '2',
-        title: 'Grocery list',
-        snippet: 'Oats, eggs, spinach, coffee…',
-        updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 5),
-      },
-    ],
   });
 }
 

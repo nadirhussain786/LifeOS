@@ -7,8 +7,8 @@ const textVariants = cva('text-foreground', {
   variants: {
     variant: {
       default: 'text-base',
-      heading: 'text-2xl font-semibold tracking-tight',
-      subheading: 'text-lg font-medium',
+      heading: 'text-2xl font-sora-extrabold tracking-tight',
+      subheading: 'text-lg font-sora-semibold',
       muted: 'text-sm text-muted-foreground',
       caption: 'text-xs text-muted-foreground',
     },

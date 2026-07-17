@@ -1,18 +1,21 @@
 import { cva, type VariantProps } from 'class-variance-authority';
-import { Pressable, type PressableProps } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Pressable, StyleSheet, type PressableProps } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 
 import { Text } from '@/components/ui/text';
 import { cn } from '@/lib/utils';
 
-const buttonVariants = cva('flex-row items-center justify-center rounded-full disabled:opacity-40', {
+const buttonVariants = cva('flex-row items-center justify-center overflow-hidden rounded-full disabled:opacity-40', {
   variants: {
     variant: {
       primary: 'bg-primary',
       secondary: 'bg-secondary',
       ghost: 'bg-transparent',
       destructive: 'bg-destructive',
-      accent: 'bg-accent',
+      // accent paints via a LinearGradient layer instead of a flat fill —
+      // no bg-* class here, see the gradient rendered behind the label below.
+      accent: '',
     },
     size: {
       sm: 'h-9 px-3',
@@ -26,7 +29,7 @@ const buttonVariants = cva('flex-row items-center justify-center rounded-full di
   },
 });
 
-const textVariants = cva('font-semibold', {
+const textVariants = cva('font-sora-semibold', {
   variants: {
     variant: {
       primary: 'text-primary-foreground',
@@ -48,6 +51,10 @@ const textVariants = cva('font-semibold', {
 });
 
 const SHADOW_VARIANTS = new Set(['primary', 'accent', 'destructive']);
+
+// Deeper than the flat --accent token at both ends, so the gradient reads as
+// genuine depth rather than a two-tone sticker.
+const ACCENT_GRADIENT = ['#22c58e', '#0b6b4f'] as const;
 
 type Props = PressableProps &
   VariantProps<typeof buttonVariants> & {
@@ -94,6 +101,15 @@ export function Button({ label, variant = 'primary', size, className, disabled, 
         }}
         {...props}
       >
+        {variant === 'accent' && !disabled && (
+          <LinearGradient
+            colors={ACCENT_GRADIENT}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={StyleSheet.absoluteFillObject}
+          />
+        )}
+        {variant === 'accent' && disabled && <Animated.View className="absolute inset-0 bg-accent" />}
         <Text className={textVariants({ variant, size })}>{label}</Text>
       </Pressable>
     </Animated.View>

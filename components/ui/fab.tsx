@@ -1,11 +1,16 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { Plus } from 'lucide-react-native';
-import { Pressable, useColorScheme } from 'react-native';
+import { Pressable, StyleSheet, useColorScheme } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors } from '@/constants/theme';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+// Same gradient as the accent Button — the FAB and primary CTAs should read
+// as the same signature brand surface wherever they appear.
+const ACCENT_GRADIENT = ['#22c58e', '#0b6b4f'] as const;
 
 type Props = {
   onPress: () => void;
@@ -39,17 +44,18 @@ export function Fab({ onPress, accessibilityLabel = 'Quick actions' }: Props) {
           height: 56,
           width: 56,
           borderRadius: 28,
+          overflow: 'hidden',
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: colors[scheme].accent,
           shadowColor: colors[scheme].accent,
-          shadowOpacity: 0.35,
-          shadowRadius: 10,
-          shadowOffset: { width: 0, height: 4 },
-          elevation: 4,
+          shadowOpacity: 0.4,
+          shadowRadius: 12,
+          shadowOffset: { width: 0, height: 5 },
+          elevation: 5,
         },
       ]}
     >
+      <LinearGradient colors={ACCENT_GRADIENT} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFillObject} />
       <Plus color={colors[scheme].accentForeground} size={26} />
     </AnimatedPressable>
   );

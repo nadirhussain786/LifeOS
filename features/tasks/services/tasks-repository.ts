@@ -1,3 +1,4 @@
+import { addDays, addMonths, addWeeks, addYears } from 'date-fns';
 import { and, eq, inArray, isNull, sql } from 'drizzle-orm';
 
 import { getDb } from '@/database/client';
@@ -9,6 +10,7 @@ import type {
   Task,
   TaskCategory,
   TaskListFilter,
+  TaskRecurrenceFrequency,
   TaskSort,
   UpdateTaskInput,
 } from '@/features/tasks/types/task.types';
@@ -63,6 +65,9 @@ export function createTask(input: CreateTaskInput): Task {
     priority: input.priority ?? 'none',
     categoryId: input.categoryId ?? null,
     dueDate: input.dueDate ?? null,
+    hasDueTime: input.hasDueTime ?? false,
+    recurrenceFrequency: input.recurrenceFrequency ?? 'none',
+    recurrenceParentId: input.recurrenceParentId ?? null,
     completedAt: null,
     position: 0,
     createdAt: now,
@@ -83,13 +88,44 @@ export function updateTask(id: string, input: UpdateTaskInput) {
     .run();
 }
 
+function nextRecurrenceDueDate(dueDate: number, frequency: TaskRecurrenceFrequency): number {
+  const due = new Date(dueDate);
+  switch (frequency) {
+    case 'daily':
+      return addDays(due, 1).getTime();
+    case 'weekly':
+      return addWeeks(due, 1).getTime();
+    case 'monthly':
+      return addMonths(due, 1).getTime();
+    case 'yearly':
+      return addYears(due, 1).getTime();
+    default:
+      return dueDate;
+  }
+}
+
 export function completeTask(id: string) {
   const now = Date.now();
+  const task = getTask(id);
+
   getDb()
     .update(tasks)
     .set({ status: 'completed', completedAt: now, updatedAt: now, syncStatus: 'pending' })
     .where(eq(tasks.id, id))
     .run();
+
+  if (task && task.recurrenceFrequency !== 'none' && task.dueDate) {
+    createTask({
+      title: task.title,
+      notes: task.notes,
+      priority: task.priority,
+      categoryId: task.categoryId,
+      dueDate: nextRecurrenceDueDate(task.dueDate, task.recurrenceFrequency),
+      hasDueTime: task.hasDueTime,
+      recurrenceFrequency: task.recurrenceFrequency,
+      recurrenceParentId: task.recurrenceParentId ?? task.id,
+    });
+  }
 }
 
 export function reopenTask(id: string) {
@@ -124,6 +160,10 @@ export function listCategories(): TaskCategory[] {
     .all();
 }
 
+export function getCategoryById(id: string): TaskCategory | null {
+  return getDb().select().from(taskCategories).where(eq(taskCategories.id, id)).get() ?? null;
+}
+
 export function createCategory(name: string, colorToken: string, icon: string): TaskCategory {
   const now = Date.now();
   const category: TaskCategory = { id: generateId(), name, colorToken, icon };
@@ -132,4 +172,12 @@ export function createCategory(name: string, colorToken: string, icon: string): 
     .values({ ...category, userId: LOCAL_USER_ID, createdAt: now, updatedAt: now })
     .run();
   return category;
+}
+
+export function deleteCategory(id: string) {
+  getDb()
+    .update(taskCategories)
+    .set({ deletedAt: Date.now() })
+    .where(eq(taskCategories.id, id))
+    .run();
 }

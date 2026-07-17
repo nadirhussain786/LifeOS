@@ -1,26 +1,26 @@
 import { CategoryPicker as GenericCategoryPicker } from '@/components/ui/category-picker';
 import { categoryColorPalette } from '@/constants/theme';
-import { useTaskCategories, useTaskCategoryById } from '@/features/tasks/hooks/use-tasks';
-import { createCategory, deleteCategory } from '@/features/tasks/services/tasks-repository';
+import { useNoteCategories, useNoteCategoryById } from '@/features/notes/hooks/use-notes';
+import { createNoteCategory, deleteNoteCategory } from '@/features/notes/services/notes-repository';
 
 type Props = {
   value: string | null;
   onChange: (categoryId: string | null) => void;
 };
 
-export function CategoryPicker({ value, onChange }: Props) {
-  const { data: categories = [], refetch } = useTaskCategories();
-  const { data: selectedCategory } = useTaskCategoryById(value);
+export function NoteCategoryPicker({ value, onChange }: Props) {
+  const { data: categories = [], refetch } = useNoteCategories();
+  const { data: selectedCategory } = useNoteCategoryById(value);
 
   const handleCreate = (name: string) => {
     const color = categoryColorPalette[categories.length % categoryColorPalette.length];
-    const category = createCategory(name, color, 'tag');
+    const category = createNoteCategory(name, color, 'tag');
     onChange(category.id);
     refetch();
   };
 
   const handleDelete = (categoryId: string) => {
-    deleteCategory(categoryId);
+    deleteNoteCategory(categoryId);
     refetch();
   };
 

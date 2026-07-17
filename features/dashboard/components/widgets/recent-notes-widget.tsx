@@ -14,7 +14,7 @@ function NoteRow({ title, snippet, updatedAt }: { title: string; snippet: string
   return (
     <View className="gap-0.5">
       <View className="flex-row items-center justify-between">
-        <Text className="font-medium">{title}</Text>
+        <Text className="font-sora-medium">{title}</Text>
         <Text variant="caption">{relativeTime}</Text>
       </View>
       <Text variant="muted" numberOfLines={1}>
@@ -36,11 +36,11 @@ export function RecentNotesWidget() {
           <Skeleton className="h-10 w-full" />
         </View>
       ) : data.notes.length === 0 ? (
-        <WidgetEmptyState message="No notes yet" actionLabel="Add note" onAction={() => router.push('/(tabs)/notes')} />
+        <WidgetEmptyState message="No notes yet" actionLabel="Add note" onAction={() => router.push('/note/new')} />
       ) : (
         <View className="gap-3">
           {data.notes.map((note) => (
-            <Pressable key={note.id} onPress={() => router.push('/(tabs)/notes')}>
+            <Pressable key={note.id} onPress={() => router.push(`/note/${note.id}`)}>
               <NoteRow title={note.title} snippet={note.snippet} updatedAt={note.updatedAt} />
             </Pressable>
           ))}

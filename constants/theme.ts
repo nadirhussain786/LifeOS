@@ -50,3 +50,16 @@ export const categoryColorPalette = [
   '#8b5cf6', // violet
   '#ec4899', // pink
 ] as const;
+
+/**
+ * Task priority as a traffic-light ladder (calm blue → amber caution → red
+ * urgent) rather than a single accent — priority is its own semantic system,
+ * deliberately distinct from the brand accent so "urgent" always reads as
+ * urgent regardless of theme. High reuses the app's existing destructive
+ * red so "urgent" and "destructive" share one consistent red language.
+ */
+export const priorityColors = {
+  low: '#0ea5e9',
+  medium: '#f59e0b',
+  high: '#dc2828',
+} as const;

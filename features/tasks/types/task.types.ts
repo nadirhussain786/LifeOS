@@ -1,11 +1,13 @@
 export type TaskStatus = 'todo' | 'in_progress' | 'completed' | 'archived';
 export type TaskPriority = 'none' | 'low' | 'medium' | 'high';
+export type TaskRecurrenceFrequency = 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
 
 export type TaskCategory = {
   id: string;
   name: string;
   colorToken: string;
   icon: string;
+  deletedAt?: number | null;
 };
 
 export type Task = {
@@ -16,6 +18,9 @@ export type Task = {
   priority: TaskPriority;
   categoryId: string | null;
   dueDate: number | null;
+  hasDueTime: boolean;
+  recurrenceFrequency: TaskRecurrenceFrequency;
+  recurrenceParentId: string | null;
   completedAt: number | null;
   position: number;
   createdAt: number;
@@ -33,6 +38,10 @@ export type CreateTaskInput = {
   priority?: TaskPriority;
   categoryId?: string | null;
   dueDate?: number | null;
+  hasDueTime?: boolean;
+  recurrenceFrequency?: TaskRecurrenceFrequency;
+  /** Internal only — set by completeTask() when auto-cloning a recurring task. Not exposed in any picker UI. */
+  recurrenceParentId?: string | null;
 };
 
 export type UpdateTaskInput = Partial<CreateTaskInput> & {
