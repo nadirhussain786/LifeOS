@@ -1,7 +1,7 @@
 import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView, type BottomSheetBackdropProps } from '@gorhom/bottom-sheet';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-import { BookOpen, CheckSquare, Repeat, StickyNote, type LucideIcon } from 'lucide-react-native';
+import { BookOpen, CheckSquare, Clock3, Repeat, StickyNote, type LucideIcon } from 'lucide-react-native';
 import { forwardRef, useCallback } from 'react';
 import { Pressable, useColorScheme } from 'react-native';
 
@@ -12,7 +12,7 @@ import { toDateKey } from '@/lib/date';
 type Action = {
   label: string;
   icon: LucideIcon;
-  getHref: () => '/task/new' | '/note/new' | '/habit/new' | `/journal/${string}`;
+  getHref: () => '/task/new' | '/note/new' | '/habit/new' | `/journal/${string}` | { pathname: '/timeline/event/new'; params: { date: string } };
 };
 
 const ACTIONS: Action[] = [
@@ -20,6 +20,7 @@ const ACTIONS: Action[] = [
   { label: 'New note', icon: StickyNote, getHref: () => '/note/new' },
   { label: 'New journal entry', icon: BookOpen, getHref: () => `/journal/${toDateKey(new Date())}` },
   { label: 'New habit', icon: Repeat, getHref: () => '/habit/new' },
+  { label: 'New event', icon: Clock3, getHref: () => ({ pathname: '/timeline/event/new', params: { date: toDateKey(new Date()) } }) },
 ];
 
 export const QuickActionsSheet = forwardRef<BottomSheetModal>(function QuickActionsSheet(_props, ref) {

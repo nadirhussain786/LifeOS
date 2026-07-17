@@ -1,7 +1,9 @@
+import type { TimelineEvent } from '@/features/timeline/types/timeline.types';
+
 export type WidgetId =
   | 'today-tasks'
   | 'habit-row'
-  | 'calendar-preview'
+  | 'today-timeline'
   | 'reflect'
   | 'recent-notes'
   | 'water-intake'
@@ -33,15 +35,8 @@ export type HabitRowData = {
   habits: HabitPreview[];
 };
 
-export type CalendarEventPreview = {
-  id: string;
-  title: string;
-  timeLabel: string;
-  colorToken: 'primary' | 'muted' | 'destructive';
-};
-
-export type CalendarPreviewData = {
-  events: CalendarEventPreview[];
+export type TodayTimelineData = {
+  events: TimelineEvent[];
 };
 
 export type MoodOption = 'great' | 'good' | 'okay' | 'low' | 'rough';
@@ -61,16 +56,6 @@ export type NotePreview = {
 
 export type RecentNotesData = {
   notes: NotePreview[];
-};
-
-export type WaterIntakeData = {
-  currentMl: number;
-  goalMl: number;
-};
-
-export type ProductivitySummaryData = {
-  weeklyCompletionRate: number;
-  trend: number[];
 };
 
 export type DailyQuoteData = {

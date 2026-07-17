@@ -7,7 +7,7 @@ import type { WidgetId } from '@/features/dashboard/types/dashboard.types';
 export const DEFAULT_WIDGET_ORDER: WidgetId[] = [
   'today-tasks',
   'habit-row',
-  'calendar-preview',
+  'today-timeline',
   'reflect',
   'recent-notes',
   'water-intake',

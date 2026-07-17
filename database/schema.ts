@@ -255,6 +255,35 @@ export const entryLinks = sqliteTable('entry_links', {
   createdAt: integer('created_at').notNull(),
 });
 
+/** Standalone scheduled events — the one genuinely new source of truth the
+ * Life Timeline needs. Everything else the Timeline shows (completed tasks,
+ * habit logs, notes, journal entries) already has a home in its own module's
+ * table; an appointment or meeting doesn't, so it lives here. */
+export const calendarEvents = sqliteTable('calendar_events', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull(),
+  title: text('title').notNull(),
+  startAt: integer('start_at').notNull(),
+  endAt: integer('end_at'),
+  colorToken: text('color_token'),
+  notes: text('notes'),
+  createdAt: integer('created_at').notNull(),
+  updatedAt: integer('updated_at').notNull(),
+  deletedAt: integer('deleted_at'),
+});
+
+/** One row per "add water" action (not an upsert-by-day total) — an append-only
+ * log, same shape as habit_logs, so history/undo-last/Life-Timeline all fall
+ * out of the same real timestamped rows instead of a single mutable counter. */
+export const waterIntakeLogs = sqliteTable('water_intake_logs', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull(),
+  logDate: text('log_date').notNull(),
+  amountMl: integer('amount_ml').notNull(),
+  loggedAt: integer('logged_at').notNull(),
+  createdAt: integer('created_at').notNull(),
+});
+
 /**
  * Bootstrap DDL, run once at startup — see database/client.ts for why this
  * is hand-written rather than generated via drizzle-kit migrations.
@@ -490,6 +519,28 @@ export const TABLE_BOOTSTRAP_SQL = `
     relation TEXT NOT NULL,
     created_at INTEGER NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS calendar_events (
+    id TEXT PRIMARY KEY NOT NULL,
+    user_id TEXT NOT NULL,
+    title TEXT NOT NULL,
+    start_at INTEGER NOT NULL,
+    end_at INTEGER,
+    color_token TEXT,
+    notes TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    deleted_at INTEGER
+  );
+
+  CREATE TABLE IF NOT EXISTS water_intake_logs (
+    id TEXT PRIMARY KEY NOT NULL,
+    user_id TEXT NOT NULL,
+    log_date TEXT NOT NULL,
+    amount_ml INTEGER NOT NULL,
+    logged_at INTEGER NOT NULL,
+    created_at INTEGER NOT NULL
+  );
 `;
 
 /** Run after ADDITIVE_COLUMNS — see TABLE_BOOTSTRAP_SQL's comment for why. */
@@ -511,6 +562,8 @@ export const INDEX_BOOTSTRAP_SQL = `
   CREATE INDEX IF NOT EXISTS idx_journal_attachments_entry ON journal_attachments(entry_id);
   CREATE INDEX IF NOT EXISTS idx_entry_links_source ON entry_links(user_id, source_type, source_id);
   CREATE INDEX IF NOT EXISTS idx_entry_links_target ON entry_links(user_id, target_type, target_id);
+  CREATE INDEX IF NOT EXISTS idx_calendar_events_start ON calendar_events(user_id, start_at);
+  CREATE INDEX IF NOT EXISTS idx_water_intake_logs_date ON water_intake_logs(user_id, log_date);
 `;
 
 /**

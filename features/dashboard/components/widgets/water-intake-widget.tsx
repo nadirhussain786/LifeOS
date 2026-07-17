@@ -1,45 +1,109 @@
-import { useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { GlassWater } from 'lucide-react-native';
-import { View } from 'react-native';
+import { BarChart3, Droplet, GlassWater, Settings2 } from 'lucide-react-native';
+import { useEffect, useRef } from 'react';
+import { Pressable, useColorScheme, View } from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withSequence, withSpring } from 'react-native-reanimated';
 
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
+import { colors } from '@/constants/theme';
 import { WidgetCard } from '@/features/dashboard/components/widget-card';
-import { useWaterIntake } from '@/features/dashboard/hooks/use-widget-data';
-import type { WaterIntakeData } from '@/features/dashboard/types/dashboard.types';
+import { useTodayWaterTotal, useWaterIntakeMutations } from '@/features/water-intake/hooks/use-water-intake';
+import { useWaterSettingsStore } from '@/features/water-intake/store/water-settings-store';
 
-const INCREMENT_ML = 250;
+const GLASS_ML = 250;
+const WATER_TINT = '#0ea5e9';
+const QUICK_ADD_ML = [500, 1000] as const;
 
 export function WaterIntakeWidget() {
-  const queryClient = useQueryClient();
-  const { data, isLoading } = useWaterIntake();
+  const router = useRouter();
+  const scheme = useColorScheme() ?? 'light';
+  const goalMl = useWaterSettingsStore((state) => state.goalMl);
+  const { data: currentMl, isLoading } = useTodayWaterTotal();
+  const { addWater, undoLast } = useWaterIntakeMutations();
 
-  const addWater = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    queryClient.setQueryData<WaterIntakeData>(['dashboard', 'water-intake'], (prev) =>
-      prev ? { ...prev, currentMl: Math.min(prev.currentMl + INCREMENT_ML, prev.goalMl) } : prev,
-    );
+  const goalReached = (currentMl ?? 0) >= goalMl;
+  const glassCount = Math.round(goalMl / GLASS_ML);
+  const filledGlasses = Math.min(Math.round((currentMl ?? 0) / GLASS_ML), glassCount);
+
+  const celebrateScale = useSharedValue(1);
+  const wasReached = useRef(false);
+  useEffect(() => {
+    if (goalReached && !wasReached.current) {
+      celebrateScale.value = withSequence(withSpring(1.15, { damping: 6, stiffness: 400 }), withSpring(1, { damping: 8, stiffness: 300 }));
+    }
+    wasReached.current = goalReached;
+  }, [goalReached, celebrateScale]);
+  const celebrateStyle = useAnimatedStyle(() => ({ transform: [{ scale: celebrateScale.value }] }));
+
+  const tapGlass = (index: number) => {
+    Haptics.selectionAsync();
+    if (index === filledGlasses - 1) undoLast.mutate();
+    else if (index >= filledGlasses) addWater.mutate(GLASS_ML);
   };
 
-  const progress = data ? Math.min(data.currentMl / data.goalMl, 1) : 0;
+  const quickAdd = (ml: number) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    addWater.mutate(ml);
+  };
 
   return (
-    <WidgetCard icon={GlassWater} title="Water intake">
-      {isLoading || !data ? (
+    <WidgetCard icon={GlassWater} title="Water intake" actionLabel="History" onActionPress={() => router.push('/water-intake/history')}>
+      {isLoading || currentMl === undefined ? (
         <Skeleton className="h-8 w-full" />
       ) : (
-        <View className="gap-3">
+        <View className="gap-4">
           <View className="flex-row items-center justify-between">
-            <Text variant="muted">
-              {data.currentMl} / {data.goalMl} ml
-            </Text>
-            <Button label={`+${INCREMENT_ML}ml`} size="sm" variant="secondary" onPress={addWater} />
+            <Animated.View style={celebrateStyle}>
+              <Text variant="muted" className="font-sora-semibold" style={goalReached ? { color: WATER_TINT } : undefined}>
+                {currentMl} / {goalMl} ml{goalReached ? ' 🎉' : ''}
+              </Text>
+            </Animated.View>
+            <Pressable
+              onPress={() => router.push('/water-intake/settings')}
+              hitSlop={8}
+              className="h-8 w-8 items-center justify-center rounded-full border border-border"
+            >
+              <Settings2 size={14} color={colors[scheme].mutedForeground} />
+            </Pressable>
           </View>
-          <View className="h-2 overflow-hidden rounded-full bg-muted">
-            <View className="h-full rounded-full bg-primary" style={{ width: `${progress * 100}%` }} />
+
+          <View className="flex-row flex-wrap gap-2">
+            {Array.from({ length: glassCount }).map((_, index) => {
+              const filled = index < filledGlasses;
+              return (
+                <Pressable
+                  key={index}
+                  onPress={() => tapGlass(index)}
+                  hitSlop={4}
+                  accessibilityLabel={`${index + 1} glass${index === 0 ? '' : 'es'}`}
+                  className="h-9 w-9 items-center justify-center rounded-full border"
+                  style={{
+                    borderColor: filled ? WATER_TINT : colors[scheme].border,
+                    backgroundColor: filled ? `${WATER_TINT}1f` : 'transparent',
+                  }}
+                >
+                  <Droplet size={16} color={filled ? WATER_TINT : colors[scheme].mutedForeground} fill={filled ? WATER_TINT : 'transparent'} />
+                </Pressable>
+              );
+            })}
           </View>
+
+          <View className="flex-row gap-2">
+            {QUICK_ADD_ML.map((ml) => (
+              <Pressable key={ml} onPress={() => quickAdd(ml)} className="flex-1 items-center rounded-full border border-dashed border-border py-2">
+                <Text variant="caption" className="font-sora-medium">
+                  + {ml >= 1000 ? `${ml / 1000}L bottle` : `${ml}ml`}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+
+          <Pressable onPress={() => router.push('/water-intake/history')} className="flex-row items-center justify-center gap-1.5">
+            <BarChart3 size={12} color={colors[scheme].mutedForeground} />
+            <Text variant="caption">View last 14 days</Text>
+          </Pressable>
         </View>
       )}
     </WidgetCard>

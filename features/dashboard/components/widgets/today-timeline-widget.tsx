@@ -1,0 +1,54 @@
+import { format } from 'date-fns';
+import { useRouter } from 'expo-router';
+import { Clock3, Plus } from 'lucide-react-native';
+import { Pressable, useColorScheme, View } from 'react-native';
+
+import { Skeleton } from '@/components/ui/skeleton';
+import { Text } from '@/components/ui/text';
+import { colors } from '@/constants/theme';
+import { WidgetCard } from '@/features/dashboard/components/widget-card';
+import { WidgetEmptyState } from '@/features/dashboard/components/widget-empty-state';
+import { useTodayTimeline } from '@/features/dashboard/hooks/use-widget-data';
+import { toDateKey } from '@/lib/date';
+
+export function TodayTimelineWidget() {
+  const router = useRouter();
+  const scheme = useColorScheme() ?? 'light';
+  const { data, isLoading } = useTodayTimeline();
+  const todayKey = toDateKey(new Date());
+
+  const addEvent = () => router.push({ pathname: '/timeline/event/new', params: { date: todayKey } });
+
+  return (
+    <WidgetCard icon={Clock3} title="Today's timeline" actionLabel="View all" onActionPress={() => router.push(`/timeline/${todayKey}`)}>
+      {isLoading || !data ? (
+        <View className="gap-2">
+          <Skeleton className="h-8 w-full" />
+          <Skeleton className="h-8 w-full" />
+        </View>
+      ) : data.events.length === 0 ? (
+        <WidgetEmptyState message="Nothing on the timeline yet — it fills in as you go." actionLabel="Add event" onAction={addEvent} />
+      ) : (
+        <View className="gap-2.5">
+          {data.events.slice(0, 4).map((event) => (
+            <View key={event.id} className="flex-row items-center gap-2.5">
+              {event.colorToken && <View className="h-2 w-2 rounded-full" style={{ backgroundColor: event.colorToken }} />}
+              <Text className="text-sm">{event.emoji}</Text>
+              <Text className="flex-1" numberOfLines={1}>
+                {event.title}
+              </Text>
+              <Text variant="caption">
+                {format(event.time, 'h:mm a')}
+                {event.endTime ? ` – ${format(event.endTime, 'h:mm a')}` : ''}
+              </Text>
+            </View>
+          ))}
+          <Pressable onPress={addEvent} className="flex-row items-center gap-1.5 pt-1" hitSlop={6}>
+            <Plus size={13} color={colors[scheme].mutedForeground} />
+            <Text variant="muted">Add event</Text>
+          </Pressable>
+        </View>
+      )}
+    </WidgetCard>
+  );
+}

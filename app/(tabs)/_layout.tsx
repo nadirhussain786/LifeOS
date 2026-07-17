@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { BookOpen, Calendar, CheckSquare, LayoutGrid, Repeat, StickyNote } from 'lucide-react-native';
+import { BookOpen, CheckSquare, LayoutGrid, Repeat, StickyNote } from 'lucide-react-native';
 import { useColorScheme } from 'react-native';
 
 import { colors } from '@/constants/theme';
@@ -39,10 +39,6 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="habits"
         options={{ title: 'Habits', tabBarIcon: ({ color, size }) => <Repeat color={color} size={size} /> }}
-      />
-      <Tabs.Screen
-        name="calendar"
-        options={{ title: 'Calendar', tabBarIcon: ({ color, size }) => <Calendar color={color} size={size} /> }}
       />
     </Tabs>
   );

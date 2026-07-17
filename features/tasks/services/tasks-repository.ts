@@ -1,5 +1,5 @@
-import { addDays, addMonths, addWeeks, addYears } from 'date-fns';
-import { and, eq, inArray, isNull, sql } from 'drizzle-orm';
+import { addDays, addMonths, addWeeks, addYears, endOfDay, startOfDay, subDays } from 'date-fns';
+import { and, eq, gte, inArray, isNull, lte, sql } from 'drizzle-orm';
 
 import { getDb } from '@/database/client';
 import { taskCategories, tasks } from '@/database/schema';
@@ -180,4 +180,41 @@ export function deleteCategory(id: string) {
     .set({ deletedAt: Date.now() })
     .where(eq(taskCategories.id, id))
     .run();
+}
+
+export type WeeklyCompletionStats = { weeklyCompletionRate: number; trend: number[] };
+
+/** Last 7 days (oldest → newest, ending today): completion rate against
+ * what was actually due, plus a per-day trend normalized to its own peak
+ * so the bar chart always uses the full visual range. */
+export function getWeeklyCompletionStats(): WeeklyCompletionStats {
+  const db = getDb();
+  const today = startOfDay(new Date());
+  const days = Array.from({ length: 7 }, (_, i) => subDays(today, 6 - i));
+
+  const countInRange = (column: typeof tasks.completedAt | typeof tasks.dueDate, day: Date) =>
+    db
+      .select()
+      .from(tasks)
+      .where(
+        and(
+          eq(tasks.userId, LOCAL_USER_ID),
+          isNull(tasks.deletedAt),
+          gte(column, day.getTime()),
+          lte(column, endOfDay(day).getTime()),
+        ),
+      )
+      .all().length;
+
+  const completedCounts = days.map((day) => countInRange(tasks.completedAt, day));
+  const dueCounts = days.map((day) => countInRange(tasks.dueDate, day));
+
+  const totalCompleted = completedCounts.reduce((sum, count) => sum + count, 0);
+  const totalDue = dueCounts.reduce((sum, count) => sum + count, 0);
+  const weeklyCompletionRate = totalDue === 0 ? (totalCompleted > 0 ? 1 : 0) : Math.min(totalCompleted / totalDue, 1);
+
+  const peak = Math.max(...completedCounts, 1);
+  const trend = completedCounts.map((count) => count / peak);
+
+  return { weeklyCompletionRate, trend };
 }

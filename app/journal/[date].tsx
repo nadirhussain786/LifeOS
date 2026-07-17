@@ -3,7 +3,7 @@ import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Location from 'expo-location';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { ChevronLeft, MapPin, Trash2 } from 'lucide-react-native';
+import { ChevronLeft, Clock3, MapPin, Trash2 } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, TextInput, useColorScheme, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -112,9 +112,20 @@ export default function JournalEntryScreen() {
       </View>
 
       <View className="gap-1 px-5 pb-5">
-        <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-          {format(date, 'EEEE')}
-        </Text>
+        <View className="flex-row items-center justify-between">
+          <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
+            {format(date, 'EEEE')}
+          </Text>
+          <Pressable
+            onPress={() => router.push(`/timeline/${entryDate}`)}
+            className="flex-row items-center gap-1.5 rounded-full border border-border px-3 py-1"
+          >
+            <Clock3 size={12} color={colors[scheme].mutedForeground} />
+            <Text variant="caption" className="font-sora-medium">
+              Day timeline
+            </Text>
+          </Pressable>
+        </View>
         <Text style={{ fontSize: 32, lineHeight: 40, fontFamily: 'Literata_600SemiBold' }} className="text-foreground">
           {format(date, 'MMMM d')}
         </Text>

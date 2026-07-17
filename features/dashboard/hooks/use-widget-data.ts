@@ -1,22 +1,47 @@
+import { format, isToday } from 'date-fns';
 import { useQuery } from '@tanstack/react-query';
 
-import {
-  fetchCalendarPreview,
-  fetchDailyQuote,
-  fetchProductivitySummary,
-  fetchTodayTasks,
-  fetchWaterIntake,
-} from '@/features/dashboard/services/dashboard-mock-data';
+import { fetchDailyQuote } from '@/features/dashboard/services/dashboard-mock-data';
 import { listHabitsWithToday } from '@/features/habits/services/habits-repository';
 import { getEntryByDate, listEntriesBetween } from '@/features/journal/services/journal-repository';
 import { calculateJournalStreak } from '@/features/journal/services/journal-streak';
 import { stripMarkdown } from '@/features/notes/services/markdown';
 import { listRecentNotes } from '@/features/notes/services/notes-repository';
+import { getDueBucket } from '@/features/tasks/services/task-grouping';
+import { getWeeklyCompletionStats, listTasks } from '@/features/tasks/services/tasks-repository';
+import { listTimelineForDate } from '@/features/timeline/services/timeline-repository';
 import { toDateKey } from '@/lib/date';
-import type { HabitRowData, RecentNotesData, ReflectData } from '@/features/dashboard/types/dashboard.types';
+import type { HabitRowData, RecentNotesData, ReflectData, TodayTasksData, TodayTimelineData } from '@/features/dashboard/types/dashboard.types';
 
 export function useTodayTasks() {
-  return useQuery({ queryKey: ['dashboard', 'today-tasks'], queryFn: fetchTodayTasks });
+  return useQuery({
+    queryKey: ['dashboard', 'today-tasks'],
+    queryFn: async (): Promise<TodayTasksData> => {
+      const dueTodayOrOverdue = listTasks('active', 'due-date').filter((task) => {
+        const bucket = getDueBucket(task);
+        return bucket === 'overdue' || bucket === 'today';
+      });
+      const completedToday = listTasks('completed', 'due-date').filter(
+        (task) => task.completedAt !== null && isToday(task.completedAt),
+      );
+
+      return {
+        completedCount: completedToday.length,
+        totalCount: completedToday.length + dueTodayOrOverdue.length,
+        upcoming: dueTodayOrOverdue.slice(0, 4).map((task) => ({
+          id: task.id,
+          title: task.title,
+          done: false,
+          dueLabel:
+            getDueBucket(task) === 'overdue'
+              ? 'Overdue'
+              : task.hasDueTime && task.dueDate
+                ? format(task.dueDate, 'h:mm a')
+                : undefined,
+        })),
+      };
+    },
+  });
 }
 
 export function useHabitRow() {
@@ -36,8 +61,11 @@ export function useHabitRow() {
   });
 }
 
-export function useCalendarPreview() {
-  return useQuery({ queryKey: ['dashboard', 'calendar-preview'], queryFn: fetchCalendarPreview });
+export function useTodayTimeline() {
+  return useQuery({
+    queryKey: ['dashboard', 'today-timeline'],
+    queryFn: async (): Promise<TodayTimelineData> => ({ events: listTimelineForDate(toDateKey(new Date())) }),
+  });
 }
 
 export function useReflect() {
@@ -71,12 +99,8 @@ export function useRecentNotes() {
   });
 }
 
-export function useWaterIntake() {
-  return useQuery({ queryKey: ['dashboard', 'water-intake'], queryFn: fetchWaterIntake });
-}
-
 export function useProductivitySummary() {
-  return useQuery({ queryKey: ['dashboard', 'productivity-summary'], queryFn: fetchProductivitySummary });
+  return useQuery({ queryKey: ['dashboard', 'productivity-summary'], queryFn: async () => getWeeklyCompletionStats() });
 }
 
 export function useDailyQuote() {

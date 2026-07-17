@@ -1,5 +1,5 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { Archive, CalendarDays, ChevronLeft, Flag, Repeat, StickyNote, Tag, Trash2 } from 'lucide-react-native';
+import { Archive, CalendarDays, ChevronLeft, Clock3, Flag, Repeat, StickyNote, Tag, Trash2 } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, TextInput, useColorScheme, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -14,6 +14,7 @@ import { RecurrencePicker } from '@/features/tasks/components/recurrence-picker'
 import { useTask } from '@/features/tasks/hooks/use-task';
 import { useTaskMutations } from '@/features/tasks/hooks/use-task-mutations';
 import { useKeyboardHeight } from '@/hooks/use-keyboard-height';
+import { toDateKey } from '@/lib/date';
 
 const AUTOSAVE_DELAY_MS = 500;
 
@@ -69,6 +70,11 @@ export default function TaskDetailScreen() {
           <ChevronLeft size={20} color={colors[scheme].foreground} />
         </Pressable>
         <View className="flex-row gap-4">
+          {task.dueDate && (
+            <Pressable onPress={() => router.push(`/timeline/${toDateKey(new Date(task.dueDate!))}`)} hitSlop={8}>
+              <Clock3 size={20} color={colors[scheme].foreground} />
+            </Pressable>
+          )}
           <Pressable
             onPress={() => {
               archive.mutate(task.id);

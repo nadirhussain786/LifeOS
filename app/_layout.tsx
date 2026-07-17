@@ -10,6 +10,7 @@ import { Sora_400Regular, Sora_500Medium, Sora_600SemiBold, Sora_700Bold, Sora_8
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
+import * as Notifications from 'expo-notifications';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -20,6 +21,18 @@ import { useAuthStore } from '@/features/auth/services/auth-store';
 import { queryClient } from '@/lib/query-client';
 
 SplashScreen.preventAutoHideAsync();
+
+// Without a handler, expo-notifications suppresses notifications delivered
+// while the app is foregrounded — water reminders should still show even if
+// the app happens to be open at the time.
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 
 export default function RootLayout() {
   const init = useAuthStore((state) => state.init);
@@ -58,6 +71,7 @@ export default function RootLayout() {
               <Stack.Screen name="note/new" options={{ presentation: 'modal' }} />
               <Stack.Screen name="habit/new" options={{ presentation: 'modal' }} />
               <Stack.Screen name="routine/new" options={{ presentation: 'modal' }} />
+              <Stack.Screen name="timeline/event/new" options={{ presentation: 'modal' }} />
             </Stack>
             <DevErrorBanner />
           </BottomSheetModalProvider>

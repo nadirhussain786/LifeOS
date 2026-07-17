@@ -13,11 +13,15 @@ function NoteRow({ title, snippet, updatedAt }: { title: string; snippet: string
   const relativeTime = useRelativeTime(updatedAt);
   return (
     <View className="gap-0.5">
-      <View className="flex-row items-center justify-between">
-        <Text className="font-sora-medium">{title}</Text>
-        <Text variant="caption">{relativeTime}</Text>
+      <View className="flex-row items-center gap-2">
+        <Text className="flex-1 font-sora-medium" numberOfLines={1}>
+          {title}
+        </Text>
+        <Text variant="caption" numberOfLines={1}>
+          {relativeTime}
+        </Text>
       </View>
-      <Text variant="muted" numberOfLines={1}>
+      <Text variant="muted" numberOfLines={2}>
         {snippet}
       </Text>
     </View>

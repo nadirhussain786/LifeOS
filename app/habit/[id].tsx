@@ -1,6 +1,6 @@
 import { format, parseISO } from 'date-fns';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { Archive, ChevronLeft, Pencil, Trash2 } from 'lucide-react-native';
+import { Archive, ChevronLeft, Clock3, Pencil, Trash2 } from 'lucide-react-native';
 import { useRef } from 'react';
 import { Pressable, ScrollView, useColorScheme, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -55,6 +55,9 @@ export default function HabitDetailScreen() {
           <ChevronLeft size={20} color={colors[scheme].foreground} />
         </Pressable>
         <View className="flex-row gap-4">
+          <Pressable onPress={() => router.push(`/timeline/${todayKey}`)} hitSlop={8}>
+            <Clock3 size={19} color={colors[scheme].foreground} />
+          </Pressable>
           <Pressable onPress={() => router.push(`/habit/${habit.id}/edit`)} hitSlop={8}>
             <Pencil size={19} color={colors[scheme].foreground} />
           </Pressable>
@@ -133,10 +136,14 @@ export default function HabitDetailScreen() {
           <Text variant="subheading">Recent history</Text>
           {recentLogs.length === 0 && <Text variant="muted">No logs yet — mark today done to start the streak.</Text>}
           {recentLogs.map((log) => (
-            <View key={log.id} className="flex-row items-center justify-between border-t border-border py-2.5">
+            <Pressable
+              key={log.id}
+              onPress={() => router.push(`/timeline/${log.logDate}`)}
+              className="flex-row items-center justify-between border-t border-border py-2.5"
+            >
               <Text variant="muted">{format(parseISO(log.logDate), 'EEE, MMM d')}</Text>
               <Text className="font-sora-medium">{log.value}{habit.unit ? ` ${habit.unit}` : ''}</Text>
-            </View>
+            </Pressable>
           ))}
         </View>
       </ScrollView>
