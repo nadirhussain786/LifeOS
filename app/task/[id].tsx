@@ -1,7 +1,8 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { Archive, CalendarDays, ChevronLeft, Clock3, Flag, Repeat, StickyNote, Tag, Trash2 } from 'lucide-react-native';
+import { Archive, Bell, CalendarDays, ChevronLeft, Clock3, Flag, Repeat, StickyNote, Tag, Trash2 } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, TextInput, useColorScheme, View } from 'react-native';
+import { Pressable, ScrollView, Switch, TextInput, View } from 'react-native';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/ui/text';
@@ -122,6 +123,18 @@ export default function TaskDetailScreen() {
               onChange={(dueDate, hasDueTime) => update.mutate({ id: task.id, input: { dueDate, hasDueTime } })}
             />
           </AttributeRow>
+
+          {task.dueDate !== null && (
+            <AttributeRow icon={Bell} label="Reminder">
+              <View className="flex-row items-center justify-between">
+                <Text variant="muted">Notify me {task.hasDueTime ? 'at the due time' : 'at 9:00 AM that day'}</Text>
+                <Switch
+                  value={task.reminderEnabled}
+                  onValueChange={(reminderEnabled) => update.mutate({ id: task.id, input: { reminderEnabled } })}
+                />
+              </View>
+            </AttributeRow>
+          )}
 
           <AttributeRow icon={Repeat} label="Repeat">
             <RecurrencePicker

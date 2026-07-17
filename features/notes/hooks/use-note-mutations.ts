@@ -1,11 +1,13 @@
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 
+import { cancelNoteReminder, syncNoteReminder } from '@/features/notes/services/note-reminders';
 import {
   addNoteAttachment,
   archiveNote,
   createNote,
   deleteNote,
   deleteNoteAttachment,
+  getNote,
   setTagsForNote,
   unarchiveNote,
   updateNote,
@@ -18,22 +20,40 @@ export function useNoteMutations() {
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['notes'] });
 
   const create = useMutation({
-    mutationFn: async (input: CreateNoteInput) => createNote(input),
+    mutationFn: async (input: CreateNoteInput) => {
+      const note = createNote(input);
+      await syncNoteReminder(note);
+      return note;
+    },
     onSuccess: invalidate,
   });
 
   const update = useMutation({
-    mutationFn: async ({ id, input }: { id: string; input: UpdateNoteInput }) => updateNote(id, input),
+    mutationFn: async ({ id, input }: { id: string; input: UpdateNoteInput }) => {
+      updateNote(id, input);
+      if (input.reminderAt !== undefined) {
+        const note = getNote(id);
+        if (note) await syncNoteReminder(note);
+      }
+    },
     onSuccess: invalidate,
   });
 
   const remove = useMutation({
-    mutationFn: async (id: string) => deleteNote(id),
+    mutationFn: async (id: string) => {
+      const note = getNote(id);
+      deleteNote(id);
+      if (note) await cancelNoteReminder(note);
+    },
     onSuccess: invalidate,
   });
 
   const archive = useMutation({
-    mutationFn: async (id: string) => archiveNote(id),
+    mutationFn: async (id: string) => {
+      const note = getNote(id);
+      archiveNote(id);
+      if (note) await cancelNoteReminder(note);
+    },
     onSuccess: invalidate,
   });
 

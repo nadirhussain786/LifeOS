@@ -14,6 +14,8 @@ export type Note = {
   isPinned: boolean;
   isArchived: boolean;
   wordCount: number;
+  reminderAt: number | null;
+  reminderNotificationId: string | null;
   createdAt: number;
   updatedAt: number;
 };
@@ -23,6 +25,7 @@ export type CreateNoteInput = {
   body?: string | null;
   categoryId?: string | null;
   isPinned?: boolean;
+  reminderAt?: number | null;
 };
 
 export type UpdateNoteInput = Partial<CreateNoteInput> & { isArchived?: boolean };

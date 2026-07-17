@@ -1,6 +1,7 @@
 import { type LucideIcon } from 'lucide-react-native';
 import { type ReactNode } from 'react';
-import { useColorScheme, View } from 'react-native';
+import { View } from 'react-native';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';

@@ -2,7 +2,8 @@ import { format, parseISO } from 'date-fns';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Archive, ChevronLeft, Clock3, Pencil, Trash2 } from 'lucide-react-native';
 import { useRef } from 'react';
-import { Pressable, ScrollView, useColorScheme, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 

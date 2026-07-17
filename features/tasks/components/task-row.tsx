@@ -2,7 +2,8 @@ import { format, isToday } from 'date-fns';
 import * as Haptics from 'expo-haptics';
 import { Archive, Check, Trash2 } from 'lucide-react-native';
 import { useEffect, useRef } from 'react';
-import { Pressable, useColorScheme, View } from 'react-native';
+import { Pressable, View } from 'react-native';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import Animated, { useAnimatedStyle, useSharedValue, withSequence, withSpring } from 'react-native-reanimated';
 
 import { SwipeableRow } from '@/components/ui/swipeable-row';

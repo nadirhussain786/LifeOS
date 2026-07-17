@@ -32,6 +32,7 @@ function toHabit(row: typeof habits.$inferSelect): Habit {
     scheduleIntervalDays: row.scheduleIntervalDays,
     reminderTime: row.reminderTime,
     reminderAdaptive: row.reminderAdaptive,
+    reminderNotificationId: row.reminderNotificationId,
     position: row.position,
     isArchived: row.isArchived,
     createdAt: row.createdAt,
@@ -92,6 +93,7 @@ export function createHabit(input: CreateHabitInput): Habit {
     scheduleIntervalDays: input.scheduleIntervalDays ?? null,
     reminderTime: input.reminderTime ?? null,
     reminderAdaptive: input.reminderAdaptive ?? false,
+    reminderNotificationId: null,
     position: 0,
     isArchived: false,
     createdAt: now,
@@ -121,6 +123,10 @@ export function updateHabit(id: string, input: UpdateHabitInput) {
     })
     .where(eq(habits.id, id))
     .run();
+}
+
+export function setHabitReminderNotificationId(id: string, notificationId: string | null) {
+  getDb().update(habits).set({ reminderNotificationId: notificationId }).where(eq(habits.id, id)).run();
 }
 
 export function archiveHabit(id: string) {

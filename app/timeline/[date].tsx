@@ -2,7 +2,8 @@ import { FlashList } from '@shopify/flash-list';
 import { addDays, format, parseISO, subDays } from 'date-fns';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronLeft, ChevronRight, Clock3, Plus } from 'lucide-react-native';
-import { Pressable, useColorScheme, View } from 'react-native';
+import { Pressable, View } from 'react-native';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/ui/empty-state';

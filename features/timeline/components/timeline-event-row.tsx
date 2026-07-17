@@ -1,6 +1,7 @@
 import { format } from 'date-fns';
 import { useRouter } from 'expo-router';
-import { Alert, Pressable, useColorScheme, View } from 'react-native';
+import { Alert, Pressable, View } from 'react-native';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 import { Text } from '@/components/ui/text';
 import { colors, habitDoneColor } from '@/constants/theme';

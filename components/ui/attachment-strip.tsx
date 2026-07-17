@@ -3,7 +3,8 @@ import * as Haptics from 'expo-haptics';
 import * as ImagePicker from 'expo-image-picker';
 import { ImagePlus, Pause, Play, Trash2, X } from 'lucide-react-native';
 import { useState } from 'react';
-import { Image, Modal, Pressable, ScrollView, useColorScheme, View } from 'react-native';
+import { Image, Modal, Pressable, ScrollView, View } from 'react-native';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/ui/text';

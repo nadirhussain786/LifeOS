@@ -3,9 +3,10 @@ import { addMinutes, format, parseISO, set } from 'date-fns';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Clock, Palette, StickyNote, X } from 'lucide-react-native';
+import { Bell, Clock, Palette, StickyNote, X } from 'lucide-react-native';
 import { useState } from 'react';
-import { Platform, Pressable, ScrollView, StyleSheet, TextInput, useColorScheme, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AttributeRow } from '@/components/ui/attribute-row';
@@ -22,6 +23,14 @@ const DURATIONS = [
   { label: '2h', minutes: 120 },
 ] as const;
 
+const REMINDER_OPTIONS = [
+  { label: 'None', minutesBefore: null },
+  { label: 'At time', minutesBefore: 0 },
+  { label: '10m before', minutesBefore: 10 },
+  { label: '30m before', minutesBefore: 30 },
+  { label: '1h before', minutesBefore: 60 },
+] as const;
+
 export default function NewCalendarEventScreen() {
   const { date: dateKey } = useLocalSearchParams<{ date: string }>();
   const router = useRouter();
@@ -36,6 +45,7 @@ export default function NewCalendarEventScreen() {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [colorToken, setColorToken] = useState<string>(categoryColorPalette[3]);
   const [durationMinutes, setDurationMinutes] = useState<number | null>(null);
+  const [reminderMinutesBefore, setReminderMinutesBefore] = useState<number | null>(30);
 
   const wash = `${colorToken}33`;
 
@@ -56,6 +66,7 @@ export default function NewCalendarEventScreen() {
       endAt: durationMinutes ? addMinutes(time, durationMinutes).getTime() : null,
       colorToken,
       notes: notes.trim() || null,
+      reminderMinutesBefore,
     });
     router.back();
   };
@@ -158,6 +169,36 @@ export default function NewCalendarEventScreen() {
                 );
               })}
             </View>
+          </AttributeRow>
+
+          <AttributeRow icon={Bell} label="Reminder">
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-2">
+              {REMINDER_OPTIONS.map((option) => {
+                const selected = reminderMinutesBefore === option.minutesBefore;
+                return (
+                  <Pressable
+                    key={option.label}
+                    onPress={() => {
+                      Haptics.selectionAsync();
+                      setReminderMinutesBefore(option.minutesBefore);
+                    }}
+                    className="items-center rounded-full border px-3 py-1.5"
+                    style={{
+                      borderColor: selected ? colorToken : colors[scheme].border,
+                      backgroundColor: selected ? colorToken : 'transparent',
+                    }}
+                  >
+                    <Text
+                      variant="caption"
+                      className="font-sora-medium"
+                      style={{ color: selected ? '#ffffff' : colors[scheme].mutedForeground }}
+                    >
+                      {option.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
           </AttributeRow>
         </View>
 

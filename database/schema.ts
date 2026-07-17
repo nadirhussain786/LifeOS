@@ -33,6 +33,8 @@ export const tasks = sqliteTable('tasks', {
   recurrenceParentId: text('recurrence_parent_id'),
   completedAt: integer('completed_at'),
   position: integer('position').notNull().default(0),
+  reminderEnabled: integer('reminder_enabled', { mode: 'boolean' }).notNull().default(false),
+  reminderNotificationId: text('reminder_notification_id'),
   sourceNoteId: text('source_note_id'),
   habitId: text('habit_id'),
   habitLogDate: text('habit_log_date'),
@@ -65,6 +67,8 @@ export const notes = sqliteTable('notes', {
   isPinned: integer('is_pinned', { mode: 'boolean' }).notNull().default(false),
   isArchived: integer('is_archived', { mode: 'boolean' }).notNull().default(false),
   wordCount: integer('word_count').notNull().default(0),
+  reminderAt: integer('reminder_at'),
+  reminderNotificationId: text('reminder_notification_id'),
   createdAt: integer('created_at').notNull(),
   updatedAt: integer('updated_at').notNull(),
   deletedAt: integer('deleted_at'),
@@ -134,6 +138,7 @@ export const habits = sqliteTable('habits', {
   scheduleIntervalDays: integer('schedule_interval_days'),
   reminderTime: text('reminder_time'),
   reminderAdaptive: integer('reminder_adaptive', { mode: 'boolean' }).notNull().default(false),
+  reminderNotificationId: text('reminder_notification_id'),
   position: integer('position').notNull().default(0),
   isArchived: integer('is_archived', { mode: 'boolean' }).notNull().default(false),
   createdAt: integer('created_at').notNull(),
@@ -267,6 +272,8 @@ export const calendarEvents = sqliteTable('calendar_events', {
   endAt: integer('end_at'),
   colorToken: text('color_token'),
   notes: text('notes'),
+  reminderMinutesBefore: integer('reminder_minutes_before'),
+  reminderNotificationId: text('reminder_notification_id'),
   createdAt: integer('created_at').notNull(),
   updatedAt: integer('updated_at').notNull(),
   deletedAt: integer('deleted_at'),
@@ -282,6 +289,46 @@ export const waterIntakeLogs = sqliteTable('water_intake_logs', {
   amountMl: integer('amount_ml').notNull(),
   loggedAt: integer('logged_at').notNull(),
   createdAt: integer('created_at').notNull(),
+});
+
+/** A song imported from the device's own file storage — `uri` points at a
+ * copy inside the app's sandboxed document directory (not the original
+ * picked file, whose URI/permission isn't guaranteed to survive a relaunch). */
+export const songs = sqliteTable('songs', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull(),
+  title: text('title').notNull(),
+  artist: text('artist'),
+  uri: text('uri').notNull(),
+  durationMs: integer('duration_ms'),
+  addedAt: integer('added_at').notNull(),
+  createdAt: integer('created_at').notNull(),
+  deletedAt: integer('deleted_at'),
+  syncStatus: text('sync_status', { enum: ['pending', 'synced', 'conflict'] })
+    .notNull()
+    .default('pending'),
+  serverUpdatedAt: integer('server_updated_at'),
+});
+
+export const playlists = sqliteTable('playlists', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull(),
+  name: text('name').notNull(),
+  colorToken: text('color_token'),
+  position: integer('position').notNull().default(0),
+  createdAt: integer('created_at').notNull(),
+  updatedAt: integer('updated_at').notNull(),
+  deletedAt: integer('deleted_at'),
+  syncStatus: text('sync_status', { enum: ['pending', 'synced', 'conflict'] })
+    .notNull()
+    .default('pending'),
+  serverUpdatedAt: integer('server_updated_at'),
+});
+
+export const playlistSongs = sqliteTable('playlist_songs', {
+  playlistId: text('playlist_id').notNull(),
+  songId: text('song_id').notNull(),
+  position: integer('position').notNull().default(0),
 });
 
 /**
@@ -323,6 +370,8 @@ export const TABLE_BOOTSTRAP_SQL = `
     recurrence_parent_id TEXT,
     completed_at INTEGER,
     position INTEGER NOT NULL DEFAULT 0,
+    reminder_enabled INTEGER NOT NULL DEFAULT 0,
+    reminder_notification_id TEXT,
     source_note_id TEXT,
     habit_id TEXT,
     habit_log_date TEXT,
@@ -353,6 +402,8 @@ export const TABLE_BOOTSTRAP_SQL = `
     is_pinned INTEGER NOT NULL DEFAULT 0,
     is_archived INTEGER NOT NULL DEFAULT 0,
     word_count INTEGER NOT NULL DEFAULT 0,
+    reminder_at INTEGER,
+    reminder_notification_id TEXT,
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL,
     deleted_at INTEGER,
@@ -413,6 +464,7 @@ export const TABLE_BOOTSTRAP_SQL = `
     schedule_interval_days INTEGER,
     reminder_time TEXT,
     reminder_adaptive INTEGER NOT NULL DEFAULT 0,
+    reminder_notification_id TEXT,
     position INTEGER NOT NULL DEFAULT 0,
     is_archived INTEGER NOT NULL DEFAULT 0,
     created_at INTEGER NOT NULL,
@@ -528,6 +580,8 @@ export const TABLE_BOOTSTRAP_SQL = `
     end_at INTEGER,
     color_token TEXT,
     notes TEXT,
+    reminder_minutes_before INTEGER,
+    reminder_notification_id TEXT,
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL,
     deleted_at INTEGER
@@ -540,6 +594,40 @@ export const TABLE_BOOTSTRAP_SQL = `
     amount_ml INTEGER NOT NULL,
     logged_at INTEGER NOT NULL,
     created_at INTEGER NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS songs (
+    id TEXT PRIMARY KEY NOT NULL,
+    user_id TEXT NOT NULL,
+    title TEXT NOT NULL,
+    artist TEXT,
+    uri TEXT NOT NULL,
+    duration_ms INTEGER,
+    added_at INTEGER NOT NULL,
+    created_at INTEGER NOT NULL,
+    deleted_at INTEGER,
+    sync_status TEXT NOT NULL DEFAULT 'pending',
+    server_updated_at INTEGER
+  );
+
+  CREATE TABLE IF NOT EXISTS playlists (
+    id TEXT PRIMARY KEY NOT NULL,
+    user_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    color_token TEXT,
+    position INTEGER NOT NULL DEFAULT 0,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    deleted_at INTEGER,
+    sync_status TEXT NOT NULL DEFAULT 'pending',
+    server_updated_at INTEGER
+  );
+
+  CREATE TABLE IF NOT EXISTS playlist_songs (
+    playlist_id TEXT NOT NULL,
+    song_id TEXT NOT NULL,
+    position INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (playlist_id, song_id)
   );
 `;
 
@@ -564,6 +652,9 @@ export const INDEX_BOOTSTRAP_SQL = `
   CREATE INDEX IF NOT EXISTS idx_entry_links_target ON entry_links(user_id, target_type, target_id);
   CREATE INDEX IF NOT EXISTS idx_calendar_events_start ON calendar_events(user_id, start_at);
   CREATE INDEX IF NOT EXISTS idx_water_intake_logs_date ON water_intake_logs(user_id, log_date);
+  CREATE INDEX IF NOT EXISTS idx_songs_user ON songs(user_id, added_at);
+  CREATE INDEX IF NOT EXISTS idx_playlists_position ON playlists(user_id, position);
+  CREATE UNIQUE INDEX IF NOT EXISTS idx_playlist_songs_position ON playlist_songs(playlist_id, position);
 `;
 
 /**
@@ -583,9 +674,26 @@ export const ADDITIVE_COLUMNS: Record<string, { name: string; ddl: string }[]> =
     { name: 'source_note_id', ddl: 'ALTER TABLE tasks ADD COLUMN source_note_id TEXT' },
     { name: 'habit_id', ddl: 'ALTER TABLE tasks ADD COLUMN habit_id TEXT' },
     { name: 'habit_log_date', ddl: 'ALTER TABLE tasks ADD COLUMN habit_log_date TEXT' },
+    { name: 'reminder_enabled', ddl: 'ALTER TABLE tasks ADD COLUMN reminder_enabled INTEGER NOT NULL DEFAULT 0' },
+    { name: 'reminder_notification_id', ddl: 'ALTER TABLE tasks ADD COLUMN reminder_notification_id TEXT' },
   ],
   notes: [
     { name: 'is_archived', ddl: 'ALTER TABLE notes ADD COLUMN is_archived INTEGER NOT NULL DEFAULT 0' },
     { name: 'word_count', ddl: 'ALTER TABLE notes ADD COLUMN word_count INTEGER NOT NULL DEFAULT 0' },
+    { name: 'reminder_at', ddl: 'ALTER TABLE notes ADD COLUMN reminder_at INTEGER' },
+    { name: 'reminder_notification_id', ddl: 'ALTER TABLE notes ADD COLUMN reminder_notification_id TEXT' },
+  ],
+  habits: [{ name: 'reminder_notification_id', ddl: 'ALTER TABLE habits ADD COLUMN reminder_notification_id TEXT' }],
+  calendar_events: [
+    { name: 'reminder_minutes_before', ddl: 'ALTER TABLE calendar_events ADD COLUMN reminder_minutes_before INTEGER' },
+    { name: 'reminder_notification_id', ddl: 'ALTER TABLE calendar_events ADD COLUMN reminder_notification_id TEXT' },
+  ],
+  songs: [
+    { name: 'sync_status', ddl: "ALTER TABLE songs ADD COLUMN sync_status TEXT NOT NULL DEFAULT 'pending'" },
+    { name: 'server_updated_at', ddl: 'ALTER TABLE songs ADD COLUMN server_updated_at INTEGER' },
+  ],
+  playlists: [
+    { name: 'sync_status', ddl: "ALTER TABLE playlists ADD COLUMN sync_status TEXT NOT NULL DEFAULT 'pending'" },
+    { name: 'server_updated_at', ddl: 'ALTER TABLE playlists ADD COLUMN server_updated_at INTEGER' },
   ],
 };

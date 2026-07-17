@@ -1,6 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { Archive, Check, Flame, Plus, Trash2 } from 'lucide-react-native';
-import { Pressable, useColorScheme, View } from 'react-native';
+import { Pressable, View } from 'react-native';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 import { SwipeableRow } from '@/components/ui/swipeable-row';
 import { Text } from '@/components/ui/text';

@@ -1,7 +1,8 @@
 import { format, isToday, parseISO } from 'date-fns';
 import { useRouter } from 'expo-router';
 import { ChevronLeft, GlassWater } from 'lucide-react-native';
-import { Pressable, ScrollView, useColorScheme, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/ui/empty-state';

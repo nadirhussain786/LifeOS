@@ -14,7 +14,18 @@ function toEvent(row: typeof calendarEvents.$inferSelect): CalendarEvent {
     endAt: row.endAt,
     colorToken: row.colorToken,
     notes: row.notes,
+    reminderMinutesBefore: row.reminderMinutesBefore,
+    reminderNotificationId: row.reminderNotificationId,
   };
+}
+
+export function getCalendarEvent(id: string): CalendarEvent | null {
+  const row = getDb().select().from(calendarEvents).where(eq(calendarEvents.id, id)).get();
+  return row ? toEvent(row) : null;
+}
+
+export function setCalendarEventReminderNotificationId(id: string, notificationId: string | null) {
+  getDb().update(calendarEvents).set({ reminderNotificationId: notificationId }).where(eq(calendarEvents.id, id)).run();
 }
 
 export function listCalendarEventsBetween(startMs: number, endMs: number): CalendarEvent[] {
@@ -43,6 +54,8 @@ export function createCalendarEvent(input: CreateCalendarEventInput): CalendarEv
     endAt: input.endAt ?? null,
     colorToken: input.colorToken ?? null,
     notes: input.notes ?? null,
+    reminderMinutesBefore: input.reminderMinutesBefore ?? null,
+    reminderNotificationId: null,
   };
   getDb()
     .insert(calendarEvents)

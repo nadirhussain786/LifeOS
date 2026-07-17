@@ -1,8 +1,9 @@
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-import { CalendarDays, Flag, Repeat, StickyNote, Tag, X } from 'lucide-react-native';
+import { Bell, CalendarDays, Flag, Repeat, StickyNote, Tag, X } from 'lucide-react-native';
 import { useState } from 'react';
-import { Pressable, ScrollView, TextInput, useColorScheme, View } from 'react-native';
+import { Pressable, ScrollView, Switch, TextInput, View } from 'react-native';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -39,6 +40,7 @@ export default function NewTaskScreen() {
   const [priority, setPriority] = useState<TaskPriority>('none');
   const [dueDate, setDueDate] = useState<number | null>(null);
   const [hasDueTime, setHasDueTime] = useState(false);
+  const [reminderEnabled, setReminderEnabled] = useState(false);
   const [recurrenceFrequency, setRecurrenceFrequency] = useState<TaskRecurrenceFrequency>('none');
   const [categoryId, setCategoryId] = useState<string | null>(null);
 
@@ -60,6 +62,7 @@ export default function NewTaskScreen() {
       hasDueTime,
       recurrenceFrequency,
       categoryId,
+      reminderEnabled: reminderEnabled && dueDate !== null,
     });
     router.back();
   };
@@ -121,6 +124,15 @@ export default function NewTaskScreen() {
               }}
             />
           </AttributeRow>
+
+          {dueDate !== null && (
+            <AttributeRow icon={Bell} label="Reminder">
+              <View className="flex-row items-center justify-between">
+                <Text variant="muted">Notify me {hasDueTime ? 'at the due time' : 'at 9:00 AM that day'}</Text>
+                <Switch value={reminderEnabled} onValueChange={setReminderEnabled} />
+              </View>
+            </AttributeRow>
+          )}
 
           <AttributeRow icon={Repeat} label="Repeat">
             <RecurrencePicker value={recurrenceFrequency} onChange={setRecurrenceFrequency} />

@@ -1,8 +1,9 @@
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-import { Star, Tag, X } from 'lucide-react-native';
+import { Bell, Star, Tag, X } from 'lucide-react-native';
 import { useState } from 'react';
-import { Pressable, ScrollView, TextInput, useColorScheme, View } from 'react-native';
+import { Pressable, ScrollView, TextInput, View } from 'react-native';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -10,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import { AttributeRow } from '@/components/ui/attribute-row';
+import { ReminderPicker } from '@/components/ui/reminder-picker';
 import { NoteCategoryPicker } from '@/features/notes/components/note-category-picker';
 import { useNoteMutations } from '@/features/notes/hooks/use-note-mutations';
 import { useKeyboardHeight } from '@/hooks/use-keyboard-height';
@@ -25,6 +27,7 @@ export default function NewNoteScreen() {
   const [body, setBody] = useState('');
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [isPinned, setIsPinned] = useState(false);
+  const [reminderAt, setReminderAt] = useState<number | null>(null);
 
   const focusProgress = useSharedValue(0);
   const underlineStyle = useAnimatedStyle(() => ({
@@ -36,7 +39,7 @@ export default function NewNoteScreen() {
     const trimmed = title.trim();
     if (!trimmed) return;
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    create.mutate({ title: trimmed, body: body.trim() || null, categoryId, isPinned });
+    create.mutate({ title: trimmed, body: body.trim() || null, categoryId, isPinned, reminderAt });
     router.back();
   };
 
@@ -86,6 +89,9 @@ export default function NewNoteScreen() {
         <View className="rounded-2xl border border-border bg-card px-4">
           <AttributeRow icon={Tag} label="Category" isFirst>
             <NoteCategoryPicker value={categoryId} onChange={setCategoryId} />
+          </AttributeRow>
+          <AttributeRow icon={Bell} label="Reminder">
+            <ReminderPicker value={reminderAt} onChange={setReminderAt} />
           </AttributeRow>
         </View>
 

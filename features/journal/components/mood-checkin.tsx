@@ -1,7 +1,8 @@
 import * as Haptics from 'expo-haptics';
 import { Battery, Moon, Target, Waves } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
-import { Pressable, TextInput, useColorScheme, View } from 'react-native';
+import { Pressable, TextInput, View } from 'react-native';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import Animated, { useAnimatedStyle, useSharedValue, withSequence, withSpring } from 'react-native-reanimated';
 
 import { Text } from '@/components/ui/text';

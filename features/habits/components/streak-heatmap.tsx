@@ -1,5 +1,6 @@
 import { addDays, subDays } from 'date-fns';
-import { useColorScheme, View } from 'react-native';
+import { View } from 'react-native';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 import { Text } from '@/components/ui/text';
 import { colors, habitDoneColor } from '@/constants/theme';

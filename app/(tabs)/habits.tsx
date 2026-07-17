@@ -2,7 +2,8 @@ import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import { Repeat, Search } from 'lucide-react-native';
 import { useMemo, useRef, useState } from 'react';
-import { TextInput, useColorScheme, View } from 'react-native';
+import { TextInput, View } from 'react-native';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 

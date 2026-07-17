@@ -2,7 +2,8 @@ import { RecordingPresets, requestRecordingPermissionsAsync, useAudioRecorder, u
 import * as Haptics from 'expo-haptics';
 import { Mic, Square } from 'lucide-react-native';
 import { useEffect, useRef } from 'react';
-import { Pressable, useColorScheme } from 'react-native';
+import { Pressable } from 'react-native';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';

@@ -3,7 +3,8 @@ import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { Repeat, Plus as PlusIcon } from 'lucide-react-native';
 import { forwardRef, useCallback } from 'react';
-import { Pressable, useColorScheme } from 'react-native';
+import { Pressable } from 'react-native';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';

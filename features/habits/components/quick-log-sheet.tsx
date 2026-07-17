@@ -2,7 +2,8 @@ import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView, type BottomShee
 import * as Haptics from 'expo-haptics';
 import { Minus, Plus } from 'lucide-react-native';
 import { forwardRef, useCallback, useEffect, useState } from 'react';
-import { Pressable, TextInput, useColorScheme, View } from 'react-native';
+import { Pressable, TextInput, View } from 'react-native';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';

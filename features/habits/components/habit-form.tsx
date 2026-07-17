@@ -2,7 +2,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as Haptics from 'expo-haptics';
 import { Bell, CalendarClock, Ruler, Sparkles, Tag } from 'lucide-react-native';
 import { Controller, useForm } from 'react-hook-form';
-import { ScrollView, Switch, TextInput, useColorScheme, View } from 'react-native';
+import { ScrollView, Switch, TextInput, View } from 'react-native';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import { AttributeRow } from '@/components/ui/attribute-row';

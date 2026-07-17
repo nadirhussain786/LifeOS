@@ -1,11 +1,13 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { Archive, ArchiveRestore, ChevronLeft, Star, Tag, Tags, Trash2 } from 'lucide-react-native';
+import { Archive, ArchiveRestore, Bell, ChevronLeft, Star, Tag, Tags, Trash2 } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, TextInput, useColorScheme, View } from 'react-native';
+import { Pressable, ScrollView, TextInput, View } from 'react-native';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AttachmentStrip } from '@/components/ui/attachment-strip';
 import { AttributeRow } from '@/components/ui/attribute-row';
+import { ReminderPicker } from '@/components/ui/reminder-picker';
 import { VoiceNoteRecorder } from '@/components/ui/voice-note-recorder';
 import { colors } from '@/constants/theme';
 import { BacklinksPanel } from '@/features/notes/components/backlinks-panel';
@@ -147,6 +149,12 @@ export default function NoteDetailScreen() {
               onToggle={toggleTag}
               onCreateTag={handleCreateTag}
               onDeleteTag={handleDeleteTag}
+            />
+          </AttributeRow>
+          <AttributeRow icon={Bell} label="Reminder">
+            <ReminderPicker
+              value={note.reminderAt}
+              onChange={(reminderAt) => update.mutate({ id: note.id, input: { reminderAt } })}
             />
           </AttributeRow>
         </View>

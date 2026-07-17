@@ -56,6 +56,8 @@ export function createNote(input: CreateNoteInput): Note {
     isPinned: input.isPinned ?? false,
     isArchived: false,
     wordCount: countWords(input.body ?? null),
+    reminderAt: input.reminderAt ?? null,
+    reminderNotificationId: null,
     createdAt: now,
     updatedAt: now,
   };
@@ -76,6 +78,10 @@ export function updateNote(id: string, input: UpdateNoteInput) {
     .run();
 
   if (input.body !== undefined) syncNoteLinks(id, input.body ?? '');
+}
+
+export function setNoteReminderNotificationId(id: string, notificationId: string | null) {
+  getDb().update(notes).set({ reminderNotificationId: notificationId }).where(eq(notes.id, id)).run();
 }
 
 export function archiveNote(id: string) {

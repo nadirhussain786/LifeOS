@@ -35,6 +35,8 @@ export type CalendarEvent = {
   endAt: number | null;
   colorToken: string | null;
   notes: string | null;
+  reminderMinutesBefore: number | null;
+  reminderNotificationId: string | null;
 };
 
 export type CreateCalendarEventInput = {
@@ -43,4 +45,5 @@ export type CreateCalendarEventInput = {
   endAt?: number | null;
   colorToken?: string | null;
   notes?: string | null;
+  reminderMinutesBefore?: number | null;
 };

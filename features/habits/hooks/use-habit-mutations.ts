@@ -1,10 +1,12 @@
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 
+import { cancelHabitReminder, syncHabitReminder } from '@/features/habits/services/habit-reminders';
 import { toDateKey } from '@/features/habits/services/habit-streaks';
 import {
   archiveHabit,
   createHabit,
   deleteHabit,
+  getHabit,
   logHabit,
   reorderHabits,
   skipHabit,
@@ -21,17 +23,29 @@ export function useHabitMutations() {
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['habits'] });
 
   const create = useMutation({
-    mutationFn: async (input: CreateHabitInput) => createHabit(input),
+    mutationFn: async (input: CreateHabitInput) => {
+      const habit = createHabit(input);
+      await syncHabitReminder(habit);
+      return habit;
+    },
     onSuccess: invalidate,
   });
 
   const update = useMutation({
-    mutationFn: async ({ id, input }: { id: string; input: UpdateHabitInput }) => updateHabit(id, input),
+    mutationFn: async ({ id, input }: { id: string; input: UpdateHabitInput }) => {
+      updateHabit(id, input);
+      const habit = getHabit(id);
+      if (habit) await syncHabitReminder(habit);
+    },
     onSuccess: invalidate,
   });
 
   const archive = useMutation({
-    mutationFn: async (id: string) => archiveHabit(id),
+    mutationFn: async (id: string) => {
+      const habit = getHabit(id);
+      archiveHabit(id);
+      if (habit) await cancelHabitReminder(habit);
+    },
     onSuccess: invalidate,
   });
 
@@ -41,7 +55,11 @@ export function useHabitMutations() {
   });
 
   const remove = useMutation({
-    mutationFn: async (id: string) => deleteHabit(id),
+    mutationFn: async (id: string) => {
+      const habit = getHabit(id);
+      deleteHabit(id);
+      if (habit) await cancelHabitReminder(habit);
+    },
     onSuccess: invalidate,
   });
 

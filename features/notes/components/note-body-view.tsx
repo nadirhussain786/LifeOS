@@ -1,6 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { Check } from 'lucide-react-native';
-import { Platform, Pressable, useColorScheme, View } from 'react-native';
+import { Platform, Pressable, View } from 'react-native';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 import { Text } from '@/components/ui/text';
 import { colors, habitDoneColor } from '@/constants/theme';

@@ -2,7 +2,8 @@ import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { Bell, ChevronLeft, Minus, Plus, Target } from 'lucide-react-native';
 import { useState } from 'react';
-import { Alert, Pressable, ScrollView, Switch, useColorScheme, View } from 'react-native';
+import { Alert, Pressable, ScrollView, Switch, View } from 'react-native';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AttributeRow } from '@/components/ui/attribute-row';
@@ -12,6 +13,7 @@ import { colors } from '@/constants/theme';
 import { cancelWaterReminders, scheduleWaterReminders } from '@/features/water-intake/services/water-reminders';
 import { GOAL_PRESETS_ML, useWaterSettingsStore } from '@/features/water-intake/store/water-settings-store';
 import { REMINDER_INTERVALS_MIN } from '@/features/water-intake/types/water-intake.types';
+import { notificationsAvailable } from '@/lib/notifications';
 
 const WATER_TINT = '#0ea5e9';
 
@@ -71,7 +73,12 @@ export default function WaterSettingsScreen() {
     setSaving(false);
 
     if (draft.enabled && newIds.length === 0) {
-      Alert.alert('Notifications disabled', 'Enable notifications for LifeOS in your device settings to get water reminders.');
+      Alert.alert(
+        notificationsAvailable ? 'Notifications disabled' : 'Not available in Expo Go',
+        notificationsAvailable
+          ? 'Enable notifications for LifeOS in your device settings to get water reminders.'
+          : 'Reminders need a development build — Expo Go on Android no longer supports notifications.',
+      );
     }
 
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);

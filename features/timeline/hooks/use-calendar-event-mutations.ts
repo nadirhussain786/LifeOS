@@ -1,6 +1,7 @@
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 
-import { createCalendarEvent, deleteCalendarEvent } from '@/features/timeline/services/calendar-events-repository';
+import { cancelCalendarEventReminder, scheduleCalendarEventReminder } from '@/features/timeline/services/calendar-event-reminders';
+import { createCalendarEvent, deleteCalendarEvent, getCalendarEvent } from '@/features/timeline/services/calendar-events-repository';
 import type { CreateCalendarEventInput } from '@/features/timeline/types/timeline.types';
 
 export function useCalendarEventMutations() {
@@ -11,12 +12,20 @@ export function useCalendarEventMutations() {
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['timeline'] });
 
   const create = useMutation({
-    mutationFn: async (input: CreateCalendarEventInput) => createCalendarEvent(input),
+    mutationFn: async (input: CreateCalendarEventInput) => {
+      const event = createCalendarEvent(input);
+      await scheduleCalendarEventReminder(event);
+      return event;
+    },
     onSuccess: invalidate,
   });
 
   const remove = useMutation({
-    mutationFn: async (id: string) => deleteCalendarEvent(id),
+    mutationFn: async (id: string) => {
+      const event = getCalendarEvent(id);
+      deleteCalendarEvent(id);
+      if (event) await cancelCalendarEventReminder(event);
+    },
     onSuccess: invalidate,
   });
 

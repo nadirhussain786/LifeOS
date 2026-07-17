@@ -23,6 +23,8 @@ export type Task = {
   recurrenceParentId: string | null;
   completedAt: number | null;
   position: number;
+  reminderEnabled: boolean;
+  reminderNotificationId: string | null;
   createdAt: number;
   updatedAt: number;
 };
@@ -42,6 +44,7 @@ export type CreateTaskInput = {
   recurrenceFrequency?: TaskRecurrenceFrequency;
   /** Internal only — set by completeTask() when auto-cloning a recurring task. Not exposed in any picker UI. */
   recurrenceParentId?: string | null;
+  reminderEnabled?: boolean;
 };
 
 export type UpdateTaskInput = Partial<CreateTaskInput> & {

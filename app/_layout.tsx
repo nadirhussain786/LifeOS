@@ -10,7 +10,6 @@ import { Sora_400Regular, Sora_500Medium, Sora_600SemiBold, Sora_700Bold, Sora_8
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
-import * as Notifications from 'expo-notifications';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -18,6 +17,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { DevErrorBanner } from '@/components/dev/dev-error-banner';
 import { useAuthStore } from '@/features/auth/services/auth-store';
+import { configureNotificationHandler } from '@/lib/notifications';
 import { queryClient } from '@/lib/query-client';
 
 SplashScreen.preventAutoHideAsync();
@@ -25,14 +25,7 @@ SplashScreen.preventAutoHideAsync();
 // Without a handler, expo-notifications suppresses notifications delivered
 // while the app is foregrounded — water reminders should still show even if
 // the app happens to be open at the time.
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+configureNotificationHandler();
 
 export default function RootLayout() {
   const init = useAuthStore((state) => state.init);
@@ -66,12 +59,14 @@ export default function RootLayout() {
             <Stack screenOptions={{ headerShown: false }}>
               <Stack.Screen name="(auth)" />
               <Stack.Screen name="(tabs)" />
-              <Stack.Screen name="settings" options={{ headerShown: true, title: 'Settings' }} />
+              <Stack.Screen name="settings/index" options={{ headerShown: true, title: 'Settings' }} />
               <Stack.Screen name="task/new" options={{ presentation: 'modal' }} />
               <Stack.Screen name="note/new" options={{ presentation: 'modal' }} />
               <Stack.Screen name="habit/new" options={{ presentation: 'modal' }} />
               <Stack.Screen name="routine/new" options={{ presentation: 'modal' }} />
               <Stack.Screen name="timeline/event/new" options={{ presentation: 'modal' }} />
+              <Stack.Screen name="music/playlist/new" options={{ presentation: 'modal' }} />
+              <Stack.Screen name="music/now-playing" options={{ presentation: 'modal' }} />
             </Stack>
             <DevErrorBanner />
           </BottomSheetModalProvider>

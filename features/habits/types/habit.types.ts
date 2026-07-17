@@ -19,6 +19,7 @@ export type Habit = {
   scheduleIntervalDays: number | null;
   reminderTime: string | null;
   reminderAdaptive: boolean;
+  reminderNotificationId: string | null;
   position: number;
   isArchived: boolean;
   createdAt: number;

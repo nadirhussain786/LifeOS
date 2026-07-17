@@ -70,6 +70,8 @@ export function createTask(input: CreateTaskInput): Task {
     recurrenceParentId: input.recurrenceParentId ?? null,
     completedAt: null,
     position: 0,
+    reminderEnabled: input.reminderEnabled ?? false,
+    reminderNotificationId: null,
     createdAt: now,
     updatedAt: now,
   };
@@ -86,6 +88,10 @@ export function updateTask(id: string, input: UpdateTaskInput) {
     .set({ ...input, updatedAt: Date.now(), syncStatus: 'pending' })
     .where(eq(tasks.id, id))
     .run();
+}
+
+export function setTaskReminderNotificationId(id: string, notificationId: string | null) {
+  getDb().update(tasks).set({ reminderNotificationId: notificationId }).where(eq(tasks.id, id)).run();
 }
 
 function nextRecurrenceDueDate(dueDate: number, frequency: TaskRecurrenceFrequency): number {

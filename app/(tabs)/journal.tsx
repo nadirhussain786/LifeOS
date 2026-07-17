@@ -1,13 +1,15 @@
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
-import { BookOpen, Flame } from 'lucide-react-native';
-import { View } from 'react-native';
+import { Bell, BookOpen, Flame } from 'lucide-react-native';
+import { Pressable, View } from 'react-native';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
+import { colors } from '@/constants/theme';
 import { DayCard } from '@/features/journal/components/day-card';
 import { MoodMonthStrip } from '@/features/journal/components/mood-month-strip';
 import { useJournalMonth, useJournalStreak } from '@/features/journal/hooks/use-journal';
@@ -19,6 +21,7 @@ const STREAK_COLOR = '#f59e0b';
 export default function JournalScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const scheme = useColorScheme() ?? 'light';
   const todayKey = toDateKey(new Date());
 
   const { data: entries = [], isLoading } = useJournalMonth();
@@ -30,14 +33,19 @@ export default function JournalScreen() {
       <View style={{ paddingTop: insets.top + 8 }} className="gap-3 px-4 pb-2">
         <View className="flex-row items-center justify-between">
           <Text variant="heading">Journal</Text>
-          {streak > 0 && (
-            <View className="flex-row items-center gap-1">
-              <Flame size={14} color={STREAK_COLOR} fill={STREAK_COLOR} />
-              <Text variant="muted" className="font-sora-medium" style={{ color: STREAK_COLOR }}>
-                {streak}-day streak
-              </Text>
-            </View>
-          )}
+          <View className="flex-row items-center gap-3">
+            {streak > 0 && (
+              <View className="flex-row items-center gap-1">
+                <Flame size={14} color={STREAK_COLOR} fill={STREAK_COLOR} />
+                <Text variant="muted" className="font-sora-medium" style={{ color: STREAK_COLOR }}>
+                  {streak}-day streak
+                </Text>
+              </View>
+            )}
+            <Pressable onPress={() => router.push('/journal/reminder-settings')} hitSlop={8}>
+              <Bell size={19} color={colors[scheme].foreground} />
+            </Pressable>
+          </View>
         </View>
 
         <Button
