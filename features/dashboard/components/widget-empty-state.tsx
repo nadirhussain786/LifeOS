@@ -1,7 +1,9 @@
-import { View } from 'react-native';
+import { Plus } from 'lucide-react-native';
+import { Pressable, View } from 'react-native';
 
-import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
+import { colors } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 type Props = {
   message: string;
@@ -10,10 +12,24 @@ type Props = {
 };
 
 export function WidgetEmptyState({ message, actionLabel, onAction }: Props) {
+  const scheme = useColorScheme() ?? 'light';
+
   return (
-    <View className="items-start gap-3 py-1">
+    <View className="gap-2.5 py-1">
       <Text variant="muted">{message}</Text>
-      {actionLabel && onAction ? <Button label={actionLabel} variant="secondary" size="sm" onPress={onAction} /> : null}
+      {actionLabel && onAction ? (
+        <Pressable
+          onPress={onAction}
+          className="flex-row items-center justify-center gap-2 rounded-2xl border border-dashed border-border py-3"
+          accessibilityRole="button"
+          accessibilityLabel={actionLabel}
+        >
+          <Plus size={16} color={colors[scheme].accent} />
+          <Text className="font-sora-semibold" style={{ color: colors[scheme].accent }}>
+            {actionLabel}
+          </Text>
+        </Pressable>
+      ) : null}
     </View>
   );
 }

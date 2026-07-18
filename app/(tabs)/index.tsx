@@ -23,7 +23,7 @@ export default function DashboardScreen() {
   return (
     <View className="flex-1 bg-background">
       <ScrollView
-        contentContainerClassName="gap-4 px-4 pb-28"
+        contentContainerClassName="gap-4 px-4 pb-24"
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <DashboardHeader />

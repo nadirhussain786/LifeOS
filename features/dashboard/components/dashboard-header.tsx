@@ -15,13 +15,20 @@ export function DashboardHeader() {
   const insets = useSafeAreaInsets();
 
   return (
-    <View className="flex-row items-start justify-between px-4 pb-2" style={{ paddingTop: insets.top + 8 }}>
-      <View className="gap-1">
-        <Text variant="heading">{greeting}</Text>
-        <Text variant="muted">{dateLabel}</Text>
+    <View className="flex-row items-center justify-between pb-1" style={{ paddingTop: insets.top + 10 }}>
+      <View className="flex-1 gap-0.5">
+        <Text variant="caption" className="font-sora-semibold uppercase tracking-wide" style={{ color: colors[scheme].mutedForeground }}>
+          {dateLabel}
+        </Text>
+        <Text className="font-sora-extrabold text-3xl text-foreground">{greeting}</Text>
       </View>
-      <Pressable onPress={() => router.push('/settings')} hitSlop={12} className="pt-1">
-        <Settings color={colors[scheme].mutedForeground} size={22} />
+      <Pressable
+        onPress={() => router.push('/settings')}
+        hitSlop={8}
+        accessibilityLabel="Settings"
+        className="h-11 w-11 items-center justify-center rounded-full bg-muted"
+      >
+        <Settings color={colors[scheme].foreground} size={20} />
       </Pressable>
     </View>
   );

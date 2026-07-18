@@ -45,8 +45,8 @@ export default function HubScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View className="gap-1">
-          <Text variant="heading">Hub</Text>
-          <Text variant="muted">{readyCount} modules ready · more on the way</Text>
+          <Text variant="heading">More</Text>
+          <Text variant="muted">{readyCount} modules ready · everything in one place</Text>
         </View>
 
         {sections.map((section, sectionIndex) => (
