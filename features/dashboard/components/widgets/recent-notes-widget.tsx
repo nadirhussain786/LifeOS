@@ -33,7 +33,7 @@ export function RecentNotesWidget() {
   const { data, isLoading } = useRecentNotes();
 
   return (
-    <WidgetCard icon={StickyNote} title="Recent notes" actionLabel="View all" onActionPress={() => router.push('/(tabs)/notes')}>
+    <WidgetCard icon={StickyNote} title="Recent notes" actionLabel="View all" onActionPress={() => router.push('/notes')}>
       {isLoading || !data ? (
         <View className="gap-2">
           <Skeleton className="h-10 w-full" />

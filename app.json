@@ -16,7 +16,9 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "UIBackgroundModes": ["audio"]
+        "UIBackgroundModes": [
+          "audio"
+        ]
       }
     },
     "android": {
@@ -57,7 +59,8 @@
           "isAndroidBackgroundLocationEnabled": false
         }
       ],
-      "expo-notifications"
+      "expo-notifications",
+      "expo-video"
     ]
   }
 }

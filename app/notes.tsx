@@ -1,6 +1,6 @@
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
-import { Archive, Search, StickyNote } from 'lucide-react-native';
+import { Archive, ChevronLeft, Search, StickyNote } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -56,7 +56,12 @@ export default function NotesScreen() {
     <View className="flex-1 bg-background">
       <View style={{ paddingTop: insets.top + 8 }} className="gap-3 px-4 pb-2">
         <View className="flex-row items-center justify-between">
-          <Text variant="heading">Notes</Text>
+          <View className="flex-row items-center gap-1">
+            <Pressable onPress={() => router.back()} hitSlop={8} className="-ml-1 p-1" accessibilityLabel="Back">
+              <ChevronLeft size={24} color={colors[scheme].foreground} />
+            </Pressable>
+            <Text variant="heading">Notes</Text>
+          </View>
           <Pressable
             onPress={() => setShowArchived((current) => !current)}
             className="flex-row items-center gap-1.5 rounded-full border border-border px-3 py-1.5"

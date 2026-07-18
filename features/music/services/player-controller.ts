@@ -5,6 +5,7 @@ import type { RepeatMode, Song } from '@/features/music/types/music.types';
 
 let player: AudioPlayer | null = null;
 let audioModeConfigured = false;
+let lockScreenActive = false;
 
 function shuffleFrom<T>(items: T[]): T[] {
   const copy = [...items];
@@ -23,9 +24,25 @@ function ensurePlayer(): AudioPlayer {
     usePlayerStore
       .getState()
       .setPlaybackState(status.playing, Math.round(status.currentTime * 1000), Math.round((status.duration || 0) * 1000));
+    // Sleep timer: this listener keeps firing while audio plays (even in the
+    // background), so it's a reliable place to enforce the auto-stop.
+    if (sleepTimerEndsAt != null && Date.now() >= sleepTimerEndsAt) {
+      sleepTimerEndsAt = null;
+      usePlayerStore.getState().setSleepTimerEndsAt(null);
+      player?.pause();
+    }
     if (status.didJustFinish) handleTrackFinished();
   });
   return player;
+}
+
+let sleepTimerEndsAt: number | null = null;
+
+/** Arms (minutes > 0) or cancels (null) the sleep timer. Enforcement happens
+ * in the playback-status listener so it fires even with the app backgrounded. */
+export function setSleepTimer(minutes: number | null) {
+  sleepTimerEndsAt = minutes ? Date.now() + minutes * 60_000 : null;
+  usePlayerStore.getState().setSleepTimerEndsAt(sleepTimerEndsAt);
 }
 
 async function configureAudioMode() {
@@ -44,7 +61,19 @@ function loadIndex(index: number, autoplay: boolean) {
   const p = ensurePlayer();
   usePlayerStore.getState().setIndex(index);
   p.replace(song.uri);
-  p.setActiveForLockScreen(true, { title: song.title, artist: song.artist ?? undefined }, { showSeekForward: true, showSeekBackward: true });
+
+  // Drive the OS lock-screen / notification now-playing surface. expo-audio
+  // wires play/pause + seek to this player natively; next/previous aren't
+  // remote-controllable through expo-audio, so we expose seek as the scrub
+  // affordance there and keep next/prev to the in-app controls.
+  const metadata = { title: song.title, artist: song.artist ?? undefined };
+  if (lockScreenActive) {
+    p.updateLockScreenMetadata(metadata);
+  } else {
+    p.setActiveForLockScreen(true, metadata, { showSeekForward: true, showSeekBackward: true });
+    lockScreenActive = true;
+  }
+
   if (autoplay) p.play();
 }
 
@@ -85,6 +114,22 @@ export async function playQueue(songs: Song[], startIndex: number) {
   loadIndex(newIndex, true);
 }
 
+/** Turns shuffle on and plays the whole set from a random starting point —
+ * backs the library's "Shuffle all" button. */
+export async function shuffleAll(songs: Song[]) {
+  if (songs.length === 0) return;
+  usePlayerStore.getState().setShuffle(true);
+  await playQueue(songs, Math.floor(Math.random() * songs.length));
+}
+
+/** Jumps straight to a track in the current queue — backs tapping a row in the
+ * "Up Next" list. */
+export function jumpToIndex(index: number) {
+  const { queue } = usePlayerStore.getState();
+  if (index < 0 || index >= queue.length) return;
+  loadIndex(index, true);
+}
+
 export function togglePlayPause() {
   if (usePlayerStore.getState().currentIndex < 0) return;
   const p = ensurePlayer();
@@ -117,6 +162,34 @@ export function playPrevious() {
 
 export function seekTo(seconds: number) {
   player?.seekTo(seconds);
+}
+
+/** Dismisses playback entirely — stops audio, tears down the lock-screen
+ * controls, releases the native player, and clears the queue. Backs the
+ * mini-player's swipe-to-dismiss / close action. */
+export function clearPlayer() {
+  // Pause FIRST so audio actually stops immediately — releasing the native
+  // player without pausing can leave the current buffer playing out (and the
+  // only way to stop it becomes the OS media widget).
+  try {
+    player?.pause();
+  } catch {
+    // no-op
+  }
+  try {
+    player?.clearLockScreenControls();
+  } catch {
+    // no-op if never activated
+  }
+  try {
+    player?.remove();
+  } catch {
+    // best-effort release
+  }
+  player = null;
+  lockScreenActive = false;
+  sleepTimerEndsAt = null;
+  usePlayerStore.getState().clear();
 }
 
 export function setRepeatMode(mode: RepeatMode) {

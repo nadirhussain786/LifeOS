@@ -5,6 +5,7 @@ import { Pressable, View } from 'react-native';
 import { SwipeableRow } from '@/components/ui/swipeable-row';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
+import { Equalizer } from '@/features/music/components/equalizer';
 import { formatDuration } from '@/features/music/utils/format-duration';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import type { Song } from '@/features/music/types/music.types';
@@ -41,9 +42,11 @@ export function SongRow({ song, isActive, isPlaying, onPress, onLongPress, onDel
         style={{ backgroundColor: isActive ? MUSIC_TINT : colors[scheme].muted }}
       >
         {isActive && isPlaying ? (
+          <Equalizer size={14} playing color="#ffffff" />
+        ) : isActive ? (
           <Pause size={14} color="#ffffff" fill="#ffffff" />
         ) : (
-          <Play size={14} color={isActive ? '#ffffff' : colors[scheme].mutedForeground} fill={isActive ? '#ffffff' : 'transparent'} />
+          <Play size={14} color={colors[scheme].mutedForeground} fill="transparent" />
         )}
       </View>
 

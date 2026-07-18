@@ -1,0 +1,88 @@
+import { FlashList } from '@shopify/flash-list';
+import { useRouter } from 'expo-router';
+import { Check, ChevronLeft, Search } from 'lucide-react-native';
+import { useMemo, useState } from 'react';
+import { Pressable, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { Text } from '@/components/ui/text';
+import { colors } from '@/constants/theme';
+import { CURRENCIES, DEFAULT_CURRENCY_CODE } from '@/features/budget/config/currencies';
+import { useBudgetMutations } from '@/features/budget/hooks/use-budget-mutations';
+import { useBudgetSettings } from '@/features/budget/hooks/use-budget';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+
+const BUDGET_TINT = '#22c55e';
+
+export default function CurrencyPickerScreen() {
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const scheme = useColorScheme() ?? 'light';
+  const { data: settings } = useBudgetSettings();
+  const { saveSettings } = useBudgetMutations();
+  const [query, setQuery] = useState('');
+
+  const current = settings?.currency ?? DEFAULT_CURRENCY_CODE;
+
+  const results = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return CURRENCIES;
+    return CURRENCIES.filter(
+      (c) => c.code.toLowerCase().includes(q) || c.name.toLowerCase().includes(q) || c.symbol.toLowerCase().includes(q),
+    );
+  }, [query]);
+
+  const pick = (code: string) => {
+    saveSettings.mutate({ currency: code });
+    router.back();
+  };
+
+  return (
+    <View className="flex-1 bg-background">
+      <View style={{ paddingTop: insets.top + 8 }} className="flex-row items-center gap-1 px-4 pb-2">
+        <Pressable onPress={() => router.back()} hitSlop={8} className="-ml-1 p-1" accessibilityLabel="Back">
+          <ChevronLeft size={24} color={colors[scheme].foreground} />
+        </Pressable>
+        <Text variant="heading">Currency</Text>
+      </View>
+
+      <View className="mx-4 mb-2 flex-row items-center gap-2 rounded-full bg-muted px-4 py-2.5">
+        <Search size={16} color={colors[scheme].mutedForeground} />
+        <TextInput
+          value={query}
+          onChangeText={setQuery}
+          placeholder="Search 80+ currencies"
+          placeholderTextColor={colors[scheme].mutedForeground}
+          autoCapitalize="characters"
+          className="flex-1 text-foreground"
+        />
+      </View>
+
+      <FlashList
+        data={results}
+        keyExtractor={(item) => item.code}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 40 }}
+        ItemSeparatorComponent={() => <View className="h-2" />}
+        renderItem={({ item }) => {
+          const selected = item.code === current;
+          return (
+            <Pressable
+              onPress={() => pick(item.code)}
+              className="flex-row items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3"
+              style={selected ? { borderColor: BUDGET_TINT } : undefined}
+            >
+              <View className="h-10 w-10 items-center justify-center rounded-xl bg-muted">
+                <Text className="font-sora-bold text-foreground">{item.symbol}</Text>
+              </View>
+              <View className="flex-1">
+                <Text className="font-sora-semibold text-foreground">{item.name}</Text>
+                <Text variant="caption">{item.code}</Text>
+              </View>
+              {selected && <Check size={20} color={BUDGET_TINT} />}
+            </Pressable>
+          );
+        }}
+      />
+    </View>
+  );
+}

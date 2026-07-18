@@ -13,6 +13,8 @@ type PlayerState = {
   durationMs: number;
   shuffle: boolean;
   repeatMode: RepeatMode;
+  /** Epoch ms when the sleep timer will pause playback, or null if off. */
+  sleepTimerEndsAt: number | null;
 };
 
 type PlayerActions = {
@@ -21,6 +23,7 @@ type PlayerActions = {
   setPlaybackState: (isPlaying: boolean, positionMs: number, durationMs: number) => void;
   setShuffle: (shuffle: boolean) => void;
   setRepeatMode: (mode: RepeatMode) => void;
+  setSleepTimerEndsAt: (endsAt: number | null) => void;
   clear: () => void;
 };
 
@@ -33,6 +36,7 @@ const initialState: PlayerState = {
   durationMs: 0,
   shuffle: false,
   repeatMode: 'off',
+  sleepTimerEndsAt: null,
 };
 
 /** Pure reactive state for the music player — every mutation is driven by
@@ -46,6 +50,7 @@ export const usePlayerStore = create<PlayerState & PlayerActions>()((set) => ({
   setPlaybackState: (isPlaying, positionMs, durationMs) => set({ isPlaying, positionMs, durationMs }),
   setShuffle: (shuffle) => set({ shuffle }),
   setRepeatMode: (repeatMode) => set({ repeatMode }),
+  setSleepTimerEndsAt: (sleepTimerEndsAt) => set({ sleepTimerEndsAt }),
   clear: () => set(initialState),
 }));
 

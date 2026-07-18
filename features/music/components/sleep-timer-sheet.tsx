@@ -1,0 +1,76 @@
+import { Moon, TimerOff } from 'lucide-react-native';
+import { Modal, Pressable, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { Text } from '@/components/ui/text';
+import { colors } from '@/constants/theme';
+import { MUSIC_TINT } from '@/features/music/components/song-row';
+import { formatDuration } from '@/features/music/utils/format-duration';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { alpha } from '@/lib/color';
+
+type Props = {
+  visible: boolean;
+  onClose: () => void;
+  remainingMs: number;
+  active: boolean;
+  onSelect: (minutes: number | null) => void;
+};
+
+const OPTIONS = [15, 30, 45, 60];
+
+/** Sleep-timer picker: auto-pauses playback after the chosen minutes. Enforced
+ * in the player controller's status listener so it fires in the background. */
+export function SleepTimerSheet({ visible, onClose, remainingMs, active, onSelect }: Props) {
+  const insets = useSafeAreaInsets();
+  const scheme = useColorScheme() ?? 'light';
+
+  const pick = (minutes: number | null) => {
+    onSelect(minutes);
+    onClose();
+  };
+
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
+      <Pressable className="flex-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} onPress={onClose}>
+        <View className="flex-1 justify-end">
+          <Pressable onPress={(e) => e.stopPropagation()} style={{ paddingBottom: insets.bottom + 12 }} className="gap-2 rounded-t-3xl bg-card px-5 pt-3">
+            <View className="mb-1 h-1 w-10 self-center rounded-full" style={{ backgroundColor: colors[scheme].border }} />
+            <View className="flex-row items-center gap-2 pb-1">
+              <Moon size={18} color={MUSIC_TINT} />
+              <Text variant="subheading">Sleep timer</Text>
+            </View>
+
+            {active && (
+              <View className="mb-1 flex-row items-center justify-between rounded-2xl px-4 py-3" style={{ backgroundColor: alpha(MUSIC_TINT, 0.12) }}>
+                <Text className="font-sora-medium" style={{ color: MUSIC_TINT }}>
+                  Pausing in {formatDuration(remainingMs)}
+                </Text>
+                <Pressable onPress={() => pick(null)} hitSlop={8} className="flex-row items-center gap-1.5">
+                  <TimerOff size={15} color={colors[scheme].mutedForeground} />
+                  <Text variant="caption" className="font-sora-semibold">
+                    Turn off
+                  </Text>
+                </Pressable>
+              </View>
+            )}
+
+            <View className="flex-row flex-wrap gap-2.5">
+              {OPTIONS.map((minutes) => (
+                <Pressable
+                  key={minutes}
+                  onPress={() => pick(minutes)}
+                  className="flex-1 items-center rounded-2xl border border-border py-4"
+                  style={{ minWidth: '45%' }}
+                >
+                  <Text className="font-sora-bold text-foreground text-lg">{minutes}</Text>
+                  <Text variant="caption">minutes</Text>
+                </Pressable>
+              ))}
+            </View>
+          </Pressable>
+        </View>
+      </Pressable>
+    </Modal>
+  );
+}

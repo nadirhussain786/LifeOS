@@ -13,6 +13,7 @@ export function useNowPlaying() {
   const repeatMode = usePlayerStore((state) => state.repeatMode);
   const queue = usePlayerStore((state) => state.queue);
   const currentIndex = usePlayerStore((state) => state.currentIndex);
+  const sleepTimerEndsAt = usePlayerStore((state) => state.sleepTimerEndsAt);
 
   return {
     currentSong,
@@ -23,6 +24,7 @@ export function useNowPlaying() {
     repeatMode,
     queue,
     currentIndex,
+    sleepTimerEndsAt,
     ...playerController,
   };
 }

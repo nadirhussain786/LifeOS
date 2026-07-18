@@ -1,0 +1,136 @@
+import { set } from 'date-fns';
+import { useRouter } from 'expo-router';
+import { BellRing, ChevronLeft, Minus, Moon, Plus, Sun } from 'lucide-react-native';
+import { useState } from 'react';
+import { Pressable, Switch, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { Button } from '@/components/ui/button';
+import { Text } from '@/components/ui/text';
+import { colors } from '@/constants/theme';
+import { TimeField } from '@/features/sleep/components/time-field';
+import { formatDuration } from '@/features/sleep/services/sleep-stats';
+import { useSleepMutations } from '@/features/sleep/hooks/use-sleep-mutations';
+import { useSleepSettings } from '@/features/sleep/hooks/use-sleep';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { notificationsAvailable } from '@/lib/notifications';
+
+const SLEEP_TINT = '#6366f1';
+const MIN_GOAL = 240;
+const MAX_GOAL = 720;
+const STEP = 15;
+
+/** Parses "HH:mm" into a carrier Date; falls back to a sensible default. */
+function parseTime(value: string | null, fallbackHour: number): Date {
+  if (value && /^\d{1,2}:\d{2}$/.test(value)) {
+    const [h, m] = value.split(':').map(Number);
+    return set(new Date(), { hours: h, minutes: m, seconds: 0, milliseconds: 0 });
+  }
+  return set(new Date(), { hours: fallbackHour, minutes: 0, seconds: 0, milliseconds: 0 });
+}
+
+function toHHmm(date: Date): string {
+  return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+}
+
+export default function SleepSettingsScreen() {
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const scheme = useColorScheme() ?? 'light';
+  const { data: settings } = useSleepSettings();
+  const { saveSettings } = useSleepMutations();
+
+  const [goal, setGoal] = useState(settings?.goalMinutes ?? 480);
+  const [bedtime, setBedtime] = useState(() => parseTime(settings?.targetBedtime ?? null, 23));
+  const [wake, setWake] = useState(() => parseTime(settings?.targetWakeTime ?? null, 7));
+  const [reminderEnabled, setReminderEnabled] = useState(settings?.reminderEnabled ?? false);
+  const [seeded, setSeeded] = useState(false);
+
+  if (settings && !seeded) {
+    setGoal(settings.goalMinutes);
+    setBedtime(parseTime(settings.targetBedtime, 23));
+    setWake(parseTime(settings.targetWakeTime, 7));
+    setReminderEnabled(settings.reminderEnabled);
+    setSeeded(true);
+  }
+
+  const adjust = (delta: number) => setGoal((g) => Math.min(MAX_GOAL, Math.max(MIN_GOAL, g + delta)));
+
+  const save = () => {
+    saveSettings.mutate({ goalMinutes: goal, targetBedtime: toHHmm(bedtime), targetWakeTime: toHHmm(wake), reminderEnabled });
+    router.back();
+  };
+
+  return (
+    <View className="flex-1 bg-background">
+      <View style={{ paddingTop: insets.top + 8 }} className="flex-row items-center gap-1 px-4 pb-2">
+        <Pressable onPress={() => router.back()} hitSlop={8} className="-ml-1 p-1" accessibilityLabel="Back">
+          <ChevronLeft size={24} color={colors[scheme].foreground} />
+        </Pressable>
+        <Text variant="heading">Sleep Goal</Text>
+      </View>
+
+      <View className="gap-5 px-5 pt-3">
+        <View className="items-center gap-4 rounded-2xl border border-border bg-card p-6">
+          <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
+            Nightly goal
+          </Text>
+          <View className="flex-row items-center gap-6">
+            <Pressable
+              onPress={() => adjust(-STEP)}
+              className="h-12 w-12 items-center justify-center rounded-2xl bg-muted"
+              accessibilityLabel="Decrease goal"
+            >
+              <Minus size={20} color={colors[scheme].foreground} />
+            </Pressable>
+            <Text className="font-sora-extrabold text-4xl" style={{ color: SLEEP_TINT, minWidth: 130, textAlign: 'center' }}>
+              {formatDuration(goal)}
+            </Text>
+            <Pressable
+              onPress={() => adjust(STEP)}
+              className="h-12 w-12 items-center justify-center rounded-2xl"
+              style={{ backgroundColor: SLEEP_TINT }}
+              accessibilityLabel="Increase goal"
+            >
+              <Plus size={20} color="#ffffff" />
+            </Pressable>
+          </View>
+          <Text variant="muted">Adults typically need 7–9 hours.</Text>
+        </View>
+
+        <View className="gap-3">
+          <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
+            Target schedule (optional)
+          </Text>
+          <View className="flex-row gap-3">
+            <TimeField icon={Moon} label="Bedtime" value={bedtime} onChange={setBedtime} tint={SLEEP_TINT} />
+            <TimeField icon={Sun} label="Wake up" value={wake} onChange={setWake} tint="#f59e0b" />
+          </View>
+        </View>
+
+        <View className="gap-2">
+          <View className="flex-row items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3.5">
+            <View className="h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: `${SLEEP_TINT}1f` }}>
+              <BellRing size={18} color={SLEEP_TINT} />
+            </View>
+            <View className="flex-1">
+              <Text className="font-sora-semibold text-foreground">Bedtime reminder</Text>
+              <Text variant="caption">Daily nudge at {toHHmm(bedtime)} to start winding down.</Text>
+            </View>
+            <Switch
+              value={reminderEnabled}
+              onValueChange={setReminderEnabled}
+              trackColor={{ true: SLEEP_TINT, false: colors[scheme].border }}
+              thumbColor="#ffffff"
+            />
+          </View>
+          {reminderEnabled && !notificationsAvailable && (
+            <Text variant="caption">Reminders need a development build — they won't fire in Expo Go on Android.</Text>
+          )}
+        </View>
+
+        <Button label="Save goal" onPress={save} size="lg" variant="accent" />
+      </View>
+    </View>
+  );
+}

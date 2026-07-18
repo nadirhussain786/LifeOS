@@ -1,0 +1,48 @@
+import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import { type LucideIcon } from 'lucide-react-native';
+import { useState } from 'react';
+import { Platform, Pressable, View } from 'react-native';
+
+import { Text } from '@/components/ui/text';
+import { formatClock, minutesOfDay } from '@/features/sleep/services/sleep-stats';
+
+type Props = {
+  icon: LucideIcon;
+  label: string;
+  /** Time-of-day carrier; only hours/minutes are read. */
+  value: Date;
+  onChange: (value: Date) => void;
+  tint: string;
+};
+
+/** Labelled time-of-day picker. iOS shows the native compact field inline;
+ * Android opens the clock dialog on tap. */
+export function TimeField({ icon: Icon, label, value, onChange, tint }: Props) {
+  const [show, setShow] = useState(false);
+
+  const handleChange = (event: DateTimePickerEvent, date?: Date) => {
+    if (Platform.OS === 'android') setShow(false);
+    if (event.type === 'set' && date) onChange(date);
+  };
+
+  return (
+    <View className="flex-1 items-center gap-2 rounded-2xl border border-border bg-card p-4">
+      <View className="h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: `${tint}1f` }}>
+        <Icon size={18} color={tint} />
+      </View>
+      <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
+        {label}
+      </Text>
+      {Platform.OS === 'ios' ? (
+        <DateTimePicker value={value} mode="time" display="compact" onChange={handleChange} />
+      ) : (
+        <Pressable onPress={() => setShow(true)} className="rounded-lg bg-muted px-3 py-1.5">
+          <Text className="font-sora-semibold text-foreground">{formatClock(minutesOfDay(value.getTime()))}</Text>
+        </Pressable>
+      )}
+      {Platform.OS === 'android' && show && (
+        <DateTimePicker value={value} mode="time" display="default" onChange={handleChange} />
+      )}
+    </View>
+  );
+}
