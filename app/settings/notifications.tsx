@@ -11,8 +11,14 @@ import { colors } from '@/constants/theme';
 import { applyDeliveryMode } from '@/features/notifications/services/delivery';
 import { formatQuietWindow } from '@/features/notifications/services/quiet-hours';
 import { useNotificationsStore, type DeliveryMode } from '@/features/notifications/store/notifications-store';
-import { CATEGORY_META, CONFIGURABLE_CATEGORIES } from '@/features/notifications/types/notification.types';
-import { hasNotificationPermission, notificationsAvailable, requestNotificationPermission } from '@/lib/notifications';
+import { CATEGORY_META, CONFIGURABLE_CATEGORIES, type NotificationCategory } from '@/features/notifications/types/notification.types';
+import {
+  cancelAllScheduled,
+  cancelScheduledInCategory,
+  hasNotificationPermission,
+  notificationsAvailable,
+  requestNotificationPermission,
+} from '@/lib/notifications';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 function SectionLabel({ children }: { children: string }) {
@@ -92,7 +98,23 @@ export default function NotificationSettingsScreen() {
       setPermissionGranted(granted);
     }
     store.setMasterEnabled(enabled);
-    resyncDigest();
+    if (enabled) {
+      resyncDigest();
+    } else {
+      // True kill switch: silence everything already queued, not just future
+      // scheduling. Reminders return as each item is re-saved once re-enabled.
+      store.setDigestNotificationId(null);
+      await cancelAllScheduled();
+    }
+  };
+
+  const handleCategoryToggle = (category: NotificationCategory, enabled: boolean) => {
+    store.setCategoryEnabled(category, enabled);
+    if (!enabled) {
+      // Clear the category's already-queued reminders immediately.
+      cancelScheduledInCategory(category);
+    }
+    if (category === 'digest') resyncDigest();
   };
 
   const disabled = !store.masterEnabled;
@@ -218,10 +240,7 @@ export default function NotificationSettingsScreen() {
                 </View>
                 <Switch
                   value={store.categories[category] ?? true}
-                  onValueChange={(v) => {
-                    store.setCategoryEnabled(category, v);
-                    if (category === 'digest') resyncDigest();
-                  }}
+                  onValueChange={(v) => handleCategoryToggle(category, v)}
                   trackColor={{ true: meta.tint, false: theme.border }}
                 />
               </View>
@@ -229,7 +248,7 @@ export default function NotificationSettingsScreen() {
           })}
         </View>
         <Text variant="caption" className="px-1">
-          Turning a category off stops new reminders. Existing ones clear the next time you edit the item.
+          Turning a category off clears its queued reminders right away. They come back as you edit each item once it&apos;s on again.
         </Text>
       </View>
     </ScrollView>

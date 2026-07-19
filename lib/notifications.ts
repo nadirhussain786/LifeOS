@@ -265,6 +265,17 @@ export async function scheduleDailyNotification(params: {
   return scheduleId;
 }
 
+/** Cancels every LifeOS-scheduled notification and clears their inbox rows —
+ * the true kill switch behind the master toggle, so turning notifications off
+ * silences already-queued reminders too, not just future scheduling. No-ops in
+ * Expo Go Android. */
+export async function cancelAllScheduled(): Promise<void> {
+  const Notifications = getNotifications();
+  if (!Notifications) return;
+  const scheduled = await Notifications.getAllScheduledNotificationsAsync().catch(() => []);
+  await Promise.all(scheduled.map((n) => cancelNotification(n.identifier)));
+}
+
 /** Subscribes to notification taps. Returns an unsubscribe fn (or a no-op in
  * Expo Go Android). The handler receives the {@link NotificationPayload}. */
 export function addNotificationResponseListener(handler: (payload: NotificationPayload) => void): () => void {
