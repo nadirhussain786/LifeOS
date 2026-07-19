@@ -3,7 +3,7 @@ import type { Session, User } from '@supabase/supabase-js';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
-import { supabase } from '@/lib/supabase';
+import { passwordResetRedirectUrl, supabase } from '@/lib/supabase';
 
 /** Result shape both sign-in and sign-up return so screens can show a friendly
  * error without importing Supabase's error types. */
@@ -31,6 +31,7 @@ type AuthState = {
   signUp: (email: string, password: string, displayName?: string) => Promise<AuthResult>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<AuthResult>;
+  updatePassword: (newPassword: string) => Promise<AuthResult>;
   continueAsGuest: () => void;
   loadProfile: () => Promise<void>;
   updateDisplayName: (displayName: string) => Promise<AuthResult>;
@@ -96,7 +97,15 @@ export const useAuthStore = create<AuthState>()(
       },
 
       resetPassword: async (email) => {
-        const { error } = await supabase.auth.resetPasswordForEmail(email.trim());
+        const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+          redirectTo: passwordResetRedirectUrl(),
+        });
+        if (error) return { ok: false, error: friendly(error.message) };
+        return { ok: true };
+      },
+
+      updatePassword: async (newPassword) => {
+        const { error } = await supabase.auth.updateUser({ password: newPassword });
         if (error) return { ok: false, error: friendly(error.message) };
         return { ok: true };
       },

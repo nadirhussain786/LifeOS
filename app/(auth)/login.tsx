@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { AuthField } from '@/features/auth/components/auth-field';
 import { useAuthStore } from '@/features/auth/services/auth-store';
+import { isSupabaseConfigured } from '@/lib/env';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -37,6 +38,12 @@ export default function LoginScreen() {
           <Text variant="heading">Welcome back</Text>
           <Text variant="muted">Sign in to sync your LifeOS across devices.</Text>
         </View>
+
+        {!isSupabaseConfigured && (
+          <Text variant="caption" style={{ color: '#f59e0b' }}>
+            Cloud sync isn&apos;t set up on this build yet. You can continue without an account — everything works offline.
+          </Text>
+        )}
 
         <View className="gap-4">
           <AuthField

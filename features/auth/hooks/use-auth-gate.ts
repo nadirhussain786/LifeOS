@@ -19,11 +19,14 @@ export function useAuthGate() {
   useEffect(() => {
     if (!isInitialized) return;
     const inAuthGroup = segments[0] === '(auth)';
+    // The reset-password screen must stay reachable even with a session — the
+    // recovery link signs the user in precisely so they can set a new password.
+    const onResetScreen = segments.includes('reset-password');
     const signedIn = !!session || isGuest;
 
     if (!signedIn && !inAuthGroup) {
       router.replace('/(auth)/login');
-    } else if (signedIn && inAuthGroup) {
+    } else if (signedIn && inAuthGroup && !onResetScreen) {
       router.replace('/(tabs)');
     }
   }, [isInitialized, session, isGuest, segments, router]);
