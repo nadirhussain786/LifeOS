@@ -1,10 +1,27 @@
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { Platform } from 'react-native';
 
+import {
+  deleteLogByNotificationId,
+  logScheduledNotification,
+} from '@/features/notifications/services/notification-log-repository';
+import { shiftDailyOutOfQuietHours, shiftTimestampOutOfQuietHours } from '@/features/notifications/services/quiet-hours';
+import { isCategoryEnabled, useNotificationsStore } from '@/features/notifications/store/notifications-store';
+import { CATEGORY_META, type NotificationCategory, type NotificationPayload } from '@/features/notifications/types/notification.types';
+import { generateId } from '@/lib/id';
+
 /** Shared local-notification primitives — every module's reminder feature
- * (Water, Habits, Tasks, Notes, Calendar Events, Journal) schedules through
- * these functions instead of each reimplementing permission handling and
- * trigger construction. */
+ * (Water, Habits, Tasks, Notes, Calendar Events, Journal, Sleep, Budget)
+ * schedules through these functions instead of each reimplementing permission
+ * handling and trigger construction.
+ *
+ * These functions are the single choke point for the app-wide notification
+ * policy: a `data` payload tagging the notification's {@link NotificationPayload}
+ * category + deep-link route flows through every call, and when present the
+ * primitives enforce the master/per-category switches and quiet hours, record
+ * the reminder in the in-app inbox (notification_log), and embed the deep-link
+ * so a tap lands on the right screen. Callers that pass no `data` get the
+ * original raw behaviour (no gating, no logging) for backwards compatibility. */
 
 /**
  * expo-notifications logs a hard ERROR the moment it's imported inside
@@ -59,44 +76,182 @@ export async function requestNotificationPermission(): Promise<boolean> {
   return requested.granted;
 }
 
+export async function hasNotificationPermission(): Promise<boolean> {
+  const Notifications = getNotifications();
+  if (!Notifications) return false;
+  const existing = await Notifications.getPermissionsAsync();
+  return existing.granted;
+}
+
 export async function cancelNotification(id: string | null | undefined): Promise<void> {
   const Notifications = getNotifications();
   if (!Notifications || !id) return;
   await Notifications.cancelScheduledNotificationAsync(id).catch(() => undefined);
+  // Keep the inbox in lock-step with what's actually queued.
+  deleteLogByNotificationId(id);
 }
 
 export async function cancelNotifications(ids: (string | null | undefined)[]): Promise<void> {
   await Promise.all(ids.map((id) => cancelNotification(id)));
 }
 
-/** One-time reminder at an exact future timestamp — task due dates, note
- * reminders, calendar events. Returns null (schedules nothing) if the time
- * has already passed or permission was denied, rather than throwing. */
-export async function scheduleOneTimeNotification(params: { title: string; body: string; date: number }): Promise<string | null> {
-  const Notifications = getNotifications();
-  if (!Notifications) return null;
+/** Guard shared by both schedulers. Skips scheduling when the master switch or
+ * the notification's category is off, AND — in "smart digest" delivery mode —
+ * when the category is a non-time-critical nudge that gets folded into the
+ * morning digest instead of pinging on its own. Time-critical categories
+ * (bypassQuietHours: due tasks, calendar events, money, bedtime) always fire.
+ * The digest itself is exempt. Untagged calls (no payload) always pass. */
+function passesCategoryGate(payload?: NotificationPayload): boolean {
+  const category = payload?.category;
+  if (!category) return true;
+  if (!isCategoryEnabled(category)) return false;
 
-  if (params.date <= Date.now()) return null;
-  const granted = await requestNotificationPermission();
-  if (!granted) return null;
-
-  return Notifications.scheduleNotificationAsync({
-    content: { title: params.title, body: params.body },
-    trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: params.date },
-  });
+  const { deliveryMode } = useNotificationsStore.getState();
+  if (deliveryMode === 'digest' && category !== 'digest' && !CATEGORY_META[category].bypassQuietHours) {
+    return false;
+  }
+  return true;
 }
 
-/** Daily-repeating reminder at a fixed hour/minute — habits and the
- * journal's "write today" nudge. */
-export async function scheduleDailyNotification(params: { title: string; body: string; hour: number; minute: number }): Promise<string | null> {
+function nextDailyOccurrence(hour: number, minute: number): number {
+  const next = new Date();
+  next.setHours(hour, minute, 0, 0);
+  if (next.getTime() <= Date.now()) next.setDate(next.getDate() + 1);
+  return next.getTime();
+}
+
+/** One-time reminder at an exact future timestamp — task due dates, note
+ * reminders, calendar events. Returns null (schedules nothing) if the time
+ * has already passed, the category is switched off, or permission was denied,
+ * rather than throwing. */
+export async function scheduleOneTimeNotification(params: {
+  title: string;
+  body: string;
+  date: number;
+  data?: NotificationPayload;
+}): Promise<string | null> {
   const Notifications = getNotifications();
   if (!Notifications) return null;
+  if (!passesCategoryGate(params.data)) return null;
+
+  const category = params.data?.category;
+  let triggerAt = params.date;
+  if (category && !CATEGORY_META[category].bypassQuietHours) {
+    triggerAt = shiftTimestampOutOfQuietHours(triggerAt);
+  }
+  if (triggerAt <= Date.now()) return null;
 
   const granted = await requestNotificationPermission();
   if (!granted) return null;
 
-  return Notifications.scheduleNotificationAsync({
-    content: { title: params.title, body: params.body },
-    trigger: { type: Notifications.SchedulableTriggerInputTypes.DAILY, hour: params.hour, minute: params.minute },
+  // Generate the inbox row id up front so it can ride inside the payload — a
+  // tap then marks exactly this row read. The row is written after scheduling
+  // succeeds, once the OS notification id is known.
+  const logId = params.data?.category ? generateId() : undefined;
+  const data = params.data ? { ...params.data, ...(logId ? { logId } : {}) } : {};
+
+  const scheduleId = await Notifications.scheduleNotificationAsync({
+    content: { title: params.title, body: params.body, data },
+    trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: triggerAt },
   });
+
+  if (params.data?.category) {
+    logScheduledNotification({
+      id: logId,
+      notificationId: scheduleId,
+      category: params.data.category,
+      title: params.title,
+      body: params.body,
+      route: params.data.route,
+      params: params.data.params,
+      scheduledAt: triggerAt,
+      repeats: 'none',
+    });
+  }
+  return scheduleId;
+}
+
+/** Daily-repeating reminder at a fixed hour/minute — habits, hydration, the
+ * journal nudge, bedtime. Shifts out of quiet hours unless the category is
+ * exempt. */
+export async function scheduleDailyNotification(params: {
+  title: string;
+  body: string;
+  hour: number;
+  minute: number;
+  data?: NotificationPayload;
+}): Promise<string | null> {
+  const Notifications = getNotifications();
+  if (!Notifications) return null;
+  if (!passesCategoryGate(params.data)) return null;
+
+  const category = params.data?.category;
+  let { hour, minute } = params;
+  if (category && !CATEGORY_META[category].bypassQuietHours) {
+    ({ hour, minute } = shiftDailyOutOfQuietHours(hour, minute));
+  }
+
+  const granted = await requestNotificationPermission();
+  if (!granted) return null;
+
+  const scheduledAt = nextDailyOccurrence(hour, minute);
+  const logId = params.data?.category ? generateId() : undefined;
+  const data = params.data ? { ...params.data, ...(logId ? { logId } : {}) } : {};
+
+  const scheduleId = await Notifications.scheduleNotificationAsync({
+    content: { title: params.title, body: params.body, data },
+    trigger: { type: Notifications.SchedulableTriggerInputTypes.DAILY, hour, minute },
+  });
+
+  if (params.data?.category) {
+    logScheduledNotification({
+      id: logId,
+      notificationId: scheduleId,
+      category: params.data.category,
+      title: params.title,
+      body: params.body,
+      route: params.data.route,
+      params: params.data.params,
+      scheduledAt,
+      repeats: 'daily',
+    });
+  }
+  return scheduleId;
+}
+
+/** Subscribes to notification taps. Returns an unsubscribe fn (or a no-op in
+ * Expo Go Android). The handler receives the {@link NotificationPayload}. */
+export function addNotificationResponseListener(handler: (payload: NotificationPayload) => void): () => void {
+  const Notifications = getNotifications();
+  if (!Notifications) return () => undefined;
+  const sub = Notifications.addNotificationResponseReceivedListener((response) => {
+    handler((response.notification.request.content.data ?? {}) as NotificationPayload);
+  });
+  return () => sub.remove();
+}
+
+/** Cancels every OS-queued notification belonging to a category (matched via
+ * its data payload) and clears their inbox rows. Used when a category is
+ * switched off, or when switching to digest delivery folds a nudge category
+ * into the morning summary, so already-queued reminders stop firing without
+ * waiting for each owning item to re-sync. No-ops in Expo Go Android. */
+export async function cancelScheduledInCategory(category: NotificationCategory): Promise<void> {
+  const Notifications = getNotifications();
+  if (!Notifications) return;
+  const scheduled = await Notifications.getAllScheduledNotificationsAsync().catch(() => []);
+  await Promise.all(
+    scheduled
+      .filter((n) => (n.content.data as NotificationPayload | undefined)?.category === category)
+      .map((n) => cancelNotification(n.identifier)),
+  );
+}
+
+/** The tap that cold-started the app, if any — checked once on mount so a
+ * notification opened from a killed state still deep-links. */
+export async function getLastNotificationResponse(): Promise<NotificationPayload | null> {
+  const Notifications = getNotifications();
+  if (!Notifications) return null;
+  const response = await Notifications.getLastNotificationResponseAsync();
+  if (!response) return null;
+  return (response.notification.request.content.data ?? {}) as NotificationPayload;
 }

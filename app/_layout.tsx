@@ -17,6 +17,9 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { DevErrorBanner } from '@/components/dev/dev-error-banner';
 import { MiniPlayerBar } from '@/features/music/components/mini-player-bar';
+import { useNotificationNavigation } from '@/features/notifications/hooks/use-notification-navigation';
+import { applyDeliveryMode } from '@/features/notifications/services/delivery';
+import { syncTodayWidget } from '@/features/widgets/services/widget-data';
 import { useAuthStore } from '@/features/auth/services/auth-store';
 import { configureNotificationHandler } from '@/lib/notifications';
 import { queryClient } from '@/lib/query-client';
@@ -27,6 +30,13 @@ SplashScreen.preventAutoHideAsync();
 // while the app is foregrounded — water reminders should still show even if
 // the app happens to be open at the time.
 configureNotificationHandler();
+
+/** Lives inside the router + query provider so it can deep-link on notification
+ * taps and mark inbox rows read. Renders nothing. */
+function NotificationNavigationBridge() {
+  useNotificationNavigation();
+  return null;
+}
 
 export default function RootLayout() {
   const init = useAuthStore((state) => state.init);
@@ -44,6 +54,12 @@ export default function RootLayout() {
 
   useEffect(() => {
     init();
+    // Reconcile scheduled reminders with the delivery mode and refresh the
+    // morning digest with today's counts on every launch — local notifications
+    // carry fixed text, so this is how it stays current.
+    applyDeliveryMode();
+    // Refresh the home-screen widget's snapshot with today's counts (Android).
+    syncTodayWidget();
   }, [init]);
 
   useEffect(() => {
@@ -85,6 +101,8 @@ export default function RootLayout() {
               <Stack.Screen name="gallery/album/[id]" />
               <Stack.Screen name="gallery/photo/[id]" />
               <Stack.Screen name="settings/index" options={{ headerShown: true, title: 'Settings' }} />
+              <Stack.Screen name="settings/notifications" options={{ headerShown: true, title: 'Notifications' }} />
+              <Stack.Screen name="notifications" options={{ headerShown: true, title: 'Notifications' }} />
               <Stack.Screen name="task/new" options={{ presentation: 'modal' }} />
               <Stack.Screen name="note/new" options={{ presentation: 'modal' }} />
               <Stack.Screen name="habit/new" options={{ presentation: 'modal' }} />
@@ -100,6 +118,7 @@ export default function RootLayout() {
               <Stack.Screen name="budget/debts/new" options={{ presentation: 'modal' }} />
               <Stack.Screen name="gallery/album/new" options={{ presentation: 'modal' }} />
             </Stack>
+            <NotificationNavigationBridge />
             <MiniPlayerBar />
             <DevErrorBanner />
           </BottomSheetModalProvider>

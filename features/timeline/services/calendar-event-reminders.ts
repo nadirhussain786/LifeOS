@@ -1,3 +1,5 @@
+import { format } from 'date-fns';
+
 import { setCalendarEventReminderNotificationId } from '@/features/timeline/services/calendar-events-repository';
 import { cancelNotification, scheduleOneTimeNotification } from '@/lib/notifications';
 import type { CalendarEvent } from '@/features/timeline/types/timeline.types';
@@ -10,6 +12,7 @@ export async function scheduleCalendarEventReminder(event: CalendarEvent): Promi
     title: event.title,
     body: event.reminderMinutesBefore === 0 ? 'Starting now.' : `Starting in ${event.reminderMinutesBefore} minutes.`,
     date: triggerAt,
+    data: { category: 'calendar', route: '/timeline/[date]', params: { date: format(event.startAt, 'yyyy-MM-dd') } },
   });
   setCalendarEventReminderNotificationId(event.id, id);
 }

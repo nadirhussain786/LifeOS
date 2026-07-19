@@ -28,6 +28,7 @@ export async function syncHabitReminder(habit: Habit): Promise<void> {
     body: "Time to check in on this habit.",
     hour: parsed.hour,
     minute: parsed.minute,
+    data: { category: 'habits', route: '/habits' },
   });
   setHabitReminderNotificationId(habit.id, id);
 }

@@ -596,6 +596,40 @@ export const galleryPhotos = sqliteTable('gallery_photos', {
 });
 
 /**
+ * Central log of every local notification LifeOS schedules — the data behind
+ * the in-app Notification Inbox. Each module still owns its own reminder
+ * scheduling; lib/notifications.ts writes a row here on every successful
+ * schedule and clears it on cancel, so the inbox never drifts from what's
+ * actually queued with the OS. Delivery status is derived, not stored: a row
+ * is "scheduled" while scheduledAt is in the future and "delivered" once it
+ * passes (repeating reminders show their next fire time). readAt/canceledAt
+ * gate the read state and cancellation.
+ */
+export const notificationLog = sqliteTable('notification_log', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull(),
+  /** The id expo-notifications returned for the scheduled notification, kept
+   * so the inbox can cancel it. Null once delivered or if scheduling no-oped
+   * (permission denied / Expo Go Android). */
+  notificationId: text('notification_id'),
+  category: text('category').notNull(),
+  title: text('title').notNull(),
+  body: text('body').notNull().default(''),
+  /** Deep-link path the notification tap navigates to (e.g. /task). */
+  route: text('route'),
+  /** JSON-encoded route params (e.g. {"id":"abc"}). */
+  params: text('params'),
+  /** When it fires; for repeats='daily' this is the next occurrence. */
+  scheduledAt: integer('scheduled_at').notNull(),
+  repeats: text('repeats', { enum: ['none', 'daily'] })
+    .notNull()
+    .default('none'),
+  readAt: integer('read_at'),
+  canceledAt: integer('canceled_at'),
+  createdAt: integer('created_at').notNull(),
+});
+
+/**
  * Bootstrap DDL, run once at startup — see database/client.ts for why this
  * is hand-written rather than generated via drizzle-kit migrations.
  *
@@ -1091,6 +1125,22 @@ export const TABLE_BOOTSTRAP_SQL = `
     sync_status TEXT NOT NULL DEFAULT 'pending',
     server_updated_at INTEGER
   );
+
+  CREATE TABLE IF NOT EXISTS notification_log (
+    id TEXT PRIMARY KEY NOT NULL,
+    user_id TEXT NOT NULL,
+    notification_id TEXT,
+    category TEXT NOT NULL,
+    title TEXT NOT NULL,
+    body TEXT NOT NULL DEFAULT '',
+    route TEXT,
+    params TEXT,
+    scheduled_at INTEGER NOT NULL,
+    repeats TEXT NOT NULL DEFAULT 'none',
+    read_at INTEGER,
+    canceled_at INTEGER,
+    created_at INTEGER NOT NULL
+  );
 `;
 
 /** Run after ADDITIVE_COLUMNS — see TABLE_BOOTSTRAP_SQL's comment for why. */
@@ -1134,6 +1184,7 @@ export const INDEX_BOOTSTRAP_SQL = `
   CREATE INDEX IF NOT EXISTS idx_gallery_albums_user ON gallery_albums(user_id);
   CREATE INDEX IF NOT EXISTS idx_gallery_photos_album ON gallery_photos(user_id, album_id, taken_at);
   CREATE INDEX IF NOT EXISTS idx_gallery_photos_favorite ON gallery_photos(user_id, is_favorite);
+  CREATE INDEX IF NOT EXISTS idx_notification_log_user ON notification_log(user_id, scheduled_at);
 `;
 
 /**

@@ -37,7 +37,12 @@ export async function syncDebtReminder(debt: Debt): Promise<void> {
       ? `${amount} due ${dueLabel} — time to pay it back.`
       : `${amount} due ${dueLabel} — time to collect.`;
 
-  const id = await scheduleOneTimeNotification({ title, body: body.trim(), date: fireAt });
+  const id = await scheduleOneTimeNotification({
+    title,
+    body: body.trim(),
+    date: fireAt,
+    data: { category: 'budget', route: '/budget/debts/[id]', params: { id: debt.id } },
+  });
   setDebtReminderNotificationId(debt.id, id);
 }
 
