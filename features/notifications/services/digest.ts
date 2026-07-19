@@ -2,14 +2,24 @@ import { isToday } from 'date-fns';
 
 import { listDebts } from '@/features/budget/services/debts-repository';
 import { listHabitsWithToday } from '@/features/habits/services/habits-repository';
+import { getEntryByDate } from '@/features/journal/services/journal-repository';
 import { useNotificationsStore } from '@/features/notifications/store/notifications-store';
 import { listTasks } from '@/features/tasks/services/tasks-repository';
+import { getDailyTotal } from '@/features/water-intake/services/water-intake-repository';
+import { useWaterSettingsStore } from '@/features/water-intake/store/water-settings-store';
 import { cancelNotification, scheduleDailyNotification } from '@/lib/notifications';
+import { toDateKey } from '@/lib/date';
 
 export type DigestSummary = {
   tasksDueToday: number;
   habitsRemaining: number;
   moneyDue: number;
+  /** True when today's journal entry hasn't been written — its individual
+   * nudge is suppressed in digest mode, so the digest carries the reminder. */
+  journalPending: boolean;
+  /** True when today's water intake is still under goal — likewise folded in
+   * since hydration nudges are suppressed in digest mode. */
+  waterBehind: boolean;
 };
 
 /**
@@ -22,6 +32,8 @@ export function buildDigestSummary(): DigestSummary {
   let tasksDueToday = 0;
   let habitsRemaining = 0;
   let moneyDue = 0;
+  let journalPending = false;
+  let waterBehind = false;
 
   try {
     tasksDueToday = listTasks('active', 'due-date').filter((t) => t.dueDate != null && isToday(t.dueDate)).length;
@@ -38,8 +50,18 @@ export function buildDigestSummary(): DigestSummary {
   } catch {
     /* ignore */
   }
+  try {
+    journalPending = getEntryByDate(toDateKey(new Date())) == null;
+  } catch {
+    /* ignore */
+  }
+  try {
+    waterBehind = getDailyTotal(toDateKey(new Date())) < (useWaterSettingsStore.getState().goalMl ?? 2000);
+  } catch {
+    /* ignore */
+  }
 
-  return { tasksDueToday, habitsRemaining, moneyDue };
+  return { tasksDueToday, habitsRemaining, moneyDue, journalPending, waterBehind };
 }
 
 function plural(n: number, word: string): string {
@@ -51,6 +73,8 @@ export function composeDigest(summary: DigestSummary): { title: string; body: st
   if (summary.tasksDueToday) parts.push(plural(summary.tasksDueToday, 'task') + ' due');
   if (summary.habitsRemaining) parts.push(plural(summary.habitsRemaining, 'habit') + ' to go');
   if (summary.moneyDue) parts.push(plural(summary.moneyDue, 'money reminder'));
+  if (summary.journalPending) parts.push('journal to write');
+  if (summary.waterBehind) parts.push('water to drink');
 
   const title = 'Good morning ☀️';
   const body =

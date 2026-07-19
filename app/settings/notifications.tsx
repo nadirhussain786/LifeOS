@@ -11,7 +11,7 @@ import { colors } from '@/constants/theme';
 import { applyDeliveryMode } from '@/features/notifications/services/delivery';
 import { formatQuietWindow } from '@/features/notifications/services/quiet-hours';
 import { useNotificationsStore, type DeliveryMode } from '@/features/notifications/store/notifications-store';
-import { CATEGORY_META, CATEGORY_ORDER } from '@/features/notifications/types/notification.types';
+import { CATEGORY_META, CONFIGURABLE_CATEGORIES } from '@/features/notifications/types/notification.types';
 import { hasNotificationPermission, notificationsAvailable, requestNotificationPermission } from '@/lib/notifications';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -201,7 +201,7 @@ export default function NotificationSettingsScreen() {
       <View className="gap-2" style={{ opacity: disabled ? 0.5 : 1 }} pointerEvents={disabled ? 'none' : 'auto'}>
         <SectionLabel>What you hear about</SectionLabel>
         <View className="rounded-2xl border border-border bg-card px-4">
-          {CATEGORY_ORDER.map((category, index) => {
+          {CONFIGURABLE_CATEGORIES.map((category, index) => {
             const meta = CATEGORY_META[category];
             const Icon = meta.icon;
             return (

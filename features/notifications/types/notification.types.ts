@@ -154,6 +154,14 @@ export const CATEGORY_ORDER: NotificationCategory[] = [
   'streak',
 ];
 
+/** Categories that actually schedule something today and therefore get a
+ * user-facing switch in Notification Settings. `goals`, `study`, and `streak`
+ * exist in the model for planned features but have no scheduler yet, so showing
+ * their toggles would be misleading no-ops — they're excluded until built. */
+export const CONFIGURABLE_CATEGORIES: NotificationCategory[] = CATEGORY_ORDER.filter(
+  (category) => category !== 'goals' && category !== 'study' && category !== 'streak',
+);
+
 /** Fallback icon for any category not found in the map (defensive). */
 export const FALLBACK_NOTIFICATION_ICON: LucideIcon = BellRing;
 
