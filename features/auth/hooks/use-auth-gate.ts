@@ -1,0 +1,30 @@
+import { useRouter, useSegments } from 'expo-router';
+import { useEffect } from 'react';
+
+import { useAuthStore } from '@/features/auth/services/auth-store';
+
+/**
+ * Redirects between the auth flow and the app based on session state. Signed-in
+ * users and explicit guests get the app; everyone else is sent to the login
+ * screen. Waits for `isInitialized` so the first frame doesn't flash the wrong
+ * screen. Mounted once from the root layout.
+ */
+export function useAuthGate() {
+  const segments = useSegments();
+  const router = useRouter();
+  const isInitialized = useAuthStore((s) => s.isInitialized);
+  const session = useAuthStore((s) => s.session);
+  const isGuest = useAuthStore((s) => s.isGuest);
+
+  useEffect(() => {
+    if (!isInitialized) return;
+    const inAuthGroup = segments[0] === '(auth)';
+    const signedIn = !!session || isGuest;
+
+    if (!signedIn && !inAuthGroup) {
+      router.replace('/(auth)/login');
+    } else if (signedIn && inAuthGroup) {
+      router.replace('/(tabs)');
+    }
+  }, [isInitialized, session, isGuest, segments, router]);
+}

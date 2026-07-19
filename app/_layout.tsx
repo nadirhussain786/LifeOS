@@ -21,6 +21,7 @@ import { useNotificationNavigation } from '@/features/notifications/hooks/use-no
 import { applyDeliveryMode } from '@/features/notifications/services/delivery';
 import { syncTodayWidget } from '@/features/widgets/services/widget-data';
 import { useAuthStore } from '@/features/auth/services/auth-store';
+import { useAuthGate } from '@/features/auth/hooks/use-auth-gate';
 import { configureAndroidChannels, configureNotificationHandler } from '@/lib/notifications';
 import { queryClient } from '@/lib/query-client';
 
@@ -41,8 +42,16 @@ function NotificationNavigationBridge() {
   return null;
 }
 
+/** Redirects between the auth flow and the app. Must live inside the navigation
+ * tree (uses router/segments). Renders nothing. */
+function AuthGate() {
+  useAuthGate();
+  return null;
+}
+
 export default function RootLayout() {
   const init = useAuthStore((state) => state.init);
+  const isInitialized = useAuthStore((state) => state.isInitialized);
   const [fontsLoaded] = useFonts({
     Sora_400Regular,
     Sora_500Medium,
@@ -66,10 +75,12 @@ export default function RootLayout() {
   }, [init]);
 
   useEffect(() => {
-    if (fontsLoaded) SplashScreen.hideAsync();
-  }, [fontsLoaded]);
+    if (fontsLoaded && isInitialized) SplashScreen.hideAsync();
+  }, [fontsLoaded, isInitialized]);
 
-  if (!fontsLoaded) return null;
+  // Wait for both fonts and the initial session check so the auth gate can
+  // route to the right screen without a flash of the wrong one.
+  if (!fontsLoaded || !isInitialized) return null;
 
   return (
     <GestureHandlerRootView className="flex-1">
@@ -121,6 +132,7 @@ export default function RootLayout() {
               <Stack.Screen name="budget/debts/new" options={{ presentation: 'modal' }} />
               <Stack.Screen name="gallery/album/new" options={{ presentation: 'modal' }} />
             </Stack>
+            <AuthGate />
             <NotificationNavigationBridge />
             <MiniPlayerBar />
             <DevErrorBanner />
