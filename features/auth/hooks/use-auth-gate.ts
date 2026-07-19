@@ -22,11 +22,14 @@ export function useAuthGate() {
     // The reset-password screen must stay reachable even with a session — the
     // recovery link signs the user in precisely so they can set a new password.
     const onResetScreen = segments.includes('reset-password');
-    const signedIn = !!session || isGuest;
 
-    if (!signedIn && !inAuthGroup) {
+    if (!session && !isGuest && !inAuthGroup) {
+      // Truly unauthenticated and outside the auth flow → send to login.
       router.replace('/(auth)/login');
-    } else if (signedIn && inAuthGroup && !onResetScreen) {
+    } else if (session && inAuthGroup && !onResetScreen) {
+      // Only a REAL session gets bounced out of the auth flow. Guests are left
+      // alone so they can open login/sign-up from Settings to upgrade to an
+      // account (they're "in the app" via a persisted guest flag, not a session).
       router.replace('/(tabs)');
     }
   }, [isInitialized, session, isGuest, segments, router]);

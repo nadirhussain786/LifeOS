@@ -3,7 +3,16 @@ import type { Session, User } from '@supabase/supabase-js';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
+import { isSupabaseConfigured } from '@/lib/env';
 import { passwordResetRedirectUrl, supabase } from '@/lib/supabase';
+
+/** Returned by auth actions when Supabase creds aren't present in the build —
+ * avoids firing a doomed request at the placeholder host (which surfaces as a
+ * confusing "Network request failed"). */
+const NOT_CONFIGURED = {
+  ok: false as const,
+  error: 'Cloud sync isn’t set up on this build. Add your Supabase keys to .env, then fully restart with `npx expo start -c`.',
+};
 
 /** Result shape both sign-in and sign-up return so screens can show a friendly
  * error without importing Supabase's error types. */
@@ -59,10 +68,26 @@ export const useAuthStore = create<AuthState>()(
       isGuest: false,
 
       init: () => {
-        supabase.auth.getSession().then(({ data }) => {
-          set({ session: data.session, user: data.session?.user ?? null, isInitialized: true });
-          if (data.session) void get().loadProfile();
-        });
+        // isInitialized MUST flip true no matter what — otherwise the root
+        // layout / index screen stay on the loading state forever. getSession()
+        // can reject (e.g. a token refresh hits the network and fails), so
+        // guard with catch + finally rather than only handling the happy path.
+        supabase.auth
+          .getSession()
+          .then(({ data }) => {
+            set({ session: data.session, user: data.session?.user ?? null });
+            if (data.session) void get().loadProfile();
+          })
+          .catch(() => {
+            // Offline / unconfigured — proceed with no session (guest-capable).
+          })
+          .finally(() => set({ isInitialized: true }));
+
+        // Safety net: never let the app hang on the loading state if getSession
+        // somehow never settles (e.g. a stalled network layer).
+        setTimeout(() => {
+          if (!get().isInitialized) set({ isInitialized: true });
+        }, 4000);
 
         supabase.auth.onAuthStateChange((_event, session) => {
           set({ session, user: session?.user ?? null, isInitialized: true });
@@ -74,6 +99,7 @@ export const useAuthStore = create<AuthState>()(
       },
 
       signIn: async (email, password) => {
+        if (!isSupabaseConfigured) return NOT_CONFIGURED;
         const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
         if (error) return { ok: false, error: friendly(error.message) };
         set({ isGuest: false });
@@ -81,6 +107,7 @@ export const useAuthStore = create<AuthState>()(
       },
 
       signUp: async (email, password, displayName) => {
+        if (!isSupabaseConfigured) return NOT_CONFIGURED;
         const { error } = await supabase.auth.signUp({
           email: email.trim(),
           password,
@@ -97,6 +124,7 @@ export const useAuthStore = create<AuthState>()(
       },
 
       resetPassword: async (email) => {
+        if (!isSupabaseConfigured) return NOT_CONFIGURED;
         const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
           redirectTo: passwordResetRedirectUrl(),
         });
@@ -105,6 +133,7 @@ export const useAuthStore = create<AuthState>()(
       },
 
       updatePassword: async (newPassword) => {
+        if (!isSupabaseConfigured) return NOT_CONFIGURED;
         const { error } = await supabase.auth.updateUser({ password: newPassword });
         if (error) return { ok: false, error: friendly(error.message) };
         return { ok: true };
