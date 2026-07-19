@@ -66,6 +66,52 @@ export function configureNotificationHandler(): void {
   });
 }
 
+/** Android notification channels. Android groups notifications by channel and
+ * lets the user tune importance/sound per channel in system settings, so we
+ * split by urgency: time-critical reminders get a heads-up (HIGH) channel,
+ * everyday nudges a quieter DEFAULT one, and the morning digest its own. iOS
+ * ignores channels. */
+const CHANNELS = {
+  timeSensitive: 'lifeos-time-sensitive',
+  reminders: 'lifeos-reminders',
+  digest: 'lifeos-digest',
+} as const;
+
+/** Maps a category to its channel: the digest to its own, time-critical
+ * categories (bypassQuietHours) to the heads-up channel, everything else to the
+ * default reminders channel. Untagged calls use the default channel. */
+function channelForCategory(category?: NotificationCategory): string {
+  if (!category) return CHANNELS.reminders;
+  if (category === 'digest') return CHANNELS.digest;
+  return CATEGORY_META[category].bypassQuietHours ? CHANNELS.timeSensitive : CHANNELS.reminders;
+}
+
+/** Creates the Android notification channels. Safe to call every launch
+ * (idempotent) and on any platform (no-ops off Android / in Expo Go Android). */
+export async function configureAndroidChannels(): Promise<void> {
+  if (Platform.OS !== 'android') return;
+  const Notifications = getNotifications();
+  if (!Notifications) return;
+
+  const accent = '#6366f1';
+  await Notifications.setNotificationChannelAsync(CHANNELS.timeSensitive, {
+    name: 'Time-sensitive',
+    importance: Notifications.AndroidImportance.HIGH,
+    vibrationPattern: [0, 250, 250, 250],
+    lightColor: accent,
+  });
+  await Notifications.setNotificationChannelAsync(CHANNELS.reminders, {
+    name: 'Reminders & nudges',
+    importance: Notifications.AndroidImportance.DEFAULT,
+    lightColor: accent,
+  });
+  await Notifications.setNotificationChannelAsync(CHANNELS.digest, {
+    name: 'Daily digest',
+    importance: Notifications.AndroidImportance.DEFAULT,
+    lightColor: accent,
+  });
+}
+
 export async function requestNotificationPermission(): Promise<boolean> {
   const Notifications = getNotifications();
   if (!Notifications) return false;
@@ -152,7 +198,7 @@ export async function scheduleOneTimeNotification(params: {
 
   const scheduleId = await Notifications.scheduleNotificationAsync({
     content: { title: params.title, body: params.body, data },
-    trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: triggerAt },
+    trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: triggerAt, channelId: channelForCategory(category) },
   });
 
   if (params.data?.category) {
@@ -200,7 +246,7 @@ export async function scheduleDailyNotification(params: {
 
   const scheduleId = await Notifications.scheduleNotificationAsync({
     content: { title: params.title, body: params.body, data },
-    trigger: { type: Notifications.SchedulableTriggerInputTypes.DAILY, hour, minute },
+    trigger: { type: Notifications.SchedulableTriggerInputTypes.DAILY, hour, minute, channelId: channelForCategory(category) },
   });
 
   if (params.data?.category) {

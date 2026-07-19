@@ -21,7 +21,7 @@ import { useNotificationNavigation } from '@/features/notifications/hooks/use-no
 import { applyDeliveryMode } from '@/features/notifications/services/delivery';
 import { syncTodayWidget } from '@/features/widgets/services/widget-data';
 import { useAuthStore } from '@/features/auth/services/auth-store';
-import { configureNotificationHandler } from '@/lib/notifications';
+import { configureAndroidChannels, configureNotificationHandler } from '@/lib/notifications';
 import { queryClient } from '@/lib/query-client';
 
 SplashScreen.preventAutoHideAsync();
@@ -30,6 +30,9 @@ SplashScreen.preventAutoHideAsync();
 // while the app is foregrounded — water reminders should still show even if
 // the app happens to be open at the time.
 configureNotificationHandler();
+// Create the Android notification channels (heads-up for time-critical, quiet
+// for nudges). No-ops off Android / in Expo Go Android.
+configureAndroidChannels();
 
 /** Lives inside the router + query provider so it can deep-link on notification
  * taps and mark inbox rows read. Renders nothing. */

@@ -61,7 +61,12 @@
           "isAndroidBackgroundLocationEnabled": false
         }
       ],
-      "expo-notifications",
+      [
+        "expo-notifications",
+        {
+          "color": "#6366f1"
+        }
+      ],
       "expo-video",
       [
         "react-native-android-widget",
