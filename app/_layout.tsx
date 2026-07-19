@@ -22,6 +22,7 @@ import { applyDeliveryMode } from '@/features/notifications/services/delivery';
 import { syncTodayWidget } from '@/features/widgets/services/widget-data';
 import { useAuthStore } from '@/features/auth/services/auth-store';
 import { useAuthGate } from '@/features/auth/hooks/use-auth-gate';
+import { useSyncTrigger } from '@/features/sync/hooks/use-sync';
 import { configureAndroidChannels, configureNotificationHandler } from '@/lib/notifications';
 import { queryClient } from '@/lib/query-client';
 
@@ -46,6 +47,12 @@ function NotificationNavigationBridge() {
  * tree (uses router/segments). Renders nothing. */
 function AuthGate() {
   useAuthGate();
+  return null;
+}
+
+/** Drives automatic local↔cloud sync while signed in. Renders nothing. */
+function SyncTrigger() {
+  useSyncTrigger();
   return null;
 }
 
@@ -116,6 +123,7 @@ export default function RootLayout() {
               <Stack.Screen name="gallery/photo/[id]" />
               <Stack.Screen name="settings/index" options={{ headerShown: true, title: 'Settings' }} />
               <Stack.Screen name="settings/notifications" options={{ headerShown: true, title: 'Notifications' }} />
+              <Stack.Screen name="settings/sync" options={{ headerShown: true, title: 'Sync & Account' }} />
               <Stack.Screen name="notifications" options={{ headerShown: true, title: 'Notifications' }} />
               <Stack.Screen name="task/new" options={{ presentation: 'modal' }} />
               <Stack.Screen name="note/new" options={{ presentation: 'modal' }} />
@@ -133,6 +141,7 @@ export default function RootLayout() {
               <Stack.Screen name="gallery/album/new" options={{ presentation: 'modal' }} />
             </Stack>
             <AuthGate />
+            <SyncTrigger />
             <NotificationNavigationBridge />
             <MiniPlayerBar />
             <DevErrorBanner />

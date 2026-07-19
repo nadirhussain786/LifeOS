@@ -20,14 +20,26 @@ verified with `tsc` + `expo config` + `expo export` (build-level only — see ca
 - [x] True kill switch (master/category OFF cancels queued reminders)
 - [x] Per-module reminder screens reconciled with central switches (CategoryOffNotice)
 - [x] `eas.json` + bundle identifiers for dev builds
+- [x] **Auth**: email/password sign-up/in/out + reset, guest mode, auth gate, profile
+- [x] **Sync engine (v1)**: offline-first local↔Supabase, last-write-wins, `'local'↔uid` translation (guest→account migration automatic), per-module allow-sync toggles, auto-sync on launch/foreground + manual "Sync now"
+- [x] **Sync & Account** settings screen (profile, sync status, module toggles, sign out)
+- [x] **Supabase server schema** — `supabase/migrations/0001_init.sql` (profiles + trigger + 15 v1 tables + RLS)
 
 ---
 
 ## 🔒 Needs you (blocked on account / asset / decision)
-- [ ] **Device validation** — run `eas login && eas init && eas build -p android --profile development`, install the APK, and confirm reminders fire + widget renders. *This is the #1 next step.*
+- [ ] **Supabase project** — create one, run `supabase/migrations/0001_init.sql` in the SQL editor, and put the real URL + anon key in `.env` (currently placeholders). Required before auth or sync can run.
+- [ ] **Device validation** — run `eas login && eas init && eas build -p android --profile development`, install the APK, and confirm reminders fire + widget renders + sign-in/sync works. *#1 next step.*
 - [ ] **Notification status-bar icon** — provide a 96×96 white-on-transparent PNG in `assets/`; then wire `"icon"` into the `expo-notifications` plugin.
 - [ ] **Real bundle identifier** — replace the `com.lifeos.app` placeholder before any store submission.
 - [ ] **iOS widget prerequisite** — a paid Apple Developer account (to build/test on a device).
+
+## 🔁 Sync v2 (deeper coverage)
+- [ ] Sync child/log tables (habit logs & skips, note tags/links, goal milestones & progress logs, journal reflections, study sessions, water logs, entry links) — need `updated_at` + a change strategy for append/join tables.
+- [ ] Sync per-module settings rows (sleep/study/budget settings — single-row, no id).
+- [ ] Media sync via Supabase Storage (gallery photos/videos, note & journal attachments, music files).
+- [ ] Account switch handling (clear-and-pull when a different uid signs in on a device).
+- [ ] Conflict surfacing (currently silent last-write-wins).
 
 ---
 

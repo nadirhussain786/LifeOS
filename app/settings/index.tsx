@@ -167,7 +167,7 @@ export default function SettingsScreen() {
         <View className="rounded-2xl border border-border bg-card px-4">
           <SettingsRow icon={Info} label="Version" value={Constants.expoConfig?.version ?? '1.0.0'} isFirst />
           <SettingsRow icon={Database} label="Storage" value="On this device" />
-          <SettingsRow icon={ShieldCheck} label="Sync & account" value="Coming soon" />
+          <SettingsRow icon={ShieldCheck} label="Sync & account" subtitle="Backup, sync, and sign in" onPress={() => router.push('/settings/sync')} />
         </View>
       </View>
     </ScrollView>
