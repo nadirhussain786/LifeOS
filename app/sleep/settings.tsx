@@ -12,6 +12,7 @@ import { TimeField } from '@/features/sleep/components/time-field';
 import { formatDuration } from '@/features/sleep/services/sleep-stats';
 import { useSleepMutations } from '@/features/sleep/hooks/use-sleep-mutations';
 import { useSleepSettings } from '@/features/sleep/hooks/use-sleep';
+import { CategoryOffNotice } from '@/features/notifications/components/category-off-notice';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { notificationsAvailable } from '@/lib/notifications';
 
@@ -109,6 +110,7 @@ export default function SleepSettingsScreen() {
         </View>
 
         <View className="gap-2">
+          <CategoryOffNotice category="sleep" />
           <View className="flex-row items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3.5">
             <View className="h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: `${SLEEP_TINT}1f` }}>
               <BellRing size={18} color={SLEEP_TINT} />

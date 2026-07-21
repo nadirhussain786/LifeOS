@@ -14,5 +14,6 @@ export async function scheduleJournalReminder(settings: JournalReminderSettings)
     body: "Take a minute to write today's entry.",
     hour: settings.hour,
     minute: settings.minute,
+    data: { category: 'journal', route: '/journal' },
   });
 }

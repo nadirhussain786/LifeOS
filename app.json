@@ -15,6 +15,7 @@
     },
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.lifeos.app",
       "infoPlist": {
         "UIBackgroundModes": [
           "audio"
@@ -22,6 +23,7 @@
       }
     },
     "android": {
+      "package": "com.lifeos.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -59,8 +61,30 @@
           "isAndroidBackgroundLocationEnabled": false
         }
       ],
-      "expo-notifications",
-      "expo-video"
+      [
+        "expo-notifications",
+        {
+          "color": "#6366f1"
+        }
+      ],
+      "expo-video",
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "LifeOSToday",
+              "label": "LifeOS · Today",
+              "minWidth": "180dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 3,
+              "targetCellHeight": 2,
+              "description": "Tasks due, habits left, and water at a glance",
+              "updatePeriodMillis": 1800000
+            }
+          ]
+        }
+      ]
     ]
   }
 }

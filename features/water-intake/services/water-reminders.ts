@@ -30,6 +30,7 @@ export async function scheduleWaterReminders(settings: WaterReminderSettings): P
         body: "It's been a while — grab some water.",
         hour: slot.hour,
         minute: slot.minute,
+        data: { category: 'water', route: '/water-intake/history' },
       }),
     ),
   );

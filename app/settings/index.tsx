@@ -2,6 +2,7 @@ import Constants from 'expo-constants';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import {
+  Bell,
   BookOpen,
   Database,
   Download,
@@ -114,10 +115,16 @@ export default function SettingsScreen() {
         <SectionLabel>Notifications</SectionLabel>
         <View className="rounded-2xl border border-border bg-card px-4">
           <SettingsRow
+            icon={Bell}
+            label="Notifications"
+            subtitle="Delivery, quiet hours & what you hear about"
+            isFirst
+            onPress={() => router.push('/settings/notifications')}
+          />
+          <SettingsRow
             icon={Droplet}
             label="Water intake reminders"
             subtitle="Daily hydration nudges on your schedule"
-            isFirst
             onPress={() => router.push('/water-intake/settings')}
           />
           <SettingsRow
@@ -160,7 +167,7 @@ export default function SettingsScreen() {
         <View className="rounded-2xl border border-border bg-card px-4">
           <SettingsRow icon={Info} label="Version" value={Constants.expoConfig?.version ?? '1.0.0'} isFirst />
           <SettingsRow icon={Database} label="Storage" value="On this device" />
-          <SettingsRow icon={ShieldCheck} label="Sync & account" value="Coming soon" />
+          <SettingsRow icon={ShieldCheck} label="Sync & account" subtitle="Backup, sync, and sign in" onPress={() => router.push('/settings/sync')} />
         </View>
       </View>
     </ScrollView>

@@ -4,8 +4,10 @@ import { openDatabaseSync } from 'expo-sqlite';
 import * as schema from '@/database/schema';
 
 type Database = ReturnType<typeof drizzle<typeof schema>>;
+type RawDatabase = ReturnType<typeof openDatabaseSync>;
 
 let instance: Database | null = null;
+let rawInstance: RawDatabase | null = null;
 
 /**
  * Lazily opens the database on first use rather than as a module-level
@@ -47,7 +49,19 @@ export function getDb(): Database {
     sqliteDb.execSync(schema.TABLE_BOOTSTRAP_SQL);
     applyAdditiveColumns(sqliteDb);
     sqliteDb.execSync(schema.INDEX_BOOTSTRAP_SQL);
+    rawInstance = sqliteDb;
     instance = drizzle(sqliteDb, { schema });
   }
   return instance;
+}
+
+/**
+ * The underlying expo-sqlite handle, for code that needs raw table-name-driven
+ * SQL that drizzle's typed API can't express — notably the generic sync engine,
+ * which reads/writes arbitrary tables by name. Ensures the DB is bootstrapped
+ * first by going through getDb(). Prefer getDb()/drizzle everywhere else.
+ */
+export function getRawDb(): RawDatabase {
+  if (!rawInstance) getDb();
+  return rawInstance as RawDatabase;
 }

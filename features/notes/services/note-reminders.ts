@@ -17,6 +17,7 @@ export async function syncNoteReminder(note: Note): Promise<void> {
     title: note.title || 'Note reminder',
     body: 'Take a look at this note.',
     date: note.reminderAt,
+    data: { category: 'notes', route: '/note/[id]', params: { id: note.id } },
   });
   setNoteReminderNotificationId(note.id, id);
 }

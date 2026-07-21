@@ -17,8 +17,13 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { DevErrorBanner } from '@/components/dev/dev-error-banner';
 import { MiniPlayerBar } from '@/features/music/components/mini-player-bar';
+import { useNotificationNavigation } from '@/features/notifications/hooks/use-notification-navigation';
+import { applyDeliveryMode } from '@/features/notifications/services/delivery';
+import { syncTodayWidget } from '@/features/widgets/services/widget-data';
 import { useAuthStore } from '@/features/auth/services/auth-store';
-import { configureNotificationHandler } from '@/lib/notifications';
+import { useAuthGate } from '@/features/auth/hooks/use-auth-gate';
+import { useSyncTrigger } from '@/features/sync/hooks/use-sync';
+import { configureAndroidChannels, configureNotificationHandler } from '@/lib/notifications';
 import { queryClient } from '@/lib/query-client';
 
 SplashScreen.preventAutoHideAsync();
@@ -27,9 +32,33 @@ SplashScreen.preventAutoHideAsync();
 // while the app is foregrounded — water reminders should still show even if
 // the app happens to be open at the time.
 configureNotificationHandler();
+// Create the Android notification channels (heads-up for time-critical, quiet
+// for nudges). No-ops off Android / in Expo Go Android.
+configureAndroidChannels();
+
+/** Lives inside the router + query provider so it can deep-link on notification
+ * taps and mark inbox rows read. Renders nothing. */
+function NotificationNavigationBridge() {
+  useNotificationNavigation();
+  return null;
+}
+
+/** Redirects between the auth flow and the app. Must live inside the navigation
+ * tree (uses router/segments). Renders nothing. */
+function AuthGate() {
+  useAuthGate();
+  return null;
+}
+
+/** Drives automatic local↔cloud sync while signed in. Renders nothing. */
+function SyncTrigger() {
+  useSyncTrigger();
+  return null;
+}
 
 export default function RootLayout() {
   const init = useAuthStore((state) => state.init);
+  const isInitialized = useAuthStore((state) => state.isInitialized);
   const [fontsLoaded] = useFonts({
     Sora_400Regular,
     Sora_500Medium,
@@ -44,13 +73,21 @@ export default function RootLayout() {
 
   useEffect(() => {
     init();
+    // Reconcile scheduled reminders with the delivery mode and refresh the
+    // morning digest with today's counts on every launch — local notifications
+    // carry fixed text, so this is how it stays current.
+    applyDeliveryMode();
+    // Refresh the home-screen widget's snapshot with today's counts (Android).
+    syncTodayWidget();
   }, [init]);
 
   useEffect(() => {
-    if (fontsLoaded) SplashScreen.hideAsync();
-  }, [fontsLoaded]);
+    if (fontsLoaded && isInitialized) SplashScreen.hideAsync();
+  }, [fontsLoaded, isInitialized]);
 
-  if (!fontsLoaded) return null;
+  // Wait for both fonts and the initial session check so the auth gate can
+  // route to the right screen without a flash of the wrong one.
+  if (!fontsLoaded || !isInitialized) return null;
 
   return (
     <GestureHandlerRootView className="flex-1">
@@ -85,6 +122,9 @@ export default function RootLayout() {
               <Stack.Screen name="gallery/album/[id]" />
               <Stack.Screen name="gallery/photo/[id]" />
               <Stack.Screen name="settings/index" options={{ headerShown: true, title: 'Settings' }} />
+              <Stack.Screen name="settings/notifications" options={{ headerShown: true, title: 'Notifications' }} />
+              <Stack.Screen name="settings/sync" options={{ headerShown: true, title: 'Sync & Account' }} />
+              <Stack.Screen name="notifications" options={{ headerShown: true, title: 'Notifications' }} />
               <Stack.Screen name="task/new" options={{ presentation: 'modal' }} />
               <Stack.Screen name="note/new" options={{ presentation: 'modal' }} />
               <Stack.Screen name="habit/new" options={{ presentation: 'modal' }} />
@@ -100,6 +140,9 @@ export default function RootLayout() {
               <Stack.Screen name="budget/debts/new" options={{ presentation: 'modal' }} />
               <Stack.Screen name="gallery/album/new" options={{ presentation: 'modal' }} />
             </Stack>
+            <AuthGate />
+            <SyncTrigger />
+            <NotificationNavigationBridge />
             <MiniPlayerBar />
             <DevErrorBanner />
           </BottomSheetModalProvider>

@@ -14,6 +14,7 @@ import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import { cancelJournalReminder, scheduleJournalReminder } from '@/features/journal/services/journal-reminders';
 import { useJournalReminderStore } from '@/features/journal/store/journal-reminder-store';
+import { CategoryOffNotice } from '@/features/notifications/components/category-off-notice';
 import { notificationsAvailable } from '@/lib/notifications';
 
 const JOURNAL_TINT = '#ec4899';
@@ -73,6 +74,7 @@ export default function JournalReminderSettingsScreen() {
       </View>
 
       <ScrollView contentContainerClassName="gap-6 px-5 pt-3 pb-10" showsVerticalScrollIndicator={false}>
+        <CategoryOffNotice category="journal" />
         <View className="rounded-2xl border border-border bg-card px-4">
           <AttributeRow icon={Bell} label="Daily reminder" isFirst>
             <View className="flex-row items-center justify-between">

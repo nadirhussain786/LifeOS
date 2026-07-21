@@ -10,6 +10,7 @@ import { AttributeRow } from '@/components/ui/attribute-row';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
+import { CategoryOffNotice } from '@/features/notifications/components/category-off-notice';
 import { cancelWaterReminders, scheduleWaterReminders } from '@/features/water-intake/services/water-reminders';
 import { GOAL_PRESETS_ML, useWaterSettingsStore } from '@/features/water-intake/store/water-settings-store';
 import { REMINDER_INTERVALS_MIN } from '@/features/water-intake/types/water-intake.types';
@@ -99,6 +100,7 @@ export default function WaterSettingsScreen() {
       </View>
 
       <ScrollView contentContainerClassName="gap-6 px-5 pt-3 pb-10" showsVerticalScrollIndicator={false}>
+        <CategoryOffNotice category="water" />
         <View className="rounded-2xl border border-border bg-card px-4">
           <AttributeRow icon={Target} label="Daily goal" isFirst>
             <View className="flex-row flex-wrap gap-2">

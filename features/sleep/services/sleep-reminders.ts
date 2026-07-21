@@ -31,6 +31,7 @@ export async function syncBedtimeReminder(): Promise<void> {
     body: `Bedtime is ${formatClock(time.hour * 60 + time.minute)} — start getting ready for a good night's sleep.`,
     hour: time.hour,
     minute: time.minute,
+    data: { category: 'sleep', route: '/sleep' },
   });
   setSleepReminderNotificationId(id);
 }

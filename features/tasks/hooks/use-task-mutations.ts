@@ -11,11 +11,16 @@ import {
   updateTask,
 } from '@/features/tasks/services/tasks-repository';
 import type { CreateTaskInput, UpdateTaskInput } from '@/features/tasks/types/task.types';
+import { syncTodayWidget } from '@/features/widgets/services/widget-data';
 
 export function useTaskMutations() {
   const queryClient = useQueryClient();
 
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['tasks'] });
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    // Keep the home-screen "Today" widget's task count fresh (no-ops off Android).
+    syncTodayWidget();
+  };
 
   const create = useMutation({
     mutationFn: async (input: CreateTaskInput) => {

@@ -26,6 +26,7 @@ export async function syncTaskReminder(task: Task): Promise<void> {
     title: task.title,
     body: task.hasDueTime ? "It's due now." : 'Due today.',
     date: triggerAt,
+    data: { category: 'tasks', route: '/tasks' },
   });
   setTaskReminderNotificationId(task.id, id);
 }
