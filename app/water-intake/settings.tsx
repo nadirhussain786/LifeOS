@@ -9,14 +9,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AttributeRow } from '@/components/ui/attribute-row';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { CategoryOffNotice } from '@/features/notifications/components/category-off-notice';
 import { cancelWaterReminders, scheduleWaterReminders } from '@/features/water-intake/services/water-reminders';
 import { GOAL_PRESETS_ML, useWaterSettingsStore } from '@/features/water-intake/store/water-settings-store';
 import { REMINDER_INTERVALS_MIN } from '@/features/water-intake/types/water-intake.types';
 import { notificationsAvailable } from '@/lib/notifications';
-
-const WATER_TINT = '#0ea5e9';
 
 function formatHour(hour: number) {
   const period = hour < 12 ? 'AM' : 'PM';
@@ -52,6 +51,7 @@ export default function WaterSettingsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
+  const waterTint = moduleTint('water', scheme);
 
   const goalMl = useWaterSettingsStore((state) => state.goalMl);
   const setGoal = useWaterSettingsStore((state) => state.setGoal);
@@ -89,8 +89,8 @@ export default function WaterSettingsScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-4 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full bg-muted">
+      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-5 pb-2">
+        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
           <ChevronLeft size={20} color={colors[scheme].foreground} />
         </Pressable>
         <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
@@ -101,7 +101,7 @@ export default function WaterSettingsScreen() {
 
       <ScrollView contentContainerClassName="gap-6 px-5 pt-3 pb-10" showsVerticalScrollIndicator={false}>
         <CategoryOffNotice category="water" />
-        <View className="rounded-2xl border border-border bg-card px-4">
+        <View className="rounded-2xl border border-border bg-card px-4 shadow-e1">
           <AttributeRow icon={Target} label="Daily goal" isFirst>
             <View className="flex-row flex-wrap gap-2">
               {GOAL_PRESETS_ML.map((ml) => {
@@ -114,7 +114,7 @@ export default function WaterSettingsScreen() {
                       setGoal(ml);
                     }}
                     className="rounded-full border px-3 py-1.5"
-                    style={{ borderColor: selected ? WATER_TINT : colors[scheme].border, backgroundColor: selected ? WATER_TINT : 'transparent' }}
+                    style={{ borderColor: selected ? waterTint : colors[scheme].border, backgroundColor: selected ? waterTint : 'transparent' }}
                   >
                     <Text
                       variant="caption"
@@ -130,7 +130,7 @@ export default function WaterSettingsScreen() {
           </AttributeRow>
         </View>
 
-        <View className="gap-3 rounded-2xl border border-border bg-card p-4">
+        <View className="gap-3 rounded-2xl border border-border bg-card p-4 shadow-e1">
           <View className="flex-row items-center justify-between">
             <View className="flex-row items-center gap-2">
               <Bell size={16} color={colors[scheme].mutedForeground} />
@@ -139,7 +139,7 @@ export default function WaterSettingsScreen() {
             <Switch
               value={draft.enabled}
               onValueChange={(enabled) => setDraft((prev) => ({ ...prev, enabled }))}
-              trackColor={{ true: WATER_TINT, false: colors[scheme].border }}
+              trackColor={{ true: waterTint, false: colors[scheme].border }}
             />
           </View>
 
@@ -160,7 +160,7 @@ export default function WaterSettingsScreen() {
                           setDraft((prev) => ({ ...prev, intervalMinutes: minutes }));
                         }}
                         className="flex-1 items-center rounded-full border py-1.5"
-                        style={{ borderColor: selected ? WATER_TINT : colors[scheme].border, backgroundColor: selected ? WATER_TINT : 'transparent' }}
+                        style={{ borderColor: selected ? waterTint : colors[scheme].border, backgroundColor: selected ? waterTint : 'transparent' }}
                       >
                         <Text
                           variant="caption"

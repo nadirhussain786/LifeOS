@@ -3,12 +3,11 @@ import { ArrowRight, Moon, Star, Sun } from 'lucide-react-native';
 import { Pressable, View } from 'react-native';
 
 import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { formatClock, formatDuration, minutesOfDay } from '@/features/sleep/services/sleep-stats';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { asleepMinutes, type SleepSession } from '@/features/sleep/types/sleep.types';
-
-const SLEEP_TINT = '#6366f1';
 
 type Props = {
   session: SleepSession;

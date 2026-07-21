@@ -4,7 +4,7 @@ import { Pressable, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 import { Text } from '@/components/ui/text';
-import { colors, habitDoneColor } from '@/constants/theme';
+import { colors } from '@/constants/theme';
 import type { RoutineWithHabits } from '@/features/habits/types/habit.types';
 
 type Props = {
@@ -21,7 +21,7 @@ export function RoutineCard({ routine, onEdit, onToggleHabit, onOpenHabit }: Pro
   const doneCount = routine.habits.filter((habit) => habit.todayStatus === 'done').length;
 
   return (
-    <View className="mx-4 mb-2.5 gap-3 rounded-2xl border border-border bg-card p-4">
+    <View className="mx-4 mb-2.5 gap-3 rounded-2xl border border-border bg-card p-4 shadow-e1">
       <View className="flex-row items-center justify-between">
         <View className="flex-1 gap-0.5">
           <Text className="font-sora-semibold">{routine.name}</Text>
@@ -53,8 +53,9 @@ export function RoutineCard({ routine, onEdit, onToggleHabit, onOpenHabit }: Pro
                 className="flex-row items-center gap-3 py-2"
               >
                 <View
-                  className="h-8 w-8 items-center justify-center rounded-full border bg-card"
-                  style={{ borderColor: isDone ? habitDoneColor : colors[scheme].border }}
+                  className={`h-8 w-8 items-center justify-center rounded-full border bg-card ${
+                    isDone ? 'border-success' : 'border-border'
+                  }`}
                 >
                   <Text className="text-sm">{habit.emoji ?? '🔥'}</Text>
                 </View>
@@ -70,11 +71,9 @@ export function RoutineCard({ routine, onEdit, onToggleHabit, onOpenHabit }: Pro
                     hitSlop={8}
                     accessibilityRole="checkbox"
                     accessibilityState={{ checked: isDone }}
-                    className="h-7 w-7 items-center justify-center rounded-full border"
-                    style={{
-                      borderColor: isDone ? habitDoneColor : colors[scheme].border,
-                      backgroundColor: isDone ? habitDoneColor : 'transparent',
-                    }}
+                    className={`h-7 w-7 items-center justify-center rounded-full border ${
+                      isDone ? 'border-success bg-success' : 'border-border'
+                    }`}
                   >
                     {isDone && <Text style={{ color: '#ffffff', fontSize: 12 }}>✓</Text>}
                   </Pressable>

@@ -34,7 +34,9 @@ export function ExpenseDonut({ categories, totalCents, currency }: Props) {
       <DonutChart data={slices} size={180} strokeWidth={26}>
         <View className="items-center">
           <Text variant="caption">Spent</Text>
-          <Text className="font-sora-extrabold text-xl text-foreground">{formatMoney(totalCents, currency)}</Text>
+          <Text className="font-sora-extrabold text-xl text-foreground" style={{ fontVariant: ['tabular-nums'] }}>
+            {formatMoney(totalCents, currency)}
+          </Text>
         </View>
       </DonutChart>
 

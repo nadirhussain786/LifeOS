@@ -9,6 +9,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '@/components/ui/button';
 import { StarRating } from '@/components/ui/star-rating';
 import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { SubjectPicker } from '@/features/study/components/subject-picker';
 import { formatStudyDuration } from '@/features/study/services/study-stats';
@@ -16,7 +17,6 @@ import { useStudySubjects } from '@/features/study/hooks/use-study';
 import { useStudyMutations } from '@/features/study/hooks/use-study-mutations';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
-const STUDY_TINT = '#8b5cf6';
 const QUICK_MINUTES = [15, 25, 50, 90];
 
 /** Manually logs a past / offline study session — the tracker for time spent
@@ -25,6 +25,7 @@ export default function StudyLogScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
+  const studyTint = moduleTint('study', scheme);
   const { data: subjects = [] } = useStudySubjects();
   const { logSession, addSubject } = useStudyMutations();
 
@@ -74,21 +75,17 @@ export default function StudyLogScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-4 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full bg-muted">
+      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-5 pb-2">
+        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
           <X size={17} color={colors[scheme].foreground} />
         </Pressable>
-        <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-          Log Study Time
-        </Text>
+        <Text variant="micro">Log Study Time</Text>
         <View className="h-8 w-8" />
       </View>
 
       <ScrollView contentContainerClassName="gap-5 px-5 pt-3 pb-10" keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         <View className="gap-2.5">
-          <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-            Subject
-          </Text>
+          <Text variant="micro">Subject</Text>
           <SubjectPicker
             subjects={subjects}
             value={subjectId}
@@ -98,18 +95,16 @@ export default function StudyLogScreen() {
         </View>
 
         {/* Duration */}
-        <View className="items-center gap-3 rounded-2xl border border-border bg-card p-5">
-          <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-            How long did you study?
-          </Text>
+        <View className="items-center gap-3 rounded-2xl border border-border bg-card p-5 shadow-e1">
+          <Text variant="micro">How long did you study?</Text>
           <View className="flex-row items-center gap-6">
-            <Pressable onPress={() => adjust(-5)} className="h-11 w-11 items-center justify-center rounded-2xl bg-muted" accessibilityLabel="Less">
+            <Pressable onPress={() => adjust(-5)} className="h-11 w-11 items-center justify-center rounded-2xl border border-border bg-surface" accessibilityLabel="Less">
               <Minus size={20} color={colors[scheme].foreground} />
             </Pressable>
-            <Text className="font-sora-extrabold text-3xl" style={{ color: STUDY_TINT, minWidth: 120, textAlign: 'center' }}>
+            <Text className="font-sora-extrabold text-3xl" style={{ color: studyTint, minWidth: 120, textAlign: 'center', fontVariant: ['tabular-nums'] }}>
               {formatStudyDuration(minutes * 60)}
             </Text>
-            <Pressable onPress={() => adjust(5)} className="h-11 w-11 items-center justify-center rounded-2xl" style={{ backgroundColor: STUDY_TINT }} accessibilityLabel="More">
+            <Pressable onPress={() => adjust(5)} className="h-11 w-11 items-center justify-center rounded-2xl bg-study" accessibilityLabel="More">
               <Plus size={20} color="#ffffff" />
             </Pressable>
           </View>

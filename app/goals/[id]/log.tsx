@@ -65,13 +65,11 @@ export default function LogProgressScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-4 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full bg-muted">
+      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-5 pb-2">
+        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
           <X size={17} color={colors[scheme].foreground} />
         </Pressable>
-        <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-          Log Progress
-        </Text>
+        <Text variant="micro">Log Progress</Text>
         <View className="h-8 w-8" />
       </View>
 
@@ -95,13 +93,13 @@ export default function LogProgressScreen() {
         </View>
 
         {isCount ? (
-          <View className="gap-4 rounded-2xl border border-border bg-card p-5">
+          <View className="gap-4 rounded-2xl border border-border bg-card p-5 shadow-e1">
             <View className="flex-row items-center justify-center gap-6">
-              <Pressable onPress={() => setAddCount((a) => a - countStep)} className="h-12 w-12 items-center justify-center rounded-2xl bg-muted">
+              <Pressable onPress={() => setAddCount((a) => a - countStep)} className="h-12 w-12 items-center justify-center rounded-2xl border border-border bg-surface">
                 <Minus size={20} color={colors[scheme].foreground} />
               </Pressable>
               <View className="items-center" style={{ minWidth: 90 }}>
-                <Text className="font-sora-extrabold text-3xl" style={{ color: meta.tint }}>
+                <Text className="font-sora-extrabold text-3xl" style={{ color: meta.tint, fontVariant: ['tabular-nums'] }}>
                   {resultingCount}
                 </Text>
                 <Text variant="caption">of {goal.targetValue} {goal.unit ?? ''}</Text>
@@ -119,8 +117,8 @@ export default function LogProgressScreen() {
             </View>
           </View>
         ) : (
-          <View className="gap-4 rounded-2xl border border-border bg-card p-5">
-            <Text className="text-center font-sora-extrabold text-4xl" style={{ color: meta.tint }}>
+          <View className="gap-4 rounded-2xl border border-border bg-card p-5 shadow-e1">
+            <Text className="text-center font-sora-extrabold text-4xl" style={{ color: meta.tint, fontVariant: ['tabular-nums'] }}>
               {targetPct}%
             </Text>
             <Slider
@@ -149,9 +147,7 @@ export default function LogProgressScreen() {
         )}
 
         <View className="gap-2">
-          <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-            Note (optional)
-          </Text>
+          <Text variant="micro">Note (optional)</Text>
           <TextInput
             value={note}
             onChangeText={setNote}

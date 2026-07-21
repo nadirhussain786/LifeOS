@@ -10,6 +10,7 @@ import { Fab } from '@/components/ui/fab';
 import { Segmented } from '@/components/ui/segmented';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { GOAL_CATEGORIES } from '@/features/goals/config/goal-categories';
 import { GoalCard } from '@/features/goals/components/goal-card';
@@ -60,7 +61,7 @@ export default function GoalsScreen() {
   };
 
   const header = (
-    <View className="gap-4 pb-2">
+    <View className="gap-5 pb-2">
       {stats && (statusFilter === 'active' ? stats.activeCount > 0 : true) && (
         <GoalsStatsHeader
           activeCount={stats.activeCount}
@@ -73,7 +74,7 @@ export default function GoalsScreen() {
       <Segmented options={STATUS_OPTIONS} value={statusFilter} onChange={setStatusFilter} />
 
       {showSearch && (
-        <View className="flex-row items-center gap-2 rounded-full bg-muted px-4 py-2.5">
+        <View className="flex-row items-center gap-2 rounded-full border border-border bg-surface px-4 py-2.5">
           <Search size={16} color={colors[scheme].mutedForeground} />
           <TextInput
             value={searchQuery}
@@ -92,7 +93,7 @@ export default function GoalsScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 8 }} className="flex-row items-center justify-between px-4 pb-2">
+      <View style={{ paddingTop: insets.top + 8 }} className="flex-row items-center justify-between px-5 pb-2">
         <View className="flex-row items-center gap-1">
           <Pressable onPress={() => router.back()} hitSlop={8} className="-ml-1 p-1" accessibilityLabel="Back">
             <ChevronLeft size={24} color={colors[scheme].foreground} />
@@ -111,7 +112,7 @@ export default function GoalsScreen() {
       </View>
 
       {isLoading ? (
-        <View className="gap-3 px-4 pt-2">
+        <View className="gap-3 px-5 pt-2">
           <Skeleton className="h-28 w-full rounded-2xl" />
           <Skeleton className="h-24 w-full rounded-2xl" />
           <Skeleton className="h-24 w-full rounded-2xl" />
@@ -121,7 +122,7 @@ export default function GoalsScreen() {
           data={goals}
           keyExtractor={(goal) => goal.id}
           ListHeaderComponent={header}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 4, paddingBottom: 120 }}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 4, paddingBottom: 120 }}
           ItemSeparatorComponent={() => <View className="h-3" />}
           ListEmptyComponent={
             <View style={{ minHeight: 340 }}>
@@ -133,7 +134,7 @@ export default function GoalsScreen() {
                     ? 'Set an ambition and track it to the finish line.'
                     : 'Goals you finish or archive will show up here.'
                 }
-                tint="#f97316"
+                tint={moduleTint('goals', scheme)}
                 actionLabel={statusFilter === 'active' ? 'Create a goal' : undefined}
                 onAction={statusFilter === 'active' ? () => router.push('/goals/new') : undefined}
               />

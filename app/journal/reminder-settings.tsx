@@ -11,13 +11,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AttributeRow } from '@/components/ui/attribute-row';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { cancelJournalReminder, scheduleJournalReminder } from '@/features/journal/services/journal-reminders';
 import { useJournalReminderStore } from '@/features/journal/store/journal-reminder-store';
 import { CategoryOffNotice } from '@/features/notifications/components/category-off-notice';
 import { notificationsAvailable } from '@/lib/notifications';
-
-const JOURNAL_TINT = '#ec4899';
 
 export default function JournalReminderSettingsScreen() {
   const router = useRouter();
@@ -63,11 +62,11 @@ export default function JournalReminderSettingsScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-4 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full bg-muted">
+      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-5 pb-2">
+        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
           <ChevronLeft size={20} color={colors[scheme].foreground} />
         </Pressable>
-        <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
+        <Text variant="micro" className="font-sora-semibold">
           Journal Reminder
         </Text>
         <View className="h-8 w-8" />
@@ -75,14 +74,14 @@ export default function JournalReminderSettingsScreen() {
 
       <ScrollView contentContainerClassName="gap-6 px-5 pt-3 pb-10" showsVerticalScrollIndicator={false}>
         <CategoryOffNotice category="journal" />
-        <View className="rounded-2xl border border-border bg-card px-4">
+        <View className="rounded-2xl border border-border bg-card px-4 shadow-e1">
           <AttributeRow icon={Bell} label="Daily reminder" isFirst>
             <View className="flex-row items-center justify-between">
               <Text variant="muted">Nudge me to write</Text>
               <Switch
                 value={draft.enabled}
                 onValueChange={(enabled) => setDraft((prev) => ({ ...prev, enabled }))}
-                trackColor={{ true: JOURNAL_TINT, false: colors[scheme].border }}
+                trackColor={{ true: moduleTint('journal', scheme), false: colors[scheme].border }}
               />
             </View>
           </AttributeRow>

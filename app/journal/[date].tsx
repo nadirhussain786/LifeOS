@@ -97,8 +97,8 @@ export default function JournalEntryScreen() {
           the page itself reflects how the day felt, rather than staying neutral chrome regardless. */}
       <LinearGradient colors={[wash, 'transparent']} style={[StyleSheet.absoluteFillObject, { height: 240 }]} />
 
-      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-4 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full bg-muted">
+      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-5 pb-2">
+        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
           <ChevronLeft size={20} color={colors[scheme].foreground} />
         </Pressable>
         <Pressable
@@ -114,7 +114,7 @@ export default function JournalEntryScreen() {
 
       <View className="gap-1 px-5 pb-5">
         <View className="flex-row items-center justify-between">
-          <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
+          <Text variant="micro" className="font-sora-semibold">
             {format(date, 'EEEE')}
           </Text>
           <Pressable

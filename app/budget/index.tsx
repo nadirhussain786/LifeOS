@@ -21,6 +21,7 @@ import { ProgressBar } from '@/components/ui/progress-bar';
 import { SectionHeader } from '@/components/ui/section-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
+import { colors as palette, moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { ACCOUNTS } from '@/features/budget/config/budget-config';
 import { ExpenseDonut } from '@/features/budget/components/expense-donut';
@@ -34,11 +35,10 @@ import { alpha } from '@/lib/color';
 
 const DEBT_TINT = '#6366f1';
 
-const BUDGET_TINT = '#22c55e';
-
 export default function BudgetScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const budgetTint = moduleTint('budget', scheme);
   const insets = useSafeAreaInsets();
   const [anchorTime, setAnchorTime] = useState(() => Date.now());
 
@@ -57,7 +57,7 @@ export default function BudgetScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 8 }} className="flex-row items-center justify-between px-4 pb-2">
+      <View style={{ paddingTop: insets.top + 8 }} className="flex-row items-center justify-between px-5 pb-2">
         <View className="flex-row items-center gap-1">
           <Pressable onPress={() => router.back()} hitSlop={8} className="-ml-1 p-1" accessibilityLabel="Back">
             <ChevronLeft size={24} color={colors[scheme].foreground} />

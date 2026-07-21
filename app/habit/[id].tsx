@@ -8,7 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 
 import { Text } from '@/components/ui/text';
-import { colors, habitDoneColor } from '@/constants/theme';
+import { colors } from '@/constants/theme';
 import { QuickLogSheet } from '@/features/habits/components/quick-log-sheet';
 import { StreakHeatmap } from '@/features/habits/components/streak-heatmap';
 import { useHabit, useHabitLogs } from '@/features/habits/hooks/use-habit';
@@ -51,8 +51,8 @@ export default function HabitDetailScreen() {
     <View className="flex-1 bg-background">
       <Stack.Screen options={{ headerShown: false }} />
 
-      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-4 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full bg-muted">
+      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-5 pb-2">
+        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
           <ChevronLeft size={20} color={colors[scheme].foreground} />
         </Pressable>
         <View className="flex-row gap-4">
@@ -86,20 +86,20 @@ export default function HabitDetailScreen() {
         </View>
 
         <View className="flex-row gap-3">
-          <View className="flex-1 items-center gap-1 rounded-2xl border border-border bg-card py-4">
-            <Text style={{ fontSize: 28, fontFamily: 'Sora_800ExtraBold' }} className="text-foreground">
+          <View className="flex-1 items-center gap-1 rounded-2xl border border-border bg-card py-4 shadow-e1">
+            <Text style={{ fontSize: 28, fontFamily: 'Sora_800ExtraBold', fontVariant: ['tabular-nums'] }} className="text-foreground">
               {streaks.currentStreak}
             </Text>
             <Text variant="caption">{habit.type === 'negative' ? 'Days without' : 'Current streak'}</Text>
           </View>
-          <View className="flex-1 items-center gap-1 rounded-2xl border border-border bg-card py-4">
-            <Text style={{ fontSize: 28, fontFamily: 'Sora_800ExtraBold' }} className="text-foreground">
+          <View className="flex-1 items-center gap-1 rounded-2xl border border-border bg-card py-4 shadow-e1">
+            <Text style={{ fontSize: 28, fontFamily: 'Sora_800ExtraBold', fontVariant: ['tabular-nums'] }} className="text-foreground">
               {streaks.bestStreak}
             </Text>
             <Text variant="caption">Best streak</Text>
           </View>
-          <View className="flex-1 items-center gap-1 rounded-2xl border border-border bg-card py-4">
-            <Text style={{ fontSize: 28, fontFamily: 'Sora_800ExtraBold' }} className="text-foreground">
+          <View className="flex-1 items-center gap-1 rounded-2xl border border-border bg-card py-4 shadow-e1">
+            <Text style={{ fontSize: 28, fontFamily: 'Sora_800ExtraBold', fontVariant: ['tabular-nums'] }} className="text-foreground">
               {Math.round(streaks.completionRate30d * 100)}%
             </Text>
             <Text variant="caption">Last 30 days</Text>
@@ -109,8 +109,7 @@ export default function HabitDetailScreen() {
         {isQuantified ? (
           <Pressable
             onPress={() => quickLogRef.current?.present()}
-            className="items-center rounded-2xl py-3.5"
-            style={{ backgroundColor: habitDoneColor }}
+            className="items-center rounded-2xl bg-success py-3.5"
           >
             <Text className="font-sora-semibold" style={{ color: '#ffffff' }}>
               {todayLog ? `Logged ${todayLog.value}${habit.unit ? ` ${habit.unit}` : ''} today · tap to edit` : 'Log today'}
@@ -119,8 +118,7 @@ export default function HabitDetailScreen() {
         ) : (
           <Pressable
             onPress={() => (todayLog ? unlogToday.mutate(habit.id) : logToday.mutate({ habitId: habit.id }))}
-            className="items-center rounded-2xl py-3.5"
-            style={{ backgroundColor: todayLog ? habitDoneColor : colors[scheme].muted }}
+            className={`items-center rounded-2xl py-3.5 ${todayLog ? 'bg-success' : 'bg-surface'}`}
           >
             <Text className="font-sora-semibold" style={{ color: todayLog ? '#ffffff' : colors[scheme].foreground }}>
               {todayLog ? 'Done today ✓' : 'Mark done today'}

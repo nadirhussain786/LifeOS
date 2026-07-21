@@ -3,12 +3,10 @@ import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { BookHeart } from 'lucide-react-native';
 import { Pressable, View } from 'react-native';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
-import { colors } from '@/constants/theme';
 import { WidgetCard } from '@/features/dashboard/components/widget-card';
 import { useReflect } from '@/features/dashboard/hooks/use-widget-data';
 import { useJournalMutations } from '@/features/journal/hooks/use-journal-mutations';
@@ -26,7 +24,6 @@ const MOODS: { value: MoodOption; emoji: string }[] = [
 export function ReflectWidget() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const scheme = useColorScheme() ?? 'light';
   const { data, isLoading } = useReflect();
   const { upsert } = useJournalMutations();
   const todayKey = toDateKey(new Date());
@@ -48,8 +45,9 @@ export function ReflectWidget() {
               <Pressable
                 key={mood.value}
                 onPress={() => selectMood(mood.value)}
-                className="h-11 w-11 items-center justify-center rounded-full"
-                style={{ backgroundColor: data.todaysMood === mood.value ? colors[scheme].muted : 'transparent' }}
+                className={`h-11 w-11 items-center justify-center rounded-full ${
+                  data.todaysMood === mood.value ? 'bg-surface' : ''
+                }`}
               >
                 <Text className="text-2xl">{mood.emoji}</Text>
               </Pressable>

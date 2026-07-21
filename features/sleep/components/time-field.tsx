@@ -30,13 +30,11 @@ export function TimeField({ icon: Icon, label, value, onChange, tint }: Props) {
       <View className="h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: `${tint}1f` }}>
         <Icon size={18} color={tint} />
       </View>
-      <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-        {label}
-      </Text>
+      <Text variant="micro">{label}</Text>
       {Platform.OS === 'ios' ? (
         <DateTimePicker value={value} mode="time" display="compact" onChange={handleChange} />
       ) : (
-        <Pressable onPress={() => setShow(true)} className="rounded-lg bg-muted px-3 py-1.5">
+        <Pressable onPress={() => setShow(true)} className="rounded-lg border border-border bg-surface px-3 py-1.5">
           <Text className="font-sora-semibold text-foreground">{formatClock(minutesOfDay(value.getTime()))}</Text>
         </Pressable>
       )}

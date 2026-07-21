@@ -25,7 +25,7 @@ export function DayCard({ entry, onPress }: Props) {
         className="flex-row items-center gap-3 rounded-2xl border border-border bg-card py-3.5 pl-4 pr-4"
       >
         <View className="w-11 items-center">
-          <Text variant="caption" className="font-sora-semibold uppercase">
+          <Text variant="micro" className="font-sora-semibold">
             {format(date, 'EEE')}
           </Text>
           <Text style={{ fontSize: 20 }} className="font-sora-bold text-foreground">
@@ -53,7 +53,7 @@ export function DayCard({ entry, onPress }: Props) {
 
 const styles = StyleSheet.create({
   shadowWrap: {
-    marginHorizontal: 16,
+    marginHorizontal: 20,
     marginBottom: 10,
     borderRadius: 18,
     ...Platform.select({

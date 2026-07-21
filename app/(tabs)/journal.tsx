@@ -30,7 +30,7 @@ export default function JournalScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 8 }} className="gap-3 px-4 pb-2">
+      <View style={{ paddingTop: insets.top + 8 }} className="gap-5 px-5 pb-2">
         <View className="flex-row items-center justify-between">
           <Text variant="heading">Journal</Text>
           <View className="flex-row items-center gap-3">
@@ -56,7 +56,7 @@ export default function JournalScreen() {
       </View>
 
       {isLoading ? (
-        <View className="gap-2.5 px-4">
+        <View className="gap-2.5 px-5">
           <Skeleton className="h-16 w-full rounded-2xl" />
           <Skeleton className="h-16 w-full rounded-2xl" />
           <Skeleton className="h-16 w-full rounded-2xl" />
@@ -67,7 +67,7 @@ export default function JournalScreen() {
           keyExtractor={(entry) => entry.id}
           contentContainerStyle={{ paddingTop: 4, paddingBottom: 40 }}
           ListHeaderComponent={
-            <View className="mx-4 mb-4">
+            <View className="mx-5 mb-4">
               <MoodMonthStrip monthAnchor={new Date()} entries={entries} onSelectDate={(dateKey) => router.push(`/journal/${dateKey}`)} />
             </View>
           }

@@ -6,6 +6,7 @@ import { RefreshControl, ScrollView, View } from 'react-native';
 import { Fab } from '@/components/ui/fab';
 import { DashboardHeader } from '@/features/dashboard/components/dashboard-header';
 import { QuickActionsSheet } from '@/features/dashboard/components/quick-actions-sheet';
+import { TodayFocusCard } from '@/features/dashboard/components/today-focus-card';
 import { useDashboardWidgets } from '@/features/dashboard/hooks/use-dashboard-widgets';
 
 export default function DashboardScreen() {
@@ -23,10 +24,12 @@ export default function DashboardScreen() {
   return (
     <View className="flex-1 bg-background">
       <ScrollView
-        contentContainerClassName="gap-4 px-4 pb-24"
+        contentContainerClassName="gap-5 px-5 pb-28"
+        showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <DashboardHeader />
+        <TodayFocusCard />
         {widgets.map(({ id, Component }) => (
           <Component key={id} />
         ))}

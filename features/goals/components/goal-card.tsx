@@ -15,13 +15,6 @@ import { cn } from '@/lib/utils';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-const DUE_COLOR: Record<string, string> = {
-  overdue: '#dc2828',
-  today: '#f59e0b',
-  soon: '#f59e0b',
-  later: '',
-};
-
 type Props = {
   goal: GoalWithProgress;
   onPress: (goal: GoalWithProgress) => void;
@@ -45,7 +38,7 @@ export function GoalCard({ goal, onPress }: Props) {
       onPressIn={() => (scale.value = withTiming(0.98, { duration: 90 }))}
       onPressOut={() => (scale.value = withTiming(1, { duration: 90 }))}
       style={animatedStyle}
-      className="gap-3 rounded-2xl border border-border bg-card p-4"
+      className="gap-3 rounded-2xl border border-border bg-card p-4 shadow-e1"
       accessibilityRole="button"
       accessibilityLabel={goal.title}
     >
@@ -104,7 +97,10 @@ export function GoalCard({ goal, onPress }: Props) {
             <View />
           )}
           {due && (
-            <Text variant="caption" style={due.state !== 'later' ? { color: DUE_COLOR[due.state] } : undefined}>
+            <Text
+              variant="caption"
+              className={due.state === 'later' ? undefined : due.state === 'overdue' ? 'text-destructive' : 'text-warning'}
+            >
               {due.label}
             </Text>
           )}

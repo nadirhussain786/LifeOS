@@ -38,7 +38,7 @@ export function PriorityPicker({ value, onChange }: { value: TaskPriority; onCha
             }}
             className={cn(
               'flex-1 flex-row items-center justify-center gap-1.5 rounded-full border py-2',
-              !color && (selected ? 'border-border bg-muted' : 'border-border bg-transparent'),
+              !color && (selected ? 'border-border bg-surface' : 'border-border bg-transparent'),
             )}
             style={color ? { borderColor: color, backgroundColor: selected ? color : 'transparent' } : undefined}
           >

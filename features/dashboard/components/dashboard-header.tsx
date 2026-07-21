@@ -19,17 +19,17 @@ export function DashboardHeader() {
   return (
     <View className="flex-row items-center justify-between pb-1" style={{ paddingTop: insets.top + 10 }}>
       <View className="flex-1 gap-0.5">
-        <Text variant="caption" className="font-sora-semibold uppercase tracking-wide" style={{ color: colors[scheme].mutedForeground }}>
+        <Text variant="caption" className="font-sora-semibold uppercase tracking-wide text-muted-foreground">
           {dateLabel}
         </Text>
-        <Text className="font-sora-extrabold text-3xl text-foreground">{greeting}</Text>
+        <Text className="font-sora-extrabold text-3xl tracking-tight text-foreground">{greeting}</Text>
       </View>
       <View className="flex-row items-center gap-2">
         <Pressable
           onPress={() => router.push('/notifications')}
           hitSlop={8}
           accessibilityLabel="Notifications"
-          className="h-11 w-11 items-center justify-center rounded-full bg-muted"
+          className="h-11 w-11 items-center justify-center rounded-full border border-border bg-surface"
         >
           <Bell color={colors[scheme].foreground} size={20} />
           {unread > 0 && (
@@ -45,7 +45,7 @@ export function DashboardHeader() {
           onPress={() => router.push('/settings')}
           hitSlop={8}
           accessibilityLabel="Settings"
-          className="h-11 w-11 items-center justify-center rounded-full bg-muted"
+          className="h-11 w-11 items-center justify-center rounded-full border border-border bg-surface"
         >
           <Settings color={colors[scheme].foreground} size={20} />
         </Pressable>

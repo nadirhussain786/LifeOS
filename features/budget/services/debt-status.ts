@@ -1,5 +1,6 @@
 import { differenceInCalendarDays } from 'date-fns';
 
+import { colors } from '@/constants/design-tokens';
 import type { Debt, DebtStatus, DebtWithStatus } from '@/features/budget/types/budget.types';
 
 /** A debt is "due soon" once it's within this many days of its deadline. */
@@ -46,15 +47,16 @@ export function statusLabel(d: DebtWithStatus): string {
   return `${d.daysLeft} day${d.daysLeft === 1 ? '' : 's'} left`;
 }
 
-/** Status → accent colour (matches the app's traffic-light convention). */
+/** Status → accent colour (semantic tokens for the traffic-light states; the
+ *  neutral "upcoming / no deadline" state keeps the debts sub-identity tint). */
 export function statusTint(status: DebtStatus): string {
   switch (status) {
     case 'overdue':
-      return '#ef4444';
+      return colors.light.error;
     case 'due_soon':
-      return '#f59e0b';
+      return colors.light.warning;
     case 'settled':
-      return '#22c55e';
+      return colors.light.success;
     default:
       return '#6366f1';
   }

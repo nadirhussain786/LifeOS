@@ -69,15 +69,15 @@ export default function NewTaskScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-4 pb-2">
+      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-5 pb-2">
         <Pressable
           onPress={() => router.back()}
           hitSlop={10}
-          className="h-8 w-8 items-center justify-center rounded-full bg-muted"
+          className="h-8 w-8 items-center justify-center rounded-full border border-border bg-surface"
         >
           <X size={17} color={colors[scheme].foreground} />
         </Pressable>
-        <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
+        <Text variant="micro" className="font-sora-semibold">
           New Task
         </Text>
         <View className="h-8 w-8" />
@@ -109,7 +109,7 @@ export default function NewTaskScreen() {
           <Animated.View className="h-[3px] w-16 rounded-full bg-accent" style={underlineStyle} />
         </View>
 
-        <View className="rounded-2xl border border-border bg-card px-4">
+        <View className="rounded-2xl border border-border bg-card px-4 shadow-e1">
           <AttributeRow icon={Flag} label="Priority" isFirst>
             <PriorityPicker value={priority} onChange={setPriority} />
           </AttributeRow>
@@ -146,7 +146,7 @@ export default function NewTaskScreen() {
         <View className="gap-2.5">
           <View className="flex-row items-center gap-1.5">
             <StickyNote size={13} color={colors[scheme].mutedForeground} />
-            <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
+            <Text variant="micro" className="font-sora-semibold">
               Notes
             </Text>
           </View>
@@ -156,7 +156,7 @@ export default function NewTaskScreen() {
             multiline
             placeholder="Add notes…"
             placeholderTextColor={colors[scheme].mutedForeground}
-            className="min-h-24 rounded-2xl border border-border bg-card p-4 text-base text-foreground"
+            className="min-h-24 rounded-2xl border border-border bg-card p-4 text-base text-foreground shadow-e1"
             textAlignVertical="top"
           />
         </View>

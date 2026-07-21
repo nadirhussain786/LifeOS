@@ -5,7 +5,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 
 import { SwipeableRow } from '@/components/ui/swipeable-row';
 import { Text } from '@/components/ui/text';
-import { colors, habitDoneColor } from '@/constants/theme';
+import { colors } from '@/constants/theme';
 import type { HabitWithToday } from '@/features/habits/types/habit.types';
 
 type Props = {
@@ -96,11 +96,9 @@ export function HabitRow({ habit, onPress, onToggleDone, onQuickLog, onArchive, 
             accessibilityRole="checkbox"
             accessibilityState={{ checked: isDone }}
             accessibilityLabel={isDone ? `Mark "${habit.name}" as not done` : `Mark "${habit.name}" as done`}
-            className="h-9 w-9 items-center justify-center rounded-full border"
-            style={{
-              borderColor: isDone ? habitDoneColor : colors[scheme].border,
-              backgroundColor: isDone ? habitDoneColor : 'transparent',
-            }}
+            className={`h-9 w-9 items-center justify-center rounded-full border ${
+              isDone ? 'border-success bg-success' : 'border-border'
+            }`}
           >
             {isDone ? <Check size={17} color="#ffffff" /> : null}
           </Pressable>

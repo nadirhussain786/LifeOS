@@ -48,8 +48,7 @@ export function TodayTasksWidget() {
                 <Pressable
                   key={task.id}
                   onPress={() => completeTask(task.id)}
-                  className="flex-row items-center gap-3 rounded-xl px-3 py-2.5"
-                  style={{ backgroundColor: colors[scheme].muted }}
+                  className="flex-row items-center gap-3 rounded-xl bg-surface px-3 py-2.5"
                 >
                   <View className="h-5 w-5 rounded-full border-2" style={{ borderColor: colors[scheme].border }} />
                   <Text className="flex-1" numberOfLines={1}>

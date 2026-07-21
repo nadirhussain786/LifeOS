@@ -12,6 +12,7 @@ import { LineChart } from '@/components/ui/line-chart';
 import { ProgressRing } from '@/components/ui/progress-ring';
 import { SectionHeader } from '@/components/ui/section-header';
 import { Text } from '@/components/ui/text';
+import { colors as dsColors } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { goalCategoryLabel, goalCategoryMeta } from '@/features/goals/config/goal-categories';
 import { goalPriorityColor } from '@/features/goals/config/goal-priority';
@@ -82,8 +83,8 @@ export default function GoalDetailScreen() {
     <View className="flex-1 bg-background">
       <Stack.Screen options={{ headerShown: false }} />
 
-      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-4 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full bg-muted">
+      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-5 pb-2">
+        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
           <ChevronLeft size={20} color={colors[scheme].foreground} />
         </Pressable>
         <View className="flex-row gap-4">
@@ -101,13 +102,13 @@ export default function GoalDetailScreen() {
         </View>
       </View>
 
-      <ScrollView contentContainerClassName="gap-5 px-4 pt-1 pb-10" showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerClassName="gap-5 px-5 pt-1 pb-10" showsVerticalScrollIndicator={false}>
         {/* Hero: ring + time/pace */}
         <HeroCard tint={meta.tint}>
           <View className="items-center gap-4">
             <ProgressRing progress={goal.progress} size={158} strokeWidth={13} color={WHITE} trackColor={alpha(WHITE, 0.25)}>
               <View className="items-center">
-                <Text className="font-sora-extrabold text-4xl" style={{ color: WHITE }}>
+                <Text className="font-sora-extrabold text-4xl" style={{ color: WHITE, fontVariant: ['tabular-nums'] }}>
                   {formatProgressPercent(goal.progress)}
                 </Text>
                 <View className="flex-row items-center gap-1">
@@ -154,7 +155,10 @@ export default function GoalDetailScreen() {
               </Text>
             </View>
             {due && (
-              <Text variant="caption" style={due.state !== 'later' ? { color: due.state === 'overdue' ? '#dc2828' : '#f59e0b' } : undefined}>
+              <Text
+                variant="caption"
+                className={due.state === 'later' ? undefined : due.state === 'overdue' ? 'text-destructive' : 'text-warning'}
+              >
                 {due.label}
               </Text>
             )}
@@ -163,9 +167,9 @@ export default function GoalDetailScreen() {
 
         {/* Completed banner + reopen */}
         {isCompleted && (
-          <View className="gap-3 rounded-2xl border border-border bg-card p-4">
+          <View className="gap-3 rounded-2xl border border-border bg-card p-4 shadow-e1">
             <View className="flex-row items-center gap-2">
-              <Check size={18} color="#22c55e" />
+              <Check size={18} color={dsColors[scheme].success} />
               <Text className="font-sora-semibold text-foreground">
                 Completed{goal.completedAt ? ` on ${format(goal.completedAt, 'MMM d, yyyy')}` : ''}
               </Text>
@@ -185,7 +189,7 @@ export default function GoalDetailScreen() {
         {/* Progress chart — shown for active and completed goals so the history
             stays visible after finishing. */}
         {showChart && (
-          <View className="gap-3 rounded-2xl border border-border bg-card p-4">
+          <View className="gap-3 rounded-2xl border border-border bg-card p-4 shadow-e1">
             <View className="flex-row items-center justify-between">
               <Text variant="subheading">Progress over time</Text>
               {timeline.hasDeadline && !isCompleted && (
@@ -197,9 +201,9 @@ export default function GoalDetailScreen() {
             </View>
             <LineChart series={series} color={meta.tint} rangeStart={goal.createdAt} rangeEnd={rangeEnd} showExpected={timeline.hasDeadline && !isCompleted} height={150} />
             {!isCompleted && timeline.requiredPerDay !== null && timeline.pace === 'behind' && (
-              <View className="flex-row items-center gap-1.5 rounded-xl px-3 py-2" style={{ backgroundColor: alpha('#f59e0b', 0.12) }}>
-                <TrendingUp size={14} color="#f59e0b" />
-                <Text variant="caption" style={{ color: '#b45309' }}>
+              <View className="flex-row items-center gap-1.5 rounded-xl px-3 py-2" style={{ backgroundColor: alpha(dsColors[scheme].warning, 0.12) }}>
+                <TrendingUp size={14} color={dsColors[scheme].warning} />
+                <Text variant="caption" className="text-warning">
                   Aim for {Math.max(1, Math.round(timeline.requiredPerDay * 100))}% per day to finish on time.
                 </Text>
               </View>
@@ -230,7 +234,7 @@ export default function GoalDetailScreen() {
                 <Pressable
                   key={log.id}
                   onLongPress={() => mutations.removeProgressLog.mutate(log.id)}
-                  className="flex-row items-center gap-3 rounded-2xl border border-border bg-card p-3.5"
+                  className="flex-row items-center gap-3 rounded-2xl border border-border bg-card p-3.5 shadow-e1"
                   accessibilityHint="Long-press to delete this update"
                 >
                   <View className="h-9 w-9 items-center justify-center rounded-full" style={{ backgroundColor: alpha(meta.tint, 0.15) }}>
@@ -240,8 +244,8 @@ export default function GoalDetailScreen() {
                     <Text className="font-sora-medium text-foreground">{log.note?.trim() || 'Progress update'}</Text>
                     <Text variant="caption">{format(log.loggedAt, 'EEE, MMM d · h:mm a')}</Text>
                   </View>
-                  <View className="rounded-full px-2.5 py-1" style={{ backgroundColor: alpha(log.delta >= 0 ? '#22c55e' : '#ef4444', 0.14) }}>
-                    <Text className="font-sora-bold" style={{ color: log.delta >= 0 ? '#16a34a' : '#dc2626', fontSize: 12 }}>
+                  <View className="rounded-full px-2.5 py-1" style={{ backgroundColor: alpha(log.delta >= 0 ? dsColors[scheme].success : dsColors[scheme].error, 0.14) }}>
+                    <Text className="font-sora-bold" style={{ color: log.delta >= 0 ? dsColors[scheme].success : dsColors[scheme].error, fontSize: 12 }}>
                       {formatDelta(log.delta)}
                     </Text>
                   </View>
@@ -254,7 +258,7 @@ export default function GoalDetailScreen() {
         {/* Complete (active only) */}
         {!isCompleted &&
           (readyToComplete ? (
-            <GradientButton label="Complete goal 🎉" tint="#22c55e" icon={Check} onPress={handleComplete} />
+            <GradientButton label="Complete goal 🎉" tint={dsColors[scheme].success} icon={Check} onPress={handleComplete} />
           ) : (
             <Pressable onPress={handleComplete} className="flex-row items-center justify-center gap-2 rounded-2xl border border-border py-4">
               <Check size={18} color={colors[scheme].foreground} />

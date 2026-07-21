@@ -13,6 +13,7 @@ import { ProgressRing } from '@/components/ui/progress-ring';
 import { Segmented } from '@/components/ui/segmented';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { StudyInsightsCard } from '@/features/study/components/study-insights-card';
 import { StudyStatsRow } from '@/features/study/components/study-stats-row';
@@ -25,8 +26,6 @@ import { useStudyMutations } from '@/features/study/hooks/use-study-mutations';
 import { useStudyTimerStore } from '@/features/study/store/study-timer-store';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { alpha } from '@/lib/color';
-
-const STUDY_TINT = '#8b5cf6';
 
 const RANGE_OPTIONS = [
   { value: 'week' as const, label: 'Week' },
@@ -48,6 +47,7 @@ export default function StudyScreen() {
   const [mode, setMode] = useState<StartMode>('pomodoro');
   const [subjectId, setSubjectId] = useState<string | null>(null);
   const [customMinutes, setCustomMinutes] = useState(50);
+  const studyTint = moduleTint('study', scheme);
 
   const { isLoading, stats, trend, breakdown, insights, subjects, settings, dailyGoalSeconds, sessions } = useStudyInsights(
     range === 'week' ? 7 : 30,
@@ -63,7 +63,7 @@ export default function StudyScreen() {
   const chartData: BarDatum[] = trend.map((point) => ({
     label: range === 'week' ? format(parseISO(point.date), 'EEEEE') : format(parseISO(point.date), 'd'),
     value: Math.round(point.seconds / 60),
-    color: point.metGoal ? STUDY_TINT : `${STUDY_TINT}66`,
+    color: point.metGoal ? studyTint : alpha(studyTint, 0.4),
   }));
 
   const start = () => {
@@ -77,7 +77,7 @@ export default function StudyScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 8 }} className="flex-row items-center justify-between px-4 pb-2">
+      <View style={{ paddingTop: insets.top + 8 }} className="flex-row items-center justify-between px-5 pb-2">
         <View className="flex-row items-center gap-1">
           <Pressable onPress={() => router.back()} hitSlop={8} className="-ml-1 p-1" accessibilityLabel="Back">
             <ChevronLeft size={24} color={colors[scheme].foreground} />
@@ -95,17 +95,16 @@ export default function StudyScreen() {
       </View>
 
       {isLoading ? (
-        <View className="gap-3 px-4 pt-2">
+        <View className="gap-5 px-5 pt-2">
           <Skeleton className="h-52 w-full rounded-2xl" />
           <Skeleton className="h-40 w-full rounded-2xl" />
         </View>
       ) : (
-        <ScrollView contentContainerClassName="gap-5 px-4 pb-28" showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerClassName="gap-5 px-5 pb-28" showsVerticalScrollIndicator={false}>
           {timerActive && (
             <Pressable
               onPress={() => router.push('/study/timer')}
-              className="flex-row items-center gap-3 rounded-2xl p-4"
-              style={{ backgroundColor: STUDY_TINT }}
+              className="flex-row items-center gap-3 rounded-2xl bg-study p-4"
             >
               <Timer size={20} color="#ffffff" />
               <Text className="flex-1 font-sora-semibold" style={{ color: '#ffffff' }}>
@@ -117,11 +116,11 @@ export default function StudyScreen() {
             </Pressable>
           )}
 
-          <HeroCard tint={STUDY_TINT}>
+          <HeroCard tint={studyTint}>
             <View className="items-center gap-1">
               <ProgressRing progress={todayRatio} size={168} strokeWidth={14} color="#ffffff" trackColor={alpha('#ffffff', 0.25)}>
                 <View className="items-center">
-                  <Text className="font-sora-extrabold text-3xl" style={{ color: '#ffffff' }}>{formatStudyDuration(stats.todaySeconds)}</Text>
+                  <Text className="font-sora-extrabold text-3xl" style={{ color: '#ffffff', fontVariant: ['tabular-nums'] }}>{formatStudyDuration(stats.todaySeconds)}</Text>
                   <Text style={{ color: alpha('#ffffff', 0.8), fontSize: 12 }}>of {formatStudyDuration(dailyGoalSeconds)} today</Text>
                 </View>
               </ProgressRing>
@@ -129,7 +128,7 @@ export default function StudyScreen() {
           </HeroCard>
 
           {/* Start a session */}
-          <View className="gap-3 rounded-2xl border border-border bg-card p-4">
+          <View className="gap-3 rounded-2xl border border-border bg-card p-4 shadow-e1">
             <Text variant="subheading">Start focusing</Text>
             <SubjectPicker
               subjects={subjects}
@@ -139,10 +138,10 @@ export default function StudyScreen() {
                 addSubject.mutate({ name, colorToken }, { onSuccess: (created) => setSubjectId(created.id) })
               }
             />
-            <Segmented options={MODE_OPTIONS} value={mode} onChange={setMode} activeColor={STUDY_TINT} />
+            <Segmented options={MODE_OPTIONS} value={mode} onChange={setMode} activeColor={studyTint} />
 
             {mode === 'custom' && (
-              <View className="flex-row items-center justify-between rounded-xl bg-muted px-3 py-2">
+              <View className="flex-row items-center justify-between rounded-xl bg-surface px-3 py-2">
                 <Text variant="muted">Focus length</Text>
                 <View className="flex-row items-center gap-4">
                   <Pressable onPress={() => setCustomMinutes((m) => Math.max(5, m - 5))} hitSlop={6}>
@@ -158,7 +157,7 @@ export default function StudyScreen() {
               </View>
             )}
 
-            <GradientButton label={startLabel} tint={STUDY_TINT} icon={Play} onPress={start} />
+            <GradientButton label={startLabel} tint={studyTint} icon={Play} onPress={start} />
           </View>
 
           {sessions.length === 0 ? (
@@ -167,7 +166,7 @@ export default function StudyScreen() {
                 icon={GraduationCap}
                 title="No study time yet"
                 description="Start a focus session above, or log time you studied offline — your streak and stats build from here."
-                tint={STUDY_TINT}
+                tint={studyTint}
                 actionLabel="Log past time"
                 onAction={() => router.push('/study/log')}
               />
@@ -178,18 +177,18 @@ export default function StudyScreen() {
 
               <StudyInsightsCard insights={insights} />
 
-              <View className="gap-3 rounded-2xl border border-border bg-card p-4">
+              <View className="gap-3 rounded-2xl border border-border bg-card p-4 shadow-e1">
                 <View className="flex-row items-center justify-between">
                   <Text variant="subheading">Focus time</Text>
                   <View style={{ width: 160 }}>
-                    <Segmented options={RANGE_OPTIONS} value={range} onChange={setRange} activeColor={STUDY_TINT} />
+                    <Segmented options={RANGE_OPTIONS} value={range} onChange={setRange} activeColor={studyTint} />
                   </View>
                 </View>
-                <BarChart data={chartData} color={STUDY_TINT} goalValue={settings.dailyGoalMinutes} labelEvery={range === 'week' ? 1 : 5} height={170} />
+                <BarChart data={chartData} color={studyTint} goalValue={settings.dailyGoalMinutes} labelEvery={range === 'week' ? 1 : 5} height={170} />
               </View>
 
               {breakdown.length > 0 && (
-                <View className="gap-3 rounded-2xl border border-border bg-card p-4">
+                <View className="gap-3 rounded-2xl border border-border bg-card p-4 shadow-e1">
                   <Text variant="subheading">By subject · this week</Text>
                   <SubjectBreakdownList breakdown={breakdown} />
                 </View>
