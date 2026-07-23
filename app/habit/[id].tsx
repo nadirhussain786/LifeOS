@@ -1,13 +1,14 @@
 import { format, parseISO } from 'date-fns';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { Archive, ChevronLeft, Clock3, Pencil, Trash2 } from 'lucide-react-native';
+import { Archive, Clock3, Pencil, Trash2 } from 'lucide-react-native';
 import { useRef } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { QuickLogSheet } from '@/features/habits/components/quick-log-sheet';
 import { StreakHeatmap } from '@/features/habits/components/streak-heatmap';
@@ -21,7 +22,6 @@ const QUANTIFIED_TYPES = new Set(['count', 'duration', 'distance', 'time']);
 export default function HabitDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
   const quickLogRef = useRef<BottomSheetModal>(null);
 
@@ -51,31 +51,32 @@ export default function HabitDetailScreen() {
     <View className="flex-1 bg-background">
       <Stack.Screen options={{ headerShown: false }} />
 
-      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-5 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
-          <ChevronLeft size={20} color={colors[scheme].foreground} />
-        </Pressable>
-        <View className="flex-row gap-4">
-          <Pressable onPress={() => router.push(`/timeline/${todayKey}`)} hitSlop={8}>
-            <Clock3 size={19} color={colors[scheme].foreground} />
-          </Pressable>
-          <Pressable onPress={() => router.push(`/habit/${habit.id}/edit`)} hitSlop={8}>
-            <Pencil size={19} color={colors[scheme].foreground} />
-          </Pressable>
-          <Pressable onPress={() => archive.mutate(habit.id)} hitSlop={8}>
-            <Archive size={19} color={colors[scheme].foreground} />
-          </Pressable>
-          <Pressable
-            onPress={() => {
-              remove.mutate(habit.id);
-              router.back();
-            }}
-            hitSlop={8}
-          >
-            <Trash2 size={19} color={colors[scheme].destructive} />
-          </Pressable>
-        </View>
-      </View>
+      <ScreenHeader
+        eyebrow="Habit"
+        tint={moduleTint('habit', scheme)}
+        right={
+          <View className="flex-row gap-4">
+            <Pressable onPress={() => router.push(`/timeline/${todayKey}`)} hitSlop={8}>
+              <Clock3 size={19} color={colors[scheme].foreground} />
+            </Pressable>
+            <Pressable onPress={() => router.push(`/habit/${habit.id}/edit`)} hitSlop={8}>
+              <Pencil size={19} color={colors[scheme].foreground} />
+            </Pressable>
+            <Pressable onPress={() => archive.mutate(habit.id)} hitSlop={8}>
+              <Archive size={19} color={colors[scheme].foreground} />
+            </Pressable>
+            <Pressable
+              onPress={() => {
+                remove.mutate(habit.id);
+                router.back();
+              }}
+              hitSlop={8}
+            >
+              <Trash2 size={19} color={colors[scheme].destructive} />
+            </Pressable>
+          </View>
+        }
+      />
 
       <ScrollView contentContainerClassName="gap-6 px-5 pt-3 pb-10" showsVerticalScrollIndicator={false}>
         <View className="flex-row items-center gap-3">

@@ -12,12 +12,12 @@ import {
 } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/ui/empty-state';
 import { Fab } from '@/components/ui/fab';
 import { HeroCard } from '@/components/ui/hero-card';
 import { ProgressBar } from '@/components/ui/progress-bar';
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { SectionHeader } from '@/components/ui/section-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
@@ -39,7 +39,6 @@ export default function BudgetScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
   const budgetTint = moduleTint('budget', scheme);
-  const insets = useSafeAreaInsets();
   const [anchorTime, setAnchorTime] = useState(() => Date.now());
 
   const overview = useBudgetOverview('month', anchorTime);
@@ -57,25 +56,18 @@ export default function BudgetScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 8 }} className="flex-row items-center justify-between px-5 pb-2">
-        <View className="flex-row items-center gap-1">
-          <Pressable onPress={() => router.back()} hitSlop={8} className="-ml-1 p-1" accessibilityLabel="Back">
-            <ChevronLeft size={24} color={colors[scheme].foreground} />
-          </Pressable>
-          <Text variant="heading">Budget</Text>
-        </View>
-        <View className="flex-row items-center gap-4">
-          <Pressable onPress={() => router.push('/budget/reports')} hitSlop={8} accessibilityLabel="Reports">
-            <BarChart3 size={20} color={colors[scheme].foreground} />
-          </Pressable>
-          <Pressable onPress={() => router.push('/budget/settings')} hitSlop={8} accessibilityLabel="Budget settings">
-            <Settings2 size={20} color={colors[scheme].foreground} />
-          </Pressable>
-        </View>
-      </View>
+      <ScreenHeader
+        title="Budget"
+        eyebrow="Finance"
+        tint={budgetTint}
+        actions={[
+          { icon: BarChart3, label: 'Reports', onPress: () => router.push('/budget/reports') },
+          { icon: Settings2, label: 'Budget settings', onPress: () => router.push('/budget/settings') },
+        ]}
+      />
 
       {isLoading ? (
-        <View className="gap-3 px-4 pt-2">
+        <View className="gap-3 px-5 pt-2">
           <Skeleton className="h-40 w-full rounded-2xl" />
           <Skeleton className="h-24 w-full rounded-2xl" />
         </View>
@@ -89,7 +81,7 @@ export default function BudgetScreen() {
           onAction={() => router.push('/budget/transaction')}
         />
       ) : (
-        <ScrollView contentContainerClassName="gap-5 px-4 pb-28" showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerClassName="gap-5 px-5 pb-28" showsVerticalScrollIndicator={false}>
           {/* Month selector */}
           <View className="flex-row items-center justify-between">
             <Pressable onPress={() => setAnchorTime(subMonths(anchor, 1).getTime())} hitSlop={8} className="h-9 w-9 items-center justify-center rounded-full bg-muted">

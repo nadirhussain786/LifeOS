@@ -1,13 +1,13 @@
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-import { Bell, ChevronLeft, Minus, Plus, Target } from 'lucide-react-native';
+import { Bell, Minus, Plus, Target } from 'lucide-react-native';
 import { useState } from 'react';
 import { Alert, Pressable, ScrollView, Switch, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AttributeRow } from '@/components/ui/attribute-row';
 import { Button } from '@/components/ui/button';
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
 import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
@@ -49,7 +49,6 @@ function HourStepper({ label, hour, onChange }: { label: string; hour: number; o
 
 export default function WaterSettingsScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
   const waterTint = moduleTint('water', scheme);
 
@@ -89,15 +88,7 @@ export default function WaterSettingsScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-5 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
-          <ChevronLeft size={20} color={colors[scheme].foreground} />
-        </Pressable>
-        <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-          Water Settings
-        </Text>
-        <View className="h-8 w-8" />
-      </View>
+      <ScreenHeader title="Water Settings" eyebrow="Water" tint={waterTint} />
 
       <ScrollView contentContainerClassName="gap-6 px-5 pt-3 pb-10" showsVerticalScrollIndicator={false}>
         <CategoryOffNotice category="water" />

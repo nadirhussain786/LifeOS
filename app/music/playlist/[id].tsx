@@ -1,12 +1,12 @@
 import { FlashList } from '@shopify/flash-list';
 import * as Haptics from 'expo-haptics';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { ChevronLeft, ListMusic, Play, Plus, Trash2 } from 'lucide-react-native';
+import { ListMusic, Play, Plus, Trash2 } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { Alert, Pressable, TextInput, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/ui/empty-state';
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import { MUSIC_TINT, SongRow } from '@/features/music/components/song-row';
@@ -19,7 +19,6 @@ const AUTOSAVE_DELAY_MS = 500;
 export default function PlaylistDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
 
   const { data: playlist } = usePlaylist(id);
@@ -59,14 +58,11 @@ export default function PlaylistDetailScreen() {
     <View className="flex-1 bg-background">
       <Stack.Screen options={{ headerShown: false }} />
 
-      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-4 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
-          <ChevronLeft size={20} color={colors[scheme].foreground} />
-        </Pressable>
-        <Pressable onPress={handleDeletePlaylist} hitSlop={8}>
-          <Trash2 size={19} color={colors[scheme].destructive} />
-        </Pressable>
-      </View>
+      <ScreenHeader
+        eyebrow="Playlist"
+        tint={MUSIC_TINT}
+        actions={[{ icon: Trash2, label: 'Delete playlist', onPress: handleDeletePlaylist, tint: colors[scheme].destructive }]}
+      />
 
       <View className="gap-3 px-5 pt-1">
         <TextInput

@@ -1,12 +1,12 @@
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
-import { ArrowUpDown, ChevronLeft, Search, Target } from 'lucide-react-native';
+import { ArrowUpDown, Search, Target } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/ui/empty-state';
 import { Fab } from '@/components/ui/fab';
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { Segmented } from '@/components/ui/segmented';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
@@ -39,7 +39,6 @@ const SORT_CYCLE: GoalSort[] = ['manual', 'progress', 'due', 'priority', 'create
 export default function GoalsScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
-  const insets = useSafeAreaInsets();
   const [showSearch, setShowSearch] = useState(false);
 
   const { data: goals = [], isLoading } = useGoals();
@@ -93,23 +92,15 @@ export default function GoalsScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 8 }} className="flex-row items-center justify-between px-5 pb-2">
-        <View className="flex-row items-center gap-1">
-          <Pressable onPress={() => router.back()} hitSlop={8} className="-ml-1 p-1" accessibilityLabel="Back">
-            <ChevronLeft size={24} color={colors[scheme].foreground} />
-          </Pressable>
-          <Text variant="heading">Goals</Text>
-        </View>
-        <View className="flex-row items-center gap-4">
-          <Pressable onPress={() => setShowSearch((s) => !s)} hitSlop={8} accessibilityLabel="Search">
-            <Search size={20} color={colors[scheme].foreground} />
-          </Pressable>
-          <Pressable onPress={cycleSort} hitSlop={8} className="flex-row items-center gap-1" accessibilityLabel="Change sort">
-            <ArrowUpDown size={18} color={colors[scheme].foreground} />
-            <Text variant="caption">{SORT_LABELS[sort]}</Text>
-          </Pressable>
-        </View>
-      </View>
+      <ScreenHeader
+        title="Goals"
+        eyebrow="Focus & Growth"
+        tint={moduleTint('goals', scheme)}
+        actions={[
+          { icon: Search, label: 'Search', onPress: () => setShowSearch((s) => !s) },
+          { icon: ArrowUpDown, label: 'Change sort', onPress: cycleSort, text: SORT_LABELS[sort] },
+        ]}
+      />
 
       {isLoading ? (
         <View className="gap-3 px-5 pt-2">

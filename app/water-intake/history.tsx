@@ -1,11 +1,11 @@
 import { format, isToday, parseISO } from 'date-fns';
 import { useRouter } from 'expo-router';
-import { ChevronLeft, GlassWater } from 'lucide-react-native';
-import { Pressable, ScrollView, View } from 'react-native';
+import { GlassWater, Settings2 } from 'lucide-react-native';
+import { ScrollView, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/ui/empty-state';
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
 import { moduleTint } from '@/constants/design-tokens';
@@ -17,7 +17,6 @@ const HISTORY_DAYS = 14;
 
 export default function WaterHistoryScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
   const waterTint = moduleTint('water', scheme);
   const goalMl = useWaterSettingsStore((state) => state.goalMl);
@@ -27,15 +26,14 @@ export default function WaterHistoryScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-5 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
-          <ChevronLeft size={20} color={colors[scheme].foreground} />
-        </Pressable>
-        <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-          Water History
-        </Text>
-        <View className="h-8 w-8" />
-      </View>
+      <ScreenHeader
+        title="Water"
+        eyebrow="Wellbeing"
+        tint={waterTint}
+        actions={[
+          { icon: Settings2, label: 'Water settings', onPress: () => router.push('/water-intake/settings') },
+        ]}
+      />
 
       {isLoading || !history ? (
         <View className="gap-2.5 px-5 pt-4">

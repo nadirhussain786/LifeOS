@@ -1,11 +1,11 @@
 import { set } from 'date-fns';
 import { useRouter } from 'expo-router';
-import { BellRing, ChevronLeft, Minus, Moon, Plus, Sun } from 'lucide-react-native';
+import { BellRing, Minus, Moon, Plus, Sun } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, Switch, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/button';
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
 import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
@@ -36,7 +36,6 @@ function toHHmm(date: Date): string {
 
 export default function SleepSettingsScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
   const sleepTint = moduleTint('sleep', scheme);
   const { data: settings } = useSleepSettings();
@@ -65,12 +64,7 @@ export default function SleepSettingsScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 8 }} className="flex-row items-center gap-1 px-5 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={8} className="-ml-1 p-1" accessibilityLabel="Back">
-          <ChevronLeft size={24} color={colors[scheme].foreground} />
-        </Pressable>
-        <Text variant="heading">Sleep Goal</Text>
-      </View>
+      <ScreenHeader title="Sleep Goal" eyebrow="Sleep" tint={sleepTint} />
 
       <View className="gap-5 px-5 pt-3">
         <View className="items-center gap-4 rounded-2xl border border-border bg-card p-6 shadow-e1">

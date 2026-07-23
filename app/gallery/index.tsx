@@ -2,14 +2,14 @@ import { format } from 'date-fns';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import * as Sharing from 'expo-sharing';
-import { ChevronLeft, ChevronRight, GitCompareArrows, Heart, Images, LayoutGrid, Plus } from 'lucide-react-native';
+import { ChevronRight, GitCompareArrows, Heart, Images, LayoutGrid, Plus } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import { Alert, Dimensions, Pressable, ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/ui/empty-state';
 import { Fab } from '@/components/ui/fab';
 import { HeroCard } from '@/components/ui/hero-card';
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
@@ -27,7 +27,6 @@ const GALLERY_TINT = '#ec4899';
 export default function GalleryScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
-  const insets = useSafeAreaInsets();
   const [addOpen, setAddOpen] = useState(false);
 
   const { data: albums = [], isLoading } = useAlbums();
@@ -63,15 +62,10 @@ export default function GalleryScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 8 }} className="flex-row items-center gap-1 px-4 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={8} className="-ml-1 p-1" accessibilityLabel="Back">
-          <ChevronLeft size={24} color={colors[scheme].foreground} />
-        </Pressable>
-        <Text variant="heading">Progress</Text>
-      </View>
+      <ScreenHeader title="Progress" eyebrow="Memories & Media" tint={GALLERY_TINT} />
 
       {isLoading ? (
-        <View className="gap-3 px-4 pt-2">
+        <View className="gap-3 px-5 pt-2">
           <Skeleton className="h-40 w-full rounded-2xl" />
           <Skeleton className="h-48 w-full rounded-2xl" />
         </View>

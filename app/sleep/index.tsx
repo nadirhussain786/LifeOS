@@ -1,19 +1,19 @@
 import { format, parseISO } from 'date-fns';
 import { useRouter } from 'expo-router';
-import { ChevronLeft, Hourglass, Moon, Settings2, Sun } from 'lucide-react-native';
+import { Hourglass, Moon, Settings2, Sun } from 'lucide-react-native';
 import { useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ScrollView, View } from 'react-native';
 
 import { BarChart, type BarDatum } from '@/components/ui/bar-chart';
+import { EmptyState } from '@/components/ui/empty-state';
 import { Fab } from '@/components/ui/fab';
 import { HeroCard } from '@/components/ui/hero-card';
 import { ProgressRing } from '@/components/ui/progress-ring';
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { Segmented } from '@/components/ui/segmented';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
 import { moduleTint } from '@/constants/design-tokens';
-import { colors } from '@/constants/theme';
 import { SleepSessionCard } from '@/features/sleep/components/sleep-session-card';
 import { SleepStatsRow } from '@/features/sleep/components/sleep-stats-row';
 import { SleepTrackerCard } from '@/features/sleep/components/sleep-tracker-card';
@@ -30,7 +30,6 @@ const RANGE_OPTIONS = [
 export default function SleepScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
-  const insets = useSafeAreaInsets();
   const [range, setRange] = useState<'week' | 'month'>('week');
   const sleepTint = moduleTint('sleep', scheme);
 
@@ -46,17 +45,14 @@ export default function SleepScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 8 }} className="flex-row items-center justify-between px-5 pb-2">
-        <View className="flex-row items-center gap-1">
-          <Pressable onPress={() => router.back()} hitSlop={8} className="-ml-1 p-1" accessibilityLabel="Back">
-            <ChevronLeft size={24} color={colors[scheme].foreground} />
-          </Pressable>
-          <Text variant="heading">Sleep</Text>
-        </View>
-        <Pressable onPress={() => router.push('/sleep/settings')} hitSlop={8} accessibilityLabel="Sleep settings">
-          <Settings2 size={20} color={colors[scheme].foreground} />
-        </Pressable>
-      </View>
+      <ScreenHeader
+        title="Sleep"
+        eyebrow="Wellbeing"
+        tint={sleepTint}
+        actions={[
+          { icon: Settings2, label: 'Sleep settings', onPress: () => router.push('/sleep/settings') },
+        ]}
+      />
 
       {isLoading ? (
         <View className="gap-5 px-5 pt-2">
@@ -69,19 +65,15 @@ export default function SleepScreen() {
           <SleepTrackerCard />
 
           {sessions.length === 0 ? (
-            <View className="items-center gap-2 rounded-2xl border border-dashed border-border px-6 py-8">
-              <Moon size={26} color={sleepTint} strokeWidth={1.75} />
-              <Text variant="subheading" className="text-center">
-                No nights logged yet
-              </Text>
-              <Text variant="muted" className="text-center">
-                Use the tracker above tonight, or log a past night to see your patterns and streaks.
-              </Text>
-              <Pressable onPress={() => router.push('/sleep/log')} className="mt-1 rounded-full bg-sleep px-4 py-2">
-                <Text className="font-sora-semibold" style={{ color: '#ffffff' }}>
-                  Log a past night
-                </Text>
-              </Pressable>
+            <View style={{ minHeight: 300 }}>
+              <EmptyState
+                icon={Moon}
+                title="No nights logged yet"
+                description="Use the tracker above tonight, or log a past night to see your patterns and streaks."
+                tint={sleepTint}
+                actionLabel="Log a past night"
+                onAction={() => router.push('/sleep/log')}
+              />
             </View>
           ) : (
             <>

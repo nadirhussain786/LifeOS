@@ -2,14 +2,14 @@ import DateTimePicker, { type DateTimePickerEvent } from '@react-native-communit
 import { format, set } from 'date-fns';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-import { Bell, ChevronLeft, Clock } from 'lucide-react-native';
+import { Bell, Clock } from 'lucide-react-native';
 import { useState } from 'react';
 import { Alert, Platform, Pressable, ScrollView, Switch, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AttributeRow } from '@/components/ui/attribute-row';
 import { Button } from '@/components/ui/button';
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
 import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
@@ -20,7 +20,6 @@ import { notificationsAvailable } from '@/lib/notifications';
 
 export default function JournalReminderSettingsScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
 
   const settings = useJournalReminderStore((state) => state.settings);
@@ -62,15 +61,7 @@ export default function JournalReminderSettingsScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-5 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
-          <ChevronLeft size={20} color={colors[scheme].foreground} />
-        </Pressable>
-        <Text variant="micro" className="font-sora-semibold">
-          Journal Reminder
-        </Text>
-        <View className="h-8 w-8" />
-      </View>
+      <ScreenHeader title="Journal Reminder" eyebrow="Journal" tint={moduleTint('journal', scheme)} />
 
       <ScrollView contentContainerClassName="gap-6 px-5 pt-3 pb-10" showsVerticalScrollIndicator={false}>
         <CategoryOffNotice category="journal" />

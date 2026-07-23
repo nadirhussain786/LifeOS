@@ -1,10 +1,10 @@
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
-import { ChevronLeft, ListMusic, Play, Plus, Shuffle } from 'lucide-react-native';
+import { ListMusic, Play, Plus, Shuffle } from 'lucide-react-native';
 import { Pressable, ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/ui/empty-state';
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
@@ -18,7 +18,6 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 export default function MusicScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
-  const insets = useSafeAreaInsets();
 
   const { data: songs = [], isLoading } = useSongs();
   const { data: playlists = [] } = usePlaylists();
@@ -33,25 +32,24 @@ export default function MusicScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 8 }} className="flex-row items-center justify-between px-4 pb-2">
-        <View className="flex-row items-center gap-1">
-          <Pressable onPress={() => router.back()} hitSlop={8} className="-ml-1 p-1" accessibilityLabel="Back">
-            <ChevronLeft size={24} color={colors[scheme].foreground} />
+      <ScreenHeader
+        title="Music"
+        eyebrow="Library"
+        tint={MUSIC_TINT}
+        right={
+          <Pressable
+            onPress={handleAddSongs}
+            disabled={importFromDevice.isPending}
+            className="flex-row items-center gap-1.5 rounded-full px-3 py-1.5"
+            style={{ backgroundColor: MUSIC_TINT, opacity: importFromDevice.isPending ? 0.6 : 1 }}
+          >
+            <Plus size={15} color="#ffffff" />
+            <Text variant="caption" className="font-sora-semibold" style={{ color: '#ffffff' }}>
+              {importFromDevice.isPending ? 'Adding…' : 'Add songs'}
+            </Text>
           </Pressable>
-          <Text variant="heading">Music</Text>
-        </View>
-        <Pressable
-          onPress={handleAddSongs}
-          disabled={importFromDevice.isPending}
-          className="flex-row items-center gap-1.5 rounded-full px-3 py-1.5"
-          style={{ backgroundColor: MUSIC_TINT, opacity: importFromDevice.isPending ? 0.6 : 1 }}
-        >
-          <Plus size={15} color="#ffffff" />
-          <Text variant="caption" className="font-sora-semibold" style={{ color: '#ffffff' }}>
-            {importFromDevice.isPending ? 'Adding…' : 'Add songs'}
-          </Text>
-        </Pressable>
-      </View>
+        }
+      />
 
       {isLoading ? (
         <View className="gap-2.5 px-4">

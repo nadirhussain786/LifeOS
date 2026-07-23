@@ -1,11 +1,12 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { ChevronLeft, Trash2 } from 'lucide-react-native';
+import { Trash2 } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { Pressable, TextInput, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { TextInput, View } from 'react-native';
 
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
+import { MUSIC_TINT } from '@/features/music/components/song-row';
 import { formatDuration } from '@/features/music/utils/format-duration';
 import { useSongMutations, useSongs } from '@/features/music/hooks/use-songs';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -15,7 +16,6 @@ const AUTOSAVE_DELAY_MS = 500;
 export default function SongDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
 
   const { data: songs = [] } = useSongs();
@@ -50,20 +50,21 @@ export default function SongDetailScreen() {
     <View className="flex-1 bg-background">
       <Stack.Screen options={{ headerShown: false }} />
 
-      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-4 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
-          <ChevronLeft size={20} color={colors[scheme].foreground} />
-        </Pressable>
-        <Pressable
-          onPress={() => {
-            remove.mutate(song.id);
-            router.back();
-          }}
-          hitSlop={8}
-        >
-          <Trash2 size={19} color={colors[scheme].destructive} />
-        </Pressable>
-      </View>
+      <ScreenHeader
+        eyebrow="Song"
+        tint={MUSIC_TINT}
+        actions={[
+          {
+            icon: Trash2,
+            label: 'Delete song',
+            onPress: () => {
+              remove.mutate(song.id);
+              router.back();
+            },
+            tint: colors[scheme].destructive,
+          },
+        ]}
+      />
 
       <View className="gap-5 px-5 pt-2">
         <View className="gap-1.5">

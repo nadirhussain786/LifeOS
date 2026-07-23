@@ -3,14 +3,14 @@ import { differenceInCalendarDays, format } from 'date-fns';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import * as Sharing from 'expo-sharing';
-import { Bookmark, ChevronLeft, GitCompareArrows, Share2, Sparkles, TrendingUp } from 'lucide-react-native';
+import { Bookmark, GitCompareArrows, Share2, Sparkles, TrendingUp } from 'lucide-react-native';
 import { useRef, useState } from 'react';
 import { Alert, Dimensions, Image, Pressable, ScrollView, TextInput, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { captureRef } from 'react-native-view-shot';
 
 import { EmptyState } from '@/components/ui/empty-state';
 import { GradientButton } from '@/components/ui/gradient-button';
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { Segmented } from '@/components/ui/segmented';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
@@ -30,7 +30,6 @@ type Layout = 'split' | 'slider';
 
 export default function CompareScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
   const { data: photos = [] } = usePhotos();
 
@@ -109,7 +108,7 @@ export default function CompareScreen() {
   if (stills.length < 2) {
     return (
       <View className="flex-1 bg-background">
-        <Header insets={insets} scheme={scheme} onBack={() => router.back()} />
+        <ScreenHeader title="Before & After" eyebrow="Progress" tint={COMPARE_TINT} />
         <EmptyState
           icon={GitCompareArrows}
           title="Add more photos"
@@ -124,7 +123,7 @@ export default function CompareScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <Header insets={insets} scheme={scheme} onBack={() => router.back()} />
+      <ScreenHeader title="Before & After" eyebrow="Progress" tint={COMPARE_TINT} />
 
       <ScrollView contentContainerClassName="gap-5 px-4 pb-10" showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         {/* The shareable Progress Post card */}
@@ -298,25 +297,6 @@ export default function CompareScreen() {
           </View>
         </View>
       </ScrollView>
-    </View>
-  );
-}
-
-function Header({
-  insets,
-  scheme,
-  onBack,
-}: {
-  insets: { top: number };
-  scheme: 'light' | 'dark';
-  onBack: () => void;
-}) {
-  return (
-    <View style={{ paddingTop: insets.top + 8 }} className="flex-row items-center gap-1 px-4 pb-2">
-      <Pressable onPress={onBack} hitSlop={8} className="-ml-1 p-1" accessibilityLabel="Back">
-        <ChevronLeft size={24} color={colors[scheme].foreground} />
-      </Pressable>
-      <Text variant="heading">Before & After</Text>
     </View>
   );
 }

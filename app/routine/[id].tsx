@@ -1,12 +1,13 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { ChevronDown, ChevronLeft, ChevronUp, Plus, Trash2, X } from 'lucide-react-native';
+import { ChevronDown, ChevronUp, Plus, Trash2, X } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { useRoutineMutations } from '@/features/habits/hooks/use-routine-mutations';
 import { useRoutines } from '@/features/habits/hooks/use-routines';
@@ -17,7 +18,6 @@ const AUTOSAVE_DELAY_MS = 500;
 export default function RoutineDetailScreen() {
   const { id: routineId } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
 
   const { data: routines = [] } = useRoutines();
@@ -54,23 +54,22 @@ export default function RoutineDetailScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-4 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full bg-muted">
-          <ChevronLeft size={20} color={colors[scheme].foreground} />
-        </Pressable>
-        <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-          Edit Routine
-        </Text>
-        <Pressable
-          onPress={() => {
-            remove.mutate(routine.id);
-            router.back();
-          }}
-          hitSlop={8}
-        >
-          <Trash2 size={19} color={colors[scheme].destructive} />
-        </Pressable>
-      </View>
+      <ScreenHeader
+        title="Edit Routine"
+        eyebrow="Routine"
+        tint={moduleTint('habit', scheme)}
+        actions={[
+          {
+            icon: Trash2,
+            label: 'Delete routine',
+            onPress: () => {
+              remove.mutate(routine.id);
+              router.back();
+            },
+            tint: colors[scheme].destructive,
+          },
+        ]}
+      />
 
       <ScrollView contentContainerClassName="gap-6 px-5 pt-3 pb-10" keyboardShouldPersistTaps="handled">
         <TextInput

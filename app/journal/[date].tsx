@@ -3,15 +3,16 @@ import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Location from 'expo-location';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { ChevronLeft, Clock3, MapPin, Trash2 } from 'lucide-react-native';
+import { Clock3, MapPin, Trash2 } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AttachmentStrip } from '@/components/ui/attachment-strip';
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
 import { VoiceNoteRecorder } from '@/components/ui/voice-note-recorder';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { MoodCheckin } from '@/features/journal/components/mood-checkin';
 import { ReflectionPromptList } from '@/features/journal/components/reflection-prompt-list';
@@ -31,7 +32,6 @@ const AUTOSAVE_DELAY_MS = 500;
 export default function JournalEntryScreen() {
   const { date: entryDate } = useLocalSearchParams<{ date: string }>();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
   const keyboardHeight = useKeyboardHeight();
 
@@ -97,20 +97,21 @@ export default function JournalEntryScreen() {
           the page itself reflects how the day felt, rather than staying neutral chrome regardless. */}
       <LinearGradient colors={[wash, 'transparent']} style={[StyleSheet.absoluteFillObject, { height: 240 }]} />
 
-      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-5 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
-          <ChevronLeft size={20} color={colors[scheme].foreground} />
-        </Pressable>
-        <Pressable
-          onPress={() => {
-            remove.mutate(entry.id);
-            router.back();
-          }}
-          hitSlop={8}
-        >
-          <Trash2 size={19} color={colors[scheme].destructive} />
-        </Pressable>
-      </View>
+      <ScreenHeader
+        eyebrow="Journal"
+        tint={moduleTint('journal', scheme)}
+        actions={[
+          {
+            icon: Trash2,
+            label: 'Delete entry',
+            onPress: () => {
+              remove.mutate(entry.id);
+              router.back();
+            },
+            tint: colors[scheme].destructive,
+          },
+        ]}
+      />
 
       <View className="gap-1 px-5 pb-5">
         <View className="flex-row items-center justify-between">

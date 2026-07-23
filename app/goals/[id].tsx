@@ -1,18 +1,18 @@
 import { format } from 'date-fns';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { Archive, Check, ChevronLeft, Pencil, Plus, RotateCcw, TrendingUp, Trash2 } from 'lucide-react-native';
+import { Archive, Check, Pencil, Plus, RotateCcw, TrendingUp, Trash2 } from 'lucide-react-native';
 import { useState } from 'react';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CelebrationOverlay } from '@/components/ui/celebration-overlay';
 import { GradientButton } from '@/components/ui/gradient-button';
 import { HeroCard } from '@/components/ui/hero-card';
 import { LineChart } from '@/components/ui/line-chart';
 import { ProgressRing } from '@/components/ui/progress-ring';
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { SectionHeader } from '@/components/ui/section-header';
 import { Text } from '@/components/ui/text';
-import { colors as dsColors } from '@/constants/design-tokens';
+import { colors as dsColors, moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { goalCategoryLabel, goalCategoryMeta } from '@/features/goals/config/goal-categories';
 import { goalPriorityColor } from '@/features/goals/config/goal-priority';
@@ -37,7 +37,6 @@ const WHITE = '#ffffff';
 export default function GoalDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
   const [celebrate, setCelebrate] = useState(false);
 
@@ -83,24 +82,25 @@ export default function GoalDetailScreen() {
     <View className="flex-1 bg-background">
       <Stack.Screen options={{ headerShown: false }} />
 
-      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-5 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
-          <ChevronLeft size={20} color={colors[scheme].foreground} />
-        </Pressable>
-        <View className="flex-row gap-4">
-          <Pressable onPress={() => router.push(`/goals/${goal.id}/edit`)} hitSlop={8} accessibilityLabel="Edit">
-            <Pencil size={19} color={colors[scheme].foreground} />
-          </Pressable>
-          {!isCompleted && (
-            <Pressable onPress={() => (mutations.archive.mutate(goal.id), router.back())} hitSlop={8} accessibilityLabel="Archive">
-              <Archive size={19} color={colors[scheme].foreground} />
+      <ScreenHeader
+        eyebrow="Goals"
+        tint={moduleTint('goals', scheme)}
+        right={
+          <View className="flex-row gap-4">
+            <Pressable onPress={() => router.push(`/goals/${goal.id}/edit`)} hitSlop={8} accessibilityLabel="Edit">
+              <Pencil size={19} color={colors[scheme].foreground} />
             </Pressable>
-          )}
-          <Pressable onPress={confirmDelete} hitSlop={8} accessibilityLabel="Delete">
-            <Trash2 size={19} color={colors[scheme].destructive} />
-          </Pressable>
-        </View>
-      </View>
+            {!isCompleted && (
+              <Pressable onPress={() => (mutations.archive.mutate(goal.id), router.back())} hitSlop={8} accessibilityLabel="Archive">
+                <Archive size={19} color={colors[scheme].foreground} />
+              </Pressable>
+            )}
+            <Pressable onPress={confirmDelete} hitSlop={8} accessibilityLabel="Delete">
+              <Trash2 size={19} color={colors[scheme].destructive} />
+            </Pressable>
+          </View>
+        }
+      />
 
       <ScrollView contentContainerClassName="gap-5 px-5 pt-1 pb-10" showsVerticalScrollIndicator={false}>
         {/* Hero: ring + time/pace */}

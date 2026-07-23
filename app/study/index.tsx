@@ -1,15 +1,15 @@
 import { format, parseISO } from 'date-fns';
 import { useRouter } from 'expo-router';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
-import { ChevronLeft, GraduationCap, Minus, NotebookPen, Play, Plus, Settings2, Timer } from 'lucide-react-native';
+import { GraduationCap, Minus, NotebookPen, Play, Plus, Settings2, Timer } from 'lucide-react-native';
 import { useState } from 'react';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BarChart, type BarDatum } from '@/components/ui/bar-chart';
 import { EmptyState } from '@/components/ui/empty-state';
 import { GradientButton } from '@/components/ui/gradient-button';
 import { HeroCard } from '@/components/ui/hero-card';
 import { ProgressRing } from '@/components/ui/progress-ring';
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { Segmented } from '@/components/ui/segmented';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
@@ -42,7 +42,6 @@ type StartMode = 'pomodoro' | 'custom' | 'stopwatch';
 export default function StudyScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
-  const insets = useSafeAreaInsets();
   const [range, setRange] = useState<'week' | 'month'>('week');
   const [mode, setMode] = useState<StartMode>('pomodoro');
   const [subjectId, setSubjectId] = useState<string | null>(null);
@@ -77,22 +76,15 @@ export default function StudyScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 8 }} className="flex-row items-center justify-between px-5 pb-2">
-        <View className="flex-row items-center gap-1">
-          <Pressable onPress={() => router.back()} hitSlop={8} className="-ml-1 p-1" accessibilityLabel="Back">
-            <ChevronLeft size={24} color={colors[scheme].foreground} />
-          </Pressable>
-          <Text variant="heading">Study</Text>
-        </View>
-        <View className="flex-row items-center gap-4">
-          <Pressable onPress={() => router.push('/study/log')} hitSlop={8} accessibilityLabel="Log past study time">
-            <NotebookPen size={20} color={colors[scheme].foreground} />
-          </Pressable>
-          <Pressable onPress={() => router.push('/study/settings')} hitSlop={8} accessibilityLabel="Study settings">
-            <Settings2 size={20} color={colors[scheme].foreground} />
-          </Pressable>
-        </View>
-      </View>
+      <ScreenHeader
+        title="Study"
+        eyebrow="Focus"
+        tint={studyTint}
+        actions={[
+          { icon: NotebookPen, label: 'Log past study time', onPress: () => router.push('/study/log') },
+          { icon: Settings2, label: 'Study settings', onPress: () => router.push('/study/settings') },
+        ]}
+      />
 
       {isLoading ? (
         <View className="gap-5 px-5 pt-2">

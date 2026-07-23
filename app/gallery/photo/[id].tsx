@@ -1,11 +1,11 @@
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { format } from 'date-fns';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { CalendarDays, ChevronLeft, Heart, Trash2, X } from 'lucide-react-native';
+import { CalendarDays, Heart, Trash2, X } from 'lucide-react-native';
 import { useState } from 'react';
 import { Alert, Dimensions, Image, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import { GalleryVideo } from '@/features/gallery/components/gallery-video';
@@ -17,7 +17,6 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 export default function PhotoDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
   const { data: photo } = usePhoto(id);
   const { editPhoto, toggleFavorite, removePhoto } = useGalleryMutations();
@@ -74,19 +73,20 @@ export default function PhotoDetailScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-4 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
-          <ChevronLeft size={20} color={colors[scheme].foreground} />
-        </Pressable>
-        <View className="flex-row items-center gap-4">
-          <Pressable onPress={() => toggleFavorite.mutate({ id: photo.id, isFavorite: !photo.isFavorite })} hitSlop={8} accessibilityLabel="Favorite">
-            <Heart size={22} color="#ef4444" fill={photo.isFavorite ? '#ef4444' : 'transparent'} />
-          </Pressable>
-          <Pressable onPress={confirmDelete} hitSlop={8} accessibilityLabel="Delete">
-            <Trash2 size={20} color={colors[scheme].destructive} />
-          </Pressable>
-        </View>
-      </View>
+      <ScreenHeader
+        eyebrow="Progress"
+        tint="#ec4899"
+        right={
+          <View className="flex-row items-center gap-4">
+            <Pressable onPress={() => toggleFavorite.mutate({ id: photo.id, isFavorite: !photo.isFavorite })} hitSlop={8} accessibilityLabel="Favorite">
+              <Heart size={22} color="#ef4444" fill={photo.isFavorite ? '#ef4444' : 'transparent'} />
+            </Pressable>
+            <Pressable onPress={confirmDelete} hitSlop={8} accessibilityLabel="Delete">
+              <Trash2 size={20} color={colors[scheme].destructive} />
+            </Pressable>
+          </View>
+        }
+      />
 
       <ScrollView contentContainerClassName="gap-5 pb-10" keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         {photo.mediaType === 'video' ? (
