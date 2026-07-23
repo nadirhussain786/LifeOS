@@ -21,7 +21,7 @@ import { ProgressBar } from '@/components/ui/progress-bar';
 import { SectionHeader } from '@/components/ui/section-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
-import { colors as palette, moduleTint } from '@/constants/design-tokens';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { ACCOUNTS } from '@/features/budget/config/budget-config';
 import { ExpenseDonut } from '@/features/budget/components/expense-donut';
@@ -84,7 +84,7 @@ export default function BudgetScreen() {
           icon={Wallet}
           title="Track your money"
           description="Add your income and expenses to see where it goes and grow your savings."
-          tint={BUDGET_TINT}
+          tint={budgetTint}
           actionLabel="Add transaction"
           onAction={() => router.push('/budget/transaction')}
         />
@@ -107,7 +107,7 @@ export default function BudgetScreen() {
           </View>
 
           {/* Balance hero */}
-          <HeroCard tint={BUDGET_TINT}>
+          <HeroCard tint={budgetTint}>
             <View className="gap-4">
               <View className="items-center gap-1">
                 <Text className="font-sora-semibold uppercase tracking-wide" style={{ color: alpha('#ffffff', 0.85), fontSize: 12 }}>
@@ -202,8 +202,8 @@ export default function BudgetScreen() {
             <View className="flex-row items-center justify-between">
               <Text variant="subheading">Savings goals</Text>
               <Pressable onPress={() => router.push('/budget/savings/new')} hitSlop={8} className="flex-row items-center gap-1">
-                <Plus size={15} color={BUDGET_TINT} />
-                <Text variant="caption" style={{ color: BUDGET_TINT }} className="font-sora-semibold">
+                <Plus size={15} color={budgetTint} />
+                <Text variant="caption" style={{ color: budgetTint }} className="font-sora-semibold">
                   New
                 </Text>
               </Pressable>
@@ -237,7 +237,7 @@ export default function BudgetScreen() {
               title="Transactions"
               actionLabel={periodTransactions.length > 0 ? 'View all' : undefined}
               onAction={periodTransactions.length > 0 ? () => router.push('/budget/transactions') : undefined}
-              actionTint={BUDGET_TINT}
+              actionTint={budgetTint}
             />
             {periodTransactions.length === 0 ? (
               <Text variant="muted">No transactions this month yet.</Text>

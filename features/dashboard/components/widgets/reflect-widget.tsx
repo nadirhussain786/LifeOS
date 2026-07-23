@@ -7,6 +7,9 @@ import { Pressable, View } from 'react-native';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { alpha } from '@/lib/color';
 import { WidgetCard } from '@/features/dashboard/components/widget-card';
 import { useReflect } from '@/features/dashboard/hooks/use-widget-data';
 import { useJournalMutations } from '@/features/journal/hooks/use-journal-mutations';
@@ -24,6 +27,7 @@ const MOODS: { value: MoodOption; emoji: string }[] = [
 export function ReflectWidget() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const scheme = useColorScheme() ?? 'light';
   const { data, isLoading } = useReflect();
   const { upsert } = useJournalMutations();
   const todayKey = toDateKey(new Date());
@@ -35,7 +39,7 @@ export function ReflectWidget() {
   };
 
   return (
-    <WidgetCard icon={BookHeart} title="Reflect">
+    <WidgetCard icon={BookHeart} title="Reflect" tint={moduleTint('journal', scheme)}>
       {isLoading || !data ? (
         <Skeleton className="h-12 w-full" />
       ) : (
@@ -45,9 +49,12 @@ export function ReflectWidget() {
               <Pressable
                 key={mood.value}
                 onPress={() => selectMood(mood.value)}
-                className={`h-11 w-11 items-center justify-center rounded-full ${
-                  data.todaysMood === mood.value ? 'bg-surface' : ''
-                }`}
+                className="h-11 w-11 items-center justify-center rounded-full"
+                style={
+                  data.todaysMood === mood.value
+                    ? { backgroundColor: alpha(moduleTint('journal', scheme), 0.16) }
+                    : undefined
+                }
               >
                 <Text className="text-2xl">{mood.emoji}</Text>
               </Pressable>

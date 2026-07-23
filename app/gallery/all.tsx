@@ -65,7 +65,7 @@ export default function AllPhotosScreen() {
       </View>
 
       {showSearch && (
-        <View className="mx-4 mb-2 flex-row items-center gap-2 rounded-full bg-muted px-4 py-2.5">
+        <View className="mx-4 mb-2 flex-row items-center gap-2 rounded-full border border-border bg-surface px-4 py-2.5">
           <Search size={16} color={colors[scheme].mutedForeground} />
           <TextInput
             value={query}

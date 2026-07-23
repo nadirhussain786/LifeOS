@@ -17,6 +17,7 @@ type Props = {
 
 export function SleepSessionCard({ session, goalMinutes, onPress }: Props) {
   const scheme = useColorScheme() ?? 'light';
+  const sleepTint = moduleTint('sleep', scheme);
   const metGoal = session.durationMinutes >= goalMinutes;
 
   return (
@@ -26,8 +27,8 @@ export function SleepSessionCard({ session, goalMinutes, onPress }: Props) {
       accessibilityRole="button"
       accessibilityLabel={`Sleep on ${session.logDate}`}
     >
-      <View className="h-11 w-11 items-center justify-center rounded-xl" style={{ backgroundColor: `${SLEEP_TINT}1f` }}>
-        <Moon size={20} color={SLEEP_TINT} />
+      <View className="h-11 w-11 items-center justify-center rounded-xl" style={{ backgroundColor: `${sleepTint}1f` }}>
+        <Moon size={20} color={sleepTint} />
       </View>
 
       <View className="flex-1 gap-1">

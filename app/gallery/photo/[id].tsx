@@ -75,7 +75,7 @@ export default function PhotoDetailScreen() {
   return (
     <View className="flex-1 bg-background">
       <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-4 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full bg-muted">
+        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
           <ChevronLeft size={20} color={colors[scheme].foreground} />
         </Pressable>
         <View className="flex-row items-center gap-4">
@@ -109,7 +109,7 @@ export default function PhotoDetailScreen() {
             {Platform.OS === 'ios' ? (
               <DateTimePicker value={new Date(photo.takenAt)} mode="date" display="compact" onChange={handleDate} />
             ) : (
-              <Pressable onPress={() => setShowDate(true)} className="rounded-lg bg-muted px-3 py-1.5">
+              <Pressable onPress={() => setShowDate(true)} className="rounded-lg bg-surface px-3 py-1.5">
                 <Text className="font-sora-semibold text-foreground">{format(photo.takenAt, 'MMM d, yyyy')}</Text>
               </Pressable>
             )}
@@ -142,7 +142,7 @@ export default function PhotoDetailScreen() {
                 <Pressable
                   key={tag}
                   onPress={() => removeTag(tag)}
-                  className="flex-row items-center gap-1 rounded-full bg-muted px-3 py-1.5"
+                  className="flex-row items-center gap-1 rounded-full border border-border bg-surface px-3 py-1.5"
                 >
                   <Text className="text-foreground">#{tag}</Text>
                   <X size={12} color={colors[scheme].mutedForeground} />

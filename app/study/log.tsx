@@ -114,7 +114,7 @@ export default function StudyLogScreen() {
                 key={m}
                 onPress={() => setMinutes(m)}
                 className="rounded-full border border-border px-3.5 py-1.5"
-                style={minutes === m ? { backgroundColor: STUDY_TINT, borderColor: STUDY_TINT } : undefined}
+                style={minutes === m ? { backgroundColor: studyTint, borderColor: studyTint } : undefined}
               >
                 <Text className={minutes === m ? 'font-sora-semibold text-white' : 'text-muted-foreground'}>{m}m</Text>
               </Pressable>

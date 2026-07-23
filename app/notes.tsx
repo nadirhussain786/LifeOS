@@ -54,7 +54,7 @@ export default function NotesScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 8 }} className="gap-3 px-4 pb-2">
+      <View style={{ paddingTop: insets.top + 8 }} className="gap-5 px-5 pb-2">
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center gap-1">
             <Pressable onPress={() => router.back()} hitSlop={8} className="-ml-1 p-1" accessibilityLabel="Back">
@@ -71,7 +71,7 @@ export default function NotesScreen() {
           </Pressable>
         </View>
 
-        <View className="flex-row items-center gap-2 rounded-full bg-muted px-4 py-2.5">
+        <View className="flex-row items-center gap-2 rounded-full border border-border bg-surface px-4 py-2.5">
           <Search size={16} color={colors[scheme].mutedForeground} />
           <TextInput
             value={searchQuery}
@@ -84,7 +84,7 @@ export default function NotesScreen() {
       </View>
 
       {isLoading ? (
-        <View className="gap-2.5 px-4">
+        <View className="gap-2.5 px-5">
           <Skeleton className="h-16 w-full rounded-2xl" />
           <Skeleton className="h-16 w-full rounded-2xl" />
           <Skeleton className="h-16 w-full rounded-2xl" />

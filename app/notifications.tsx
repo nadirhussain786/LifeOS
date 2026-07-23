@@ -122,7 +122,7 @@ export default function NotificationsInboxScreen() {
         <View className="h-16 w-16 items-center justify-center rounded-2xl" style={{ backgroundColor: theme.muted }}>
           <BellOff size={28} color={theme.mutedForeground} />
         </View>
-        <Text className="font-sora-semibold text-lg text-foreground">You're all caught up</Text>
+        <Text className="font-sora-semibold text-lg text-foreground">You&rsquo;re all caught up</Text>
         <Text variant="muted" className="text-center">
           Reminders you schedule across LifeOS show up here. Turn them on from any item or from Settings → Notifications.
         </Text>
@@ -131,7 +131,7 @@ export default function NotificationsInboxScreen() {
   }
 
   return (
-    <ScrollView className="flex-1 bg-background" contentContainerClassName="gap-5 p-4 pb-10">
+    <ScrollView className="flex-1 bg-background" contentContainerClassName="gap-5 px-5 py-4 pb-10">
       <View className="flex-row gap-2">
         <Pressable
           onPress={() => markAllRead.mutate()}

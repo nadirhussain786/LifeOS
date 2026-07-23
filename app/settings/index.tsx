@@ -9,13 +9,14 @@ import {
   Droplet,
   Info,
   Laptop,
+  LockKeyhole,
   Moon,
   ShieldCheck,
   Sun,
   Trash2,
 } from 'lucide-react-native';
-import { useState } from 'react';
-import { Alert, Pressable, ScrollView, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Alert, Pressable, ScrollView, Switch, View } from 'react-native';
 
 import { SettingsRow } from '@/components/ui/settings-row';
 import { Text } from '@/components/ui/text';
@@ -23,6 +24,8 @@ import { colors } from '@/constants/theme';
 import { exportAllData } from '@/lib/data-export';
 import { clearAllData } from '@/lib/data-management';
 import { queryClient } from '@/lib/query-client';
+import { useProfileStore } from '@/features/profile/store/profile-store';
+import { authenticate, getBiometricLabel, isBiometricAvailable } from '@/features/security/lib/biometrics';
 import { useAppearanceStore, type ThemePreference } from '@/features/settings/store/appearance-store';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -46,7 +49,31 @@ export default function SettingsScreen() {
   const themePreference = useAppearanceStore((state) => state.themePreference);
   const setThemePreference = useAppearanceStore((state) => state.setThemePreference);
 
+  const appLockEnabled = useProfileStore((state) => state.appLockEnabled);
+  const setAppLockEnabled = useProfileStore((state) => state.setAppLockEnabled);
+  const [bioAvailable, setBioAvailable] = useState(false);
+  const [bioLabel, setBioLabel] = useState('Biometrics');
+
   const [isExporting, setIsExporting] = useState(false);
+
+  useEffect(() => {
+    isBiometricAvailable().then(setBioAvailable);
+    getBiometricLabel().then(setBioLabel);
+  }, []);
+
+  const toggleAppLock = async (next: boolean) => {
+    if (next) {
+      if (!bioAvailable) {
+        Alert.alert('Set up biometrics first', 'Add Face ID or a fingerprint in your device settings, then turn on App lock here.');
+        return;
+      }
+      // Confirm the person can actually authenticate before arming the lock.
+      const ok = await authenticate(`Confirm ${bioLabel}`);
+      if (!ok) return;
+    }
+    Haptics.selectionAsync();
+    setAppLockEnabled(next);
+  };
 
   const handleExport = async () => {
     setIsExporting(true);
@@ -80,7 +107,7 @@ export default function SettingsScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-background" contentContainerClassName="gap-6 p-4 pb-10">
+    <ScrollView className="flex-1 bg-background" contentContainerClassName="gap-6 px-5 py-4 pb-10">
       <View className="gap-2">
         <SectionLabel>Appearance</SectionLabel>
         <View className="flex-row gap-2 rounded-2xl border border-border bg-card p-2">
@@ -97,11 +124,11 @@ export default function SettingsScreen() {
                 className="flex-1 items-center gap-1.5 rounded-xl py-2.5"
                 style={{ backgroundColor: selected ? colors[scheme].accent : 'transparent' }}
               >
-                <Icon size={17} color={selected ? '#ffffff' : colors[scheme].mutedForeground} />
+                <Icon size={17} color={selected ? colors[scheme].accentForeground : colors[scheme].mutedForeground} />
                 <Text
                   variant="caption"
                   className="font-sora-medium"
-                  style={{ color: selected ? '#ffffff' : colors[scheme].mutedForeground }}
+                  style={{ color: selected ? colors[scheme].accentForeground : colors[scheme].mutedForeground }}
                 >
                   {option.label}
                 </Text>
@@ -137,6 +164,27 @@ export default function SettingsScreen() {
         <Text variant="caption" className="px-1">
           Tasks, notes, habits, and calendar events each have their own reminder — set it right from the item.
         </Text>
+      </View>
+
+      <View className="gap-2">
+        <SectionLabel>Privacy</SectionLabel>
+        <View className="rounded-2xl border border-border bg-card px-4">
+          <SettingsRow
+            icon={LockKeyhole}
+            label="App lock"
+            subtitle={bioAvailable ? `Require ${bioLabel} to open LifeOS` : 'Add Face ID or a fingerprint to enable'}
+            isFirst
+            right={
+              <Switch
+                value={appLockEnabled}
+                onValueChange={toggleAppLock}
+                disabled={!bioAvailable && !appLockEnabled}
+                trackColor={{ true: colors[scheme].accent, false: colors[scheme].border }}
+                thumbColor="#ffffff"
+              />
+            }
+          />
+        </View>
       </View>
 
       <View className="gap-2">

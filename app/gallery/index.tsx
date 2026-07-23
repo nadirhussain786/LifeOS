@@ -85,7 +85,7 @@ export default function GalleryScreen() {
           onAction={() => setAddOpen(true)}
         />
       ) : (
-        <ScrollView contentContainerClassName="gap-6 px-4 pb-28" showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerClassName="gap-6 px-5 pb-28" showsVerticalScrollIndicator={false}>
           {/* Stats hero */}
           <HeroCard tint={GALLERY_TINT}>
             <View className="gap-4">

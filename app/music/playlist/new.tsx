@@ -32,7 +32,7 @@ export default function NewPlaylistScreen() {
   return (
     <View className="flex-1 bg-background">
       <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-4 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full bg-muted">
+        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
           <X size={17} color={colors[scheme].foreground} />
         </Pressable>
         <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">

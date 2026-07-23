@@ -102,7 +102,7 @@ export default function ResetPasswordScreen() {
             <AuthField label="New password" value={password} onChangeText={setPassword} placeholder="At least 6 characters" secure autoComplete="new-password" autoFocus />
             <AuthField label="Confirm password" value={confirm} onChangeText={setConfirm} placeholder="Re-enter your password" secure autoComplete="new-password" />
             {error && (
-              <Text variant="caption" style={{ color: '#ef4444' }}>
+              <Text variant="caption" className="text-destructive">
                 {error}
               </Text>
             )}

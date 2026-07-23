@@ -8,11 +8,13 @@ import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import { useGreeting } from '@/features/dashboard/hooks/use-greeting';
 import { useUnreadNotificationCount } from '@/features/notifications/hooks/use-notifications-inbox';
+import { useProfileStore } from '@/features/profile/store/profile-store';
 
 export function DashboardHeader() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
-  const { greeting, dateLabel } = useGreeting();
+  const name = useProfileStore((s) => s.name);
+  const { greeting, dateLabel } = useGreeting(name || undefined);
   const insets = useSafeAreaInsets();
   const unread = useUnreadNotificationCount();
 

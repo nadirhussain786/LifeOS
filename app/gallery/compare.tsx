@@ -270,7 +270,7 @@ export default function CompareScreen() {
                 {photo ? (
                   <Image source={{ uri: photo.uri }} style={{ width: '100%', height: 80, borderRadius: 10 }} />
                 ) : (
-                  <View className="h-20 w-full items-center justify-center rounded-lg bg-muted">
+                  <View className="h-20 w-full items-center justify-center rounded-lg bg-surface">
                     <Text variant="caption">Pick photo</Text>
                   </View>
                 )}

@@ -76,13 +76,13 @@ export default function NowPlayingScreen() {
       />
 
       <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-4 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full bg-muted">
+        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
           <ChevronDown size={20} color={colors[scheme].foreground} />
         </Pressable>
         <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
           {queue.length > 0 ? `${currentIndex + 1} of ${queue.length}` : 'Now Playing'}
         </Text>
-        <Pressable onPress={dismiss} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full bg-muted" accessibilityLabel="Stop and close">
+        <Pressable onPress={dismiss} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full border border-border bg-surface" accessibilityLabel="Stop and close">
           <X size={18} color={colors[scheme].foreground} />
         </Pressable>
       </View>

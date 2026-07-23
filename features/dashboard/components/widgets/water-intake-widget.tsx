@@ -51,7 +51,7 @@ export function WaterIntakeWidget() {
   };
 
   return (
-    <WidgetCard icon={GlassWater} title="Water intake" actionLabel="History" onActionPress={() => router.push('/water-intake/history')}>
+    <WidgetCard icon={GlassWater} title="Water intake" tint={waterTint} actionLabel="History" onActionPress={() => router.push('/water-intake/history')}>
       {isLoading || currentMl === undefined ? (
         <Skeleton className="h-8 w-full" />
       ) : (

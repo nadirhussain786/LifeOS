@@ -40,7 +40,7 @@ export default function LoginScreen() {
         </View>
 
         {!isSupabaseConfigured && (
-          <Text variant="caption" style={{ color: '#f59e0b' }}>
+          <Text variant="caption" className="text-warning">
             Cloud sync isn&apos;t set up on this build yet. You can continue without an account — everything works offline.
           </Text>
         )}
@@ -66,7 +66,7 @@ export default function LoginScreen() {
           </Link>
 
           {error && (
-            <Text variant="caption" style={{ color: '#ef4444' }}>
+            <Text variant="caption" className="text-destructive">
               {error}
             </Text>
           )}

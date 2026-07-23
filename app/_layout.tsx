@@ -11,15 +11,19 @@ import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { AnimatedSplash } from '@/components/animated-splash';
 import { DevErrorBanner } from '@/components/dev/dev-error-banner';
 import { MiniPlayerBar } from '@/features/music/components/mini-player-bar';
 import { useNotificationNavigation } from '@/features/notifications/hooks/use-notification-navigation';
 import { applyDeliveryMode } from '@/features/notifications/services/delivery';
 import { syncTodayWidget } from '@/features/widgets/services/widget-data';
+import { useProfileStore } from '@/features/profile/store/profile-store';
+import { AppLockOverlay } from '@/features/security/components/app-lock-overlay';
+import { useAppLock } from '@/features/security/hooks/use-app-lock';
 import { useAuthStore } from '@/features/auth/services/auth-store';
 import { useAuthGate } from '@/features/auth/hooks/use-auth-gate';
 import { useSyncTrigger } from '@/features/sync/hooks/use-sync';
@@ -56,9 +60,17 @@ function SyncTrigger() {
   return null;
 }
 
+/** Raises the app-lock shield on cold start / when returning from background. */
+function AppLockController() {
+  useAppLock();
+  return null;
+}
+
 export default function RootLayout() {
   const init = useAuthStore((state) => state.init);
   const isInitialized = useAuthStore((state) => state.isInitialized);
+  const profileHydrated = useProfileStore((state) => state.hydrated);
+  const [splashDone, setSplashDone] = useState(false);
   const [fontsLoaded] = useFonts({
     Sora_400Regular,
     Sora_500Medium,
@@ -82,12 +94,12 @@ export default function RootLayout() {
   }, [init]);
 
   useEffect(() => {
-    if (fontsLoaded && isInitialized) SplashScreen.hideAsync();
-  }, [fontsLoaded, isInitialized]);
+    if (fontsLoaded && isInitialized && profileHydrated) SplashScreen.hideAsync();
+  }, [fontsLoaded, isInitialized, profileHydrated]);
 
-  // Wait for both fonts and the initial session check so the auth gate can
-  // route to the right screen without a flash of the wrong one.
-  if (!fontsLoaded || !isInitialized) return null;
+  // Wait for fonts, the initial session check, and the persisted profile so the
+  // gate can route to auth / onboarding / app without a flash of the wrong one.
+  if (!fontsLoaded || !isInitialized || !profileHydrated) return null;
 
   return (
     <GestureHandlerRootView className="flex-1">
@@ -96,6 +108,7 @@ export default function RootLayout() {
           <BottomSheetModalProvider>
             <Stack screenOptions={{ headerShown: false }}>
               <Stack.Screen name="(auth)" />
+              <Stack.Screen name="(onboarding)" />
               <Stack.Screen name="(tabs)" />
               <Stack.Screen name="notes" />
               <Stack.Screen name="music" />
@@ -142,9 +155,13 @@ export default function RootLayout() {
             </Stack>
             <AuthGate />
             <SyncTrigger />
+            <AppLockController />
             <NotificationNavigationBridge />
             <MiniPlayerBar />
             <DevErrorBanner />
+            {/* On top of everything: the lock shield, then the cold-start splash. */}
+            <AppLockOverlay />
+            {!splashDone && <AnimatedSplash onFinish={() => setSplashDone(true)} />}
           </BottomSheetModalProvider>
         </QueryClientProvider>
       </SafeAreaProvider>

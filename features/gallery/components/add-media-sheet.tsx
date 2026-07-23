@@ -70,7 +70,7 @@ export function AddMediaSheet({ visible, onClose, albumId }: Props) {
             <View className="mb-1 h-1 w-10 self-center rounded-full" style={{ backgroundColor: colors[scheme].border }} />
             <View className="flex-row items-center justify-between pb-1">
               <Text variant="subheading">Add to your progress</Text>
-              <Pressable onPress={onClose} hitSlop={8} className="h-8 w-8 items-center justify-center rounded-full bg-muted">
+              <Pressable onPress={onClose} hitSlop={8} className="h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
                 <X size={16} color={colors[scheme].foreground} />
               </Pressable>
             </View>

@@ -16,12 +16,20 @@ export function ProductivitySummaryWidget() {
       ) : (
         <View className="gap-3">
           <Text variant="muted">{Math.round(data.weeklyCompletionRate * 100)}% of tasks completed</Text>
-          <View className="h-14 flex-row gap-1.5">
-            {data.trend.map((value, index) => (
-              <View key={index} className="h-full flex-1 justify-end overflow-hidden rounded-sm bg-muted">
-                <View className="w-full rounded-sm bg-primary" style={{ height: `${value * 100}%` }} />
-              </View>
-            ))}
+          <View className="h-14 flex-row items-end gap-1.5">
+            {data.trend.map((value, index) => {
+              // Today (the last bar) reads at full strength; earlier days sit
+              // back at lower opacity so the eye lands on "now".
+              const isToday = index === data.trend.length - 1;
+              return (
+                <View key={index} className="h-full flex-1 justify-end overflow-hidden rounded-md bg-muted">
+                  <View
+                    className="w-full rounded-md bg-accent"
+                    style={{ height: `${Math.max(value * 100, 5)}%`, opacity: isToday ? 1 : 0.45 }}
+                  />
+                </View>
+              );
+            })}
           </View>
         </View>
       )}
