@@ -47,10 +47,10 @@ export default function JournalReminderSettingsScreen() {
 
     if (draft.enabled && !newId) {
       Alert.alert(
-        notificationsAvailable ? 'Notifications disabled' : 'Not available in Expo Go',
+        notificationsAvailable ? 'Notifications disabled' : 'Notifications unavailable',
         notificationsAvailable
           ? 'Enable notifications for LifeOS in your device settings to get a journal reminder.'
-          : 'Reminders need a development build — Expo Go on Android no longer supports notifications.',
+          : "Reminders aren't available on this device.",
       );
     }
 

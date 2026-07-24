@@ -120,7 +120,7 @@ export default function SleepSettingsScreen() {
             />
           </View>
           {reminderEnabled && !notificationsAvailable && (
-            <Text variant="caption">Reminders need a development build — they won't fire in Expo Go on Android.</Text>
+            <Text variant="caption">Reminders aren&apos;t available on this device.</Text>
           )}
         </View>
 

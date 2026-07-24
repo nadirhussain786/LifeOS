@@ -1,19 +1,17 @@
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-import { X } from 'lucide-react-native';
 import { useState } from 'react';
-import { Pressable, TextInput, View } from 'react-native';
+import { TextInput, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/button';
+import { SheetHeader } from '@/components/ui/sheet-header';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import { useRoutineMutations } from '@/features/habits/hooks/use-routine-mutations';
 
 export default function NewRoutineScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
   const { create } = useRoutineMutations();
   const [name, setName] = useState('');
@@ -29,15 +27,7 @@ export default function NewRoutineScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-4 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full bg-muted">
-          <X size={17} color={colors[scheme].foreground} />
-        </Pressable>
-        <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-          New Routine
-        </Text>
-        <View className="h-8 w-8" />
-      </View>
+      <SheetHeader title="New Routine" />
 
       <View className="gap-6 px-5 pt-3">
         <TextInput

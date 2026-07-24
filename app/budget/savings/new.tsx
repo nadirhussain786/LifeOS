@@ -1,12 +1,12 @@
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { format } from 'date-fns';
 import { useRouter } from 'expo-router';
-import { CalendarDays, X } from 'lucide-react-native';
+import { CalendarDays } from 'lucide-react-native';
 import { useState } from 'react';
 import { Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/button';
+import { SheetHeader } from '@/components/ui/sheet-header';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import { SAVINGS_COLORS } from '@/features/budget/config/budget-config';
@@ -17,7 +17,6 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function NewSavingsGoalScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
   const { addSavingsGoal } = useBudgetMutations();
   const { data: settings } = useBudgetSettings();
@@ -46,15 +45,7 @@ export default function NewSavingsGoalScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-4 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full bg-muted">
-          <X size={17} color={colors[scheme].foreground} />
-        </Pressable>
-        <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-          New Savings Goal
-        </Text>
-        <View className="h-8 w-8" />
-      </View>
+      <SheetHeader title="New Savings Goal" />
 
       <ScrollView contentContainerClassName="gap-5 px-5 pt-3 pb-10" keyboardShouldPersistTaps="handled">
         <TextInput

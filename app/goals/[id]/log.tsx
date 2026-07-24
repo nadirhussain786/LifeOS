@@ -1,11 +1,11 @@
 import Slider from '@react-native-community/slider';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Minus, Plus, X } from 'lucide-react-native';
+import { Minus, Plus } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { GradientButton } from '@/components/ui/gradient-button';
+import { SheetHeader } from '@/components/ui/sheet-header';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import { goalCategoryMeta } from '@/features/goals/config/goal-categories';
@@ -18,7 +18,6 @@ import { alpha } from '@/lib/color';
 export default function LogProgressScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
   const { data: goal } = useGoal(id);
   const { logProgress } = useGoalMutations();
@@ -65,13 +64,7 @@ export default function LogProgressScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-5 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
-          <X size={17} color={colors[scheme].foreground} />
-        </Pressable>
-        <Text variant="micro">Log Progress</Text>
-        <View className="h-8 w-8" />
-      </View>
+      <SheetHeader title="Log Progress" />
 
       <ScrollView contentContainerClassName="gap-6 px-5 pt-3 pb-10" keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         <View className="items-center gap-1">

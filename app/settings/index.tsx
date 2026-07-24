@@ -18,6 +18,7 @@ import {
 import { useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, Switch, View } from 'react-native';
 
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { SettingsRow } from '@/components/ui/settings-row';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
@@ -107,9 +108,11 @@ export default function SettingsScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-background" contentContainerClassName="gap-6 px-5 py-4 pb-10">
-      <View className="gap-2">
-        <SectionLabel>Appearance</SectionLabel>
+    <View className="flex-1 bg-background">
+      <ScreenHeader title="Settings" eyebrow="System" tint="#737373" />
+      <ScrollView contentContainerClassName="gap-6 px-5 py-4 pb-10" showsVerticalScrollIndicator={false}>
+        <View className="gap-2">
+          <SectionLabel>Appearance</SectionLabel>
         <View className="flex-row gap-2 rounded-2xl border border-border bg-card p-2">
           {THEME_OPTIONS.map((option) => {
             const selected = themePreference === option.value;
@@ -218,6 +221,7 @@ export default function SettingsScreen() {
           <SettingsRow icon={ShieldCheck} label="Sync & account" subtitle="Backup, sync, and sign in" onPress={() => router.push('/settings/sync')} />
         </View>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }

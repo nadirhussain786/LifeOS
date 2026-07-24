@@ -5,6 +5,7 @@ import { BellRing } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { Platform, Pressable, ScrollView, Switch, View } from 'react-native';
 
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { Segmented } from '@/components/ui/segmented';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
@@ -42,7 +43,6 @@ function TimeRow({
   onChange: (minutes: number) => void;
   borderTop?: boolean;
 }) {
-  const scheme = useColorScheme() ?? 'light';
   const [showPicker, setShowPicker] = useState(false);
   const value = set(new Date(), { hours: Math.floor(minutes / 60), minutes: minutes % 60, seconds: 0, milliseconds: 0 });
 
@@ -120,7 +120,9 @@ export default function NotificationSettingsScreen() {
   const disabled = !store.masterEnabled;
 
   return (
-    <ScrollView className="flex-1 bg-background" contentContainerClassName="gap-6 p-4 pb-12">
+    <View className="flex-1 bg-background">
+      <ScreenHeader title="Notifications" eyebrow="Settings" tint="#737373" />
+      <ScrollView contentContainerClassName="gap-6 px-5 py-4 pb-12" showsVerticalScrollIndicator={false}>
       {/* Master */}
       <View className="rounded-2xl border border-border bg-card px-4">
         <View className="flex-row items-center gap-3 py-3.5">
@@ -137,7 +139,7 @@ export default function NotificationSettingsScreen() {
 
       {!notificationsAvailable && (
         <Text variant="caption" className="px-1">
-          Notifications aren&apos;t supported in Expo Go on Android — use a development build to receive reminders.
+          Notifications aren&apos;t available on this device.
         </Text>
       )}
       {notificationsAvailable && store.masterEnabled && !permissionGranted && (
@@ -251,6 +253,7 @@ export default function NotificationSettingsScreen() {
           Turning a category off clears its queued reminders right away. They come back as you edit each item once it&apos;s on again.
         </Text>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }

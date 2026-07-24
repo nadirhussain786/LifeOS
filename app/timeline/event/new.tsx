@@ -3,14 +3,14 @@ import { addMinutes, format, parseISO, set } from 'date-fns';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Bell, Clock, Palette, StickyNote, X } from 'lucide-react-native';
+import { Bell, Clock, Palette, StickyNote } from 'lucide-react-native';
 import { useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AttributeRow } from '@/components/ui/attribute-row';
 import { Button } from '@/components/ui/button';
+import { SheetHeader } from '@/components/ui/sheet-header';
 import { Text } from '@/components/ui/text';
 import { categoryColorPalette, colors } from '@/constants/theme';
 import { useCalendarEventMutations } from '@/features/timeline/hooks/use-calendar-event-mutations';
@@ -34,7 +34,6 @@ const REMINDER_OPTIONS = [
 export default function NewCalendarEventScreen() {
   const { date: dateKey } = useLocalSearchParams<{ date: string }>();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
   const keyboardHeight = useKeyboardHeight();
   const { create } = useCalendarEventMutations();
@@ -75,15 +74,7 @@ export default function NewCalendarEventScreen() {
     <View className="flex-1 bg-background">
       <LinearGradient colors={[wash, 'transparent']} style={[StyleSheet.absoluteFillObject, { height: 220 }]} />
 
-      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-4 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full bg-muted">
-          <X size={17} color={colors[scheme].foreground} />
-        </Pressable>
-        <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-          New Event
-        </Text>
-        <View className="h-8 w-8" />
-      </View>
+      <SheetHeader title="New Event" />
 
       <ScrollView
         contentContainerClassName="gap-6 px-5 pt-3"

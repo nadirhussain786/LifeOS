@@ -1,13 +1,13 @@
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { format } from 'date-fns';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { CalendarDays, Trash2, X } from 'lucide-react-native';
+import { CalendarDays, Trash2 } from 'lucide-react-native';
 import { useState } from 'react';
 import { Alert, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/button';
 import { Segmented } from '@/components/ui/segmented';
+import { SheetHeader } from '@/components/ui/sheet-header';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import { CategoryGrid } from '@/features/budget/components/category-grid';
@@ -29,7 +29,6 @@ const TYPE_TINT: Record<TransactionType, string> = { income: '#22c55e', expense:
 export default function TransactionScreen() {
   const { id, savingsGoalId: presetGoalId } = useLocalSearchParams<{ id?: string; savingsGoalId?: string }>();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
   const { addTransaction, editTransaction, removeTransaction } = useBudgetMutations();
   const { data: settings } = useBudgetSettings();
@@ -116,21 +115,16 @@ export default function TransactionScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-4 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full bg-muted">
-          <X size={17} color={colors[scheme].foreground} />
-        </Pressable>
-        <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-          {isEdit ? 'Edit Transaction' : 'New Transaction'}
-        </Text>
-        {isEdit ? (
-          <Pressable onPress={confirmDelete} hitSlop={10} className="h-8 w-8 items-center justify-center" accessibilityLabel="Delete">
-            <Trash2 size={18} color={colors[scheme].destructive} />
-          </Pressable>
-        ) : (
-          <View className="h-8 w-8" />
-        )}
-      </View>
+      <SheetHeader
+        title={isEdit ? 'Edit Transaction' : 'New Transaction'}
+        right={
+          isEdit ? (
+            <Pressable onPress={confirmDelete} hitSlop={10} className="h-9 w-9 items-center justify-center" accessibilityLabel="Delete">
+              <Trash2 size={18} color={colors[scheme].destructive} />
+            </Pressable>
+          ) : undefined
+        }
+      />
 
       <ScrollView contentContainerClassName="gap-5 px-5 pt-3 pb-10" keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         <Segmented options={TYPE_OPTIONS} value={type} onChange={changeType} activeColor={tint} />

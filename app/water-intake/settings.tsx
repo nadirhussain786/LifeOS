@@ -74,10 +74,10 @@ export default function WaterSettingsScreen() {
 
     if (draft.enabled && newIds.length === 0) {
       Alert.alert(
-        notificationsAvailable ? 'Notifications disabled' : 'Not available in Expo Go',
+        notificationsAvailable ? 'Notifications disabled' : 'Notifications unavailable',
         notificationsAvailable
           ? 'Enable notifications for LifeOS in your device settings to get water reminders.'
-          : 'Reminders need a development build — Expo Go on Android no longer supports notifications.',
+          : "Reminders aren't available on this device.",
       );
     }
 

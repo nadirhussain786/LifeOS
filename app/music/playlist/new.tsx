@@ -1,11 +1,10 @@
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-import { X } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/button';
+import { SheetHeader } from '@/components/ui/sheet-header';
 import { Text } from '@/components/ui/text';
 import { categoryColorPalette, colors } from '@/constants/theme';
 import { usePlaylistMutations } from '@/features/music/hooks/use-playlists';
@@ -13,7 +12,6 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function NewPlaylistScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
   const { create } = usePlaylistMutations();
   const [name, setName] = useState('');
@@ -31,15 +29,7 @@ export default function NewPlaylistScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-4 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
-          <X size={17} color={colors[scheme].foreground} />
-        </Pressable>
-        <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-          New Playlist
-        </Text>
-        <View className="h-8 w-8" />
-      </View>
+      <SheetHeader title="New Playlist" />
 
       <View className="gap-6 px-5 pt-3">
         <TextInput

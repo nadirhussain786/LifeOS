@@ -26,7 +26,10 @@ import { AppLockOverlay } from '@/features/security/components/app-lock-overlay'
 import { useAppLock } from '@/features/security/hooks/use-app-lock';
 import { useAuthStore } from '@/features/auth/services/auth-store';
 import { useAuthGate } from '@/features/auth/hooks/use-auth-gate';
+import { useSplashStore } from '@/hooks/use-splash-store';
 import { useSyncTrigger } from '@/features/sync/hooks/use-sync';
+import { colors } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { configureAndroidChannels, configureNotificationHandler } from '@/lib/notifications';
 import { queryClient } from '@/lib/query-client';
 
@@ -70,6 +73,7 @@ export default function RootLayout() {
   const init = useAuthStore((state) => state.init);
   const isInitialized = useAuthStore((state) => state.isInitialized);
   const profileHydrated = useProfileStore((state) => state.hydrated);
+  const scheme = useColorScheme() ?? 'light';
   const [splashDone, setSplashDone] = useState(false);
   const [fontsLoaded] = useFonts({
     Sora_400Regular,
@@ -97,16 +101,21 @@ export default function RootLayout() {
     if (fontsLoaded && isInitialized && profileHydrated) SplashScreen.hideAsync();
   }, [fontsLoaded, isInitialized, profileHydrated]);
 
+  // The app's ground color. Applied to the root view + every navigator scene
+  // (contentStyle below) so boot and screen transitions never flash the
+  // default white scene — the bug this replaced, worst in dark mode.
+  const c = colors[scheme];
+
   // Wait for fonts, the initial session check, and the persisted profile so the
   // gate can route to auth / onboarding / app without a flash of the wrong one.
   if (!fontsLoaded || !isInitialized || !profileHydrated) return null;
 
   return (
-    <GestureHandlerRootView className="flex-1">
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: c.background }}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
           <BottomSheetModalProvider>
-            <Stack screenOptions={{ headerShown: false }}>
+            <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.background } }}>
               <Stack.Screen name="(auth)" />
               <Stack.Screen name="(onboarding)" />
               <Stack.Screen name="(tabs)" />
@@ -134,10 +143,10 @@ export default function RootLayout() {
               <Stack.Screen name="gallery/compare" />
               <Stack.Screen name="gallery/album/[id]" />
               <Stack.Screen name="gallery/photo/[id]" />
-              <Stack.Screen name="settings/index" options={{ headerShown: true, title: 'Settings' }} />
-              <Stack.Screen name="settings/notifications" options={{ headerShown: true, title: 'Notifications' }} />
-              <Stack.Screen name="settings/sync" options={{ headerShown: true, title: 'Sync & Account' }} />
-              <Stack.Screen name="notifications" options={{ headerShown: true, title: 'Notifications' }} />
+              <Stack.Screen name="settings/index" />
+              <Stack.Screen name="settings/notifications" />
+              <Stack.Screen name="settings/sync" />
+              <Stack.Screen name="notifications" />
               <Stack.Screen name="task/new" options={{ presentation: 'modal' }} />
               <Stack.Screen name="note/new" options={{ presentation: 'modal' }} />
               <Stack.Screen name="habit/new" options={{ presentation: 'modal' }} />
@@ -161,7 +170,16 @@ export default function RootLayout() {
             <DevErrorBanner />
             {/* On top of everything: the lock shield, then the cold-start splash. */}
             <AppLockOverlay />
-            {!splashDone && <AnimatedSplash onFinish={() => setSplashDone(true)} />}
+            {!splashDone && (
+              <AnimatedSplash
+                onFinish={() => {
+                  setSplashDone(true);
+                  // Release the cold-start autofocus guard so login/onboarding
+                  // fields no longer keep the keyboard down.
+                  useSplashStore.getState().setComplete();
+                }}
+              />
+            )}
           </BottomSheetModalProvider>
         </QueryClientProvider>
       </SafeAreaProvider>

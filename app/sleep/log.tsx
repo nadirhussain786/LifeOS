@@ -1,13 +1,13 @@
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { format, set, subDays } from 'date-fns';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { CalendarDays, Moon, Sun, Trash2, X } from 'lucide-react-native';
+import { CalendarDays, Moon, Sun, Trash2 } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import { Alert, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/button';
 import { StarRating } from '@/components/ui/star-rating';
+import { SheetHeader } from '@/components/ui/sheet-header';
 import { Text } from '@/components/ui/text';
 import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
@@ -31,7 +31,6 @@ function buildTimestamps(nightDate: Date, bed: Date, wake: Date) {
 export default function SleepLogScreen() {
   const { id, bedtimeTs, wakeTs } = useLocalSearchParams<{ id?: string; bedtimeTs?: string; wakeTs?: string }>();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
   const sleepTint = moduleTint('sleep', scheme);
   const { create, update, remove } = useSleepMutations();
@@ -116,19 +115,16 @@ export default function SleepLogScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-5 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
-          <X size={17} color={colors[scheme].foreground} />
-        </Pressable>
-        <Text variant="micro">{isEdit ? 'Edit Sleep' : 'Log Sleep'}</Text>
-        {isEdit ? (
-          <Pressable onPress={confirmDelete} hitSlop={10} className="h-8 w-8 items-center justify-center" accessibilityLabel="Delete">
-            <Trash2 size={18} color={colors[scheme].destructive} />
-          </Pressable>
-        ) : (
-          <View className="h-8 w-8" />
-        )}
-      </View>
+      <SheetHeader
+        title={isEdit ? 'Edit Sleep' : 'Log Sleep'}
+        right={
+          isEdit ? (
+            <Pressable onPress={confirmDelete} hitSlop={10} className="h-9 w-9 items-center justify-center" accessibilityLabel="Delete">
+              <Trash2 size={18} color={colors[scheme].destructive} />
+            </Pressable>
+          ) : undefined
+        }
+      />
 
       <ScrollView contentContainerClassName="gap-5 px-5 pt-3 pb-10" keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         <View className="flex-row items-center justify-between rounded-2xl border border-border bg-card px-4 py-3">

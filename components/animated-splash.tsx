@@ -25,7 +25,7 @@ const THEME = {
  * A short, calm branded splash that plays once on cold start after the native
  * splash hides: the emerald mark springs in, the wordmark rises beneath it,
  * then the whole layer fades away to reveal the app. Purpose before decoration
- * — one gentle moment, ~1.3s total, then gone.
+ * — one gentle moment, ~2s total, then gone.
  */
 export function AnimatedSplash({ onFinish }: { onFinish: () => void }) {
   const scheme = useColorScheme() ?? 'light';
@@ -44,8 +44,8 @@ export function AnimatedSplash({ onFinish }: { onFinish: () => void }) {
     wordShift.value = withDelay(220, withSpring(0, { damping: 14, stiffness: 180 }));
     // Hold, then fade the whole layer out and notify the parent to unmount it.
     container.value = withDelay(
-      980,
-      withTiming(0, { duration: 360, easing: Easing.bezier(0.3, 0, 1, 1) }, (finished) => {
+      1600,
+      withTiming(0, { duration: 420, easing: Easing.bezier(0.3, 0, 1, 1) }, (finished) => {
         if (finished) runOnJS(onFinish)();
       }),
     );

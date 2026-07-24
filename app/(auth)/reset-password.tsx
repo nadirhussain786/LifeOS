@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { AuthField } from '@/features/auth/components/auth-field';
 import { useAuthStore } from '@/features/auth/services/auth-store';
+import { useSplashStore } from '@/hooks/use-splash-store';
 import { supabase } from '@/lib/supabase';
 
 /** Pulls the recovery tokens out of a Supabase reset link (they arrive in the
@@ -24,6 +25,7 @@ export default function ResetPasswordScreen() {
   const router = useRouter();
   const url = useURL();
   const updatePassword = useAuthStore((s) => s.updatePassword);
+  const splashComplete = useSplashStore((s) => s.complete);
 
   const [ready, setReady] = useState(false);
   const [checking, setChecking] = useState(true);
@@ -99,7 +101,7 @@ export default function ResetPasswordScreen() {
           </View>
         ) : (
           <View className="gap-4">
-            <AuthField label="New password" value={password} onChangeText={setPassword} placeholder="At least 6 characters" secure autoComplete="new-password" autoFocus />
+            <AuthField label="New password" value={password} onChangeText={setPassword} placeholder="At least 6 characters" secure autoComplete="new-password" autoFocus={splashComplete} />
             <AuthField label="Confirm password" value={confirm} onChangeText={setConfirm} placeholder="Re-enter your password" secure autoComplete="new-password" />
             {error && (
               <Text variant="caption" className="text-destructive">

@@ -4,10 +4,10 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { BellRing, CalendarDays, X } from 'lucide-react-native';
 import { useState } from 'react';
 import { Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/button';
 import { Segmented } from '@/components/ui/segmented';
+import { SheetHeader } from '@/components/ui/sheet-header';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import { REMINDER_DAY_OPTIONS } from '@/features/budget/services/debt-status';
@@ -34,7 +34,6 @@ function reminderLabel(days: number): string {
 export default function DebtFormScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
   const { data: settings } = useBudgetSettings();
   const { debts } = useDebts();
@@ -100,15 +99,7 @@ export default function DebtFormScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-4 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full bg-muted">
-          <X size={17} color={colors[scheme].foreground} />
-        </Pressable>
-        <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-          {isEdit ? 'Edit IOU' : 'New IOU'}
-        </Text>
-        <View className="h-8 w-8" />
-      </View>
+      <SheetHeader title={isEdit ? 'Edit IOU' : 'New IOU'} />
 
       <ScrollView contentContainerClassName="gap-5 px-5 pt-3 pb-10" keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         {isEdit ? (
@@ -199,7 +190,7 @@ export default function DebtFormScreen() {
               })}
             </View>
             {!notificationsAvailable && reminderDaysBefore != null && (
-              <Text variant="caption">Reminders need a development build — they won't fire in Expo Go on Android.</Text>
+              <Text variant="caption">Reminders aren&apos;t available on this device.</Text>
             )}
           </View>
         )}
