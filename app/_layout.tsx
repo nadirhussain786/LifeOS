@@ -143,6 +143,7 @@ export default function RootLayout() {
               <Stack.Screen name="gallery/compare" />
               <Stack.Screen name="gallery/album/[id]" />
               <Stack.Screen name="gallery/photo/[id]" />
+              <Stack.Screen name="gallery/story/[period]" options={{ presentation: 'fullScreenModal', animation: 'fade' }} />
               <Stack.Screen name="settings/index" />
               <Stack.Screen name="settings/notifications" />
               <Stack.Screen name="settings/sync" />

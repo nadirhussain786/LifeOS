@@ -1,6 +1,6 @@
 import { usePathname, useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { GripVertical, Music, Pause, Play, SkipForward, X } from 'lucide-react-native';
+import { GripVertical, Pause, Play, SkipForward, X } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import { Pressable, useWindowDimensions, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -9,11 +9,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
+import { Equalizer } from '@/features/music/components/equalizer';
 import { MUSIC_TINT } from '@/features/music/components/song-row';
 import { useNowPlaying } from '@/features/music/hooks/use-player';
 import { usePlayerUiStore } from '@/features/music/store/player-ui-store';
+import { songGradient } from '@/features/music/utils/song-art';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { tintGradient } from '@/lib/color';
 
 const SIDE_MARGIN = 12;
 const ESTIMATED_HEIGHT = 60;
@@ -74,7 +75,7 @@ export function MiniPlayerBar() {
   if (pathname === '/music/now-playing') return null;
 
   const progress = durationMs > 0 ? Math.min(1, positionMs / durationMs) : 0;
-  const [g1, g2] = tintGradient(MUSIC_TINT);
+  const [c1, c2, c3] = songGradient(currentSong.id);
 
   const pan = Gesture.Pan()
     .activeOffsetX([-8, 8])
@@ -117,8 +118,8 @@ export function MiniPlayerBar() {
 
           {/* Tap target → Now Playing */}
           <Pressable onPress={() => router.push('/music/now-playing')} className="flex-1 flex-row items-center gap-2.5" accessibilityLabel="Open now playing">
-            <LinearGradient colors={[g1, g2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ height: 38, width: 38, borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}>
-              <Music size={18} color="#ffffff" />
+            <LinearGradient colors={[c1, c2, c3]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ height: 38, width: 38, borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}>
+              {isPlaying && <Equalizer size={13} playing color="#ffffff" />}
             </LinearGradient>
             <View className="flex-1">
               <Text className="font-sora-semibold" numberOfLines={1}>

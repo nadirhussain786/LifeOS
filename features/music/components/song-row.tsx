@@ -1,3 +1,4 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { Pause, Play, Trash2, X } from 'lucide-react-native';
 import { Pressable, View } from 'react-native';
@@ -6,11 +7,14 @@ import { SwipeableRow } from '@/components/ui/swipeable-row';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import { Equalizer } from '@/features/music/components/equalizer';
+import { songGradient } from '@/features/music/utils/song-art';
 import { formatDuration } from '@/features/music/utils/format-duration';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import type { Song } from '@/features/music/types/music.types';
 
-export const MUSIC_TINT = '#6366f1';
+/** Music's signature chrome tint — teal, matching the Hub tile. Per-song art
+ *  (song-art.ts) supplies the color variety; this is only for controls/labels. */
+export const MUSIC_TINT = '#14b8a6';
 
 type Props = {
   song: Song;
@@ -27,6 +31,7 @@ type Props = {
 
 export function SongRow({ song, isActive, isPlaying, onPress, onLongPress, onDelete, onRemove }: Props) {
   const scheme = useColorScheme() ?? 'light';
+  const [c1, c2, c3] = songGradient(song.id);
 
   const row = (
     <Pressable
@@ -35,19 +40,21 @@ export function SongRow({ song, isActive, isPlaying, onPress, onLongPress, onDel
         onPress();
       }}
       onLongPress={onLongPress}
-      className="flex-row items-center gap-3 py-3 pl-4 pr-4"
+      className="flex-row items-center gap-3 py-2.5 pl-4 pr-4"
     >
-      <View
-        className="h-9 w-9 items-center justify-center rounded-full"
-        style={{ backgroundColor: isActive ? MUSIC_TINT : colors[scheme].muted }}
-      >
-        {isActive && isPlaying ? (
-          <Equalizer size={14} playing color="#ffffff" />
-        ) : isActive ? (
-          <Pause size={14} color="#ffffff" fill="#ffffff" />
-        ) : (
-          <Play size={14} color={colors[scheme].mutedForeground} fill="transparent" />
-        )}
+      {/* Generative art thumbnail */}
+      <View className="h-11 w-11 overflow-hidden rounded-xl">
+        <LinearGradient colors={[c1, c2, c3]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <View className="h-6 w-6 items-center justify-center rounded-full" style={{ backgroundColor: 'rgba(0,0,0,0.32)' }}>
+            {isActive && isPlaying ? (
+              <Equalizer size={13} playing color="#ffffff" />
+            ) : isActive ? (
+              <Pause size={13} color="#ffffff" fill="#ffffff" />
+            ) : (
+              <Play size={12} color="#ffffff" fill="#ffffff" style={{ marginLeft: 1 }} />
+            )}
+          </View>
+        </LinearGradient>
       </View>
 
       <View className="flex-1 gap-0.5">
