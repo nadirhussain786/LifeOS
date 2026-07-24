@@ -1,13 +1,14 @@
 import { format, isToday, isYesterday, parseISO } from 'date-fns';
 import { useRouter } from 'expo-router';
-import { ChevronLeft, Receipt, Search } from 'lucide-react-native';
+import { Receipt, Search } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, TextInput, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ScrollView, TextInput, View } from 'react-native';
 
 import { EmptyState } from '@/components/ui/empty-state';
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { Segmented } from '@/components/ui/segmented';
 import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { categoryMetaFor } from '@/features/budget/config/budget-config';
 import { TransactionRow } from '@/features/budget/components/transaction-row';
@@ -33,7 +34,6 @@ function dayLabel(logDate: string): string {
 export default function TransactionsScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
-  const insets = useSafeAreaInsets();
   const [filter, setFilter] = useState<'all' | TransactionType>('all');
   const [query, setQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
@@ -63,17 +63,12 @@ export default function TransactionsScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 8 }} className="flex-row items-center justify-between px-4 pb-2">
-        <View className="flex-row items-center gap-1">
-          <Pressable onPress={() => router.back()} hitSlop={8} className="-ml-1 p-1" accessibilityLabel="Back">
-            <ChevronLeft size={24} color={colors[scheme].foreground} />
-          </Pressable>
-          <Text variant="heading">Transactions</Text>
-        </View>
-        <Pressable onPress={() => setShowSearch((s) => !s)} hitSlop={8} accessibilityLabel="Search">
-          <Search size={20} color={colors[scheme].foreground} />
-        </Pressable>
-      </View>
+      <ScreenHeader
+        title="Transactions"
+        eyebrow="Budget"
+        tint={moduleTint('budget', scheme)}
+        actions={[{ icon: Search, label: 'Search', onPress: () => setShowSearch((s) => !s) }]}
+      />
 
       <View className="gap-3 px-4 pb-2">
         <Segmented options={FILTER_OPTIONS} value={filter} onChange={setFilter} />

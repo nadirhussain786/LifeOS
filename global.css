@@ -2,58 +2,114 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * LifeOS design tokens (light + dark).
+ *
+ * Chrome neutrals carry a faint emerald bias (hue ~150–156, very low
+ * saturation) so the grayscale reads as chosen, calm and warm — never
+ * clinical. Color is spent deliberately:
+ *   • --accent      one brand emerald (CTAs, focus, "go")
+ *   • --<module>    one signature tint per life area (rings, hero washes,
+ *                   charts) — NOT for chrome
+ *   • --success / --warning / --info / --destructive
+ *                   a strictly separate semantic system
+ *
+ * Mirrored on the native side in constants/design-tokens.ts. Keep the two in
+ * sync. Prefer NativeWind classNames (bg-background, text-habit, …) over the
+ * raw values wherever a className can reach.
+ */
+
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 9%;
+    --background: 150 25% 98%;
+    --foreground: 156 14% 10%;
 
+    /* spatial stack: surface (sunken/grouped) < card (resting) */
+    --surface: 156 14% 94%;
+    --surface-foreground: 156 14% 10%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 9%;
+    --card-foreground: 156 14% 10%;
 
-    --primary: 0 0% 9%;
+    --primary: 156 14% 10%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 9%;
+    --secondary: 150 12% 95%;
+    --secondary-foreground: 156 14% 10%;
 
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
+    --muted: 150 12% 95%;
+    --muted-foreground: 156 6% 46%;
 
     --accent: 158 70% 32%;
     --accent-foreground: 0 0% 100%;
 
+    /* semantic — independent of brand accent and module tints */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    --warning: 32 95% 44%;
+    --warning-foreground: 0 0% 100%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
+    --info: 221 83% 53%;
+    --info-foreground: 0 0% 100%;
 
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
+    /* module signature tints */
+    --habit: 160 84% 39%;
+    --calendar: 217 91% 60%;
+    --water: 189 94% 43%;
+    --sleep: 239 84% 67%;
+    --journal: 258 90% 66%;
+    --fitness: 25 95% 53%;
+    --goals: 350 89% 60%;
+    --budget: 175 84% 32%;
+    --study: 262 83% 58%;
+
+    --border: 156 13% 90%;
+    --input: 156 13% 90%;
     --ring: 158 70% 32%;
   }
 
   .dark:root {
-    --background: 0 0% 7%;
-    --foreground: 0 0% 96%;
+    --background: 156 14% 6%;
+    --foreground: 150 14% 94%;
 
-    --card: 0 0% 10%;
-    --card-foreground: 0 0% 96%;
+    --surface: 156 14% 10%;
+    --surface-foreground: 150 14% 94%;
+    --card: 156 11% 11%;
+    --card-foreground: 150 14% 94%;
 
-    --primary: 0 0% 96%;
-    --primary-foreground: 0 0% 9%;
+    --primary: 150 14% 94%;
+    --primary-foreground: 156 14% 10%;
 
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 96%;
+    --secondary: 156 10% 16%;
+    --secondary-foreground: 150 14% 94%;
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 63%;
+    --muted: 156 10% 16%;
+    --muted-foreground: 156 8% 64%;
 
     --accent: 158 60% 55%;
     --accent-foreground: 158 40% 10%;
 
-    --destructive: 0 63% 40%;
-    --destructive-foreground: 0 0% 100%;
+    --success: 142 71% 58%;
+    --success-foreground: 142 60% 8%;
+    --warning: 43 96% 56%;
+    --warning-foreground: 33 90% 8%;
+    --destructive: 0 84% 71%;
+    --destructive-foreground: 0 60% 8%;
+    --info: 213 94% 68%;
+    --info-foreground: 220 60% 8%;
 
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
+    --habit: 160 64% 52%;
+    --calendar: 213 94% 68%;
+    --water: 187 85% 53%;
+    --sleep: 234 89% 74%;
+    --journal: 255 92% 76%;
+    --fitness: 27 96% 61%;
+    --goals: 351 95% 71%;
+    --budget: 172 66% 50%;
+    --study: 255 92% 76%;
+
+    --border: 156 9% 20%;
+    --input: 156 9% 20%;
     --ring: 158 60% 55%;
   }
 }

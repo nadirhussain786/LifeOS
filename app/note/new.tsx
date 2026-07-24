@@ -1,14 +1,13 @@
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-import { Bell, Star, Tag, X } from 'lucide-react-native';
+import { Bell, Star, Tag } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/button';
-import { Text } from '@/components/ui/text';
+import { SheetHeader } from '@/components/ui/sheet-header';
 import { colors } from '@/constants/theme';
 import { AttributeRow } from '@/components/ui/attribute-row';
 import { ReminderPicker } from '@/components/ui/reminder-picker';
@@ -18,7 +17,6 @@ import { useKeyboardHeight } from '@/hooks/use-keyboard-height';
 
 export default function NewNoteScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
   const keyboardHeight = useKeyboardHeight();
   const { create } = useNoteMutations();
@@ -45,21 +43,14 @@ export default function NewNoteScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-4 pb-2">
-        <Pressable
-          onPress={() => router.back()}
-          hitSlop={10}
-          className="h-8 w-8 items-center justify-center rounded-full bg-muted"
-        >
-          <X size={17} color={colors[scheme].foreground} />
-        </Pressable>
-        <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-          New Note
-        </Text>
-        <Pressable onPress={() => setIsPinned((pinned) => !pinned)} hitSlop={10} className="h-8 w-8 items-center justify-center">
-          <Star size={18} color={colors[scheme].accent} fill={isPinned ? colors[scheme].accent : 'transparent'} />
-        </Pressable>
-      </View>
+      <SheetHeader
+        title="New Note"
+        right={
+          <Pressable onPress={() => setIsPinned((pinned) => !pinned)} hitSlop={10} className="h-9 w-9 items-center justify-center">
+            <Star size={18} color={colors[scheme].accent} fill={isPinned ? colors[scheme].accent : 'transparent'} />
+          </Pressable>
+        }
+      />
 
       <ScrollView
         contentContainerClassName="gap-6 px-5 pt-3"

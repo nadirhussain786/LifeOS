@@ -6,12 +6,16 @@ import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { AuthField } from '@/features/auth/components/auth-field';
 import { useAuthStore } from '@/features/auth/services/auth-store';
+import { useSplashStore } from '@/hooks/use-splash-store';
 import { isSupabaseConfigured } from '@/lib/env';
 
 export default function LoginScreen() {
   const router = useRouter();
   const signIn = useAuthStore((s) => s.signIn);
   const continueAsGuest = useAuthStore((s) => s.continueAsGuest);
+  // Don't autofocus while the cold-start splash is still up — it would raise
+  // the keyboard behind the splash.
+  const splashComplete = useSplashStore((s) => s.complete);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -40,7 +44,7 @@ export default function LoginScreen() {
         </View>
 
         {!isSupabaseConfigured && (
-          <Text variant="caption" style={{ color: '#f59e0b' }}>
+          <Text variant="caption" className="text-warning">
             Cloud sync isn&apos;t set up on this build yet. You can continue without an account — everything works offline.
           </Text>
         )}
@@ -53,7 +57,7 @@ export default function LoginScreen() {
             placeholder="you@example.com"
             keyboardType="email-address"
             autoComplete="email"
-            autoFocus
+            autoFocus={splashComplete}
           />
           <AuthField label="Password" value={password} onChangeText={setPassword} placeholder="Your password" secure autoComplete="password" />
 
@@ -66,7 +70,7 @@ export default function LoginScreen() {
           </Link>
 
           {error && (
-            <Text variant="caption" style={{ color: '#ef4444' }}>
+            <Text variant="caption" className="text-destructive">
               {error}
             </Text>
           )}

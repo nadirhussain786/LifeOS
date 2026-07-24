@@ -1,21 +1,21 @@
-import { format } from 'date-fns';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import * as Sharing from 'expo-sharing';
-import { ChevronLeft, ChevronRight, GitCompareArrows, Heart, Images, LayoutGrid, Plus } from 'lucide-react-native';
+import { GitCompareArrows, Heart, Images, Plus } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import { Alert, Dimensions, Pressable, ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/ui/empty-state';
 import { Fab } from '@/components/ui/fab';
-import { HeroCard } from '@/components/ui/hero-card';
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import { AddMediaSheet } from '@/features/gallery/components/add-media-sheet';
 import { AlbumCard } from '@/features/gallery/components/album-card';
+import { JourneyHero } from '@/features/gallery/components/journey-hero';
 import { ProgressPostCard } from '@/features/gallery/components/progress-post-card';
+import { StoryReels } from '@/features/gallery/components/story-reels';
 import { useAlbums, useFavoritePhotos, usePhotos } from '@/features/gallery/hooks/use-gallery';
 import { useGalleryMutations } from '@/features/gallery/hooks/use-gallery-mutations';
 import type { GalleryPhoto } from '@/features/gallery/types/gallery.types';
@@ -27,7 +27,6 @@ const GALLERY_TINT = '#ec4899';
 export default function GalleryScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
-  const insets = useSafeAreaInsets();
   const [addOpen, setAddOpen] = useState(false);
 
   const { data: albums = [], isLoading } = useAlbums();
@@ -35,7 +34,7 @@ export default function GalleryScreen() {
   const { data: favorites = [] } = useFavoritePhotos();
   const { toggleFavorite } = useGalleryMutations();
 
-  const albumWidth = (Dimensions.get('window').width - 32 - 12) / 2;
+  const albumWidth = (Dimensions.get('window').width - 40 - 12) / 2;
   const albumName = useMemo(() => new Map(albums.map((a) => [a.id, a.name])), [albums]);
 
   const share = async (photo: GalleryPhoto) => {
@@ -45,13 +44,6 @@ export default function GalleryScreen() {
       Alert.alert('Could not share', 'Something went wrong sharing this moment.');
     }
   };
-
-  const stats = useMemo(() => {
-    const videos = photos.reduce((n, p) => n + (p.mediaType === 'video' ? 1 : 0), 0);
-    const days = new Set(photos.map((p) => format(p.takenAt, 'yyyy-MM-dd'))).size;
-    const first = photos.length ? Math.min(...photos.map((p) => p.takenAt)) : null;
-    return { total: photos.length, videos, photos: photos.length - videos, days, first };
-  }, [photos]);
 
   const feedPreview = photos.slice(0, 3);
 
@@ -63,17 +55,12 @@ export default function GalleryScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 8 }} className="flex-row items-center gap-1 px-4 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={8} className="-ml-1 p-1" accessibilityLabel="Back">
-          <ChevronLeft size={24} color={colors[scheme].foreground} />
-        </Pressable>
-        <Text variant="heading">Progress</Text>
-      </View>
+      <ScreenHeader title="Progress" eyebrow="Memories & Media" tint={GALLERY_TINT} />
 
       {isLoading ? (
-        <View className="gap-3 px-4 pt-2">
-          <Skeleton className="h-40 w-full rounded-2xl" />
-          <Skeleton className="h-48 w-full rounded-2xl" />
+        <View className="gap-3 px-5 pt-2">
+          <Skeleton className="h-44 w-full rounded-3xl" />
+          <Skeleton className="h-20 w-full rounded-2xl" />
         </View>
       ) : albums.length === 0 && photos.length === 0 ? (
         <EmptyState
@@ -85,53 +72,17 @@ export default function GalleryScreen() {
           onAction={() => setAddOpen(true)}
         />
       ) : (
-        <ScrollView contentContainerClassName="gap-6 px-4 pb-28" showsVerticalScrollIndicator={false}>
-          {/* Stats hero */}
-          <HeroCard tint={GALLERY_TINT}>
-            <View className="gap-4">
-              <View className="gap-0.5">
-                <Text className="font-sora-extrabold text-4xl" style={{ color: '#ffffff' }}>
-                  {stats.total}
-                </Text>
-                <Text className="font-sora-medium" style={{ color: alpha('#ffffff', 0.9) }}>
-                  moments captured{stats.first ? ` · since ${format(stats.first, 'MMM yyyy')}` : ''}
-                </Text>
-              </View>
-              <View className="flex-row rounded-2xl p-3" style={{ backgroundColor: alpha('#ffffff', 0.15) }}>
-                {[
-                  { label: 'Photos', value: stats.photos },
-                  { label: 'Videos', value: stats.videos },
-                  { label: 'Days', value: stats.days },
-                ].map((item) => (
-                  <View key={item.label} className="flex-1 items-center gap-1">
-                    <Text className="font-sora-bold text-lg" style={{ color: '#ffffff' }}>
-                      {item.value}
-                    </Text>
-                    <Text style={{ color: alpha('#ffffff', 0.85), fontSize: 11 }}>{item.label}</Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-          </HeroCard>
+        <ScrollView contentContainerClassName="gap-6 px-5 pb-28 pt-1" showsVerticalScrollIndicator={false}>
+          {/* Journey hero → plays the whole story */}
+          <JourneyHero photos={photos} onPlay={() => router.push('/gallery/story/all')} />
 
-          {/* Feed CTA */}
-          <Pressable
-            onPress={() => router.push('/gallery/feed')}
-            style={[{ borderRadius: 20, overflow: 'hidden' }, glowShadow(GALLERY_TINT, 0.28)]}
-          >
-            <LinearGradient colors={tintGradient(GALLERY_TINT)} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16 }}>
-              <View className="h-11 w-11 items-center justify-center rounded-2xl" style={{ backgroundColor: alpha('#ffffff', 0.2) }}>
-                <LayoutGrid size={22} color="#ffffff" />
-              </View>
-              <View className="flex-1">
-                <Text className="font-sora-bold" style={{ color: '#ffffff', fontSize: 16 }}>
-                  Your Progress Feed
-                </Text>
-                <Text style={{ color: alpha('#ffffff', 0.9), fontSize: 12 }}>A personal, shareable timeline</Text>
-              </View>
-              <ChevronRight size={20} color="#ffffff" />
-            </LinearGradient>
-          </Pressable>
+          {/* Story highlights (full-bleed) */}
+          <View className="gap-3" style={{ marginHorizontal: -20 }}>
+            <Text variant="caption" className="px-5 font-sora-semibold uppercase tracking-wide">
+              Story highlights
+            </Text>
+            <StoryReels photos={photos} onOpen={(period) => router.push(`/gallery/story/${period}`)} />
+          </View>
 
           {/* Quick tiles */}
           <View className="flex-row gap-2.5">
@@ -160,10 +111,10 @@ export default function GalleryScreen() {
           {feedPreview.length > 0 && (
             <View className="gap-3">
               <View className="flex-row items-center justify-between">
-                <Text variant="subheading">From your feed</Text>
+                <Text variant="subheading">Recent moments</Text>
                 <Pressable onPress={() => router.push('/gallery/feed')} hitSlop={8}>
                   <Text variant="caption" style={{ color: GALLERY_TINT }} className="font-sora-semibold">
-                    See all
+                    See feed
                   </Text>
                 </Pressable>
               </View>

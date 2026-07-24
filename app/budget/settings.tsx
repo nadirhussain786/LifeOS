@@ -1,11 +1,12 @@
 import { useRouter } from 'expo-router';
-import { ChevronLeft, ChevronRight } from 'lucide-react-native';
+import { ChevronRight } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/button';
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { DEFAULT_CURRENCY_CODE, currencySymbol, findCurrency } from '@/features/budget/config/currencies';
 import { parseAmountToCents } from '@/features/budget/services/money';
@@ -15,7 +16,6 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function BudgetSettingsScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
   const { data: settings } = useBudgetSettings();
   const { saveSettings } = useBudgetMutations();
@@ -41,12 +41,7 @@ export default function BudgetSettingsScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 8 }} className="flex-row items-center gap-1 px-4 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={8} className="-ml-1 p-1" accessibilityLabel="Back">
-          <ChevronLeft size={24} color={colors[scheme].foreground} />
-        </Pressable>
-        <Text variant="heading">Budget Settings</Text>
-      </View>
+      <ScreenHeader title="Budget Settings" eyebrow="Budget" tint={moduleTint('budget', scheme)} />
 
       <ScrollView contentContainerClassName="gap-5 px-5 pt-3 pb-10" keyboardShouldPersistTaps="handled">
         <View className="gap-2.5">

@@ -17,7 +17,7 @@ import type { CreateDebtInput, UpdateDebtInput } from '@/features/budget/types/b
 
 export function useDebts() {
   const query = useQuery({ queryKey: ['budget', 'debts'], queryFn: async () => listDebts() });
-  const debts = query.data ?? [];
+  const debts = useMemo(() => query.data ?? [], [query.data]);
   const totals = useMemo(() => debtTotals(debts), [debts]);
   return { ...query, debts, totals };
 }

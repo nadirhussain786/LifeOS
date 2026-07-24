@@ -1,16 +1,16 @@
 import { useRouter } from 'expo-router';
-import { ChevronLeft, HandCoins } from 'lucide-react-native';
+import { HandCoins } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ScrollView, View } from 'react-native';
 
 import { EmptyState } from '@/components/ui/empty-state';
 import { Fab } from '@/components/ui/fab';
 import { HeroCard } from '@/components/ui/hero-card';
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { Segmented } from '@/components/ui/segmented';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
-import { colors } from '@/constants/theme';
+import { moduleTint } from '@/constants/design-tokens';
 import { DebtCard } from '@/features/budget/components/debt-card';
 import { formatMoney } from '@/features/budget/services/money';
 import { useBudgetSettings } from '@/features/budget/hooks/use-budget';
@@ -38,7 +38,6 @@ function sortByUrgency(a: DebtWithStatus, b: DebtWithStatus): number {
 
 export default function DebtsScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
   const { data: settings } = useBudgetSettings();
   const { debts, totals, isLoading } = useDebts();
@@ -56,12 +55,7 @@ export default function DebtsScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 8 }} className="flex-row items-center gap-1 px-4 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={8} className="-ml-1 p-1" accessibilityLabel="Back">
-          <ChevronLeft size={24} color={colors[scheme].foreground} />
-        </Pressable>
-        <Text variant="heading">Borrow & Lend</Text>
-      </View>
+      <ScreenHeader title="Borrow & Lend" eyebrow="Budget" tint={moduleTint('budget', scheme)} />
 
       {isLoading ? (
         <View className="gap-3 px-4 pt-2">

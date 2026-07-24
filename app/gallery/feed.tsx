@@ -1,26 +1,21 @@
 import { useRouter } from 'expo-router';
 import * as Sharing from 'expo-sharing';
-import { ChevronLeft, Images, Plus } from 'lucide-react-native';
+import { Images, Plus } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
-import { Alert, FlatList, Pressable, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Alert, FlatList, View } from 'react-native';
 
 import { EmptyState } from '@/components/ui/empty-state';
-import { Text } from '@/components/ui/text';
-import { colors } from '@/constants/theme';
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { AddMediaSheet } from '@/features/gallery/components/add-media-sheet';
 import { ProgressPostCard } from '@/features/gallery/components/progress-post-card';
 import { useAlbums, usePhotos } from '@/features/gallery/hooks/use-gallery';
 import { useGalleryMutations } from '@/features/gallery/hooks/use-gallery-mutations';
 import type { GalleryPhoto } from '@/features/gallery/types/gallery.types';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 
 const GALLERY_TINT = '#ec4899';
 
 export default function FeedScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
-  const scheme = useColorScheme() ?? 'light';
   const [addOpen, setAddOpen] = useState(false);
 
   const { data: photos = [] } = usePhotos();
@@ -43,17 +38,12 @@ export default function FeedScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 8 }} className="flex-row items-center justify-between px-4 pb-2">
-        <View className="flex-row items-center gap-1">
-          <Pressable onPress={() => router.back()} hitSlop={8} className="-ml-1 p-1" accessibilityLabel="Back">
-            <ChevronLeft size={24} color={colors[scheme].foreground} />
-          </Pressable>
-          <Text variant="heading">Your Feed</Text>
-        </View>
-        <Pressable onPress={() => setAddOpen(true)} hitSlop={8} accessibilityLabel="Add media">
-          <Plus size={22} color={colors[scheme].foreground} />
-        </Pressable>
-      </View>
+      <ScreenHeader
+        title="Your Feed"
+        eyebrow="Progress"
+        tint={GALLERY_TINT}
+        actions={[{ icon: Plus, label: 'Add media', onPress: () => setAddOpen(true) }]}
+      />
 
       {photos.length === 0 ? (
         <EmptyState

@@ -1,13 +1,13 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { Archive, ArchiveRestore, Bell, ChevronLeft, Star, Tag, Tags, Trash2 } from 'lucide-react-native';
+import { Archive, ArchiveRestore, Bell, Star, Tag, Tags, Trash2 } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AttachmentStrip } from '@/components/ui/attachment-strip';
 import { AttributeRow } from '@/components/ui/attribute-row';
 import { ReminderPicker } from '@/components/ui/reminder-picker';
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { VoiceNoteRecorder } from '@/components/ui/voice-note-recorder';
 import { colors } from '@/constants/theme';
 import { BacklinksPanel } from '@/features/notes/components/backlinks-panel';
@@ -31,7 +31,6 @@ const AUTOSAVE_DELAY_MS = 500;
 export default function NoteDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
   const keyboardHeight = useKeyboardHeight();
   const { data: note } = useNote(id);
@@ -90,36 +89,33 @@ export default function NoteDetailScreen() {
     <View className="flex-1 bg-background">
       <Stack.Screen options={{ headerShown: false }} />
 
-      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-4 pb-2">
-        <Pressable
-          onPress={() => router.back()}
-          hitSlop={10}
-          className="h-8 w-8 items-center justify-center rounded-full bg-muted"
-        >
-          <ChevronLeft size={20} color={colors[scheme].foreground} />
-        </Pressable>
-        <View className="flex-row gap-4">
-          <Pressable onPress={() => update.mutate({ id: note.id, input: { isPinned: !note.isPinned } })} hitSlop={8}>
-            <Star size={20} color={colors[scheme].accent} fill={note.isPinned ? colors[scheme].accent : 'transparent'} />
-          </Pressable>
-          <Pressable onPress={() => (note.isArchived ? unarchive.mutate(note.id) : archive.mutate(note.id))} hitSlop={8}>
-            {note.isArchived ? (
-              <ArchiveRestore size={19} color={colors[scheme].foreground} />
-            ) : (
-              <Archive size={19} color={colors[scheme].foreground} />
-            )}
-          </Pressable>
-          <Pressable
-            onPress={() => {
-              remove.mutate(note.id);
-              router.back();
-            }}
-            hitSlop={8}
-          >
-            <Trash2 size={20} color={colors[scheme].destructive} />
-          </Pressable>
-        </View>
-      </View>
+      <ScreenHeader
+        eyebrow="Notes"
+        tint="#eab308"
+        right={
+          <View className="flex-row gap-4">
+            <Pressable onPress={() => update.mutate({ id: note.id, input: { isPinned: !note.isPinned } })} hitSlop={8}>
+              <Star size={20} color={colors[scheme].accent} fill={note.isPinned ? colors[scheme].accent : 'transparent'} />
+            </Pressable>
+            <Pressable onPress={() => (note.isArchived ? unarchive.mutate(note.id) : archive.mutate(note.id))} hitSlop={8}>
+              {note.isArchived ? (
+                <ArchiveRestore size={19} color={colors[scheme].foreground} />
+              ) : (
+                <Archive size={19} color={colors[scheme].foreground} />
+              )}
+            </Pressable>
+            <Pressable
+              onPress={() => {
+                remove.mutate(note.id);
+                router.back();
+              }}
+              hitSlop={8}
+            >
+              <Trash2 size={20} color={colors[scheme].destructive} />
+            </Pressable>
+          </View>
+        }
+      />
 
       <ScrollView
         contentContainerClassName="gap-6 px-5 pt-3"

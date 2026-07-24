@@ -11,18 +11,25 @@ import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { AnimatedSplash } from '@/components/animated-splash';
 import { DevErrorBanner } from '@/components/dev/dev-error-banner';
 import { MiniPlayerBar } from '@/features/music/components/mini-player-bar';
 import { useNotificationNavigation } from '@/features/notifications/hooks/use-notification-navigation';
 import { applyDeliveryMode } from '@/features/notifications/services/delivery';
 import { syncTodayWidget } from '@/features/widgets/services/widget-data';
+import { useProfileStore } from '@/features/profile/store/profile-store';
+import { AppLockOverlay } from '@/features/security/components/app-lock-overlay';
+import { useAppLock } from '@/features/security/hooks/use-app-lock';
 import { useAuthStore } from '@/features/auth/services/auth-store';
 import { useAuthGate } from '@/features/auth/hooks/use-auth-gate';
+import { useSplashStore } from '@/hooks/use-splash-store';
 import { useSyncTrigger } from '@/features/sync/hooks/use-sync';
+import { colors } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { configureAndroidChannels, configureNotificationHandler } from '@/lib/notifications';
 import { queryClient } from '@/lib/query-client';
 
@@ -56,9 +63,18 @@ function SyncTrigger() {
   return null;
 }
 
+/** Raises the app-lock shield on cold start / when returning from background. */
+function AppLockController() {
+  useAppLock();
+  return null;
+}
+
 export default function RootLayout() {
   const init = useAuthStore((state) => state.init);
   const isInitialized = useAuthStore((state) => state.isInitialized);
+  const profileHydrated = useProfileStore((state) => state.hydrated);
+  const scheme = useColorScheme() ?? 'light';
+  const [splashDone, setSplashDone] = useState(false);
   const [fontsLoaded] = useFonts({
     Sora_400Regular,
     Sora_500Medium,
@@ -82,20 +98,26 @@ export default function RootLayout() {
   }, [init]);
 
   useEffect(() => {
-    if (fontsLoaded && isInitialized) SplashScreen.hideAsync();
-  }, [fontsLoaded, isInitialized]);
+    if (fontsLoaded && isInitialized && profileHydrated) SplashScreen.hideAsync();
+  }, [fontsLoaded, isInitialized, profileHydrated]);
 
-  // Wait for both fonts and the initial session check so the auth gate can
-  // route to the right screen without a flash of the wrong one.
-  if (!fontsLoaded || !isInitialized) return null;
+  // The app's ground color. Applied to the root view + every navigator scene
+  // (contentStyle below) so boot and screen transitions never flash the
+  // default white scene — the bug this replaced, worst in dark mode.
+  const c = colors[scheme];
+
+  // Wait for fonts, the initial session check, and the persisted profile so the
+  // gate can route to auth / onboarding / app without a flash of the wrong one.
+  if (!fontsLoaded || !isInitialized || !profileHydrated) return null;
 
   return (
-    <GestureHandlerRootView className="flex-1">
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: c.background }}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
           <BottomSheetModalProvider>
-            <Stack screenOptions={{ headerShown: false }}>
+            <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.background } }}>
               <Stack.Screen name="(auth)" />
+              <Stack.Screen name="(onboarding)" />
               <Stack.Screen name="(tabs)" />
               <Stack.Screen name="notes" />
               <Stack.Screen name="music" />
@@ -121,10 +143,11 @@ export default function RootLayout() {
               <Stack.Screen name="gallery/compare" />
               <Stack.Screen name="gallery/album/[id]" />
               <Stack.Screen name="gallery/photo/[id]" />
-              <Stack.Screen name="settings/index" options={{ headerShown: true, title: 'Settings' }} />
-              <Stack.Screen name="settings/notifications" options={{ headerShown: true, title: 'Notifications' }} />
-              <Stack.Screen name="settings/sync" options={{ headerShown: true, title: 'Sync & Account' }} />
-              <Stack.Screen name="notifications" options={{ headerShown: true, title: 'Notifications' }} />
+              <Stack.Screen name="gallery/story/[period]" options={{ presentation: 'fullScreenModal', animation: 'fade' }} />
+              <Stack.Screen name="settings/index" />
+              <Stack.Screen name="settings/notifications" />
+              <Stack.Screen name="settings/sync" />
+              <Stack.Screen name="notifications" />
               <Stack.Screen name="task/new" options={{ presentation: 'modal' }} />
               <Stack.Screen name="note/new" options={{ presentation: 'modal' }} />
               <Stack.Screen name="habit/new" options={{ presentation: 'modal' }} />
@@ -142,9 +165,22 @@ export default function RootLayout() {
             </Stack>
             <AuthGate />
             <SyncTrigger />
+            <AppLockController />
             <NotificationNavigationBridge />
             <MiniPlayerBar />
             <DevErrorBanner />
+            {/* On top of everything: the lock shield, then the cold-start splash. */}
+            <AppLockOverlay />
+            {!splashDone && (
+              <AnimatedSplash
+                onFinish={() => {
+                  setSplashDone(true);
+                  // Release the cold-start autofocus guard so login/onboarding
+                  // fields no longer keep the keyboard down.
+                  useSplashStore.getState().setComplete();
+                }}
+              />
+            )}
           </BottomSheetModalProvider>
         </QueryClientProvider>
       </SafeAreaProvider>

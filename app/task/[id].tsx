@@ -1,10 +1,10 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { Archive, Bell, CalendarDays, ChevronLeft, Clock3, Flag, Repeat, StickyNote, Tag, Trash2 } from 'lucide-react-native';
+import { Archive, Bell, CalendarDays, Clock3, Flag, Repeat, StickyNote, Tag, Trash2 } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, Switch, TextInput, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import { AttributeRow } from '@/components/ui/attribute-row';
@@ -28,7 +28,6 @@ const AUTOSAVE_DELAY_MS = 500;
 export default function TaskDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
   const keyboardHeight = useKeyboardHeight();
   const { data: task } = useTask(id);
@@ -62,40 +61,36 @@ export default function TaskDetailScreen() {
     <View className="flex-1 bg-background">
       <Stack.Screen options={{ headerShown: false }} />
 
-      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-4 pb-2">
-        <Pressable
-          onPress={() => router.back()}
-          hitSlop={10}
-          className="h-8 w-8 items-center justify-center rounded-full bg-muted"
-        >
-          <ChevronLeft size={20} color={colors[scheme].foreground} />
-        </Pressable>
-        <View className="flex-row gap-4">
-          {task.dueDate && (
-            <Pressable onPress={() => router.push(`/timeline/${toDateKey(new Date(task.dueDate!))}`)} hitSlop={8}>
-              <Clock3 size={20} color={colors[scheme].foreground} />
+      <ScreenHeader
+        eyebrow="Task"
+        right={
+          <View className="flex-row gap-4">
+            {task.dueDate && (
+              <Pressable onPress={() => router.push(`/timeline/${toDateKey(new Date(task.dueDate!))}`)} hitSlop={8}>
+                <Clock3 size={20} color={colors[scheme].foreground} />
+              </Pressable>
+            )}
+            <Pressable
+              onPress={() => {
+                archive.mutate(task.id);
+                router.back();
+              }}
+              hitSlop={8}
+            >
+              <Archive size={20} color={colors[scheme].foreground} />
             </Pressable>
-          )}
-          <Pressable
-            onPress={() => {
-              archive.mutate(task.id);
-              router.back();
-            }}
-            hitSlop={8}
-          >
-            <Archive size={20} color={colors[scheme].foreground} />
-          </Pressable>
-          <Pressable
-            onPress={() => {
-              remove.mutate(task.id);
-              router.back();
-            }}
-            hitSlop={8}
-          >
-            <Trash2 size={20} color={colors[scheme].destructive} />
-          </Pressable>
-        </View>
-      </View>
+            <Pressable
+              onPress={() => {
+                remove.mutate(task.id);
+                router.back();
+              }}
+              hitSlop={8}
+            >
+              <Trash2 size={20} color={colors[scheme].destructive} />
+            </Pressable>
+          </View>
+        }
+      />
 
       <ScrollView
         contentContainerClassName="gap-6 px-5 pt-3"
@@ -111,7 +106,7 @@ export default function TaskDetailScreen() {
           style={{ fontSize: 26, fontFamily: 'Sora_700Bold', lineHeight: 32, color: colors[scheme].foreground }}
         />
 
-        <View className="rounded-2xl border border-border bg-card px-4">
+        <View className="rounded-2xl border border-border bg-card px-4 shadow-e1">
           <AttributeRow icon={Flag} label="Priority" isFirst>
             <PriorityPicker value={task.priority} onChange={(priority) => update.mutate({ id: task.id, input: { priority } })} />
           </AttributeRow>
@@ -154,7 +149,7 @@ export default function TaskDetailScreen() {
         <View className="gap-2.5">
           <View className="flex-row items-center gap-1.5">
             <StickyNote size={13} color={colors[scheme].mutedForeground} />
-            <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
+            <Text variant="micro" className="font-sora-semibold">
               Notes
             </Text>
           </View>
@@ -164,7 +159,7 @@ export default function TaskDetailScreen() {
             multiline
             placeholder="Add notes…"
             placeholderTextColor={colors[scheme].mutedForeground}
-            className="min-h-24 rounded-2xl border border-border bg-card p-4 text-base text-foreground"
+            className="min-h-24 rounded-2xl border border-border bg-card p-4 text-base text-foreground shadow-e1"
             textAlignVertical="top"
           />
         </View>

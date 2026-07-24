@@ -2,12 +2,14 @@ import { useRouter, useSegments } from 'expo-router';
 import { useEffect } from 'react';
 
 import { useAuthStore } from '@/features/auth/services/auth-store';
+import { useProfileStore } from '@/features/profile/store/profile-store';
 
 /**
- * Redirects between the auth flow and the app based on session state. Signed-in
- * users and explicit guests get the app; everyone else is sent to the login
- * screen. Waits for `isInitialized` so the first frame doesn't flash the wrong
- * screen. Mounted once from the root layout.
+ * Routes between the auth flow, first-run onboarding, and the app based on
+ * session + onboarding state. Order of gates: unauthenticated → login;
+ * authenticated-but-unonboarded → onboarding; done → app. Waits for both the
+ * session check and the persisted profile so the first frame never flashes the
+ * wrong screen. Mounted once from the root layout.
  */
 export function useAuthGate() {
   const segments = useSegments();
@@ -15,22 +17,37 @@ export function useAuthGate() {
   const isInitialized = useAuthStore((s) => s.isInitialized);
   const session = useAuthStore((s) => s.session);
   const isGuest = useAuthStore((s) => s.isGuest);
+  const onboardingComplete = useProfileStore((s) => s.onboardingComplete);
+  const hydrated = useProfileStore((s) => s.hydrated);
 
   useEffect(() => {
-    if (!isInitialized) return;
+    if (!isInitialized || !hydrated) return;
+
     const inAuthGroup = segments[0] === '(auth)';
+    const inOnboarding = segments[0] === '(onboarding)';
     // The reset-password screen must stay reachable even with a session — the
     // recovery link signs the user in precisely so they can set a new password.
     const onResetScreen = segments.includes('reset-password');
+    const authed = !!session || isGuest;
 
-    if (!session && !isGuest && !inAuthGroup) {
-      // Truly unauthenticated and outside the auth flow → send to login.
-      router.replace('/(auth)/login');
-    } else if (session && inAuthGroup && !onResetScreen) {
-      // Only a REAL session gets bounced out of the auth flow. Guests are left
-      // alone so they can open login/sign-up from Settings to upgrade to an
-      // account (they're "in the app" via a persisted guest flag, not a session).
-      router.replace('/(tabs)');
+    if (!authed) {
+      // Truly unauthenticated → the auth flow (unless already there).
+      if (!inAuthGroup) router.replace('/(auth)/login');
+      return;
     }
-  }, [isInitialized, session, isGuest, segments, router]);
+
+    if (onResetScreen) return;
+
+    if (!onboardingComplete) {
+      // Signed in or guest, but hasn't finished first-run setup.
+      if (!inOnboarding) router.replace('/(onboarding)');
+      return;
+    }
+
+    // Onboarded. Leave the onboarding flow; and bounce only a REAL session out
+    // of the auth flow — guests are left there so they can upgrade to an account
+    // from Settings without being kicked back into the app.
+    if (inOnboarding) router.replace('/(tabs)');
+    else if (inAuthGroup && session) router.replace('/(tabs)');
+  }, [isInitialized, hydrated, session, isGuest, onboardingComplete, segments, router]);
 }

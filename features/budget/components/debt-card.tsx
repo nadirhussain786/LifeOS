@@ -3,8 +3,10 @@ import { Pressable, View } from 'react-native';
 
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { Text } from '@/components/ui/text';
+import { colors } from '@/constants/design-tokens';
 import { statusLabel, statusTint } from '@/features/budget/services/debt-status';
 import { formatMoney } from '@/features/budget/services/money';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { alpha } from '@/lib/color';
 import type { DebtWithStatus } from '@/features/budget/types/budget.types';
 
@@ -16,15 +18,16 @@ type Props = {
 /** One IOU row: who, how much is left, and a colour-coded timing pill. A
  * partially-paid debt also shows a slim progress bar. */
 export function DebtCard({ debt, onPress }: Props) {
+  const scheme = useColorScheme() ?? 'light';
   const borrowed = debt.direction === 'borrowed';
   const Icon = borrowed ? ArrowUpRight : ArrowDownLeft;
-  const tint = debt.isSettled ? '#22c55e' : statusTint(debt.status);
+  const tint = debt.isSettled ? colors[scheme].success : statusTint(debt.status);
   const partiallyPaid = debt.paidCents > 0 && !debt.isSettled;
 
   return (
     <Pressable
       onPress={() => onPress(debt)}
-      className="gap-3 rounded-2xl border border-border bg-card p-4"
+      className="gap-3 rounded-2xl border border-border bg-card p-4 shadow-e1"
       accessibilityRole="button"
     >
       <View className="flex-row items-center gap-3">

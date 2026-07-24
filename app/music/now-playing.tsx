@@ -1,28 +1,42 @@
-import Slider from '@react-native-community/slider';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { ChevronDown, ListMusic, Moon, Music, Pause, Play, Repeat, Repeat1, Shuffle, SkipBack, SkipForward, X } from 'lucide-react-native';
+import { ChevronDown, ListMusic, Moon, Pause, Play, Repeat, Repeat1, Shuffle, SkipBack, SkipForward, X } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/ui/text';
-import { colors } from '@/constants/theme';
+import { ArtworkOrb } from '@/features/music/components/artwork-orb';
+import { AuroraBackground } from '@/features/music/components/aurora-background';
 import { QueueSheet } from '@/features/music/components/queue-sheet';
 import { SleepTimerSheet } from '@/features/music/components/sleep-timer-sheet';
-import { MUSIC_TINT } from '@/features/music/components/song-row';
+import { WaveformScrubber } from '@/features/music/components/waveform-scrubber';
 import { useNowPlaying } from '@/features/music/hooks/use-player';
+import { songColor } from '@/features/music/utils/song-art';
 import { formatDuration } from '@/features/music/utils/format-duration';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { glowShadow, tintGradient } from '@/lib/color';
+import { alpha } from '@/lib/color';
 import type { RepeatMode } from '@/features/music/types/music.types';
 
 const REPEAT_CYCLE: Record<RepeatMode, RepeatMode> = { off: 'all', all: 'one', one: 'off' };
+const WHITE = '#ffffff';
+
+/** Frosted round chip used for the header + secondary actions. */
+function GlassChip({ children, onPress, label }: { children: React.ReactNode; onPress: () => void; label: string }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      hitSlop={10}
+      accessibilityLabel={label}
+      className="h-10 w-10 items-center justify-center rounded-full"
+      style={{ backgroundColor: alpha(WHITE, 0.14), borderWidth: 1, borderColor: alpha(WHITE, 0.14) }}
+    >
+      {children}
+    </Pressable>
+  );
+}
 
 export default function NowPlayingScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const scheme = useColorScheme() ?? 'light';
   const {
     currentSong,
     isPlaying,
@@ -48,7 +62,6 @@ export default function NowPlayingScreen() {
   const [sleepOpen, setSleepOpen] = useState(false);
   const [now, setNow] = useState(() => Date.now());
 
-  // Tick once a second only while a sleep timer is armed, to drive the countdown.
   useEffect(() => {
     if (!sleepTimerEndsAt) return;
     const id = setInterval(() => setNow(Date.now()), 1000);
@@ -57,120 +70,121 @@ export default function NowPlayingScreen() {
 
   if (!currentSong) return null;
 
+  const seed = currentSong.id;
+  const accent = songColor(seed);
   const RepeatIcon = repeatMode === 'one' ? Repeat1 : Repeat;
-  const [g1, g2] = tintGradient(MUSIC_TINT);
   const sleepRemainingMs = sleepTimerEndsAt ? Math.max(0, sleepTimerEndsAt - now) : 0;
   const sleepActive = sleepRemainingMs > 0;
+  const progress = durationMs > 0 ? Math.min(1, positionMs / durationMs) : 0;
+
   const dismiss = () => {
     clearPlayer();
     router.back();
   };
 
   return (
-    <View className="flex-1 bg-background">
-      {/* Soft top wash in the module tint */}
-      <LinearGradient
-        colors={[`${MUSIC_TINT}22`, 'transparent']}
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 260 }}
-        pointerEvents="none"
-      />
+    <View className="flex-1">
+      <AuroraBackground color={accent} />
 
-      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-4 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full bg-muted">
-          <ChevronDown size={20} color={colors[scheme].foreground} />
-        </Pressable>
-        <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-          {queue.length > 0 ? `${currentIndex + 1} of ${queue.length}` : 'Now Playing'}
-        </Text>
-        <Pressable onPress={dismiss} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full bg-muted" accessibilityLabel="Stop and close">
-          <X size={18} color={colors[scheme].foreground} />
-        </Pressable>
-      </View>
+      <View style={{ paddingTop: insets.top + 12, paddingBottom: insets.bottom + 16 }} className="flex-1 px-6">
+        {/* Header */}
+        <View className="flex-row items-center justify-between">
+          <GlassChip onPress={() => router.back()} label="Minimize">
+            <ChevronDown size={20} color={WHITE} />
+          </GlassChip>
+          <Text style={{ color: alpha(WHITE, 0.75), fontSize: 11, letterSpacing: 1 }} className="font-sora-semibold uppercase">
+            {queue.length > 0 ? `${currentIndex + 1} of ${queue.length}` : 'Now Playing'}
+          </Text>
+          <GlassChip onPress={dismiss} label="Stop and close">
+            <X size={18} color={WHITE} />
+          </GlassChip>
+        </View>
 
-      <View className="flex-1 items-center justify-center gap-7 px-8">
-        <LinearGradient
-          colors={[g1, g2]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={[{ height: 260, width: 260, borderRadius: 32, alignItems: 'center', justifyContent: 'center' }, glowShadow(MUSIC_TINT, 0.4)]}
-        >
-          <Music size={90} color="#ffffff" strokeWidth={1.5} />
-        </LinearGradient>
+        {/* Artwork */}
+        <View className="flex-1 items-center justify-center">
+          <ArtworkOrb seed={seed} size={280} playing={isPlaying} />
+        </View>
 
-        <View className="w-full gap-1">
-          <Text variant="heading" numberOfLines={1} className="text-center">
+        {/* Title */}
+        <View className="gap-1 pb-5">
+          <Text numberOfLines={1} className="font-sora-extrabold text-2xl" style={{ color: WHITE }}>
             {currentSong.title}
           </Text>
-          <Text variant="muted" numberOfLines={1} className="text-center">
+          <Text numberOfLines={1} style={{ color: alpha(WHITE, 0.7), fontSize: 15 }}>
             {currentSong.artist ?? 'Unknown artist'}
           </Text>
         </View>
 
-        <View className="w-full gap-1">
-          <Slider
-            value={positionMs / 1000}
-            minimumValue={0}
-            maximumValue={Math.max(durationMs / 1000, 1)}
-            minimumTrackTintColor={MUSIC_TINT}
-            maximumTrackTintColor={colors[scheme].border}
-            thumbTintColor={MUSIC_TINT}
-            onSlidingComplete={(value) => seekTo(value)}
-          />
-          <View className="flex-row justify-between">
-            <Text variant="caption">{formatDuration(positionMs)}</Text>
-            <Text variant="caption">{formatDuration(durationMs)}</Text>
-          </View>
+        {/* Waveform seek */}
+        <WaveformScrubber
+          seed={seed}
+          progress={progress}
+          playing={isPlaying}
+          color={accent}
+          onSeek={(f) => seekTo((f * durationMs) / 1000)}
+        />
+        <View className="mt-1 flex-row justify-between">
+          <Text style={{ color: alpha(WHITE, 0.6), fontSize: 11 }} className="font-sora-medium">
+            {formatDuration(positionMs)}
+          </Text>
+          <Text style={{ color: alpha(WHITE, 0.6), fontSize: 11 }} className="font-sora-medium">
+            {formatDuration(durationMs)}
+          </Text>
         </View>
 
-        <View className="w-full flex-row items-center justify-between">
-          <Pressable onPress={toggleShuffle} hitSlop={10}>
-            <Shuffle size={19} color={shuffle ? MUSIC_TINT : colors[scheme].mutedForeground} />
+        {/* Transport */}
+        <View className="mt-5 flex-row items-center justify-between">
+          <Pressable onPress={toggleShuffle} hitSlop={12} accessibilityLabel="Shuffle">
+            <Shuffle size={20} color={shuffle ? accent : alpha(WHITE, 0.55)} />
           </Pressable>
 
-          <View className="flex-row items-center gap-8">
-            <Pressable onPress={playPrevious} hitSlop={10}>
-              <SkipBack size={26} color={colors[scheme].foreground} fill={colors[scheme].foreground} />
+          <View className="flex-row items-center gap-7">
+            <Pressable onPress={playPrevious} hitSlop={12} accessibilityLabel="Previous">
+              <SkipBack size={28} color={WHITE} fill={WHITE} />
             </Pressable>
             <Pressable
               onPress={togglePlayPause}
-              className="h-16 w-16 items-center justify-center rounded-full"
-              style={{ backgroundColor: MUSIC_TINT }}
+              accessibilityLabel={isPlaying ? 'Pause' : 'Play'}
+              className="h-[72px] w-[72px] items-center justify-center rounded-full"
+              style={{ backgroundColor: WHITE }}
             >
               {isPlaying ? (
-                <Pause size={26} color="#ffffff" fill="#ffffff" />
+                <Pause size={30} color="#0b0b10" fill="#0b0b10" />
               ) : (
-                <Play size={26} color="#ffffff" fill="#ffffff" style={{ marginLeft: 3 }} />
+                <Play size={30} color="#0b0b10" fill="#0b0b10" style={{ marginLeft: 3 }} />
               )}
             </Pressable>
-            <Pressable onPress={playNext} hitSlop={10}>
-              <SkipForward size={26} color={colors[scheme].foreground} fill={colors[scheme].foreground} />
+            <Pressable onPress={playNext} hitSlop={12} accessibilityLabel="Next">
+              <SkipForward size={28} color={WHITE} fill={WHITE} />
             </Pressable>
           </View>
 
-          <Pressable onPress={() => setRepeatMode(REPEAT_CYCLE[repeatMode])} hitSlop={10}>
-            <RepeatIcon size={19} color={repeatMode === 'off' ? colors[scheme].mutedForeground : MUSIC_TINT} />
+          <Pressable onPress={() => setRepeatMode(REPEAT_CYCLE[repeatMode])} hitSlop={12} accessibilityLabel="Repeat">
+            <RepeatIcon size={20} color={repeatMode === 'off' ? alpha(WHITE, 0.55) : accent} />
           </Pressable>
         </View>
 
-        {/* Sleep timer + Up Next */}
-        <View className="w-full flex-row gap-3">
+        {/* Sleep + Up Next */}
+        <View className="mt-6 flex-row gap-3">
           <Pressable
             onPress={() => setSleepOpen(true)}
-            className="flex-1 flex-row items-center justify-center gap-2 rounded-full border py-3"
-            style={{ borderColor: sleepActive ? MUSIC_TINT : colors[scheme].border }}
+            className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl py-3.5"
+            style={{ backgroundColor: alpha(WHITE, sleepActive ? 0.2 : 0.1), borderWidth: 1, borderColor: alpha(WHITE, 0.14) }}
           >
-            <Moon size={16} color={sleepActive ? MUSIC_TINT : colors[scheme].mutedForeground} />
-            <Text className="font-sora-semibold" style={{ color: sleepActive ? MUSIC_TINT : colors[scheme].foreground }}>
+            <Moon size={16} color={sleepActive ? accent : WHITE} />
+            <Text className="font-sora-semibold" style={{ color: WHITE }}>
               {sleepActive ? formatDuration(sleepRemainingMs) : 'Sleep'}
             </Text>
           </Pressable>
           <Pressable
             onPress={() => setQueueOpen(true)}
-            className="flex-1 flex-row items-center justify-center gap-2 rounded-full border py-3"
-            style={{ borderColor: colors[scheme].border }}
+            className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl py-3.5"
+            style={{ backgroundColor: alpha(WHITE, 0.1), borderWidth: 1, borderColor: alpha(WHITE, 0.14) }}
           >
-            <ListMusic size={16} color={colors[scheme].foreground} />
-            <Text className="font-sora-semibold text-foreground">Up Next</Text>
+            <ListMusic size={16} color={WHITE} />
+            <Text className="font-sora-semibold" style={{ color: WHITE }}>
+              Up Next
+            </Text>
           </Pressable>
         </View>
       </View>

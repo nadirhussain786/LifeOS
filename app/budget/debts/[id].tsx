@@ -1,14 +1,15 @@
 import { format } from 'date-fns';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { CheckCircle2, ChevronLeft, Pencil, RotateCcw, Trash2 } from 'lucide-react-native';
+import { CheckCircle2, Pencil, RotateCcw, Trash2 } from 'lucide-react-native';
 import { useState } from 'react';
 import { Alert, Pressable, ScrollView, TextInput, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/button';
 import { GradientButton } from '@/components/ui/gradient-button';
 import { ProgressRing } from '@/components/ui/progress-ring';
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { statusLabel, statusTint } from '@/features/budget/services/debt-status';
 import { formatMoney, parseAmountToCents } from '@/features/budget/services/money';
@@ -18,7 +19,6 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 export default function DebtDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
   const { debts } = useDebts();
   const { addPayment, markSettled, markReopened, removeDebt } = useDebtMutations();
@@ -47,19 +47,14 @@ export default function DebtDetailScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-4 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full bg-muted">
-          <ChevronLeft size={20} color={colors[scheme].foreground} />
-        </Pressable>
-        <View className="flex-row items-center gap-4">
-          <Pressable onPress={() => router.push(`/budget/debts/new?id=${debt.id}`)} hitSlop={8} accessibilityLabel="Edit IOU">
-            <Pencil size={18} color={colors[scheme].foreground} />
-          </Pressable>
-          <Pressable onPress={confirmDelete} hitSlop={8} accessibilityLabel="Delete IOU">
-            <Trash2 size={19} color={colors[scheme].destructive} />
-          </Pressable>
-        </View>
-      </View>
+      <ScreenHeader
+        eyebrow="Borrow & Lend"
+        tint={moduleTint('budget', scheme)}
+        actions={[
+          { icon: Pencil, label: 'Edit IOU', onPress: () => router.push(`/budget/debts/new?id=${debt.id}`) },
+          { icon: Trash2, label: 'Delete IOU', onPress: confirmDelete, tint: colors[scheme].destructive },
+        ]}
+      />
 
       <ScrollView contentContainerClassName="gap-6 px-5 pt-2 pb-10" showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <View className="items-center gap-4">

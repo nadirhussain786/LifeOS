@@ -1,10 +1,9 @@
 import { useRouter } from 'expo-router';
-import { X } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/button';
+import { SheetHeader } from '@/components/ui/sheet-header';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import { ALBUM_CATEGORIES } from '@/features/gallery/config/album-categories';
@@ -15,7 +14,6 @@ import { cn } from '@/lib/utils';
 
 export default function NewAlbumScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
   const { addAlbum } = useGalleryMutations();
 
@@ -34,15 +32,7 @@ export default function NewAlbumScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-4 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full bg-muted">
-          <X size={17} color={colors[scheme].foreground} />
-        </Pressable>
-        <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-          New Album
-        </Text>
-        <View className="h-8 w-8" />
-      </View>
+      <SheetHeader title="New Album" />
 
       <ScrollView contentContainerClassName="gap-5 px-5 pt-3 pb-10" keyboardShouldPersistTaps="handled">
         <TextInput

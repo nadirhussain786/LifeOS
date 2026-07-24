@@ -4,20 +4,21 @@ import { Alert, Pressable, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 import { Text } from '@/components/ui/text';
+import { moduleTints } from '@/constants/design-tokens';
 import { colors, habitDoneColor } from '@/constants/theme';
 import type { TimelineEvent, TimelineEventType } from '@/features/timeline/types/timeline.types';
 
-// Each module keeps the identity color it already established elsewhere in
-// the app (Habits' "done" green, Notes' violet, Journal's rose) so an event's
-// origin reads at a glance without needing a legend.
+// Each event wears the design-system identity tint of the module it came from
+// (Journal violet, Water cyan, Calendar blue, Habits/Tasks' "done" green) so an
+// event's origin reads at a glance without needing a legend.
 const TYPE_TINT: Record<TimelineEventType, string> = {
   task_completed: habitDoneColor,
-  task_scheduled: '#0ea5e9',
+  task_scheduled: moduleTints.calendar.light,
   habit_completed: habitDoneColor,
-  note_created: '#8b5cf6',
-  journal_written: '#ec4899',
-  water_logged: '#0ea5e9',
-  calendar_event: '#0ea5e9',
+  note_created: '#eab308',
+  journal_written: moduleTints.journal.light,
+  water_logged: moduleTints.water.light,
+  calendar_event: moduleTints.calendar.light,
 };
 
 type Props = {

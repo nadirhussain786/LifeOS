@@ -5,7 +5,9 @@ import { View } from 'react-native';
 import { HeroCard } from '@/components/ui/hero-card';
 import { ProgressRing } from '@/components/ui/progress-ring';
 import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
 import { formatProgressPercent } from '@/features/goals/services/goal-format';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { alpha } from '@/lib/color';
 
 type Props = {
@@ -15,10 +17,10 @@ type Props = {
   nextDue: number | null;
 };
 
-const GOALS_TINT = '#f97316';
 const WHITE = '#ffffff';
 
 export function GoalsStatsHeader({ activeCount, completedCount, avgProgress, nextDue }: Props) {
+  const scheme = useColorScheme() ?? 'light';
   const rows = [
     { icon: Target, text: `${activeCount} active ${activeCount === 1 ? 'goal' : 'goals'}` },
     { icon: CheckCircle2, text: `${completedCount} completed` },
@@ -26,11 +28,11 @@ export function GoalsStatsHeader({ activeCount, completedCount, avgProgress, nex
   ];
 
   return (
-    <HeroCard tint={GOALS_TINT}>
+    <HeroCard tint={moduleTint('goals', scheme)}>
       <View className="flex-row items-center gap-5">
         <ProgressRing progress={avgProgress} size={104} strokeWidth={10} color={WHITE} trackColor={alpha(WHITE, 0.25)}>
           <View className="items-center">
-            <Text className="font-sora-extrabold text-xl" style={{ color: WHITE }}>
+            <Text className="font-sora-extrabold text-xl" style={{ color: WHITE, fontVariant: ['tabular-nums'] }}>
               {formatProgressPercent(avgProgress)}
             </Text>
             <Text style={{ color: alpha(WHITE, 0.8), fontSize: 11 }}>avg</Text>

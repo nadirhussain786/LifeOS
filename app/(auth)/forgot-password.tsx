@@ -62,7 +62,7 @@ export default function ForgotPasswordScreen() {
               autoFocus
             />
             {error && (
-              <Text variant="caption" style={{ color: '#ef4444' }}>
+              <Text variant="caption" className="text-destructive">
                 {error}
               </Text>
             )}

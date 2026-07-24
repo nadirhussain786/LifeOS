@@ -1,12 +1,13 @@
 import { set } from 'date-fns';
 import { useRouter } from 'expo-router';
-import { BellRing, ChevronLeft, Minus, Moon, Plus, Sun } from 'lucide-react-native';
+import { BellRing, Minus, Moon, Plus, Sun } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, Switch, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/button';
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { TimeField } from '@/features/sleep/components/time-field';
 import { formatDuration } from '@/features/sleep/services/sleep-stats';
@@ -16,7 +17,6 @@ import { CategoryOffNotice } from '@/features/notifications/components/category-
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { notificationsAvailable } from '@/lib/notifications';
 
-const SLEEP_TINT = '#6366f1';
 const MIN_GOAL = 240;
 const MAX_GOAL = 720;
 const STEP = 15;
@@ -36,8 +36,8 @@ function toHHmm(date: Date): string {
 
 export default function SleepSettingsScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
+  const sleepTint = moduleTint('sleep', scheme);
   const { data: settings } = useSleepSettings();
   const { saveSettings } = useSleepMutations();
 
@@ -64,33 +64,28 @@ export default function SleepSettingsScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 8 }} className="flex-row items-center gap-1 px-4 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={8} className="-ml-1 p-1" accessibilityLabel="Back">
-          <ChevronLeft size={24} color={colors[scheme].foreground} />
-        </Pressable>
-        <Text variant="heading">Sleep Goal</Text>
-      </View>
+      <ScreenHeader title="Sleep Goal" eyebrow="Sleep" tint={sleepTint} />
 
       <View className="gap-5 px-5 pt-3">
-        <View className="items-center gap-4 rounded-2xl border border-border bg-card p-6">
-          <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-            Nightly goal
-          </Text>
+        <View className="items-center gap-4 rounded-2xl border border-border bg-card p-6 shadow-e1">
+          <Text variant="micro">Nightly goal</Text>
           <View className="flex-row items-center gap-6">
             <Pressable
               onPress={() => adjust(-STEP)}
-              className="h-12 w-12 items-center justify-center rounded-2xl bg-muted"
+              className="h-12 w-12 items-center justify-center rounded-2xl border border-border bg-surface"
               accessibilityLabel="Decrease goal"
             >
               <Minus size={20} color={colors[scheme].foreground} />
             </Pressable>
-            <Text className="font-sora-extrabold text-4xl" style={{ color: SLEEP_TINT, minWidth: 130, textAlign: 'center' }}>
+            <Text
+              className="font-sora-extrabold text-4xl text-sleep"
+              style={{ minWidth: 130, textAlign: 'center', fontVariant: ['tabular-nums'] }}
+            >
               {formatDuration(goal)}
             </Text>
             <Pressable
               onPress={() => adjust(STEP)}
-              className="h-12 w-12 items-center justify-center rounded-2xl"
-              style={{ backgroundColor: SLEEP_TINT }}
+              className="h-12 w-12 items-center justify-center rounded-2xl bg-sleep"
               accessibilityLabel="Increase goal"
             >
               <Plus size={20} color="#ffffff" />
@@ -100,11 +95,9 @@ export default function SleepSettingsScreen() {
         </View>
 
         <View className="gap-3">
-          <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-            Target schedule (optional)
-          </Text>
+          <Text variant="micro">Target schedule (optional)</Text>
           <View className="flex-row gap-3">
-            <TimeField icon={Moon} label="Bedtime" value={bedtime} onChange={setBedtime} tint={SLEEP_TINT} />
+            <TimeField icon={Moon} label="Bedtime" value={bedtime} onChange={setBedtime} tint={sleepTint} />
             <TimeField icon={Sun} label="Wake up" value={wake} onChange={setWake} tint="#f59e0b" />
           </View>
         </View>
@@ -112,8 +105,8 @@ export default function SleepSettingsScreen() {
         <View className="gap-2">
           <CategoryOffNotice category="sleep" />
           <View className="flex-row items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3.5">
-            <View className="h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: `${SLEEP_TINT}1f` }}>
-              <BellRing size={18} color={SLEEP_TINT} />
+            <View className="h-10 w-10 items-center justify-center rounded-xl bg-sleep/10">
+              <BellRing size={18} color={sleepTint} />
             </View>
             <View className="flex-1">
               <Text className="font-sora-semibold text-foreground">Bedtime reminder</Text>
@@ -122,12 +115,12 @@ export default function SleepSettingsScreen() {
             <Switch
               value={reminderEnabled}
               onValueChange={setReminderEnabled}
-              trackColor={{ true: SLEEP_TINT, false: colors[scheme].border }}
+              trackColor={{ true: sleepTint, false: colors[scheme].border }}
               thumbColor="#ffffff"
             />
           </View>
           {reminderEnabled && !notificationsAvailable && (
-            <Text variant="caption">Reminders need a development build — they won't fire in Expo Go on Android.</Text>
+            <Text variant="caption">Reminders aren&apos;t available on this device.</Text>
           )}
         </View>
 
