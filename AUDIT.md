@@ -32,7 +32,20 @@ Verified each step with `tsc --noEmit` + `jest` (18 tests) + `expo export` (all 
 - **In-app account deletion**: needs a Supabase edge function (`auth.admin.deleteUser` + delete the user's rows) — the client can't do it. Add a "Delete account" action calling it.
 - **Privacy policy + store data-safety declarations**, real bundle id, `eas init`, EAS env values, notification mono-icon.
 
-The **Medium/Low** items below (broad error-state rollout, a11y on all inputs, list virtualization, optimistic updates, feature barrels, repository/reminder dedup, i18n) remain as follow-up sweeps.
+**Perf & a11y sweep (2026-07-25, second pass):**
+- **[PERF] Gallery** — migrated to `expo-image` (downsampling/disk-cache/recycling) everywhere except the view-shot capture path in `compare.tsx`; the "All Photos" grid is now a virtualized `FlashList` (`PhotoGridList`).
+- **[PERF] Transaction history** — now a virtualized `FlashList` (+ loading skeleton + error state).
+- **[A11y] Dynamic type** — `Text` caps scaling at 1.4× (overridable); **SwipeableRow** exposes `accessibilityActions` for swipe-only archive/delete (wired into the task row).
+- **[UX] Error states** — `QueryError` (retry) wired into Tasks, Habits, and Transactions on load failure.
+
+**Still remaining (large refactors / broad mechanical sweeps — recommend doing with device testing):**
+- Error states + input `accessibilityLabel`s on the *remaining* screens (mechanical).
+- Optimistic updates for high-frequency toggles (task/habit/favorite).
+- Feature barrels (`index.ts` public API per module) + ban deep cross-feature imports.
+- Repository CRUD + reminder-service dedup (shared helpers).
+- i18n string extraction (~247 strings) + hardcoded semantic-color → token cleanup.
+- Schema drift (drizzle-kit migrations) and sync-cursor keyset (ms `>` edge).
+- **External:** Sentry DSN, SQLCipher at-rest encryption, in-app account-deletion edge function, privacy policy.
 
 ---
 
