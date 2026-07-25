@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 
 import { EmptyState } from '@/components/ui/empty-state';
+import { QueryError } from '@/components/ui/query-error';
 import { Fab } from '@/components/ui/fab';
 import { ListSectionHeader } from '@/components/ui/list-section-header';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -39,7 +40,7 @@ export default function HabitsScreen() {
   const [quickLogHabit, setQuickLogHabit] = useState<HabitWithToday | null>(null);
 
   const { searchQuery, setSearchQuery } = useHabitsFilterStore();
-  const { data: habits = [], isLoading } = useHabits();
+  const { data: habits = [], isLoading, isError, refetch } = useHabits();
   const { data: routines = [] } = useRoutines();
   const { data: categories = [] } = useHabitCategories();
   const { logToday, unlogToday, logDate, archive, remove } = useHabitMutations();
@@ -117,7 +118,9 @@ export default function HabitsScreen() {
         </View>
       </View>
 
-      {isLoading ? (
+      {isError ? (
+        <QueryError onRetry={() => refetch()} message="Couldn't load your habits." />
+      ) : isLoading ? (
         <View className="gap-2.5 px-5">
           <Skeleton className="h-16 w-full rounded-2xl" />
           <Skeleton className="h-16 w-full rounded-2xl" />

@@ -7,6 +7,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/ui/empty-state';
+import { QueryError } from '@/components/ui/query-error';
 import { Fab } from '@/components/ui/fab';
 import { ListSectionHeader } from '@/components/ui/list-section-header';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -35,7 +36,7 @@ export default function TasksScreen() {
   const insets = useSafeAreaInsets();
 
   const { filter, setFilter, searchQuery, setSearchQuery } = useTasksFilterStore();
-  const { data: tasks = [], isLoading } = useTasks();
+  const { data: tasks = [], isLoading, isError, refetch } = useTasks();
   const { complete, reopen, archive, remove } = useTaskMutations();
 
   const bucketDotColor: Record<TaskDueBucket, string | undefined> = {
@@ -87,7 +88,9 @@ export default function TasksScreen() {
         </View>
       </View>
 
-      {isLoading ? (
+      {isError ? (
+        <QueryError onRetry={() => refetch()} message="Couldn't load your tasks." />
+      ) : isLoading ? (
         <View className="gap-2.5 px-5">
           <Skeleton className="h-16 w-full rounded-2xl" />
           <Skeleton className="h-16 w-full rounded-2xl" />

@@ -58,6 +58,11 @@ export function TaskRow({ task, onPress, onToggleComplete, onArchive, onDelete }
 
   return (
     <SwipeableRow
+      accessibilityActions={[
+        { name: 'archive', label: 'Archive' },
+        { name: 'delete', label: 'Delete' },
+      ]}
+      onAccessibilityAction={(name) => (name === 'archive' ? onArchive() : name === 'delete' ? onDelete() : undefined)}
       actions={
         <>
           <Pressable

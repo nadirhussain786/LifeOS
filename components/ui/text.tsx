@@ -23,5 +23,7 @@ const textVariants = cva('text-foreground', {
 type Props = TextProps & VariantProps<typeof textVariants> & { className?: string };
 
 export function Text({ className, variant, ...props }: Props) {
-  return <RNText className={cn(textVariants({ variant }), className)} {...props} />;
+  // Cap dynamic-type scaling so large OS font sizes don't overflow the app's
+  // fixed-height rows/controls. Overridable per-use (props spread wins).
+  return <RNText maxFontSizeMultiplier={1.4} className={cn(textVariants({ variant }), className)} {...props} />;
 }
