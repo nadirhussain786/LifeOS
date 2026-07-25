@@ -353,3 +353,23 @@ create table if not exists public.budget_debts (
 alter table public.budget_debts enable row level security;
 create policy "budget_debts_own" on public.budget_debts
   for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+-- ---------------------------------------------------------------------------
+-- Indexes — every sync pull is WHERE user_id = ? AND updated_at > ?; without
+-- these it's a sequential scan per table per sync. Idempotent.
+-- ---------------------------------------------------------------------------
+create index if not exists idx_task_categories_sync on public.task_categories(user_id, updated_at);
+create index if not exists idx_tasks_sync on public.tasks(user_id, updated_at);
+create index if not exists idx_note_categories_sync on public.note_categories(user_id, updated_at);
+create index if not exists idx_notes_sync on public.notes(user_id, updated_at);
+create index if not exists idx_habit_categories_sync on public.habit_categories(user_id, updated_at);
+create index if not exists idx_habits_sync on public.habits(user_id, updated_at);
+create index if not exists idx_habit_routines_sync on public.habit_routines(user_id, updated_at);
+create index if not exists idx_journal_entries_sync on public.journal_entries(user_id, updated_at);
+create index if not exists idx_calendar_events_sync on public.calendar_events(user_id, updated_at);
+create index if not exists idx_goals_sync on public.goals(user_id, updated_at);
+create index if not exists idx_sleep_sessions_sync on public.sleep_sessions(user_id, updated_at);
+create index if not exists idx_study_subjects_sync on public.study_subjects(user_id, updated_at);
+create index if not exists idx_budget_transactions_sync on public.budget_transactions(user_id, updated_at);
+create index if not exists idx_savings_goals_sync on public.savings_goals(user_id, updated_at);
+create index if not exists idx_budget_debts_sync on public.budget_debts(user_id, updated_at);

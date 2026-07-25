@@ -153,7 +153,7 @@ export function updateSleepSession(id: string, input: UpdateSleepInput) {
 export function deleteSleepSession(id: string) {
   getDb()
     .update(sleepSessions)
-    .set({ deletedAt: Date.now(), syncStatus: 'pending' })
+    .set({ deletedAt: Date.now(), updatedAt: Date.now(), syncStatus: 'pending' })
     .where(eq(sleepSessions.id, id))
     .run();
 }

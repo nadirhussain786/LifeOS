@@ -139,7 +139,7 @@ export function unarchiveHabit(id: string) {
 
 export function deleteHabit(id: string) {
   const db = getDb();
-  db.update(habits).set({ deletedAt: Date.now(), syncStatus: 'pending' }).where(eq(habits.id, id)).run();
+  db.update(habits).set({ deletedAt: Date.now(), updatedAt: Date.now(), syncStatus: 'pending' }).where(eq(habits.id, id)).run();
   db.delete(habitRoutineItems).where(eq(habitRoutineItems.habitId, id)).run();
 }
 
@@ -244,7 +244,7 @@ export function createHabitCategory(name: string, colorToken: string, icon: stri
 }
 
 export function deleteHabitCategory(id: string) {
-  getDb().update(habitCategories).set({ deletedAt: Date.now() }).where(eq(habitCategories.id, id)).run();
+  getDb().update(habitCategories).set({ deletedAt: Date.now(), updatedAt: Date.now() }).where(eq(habitCategories.id, id)).run();
 }
 
 // ---- Routines (habit stacking) ----

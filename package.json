@@ -8,7 +8,11 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "typecheck": "tsc --noEmit",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@expo-google-fonts/literata": "^0.4.3",
@@ -37,6 +41,7 @@
     "expo-linear-gradient": "~15.0.8",
     "expo-linking": "~8.0.12",
     "expo-local-authentication": "~17.0.8",
+    "expo-localization": "~17.0.9",
     "expo-location": "~19.0.8",
     "expo-notifications": "~0.32.17",
     "expo-router": "~6.0.24",
@@ -47,6 +52,7 @@
     "expo-status-bar": "~3.0.9",
     "expo-video": "~3.0.16",
     "expo-video-thumbnails": "~10.0.8",
+    "jest-expo": "~54.0.17",
     "lucide-react-native": "^1.24.0",
     "nativewind": "^4.2.6",
     "react": "19.1.0",
@@ -69,10 +75,13 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@testing-library/react-native": "^14.0.1",
+    "@types/jest": "^30.0.0",
     "@types/react": "~19.1.0",
     "drizzle-kit": "^0.31.10",
     "eslint": "^9.39.5",
     "eslint-config-expo": "^10.0.0",
+    "jest": "^29.7.0",
     "prettier": "^3.9.5",
     "prettier-plugin-tailwindcss": "^0.8.0",
     "typescript": "~5.9.2"

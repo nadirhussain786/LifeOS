@@ -3,6 +3,7 @@ import type { Session, User } from '@supabase/supabase-js';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
+import { reconcileAccountOnSignIn } from '@/features/sync/services/account-reconcile';
 import { isSupabaseConfigured } from '@/lib/env';
 import { passwordResetRedirectUrl, supabase } from '@/lib/supabase';
 
@@ -75,6 +76,7 @@ export const useAuthStore = create<AuthState>()(
         supabase.auth
           .getSession()
           .then(({ data }) => {
+            if (data.session) reconcileAccountOnSignIn(data.session.user.id);
             set({ session: data.session, user: data.session?.user ?? null });
             if (data.session) void get().loadProfile();
           })
@@ -90,6 +92,8 @@ export const useAuthStore = create<AuthState>()(
         }, 4000);
 
         supabase.auth.onAuthStateChange((_event, session) => {
+          // Wipe-before-sync if a different account signed in on this device.
+          if (session) reconcileAccountOnSignIn(session.user.id);
           set({ session, user: session?.user ?? null, isInitialized: true });
           // A real session means we're no longer a guest.
           if (session) set({ isGuest: false });

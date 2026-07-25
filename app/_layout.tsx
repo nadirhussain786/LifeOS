@@ -16,11 +16,13 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AnimatedSplash } from '@/components/animated-splash';
+import { ErrorBoundary } from '@/components/error-boundary';
 import { DevErrorBanner } from '@/components/dev/dev-error-banner';
 import { MiniPlayerBar } from '@/features/music/components/mini-player-bar';
 import { useNotificationNavigation } from '@/features/notifications/hooks/use-notification-navigation';
 import { applyDeliveryMode } from '@/features/notifications/services/delivery';
 import { syncTodayWidget } from '@/features/widgets/services/widget-data';
+import { useWidgetSync } from '@/features/widgets/hooks/use-widget-sync';
 import { useProfileStore } from '@/features/profile/store/profile-store';
 import { AppLockOverlay } from '@/features/security/components/app-lock-overlay';
 import { useAppLock } from '@/features/security/hooks/use-app-lock';
@@ -60,6 +62,12 @@ function AuthGate() {
 /** Drives automatic local↔cloud sync while signed in. Renders nothing. */
 function SyncTrigger() {
   useSyncTrigger();
+  return null;
+}
+
+/** Refreshes the home-screen widget when tasks/habits/water change. Renders nothing. */
+function WidgetSync() {
+  useWidgetSync();
   return null;
 }
 
@@ -115,6 +123,7 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
           <BottomSheetModalProvider>
+            <ErrorBoundary>
             <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.background } }}>
               <Stack.Screen name="(auth)" />
               <Stack.Screen name="(onboarding)" />
@@ -165,10 +174,12 @@ export default function RootLayout() {
             </Stack>
             <AuthGate />
             <SyncTrigger />
+            <WidgetSync />
             <AppLockController />
             <NotificationNavigationBridge />
             <MiniPlayerBar />
             <DevErrorBanner />
+            </ErrorBoundary>
             {/* On top of everything: the lock shield, then the cold-start splash. */}
             <AppLockOverlay />
             {!splashDone && (

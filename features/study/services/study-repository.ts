@@ -59,7 +59,7 @@ export function renameStudySubject(id: string, name: string) {
 }
 
 export function deleteStudySubject(id: string) {
-  getDb().update(studySubjects).set({ deletedAt: Date.now() }).where(eq(studySubjects.id, id)).run();
+  getDb().update(studySubjects).set({ deletedAt: Date.now(), updatedAt: Date.now() }).where(eq(studySubjects.id, id)).run();
 }
 
 // ---- Sessions ----

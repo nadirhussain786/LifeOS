@@ -95,7 +95,8 @@ export function unarchiveNote(id: string) {
 export function deleteNote(id: string) {
   getDb()
     .update(notes)
-    .set({ deletedAt: Date.now(), syncStatus: 'pending' })
+    // updatedAt must move so the delete is seen by the sync push (WHERE updated_at > cursor).
+    .set({ deletedAt: Date.now(), updatedAt: Date.now(), syncStatus: 'pending' })
     .where(eq(notes.id, id))
     .run();
 }
@@ -125,7 +126,7 @@ export function createNoteCategory(name: string, colorToken: string, icon: strin
 export function deleteNoteCategory(id: string) {
   getDb()
     .update(noteCategories)
-    .set({ deletedAt: Date.now() })
+    .set({ deletedAt: Date.now(), updatedAt: Date.now() })
     .where(eq(noteCategories.id, id))
     .run();
 }

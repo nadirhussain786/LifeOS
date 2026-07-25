@@ -65,5 +65,5 @@ export function createCalendarEvent(input: CreateCalendarEventInput): CalendarEv
 }
 
 export function deleteCalendarEvent(id: string) {
-  getDb().update(calendarEvents).set({ deletedAt: Date.now() }).where(eq(calendarEvents.id, id)).run();
+  getDb().update(calendarEvents).set({ deletedAt: Date.now(), updatedAt: Date.now() }).where(eq(calendarEvents.id, id)).run();
 }

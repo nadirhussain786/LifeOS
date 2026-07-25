@@ -5,8 +5,10 @@ import { useMemo, useState } from 'react';
 import { ScrollView, TextInput, View } from 'react-native';
 
 import { EmptyState } from '@/components/ui/empty-state';
+import { QueryError } from '@/components/ui/query-error';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Segmented } from '@/components/ui/segmented';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
 import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
@@ -38,7 +40,7 @@ export default function TransactionsScreen() {
   const [query, setQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
 
-  const { data: transactions = [] } = useTransactions();
+  const { data: transactions = [], isLoading, isError, refetch } = useTransactions();
   const { data: settings } = useBudgetSettings();
   const currency = settings?.currency ?? '$';
 
@@ -80,6 +82,7 @@ export default function TransactionsScreen() {
               onChangeText={setQuery}
               placeholder="Search notes & categories"
               placeholderTextColor={colors[scheme].mutedForeground}
+              accessibilityLabel="Search transactions"
               autoFocus
               className="flex-1 text-foreground"
             />
@@ -87,7 +90,15 @@ export default function TransactionsScreen() {
         )}
       </View>
 
-      {groups.length === 0 ? (
+      {isError ? (
+        <QueryError onRetry={() => refetch()} message="Couldn't load your transactions." />
+      ) : isLoading ? (
+        <View className="gap-2 px-4 pt-1">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className="h-16 rounded-2xl" />
+          ))}
+        </View>
+      ) : groups.length === 0 ? (
         <EmptyState
           icon={Receipt}
           title="Nothing here"

@@ -16,16 +16,13 @@ import {
   updateHabit,
 } from '@/features/habits/services/habits-repository';
 import type { CreateHabitInput, HabitSkipReason, UpdateHabitInput } from '@/features/habits/types/habit.types';
-import { syncTodayWidget } from '@/features/widgets/services/widget-data';
 
 export function useHabitMutations() {
   const queryClient = useQueryClient();
 
-  const invalidate = () => {
-    queryClient.invalidateQueries({ queryKey: ['habits'] });
-    // Keep the home-screen "Today" widget's habits-left count fresh (no-ops off Android).
-    syncTodayWidget();
-  };
+  // Widget refresh happens via the query-cache subscription (use-widget-sync);
+  // the feature no longer imports the widget module (avoids a dependency cycle).
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['habits'] });
 
   const create = useMutation({
     mutationFn: async (input: CreateHabitInput) => {

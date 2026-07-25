@@ -153,7 +153,8 @@ export function archiveTask(id: string) {
 export function deleteTask(id: string) {
   getDb()
     .update(tasks)
-    .set({ deletedAt: Date.now(), syncStatus: 'pending' })
+    // updatedAt must move so the delete is seen by the sync push (WHERE updated_at > cursor).
+    .set({ deletedAt: Date.now(), updatedAt: Date.now(), syncStatus: 'pending' })
     .where(eq(tasks.id, id))
     .run();
 }
@@ -183,7 +184,7 @@ export function createCategory(name: string, colorToken: string, icon: string): 
 export function deleteCategory(id: string) {
   getDb()
     .update(taskCategories)
-    .set({ deletedAt: Date.now() })
+    .set({ deletedAt: Date.now(), updatedAt: Date.now() })
     .where(eq(taskCategories.id, id))
     .run();
 }

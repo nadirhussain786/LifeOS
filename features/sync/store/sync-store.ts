@@ -16,6 +16,10 @@ type SyncState = {
   pushCursors: Record<string, number>;
   pullCursors: Record<string, number>;
   lastSyncedAt: number | null;
+  /** The uid whose data currently lives in the local ('local') DB. Used to
+   * detect an account switch on a shared device and wipe before the new
+   * account's first sync, so one user's data never bleeds into another's. */
+  lastUserId: string | null;
 
   // Transient (not persisted):
   status: SyncStatus;
@@ -26,6 +30,7 @@ type SyncState = {
   setCursor: (kind: 'push' | 'pull', table: string, value: number) => void;
   setLastSyncedAt: (ts: number) => void;
   setStatus: (status: SyncStatus, error?: string | null) => void;
+  setLastUserId: (uid: string | null) => void;
   /** Wipes cursors — used on account switch so the next sync is a full pull. */
   resetCursors: () => void;
 };
@@ -38,6 +43,7 @@ export const useSyncStore = create<SyncState>()(
       pushCursors: {},
       pullCursors: {},
       lastSyncedAt: null,
+      lastUserId: null,
       status: 'idle',
       lastError: null,
 
@@ -50,6 +56,7 @@ export const useSyncStore = create<SyncState>()(
         }),
       setLastSyncedAt: (lastSyncedAt) => set({ lastSyncedAt }),
       setStatus: (status, lastError = null) => set({ status, lastError }),
+      setLastUserId: (lastUserId) => set({ lastUserId }),
       resetCursors: () => set({ pushCursors: {}, pullCursors: {} }),
     }),
     {
@@ -62,6 +69,7 @@ export const useSyncStore = create<SyncState>()(
         pushCursors: s.pushCursors,
         pullCursors: s.pullCursors,
         lastSyncedAt: s.lastSyncedAt,
+        lastUserId: s.lastUserId,
       }),
       // Backfill any module added in a later release.
       merge: (persisted, current) => {

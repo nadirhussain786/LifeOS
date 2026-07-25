@@ -111,7 +111,7 @@ export function upsertEntry(input: UpsertJournalEntryInput): JournalEntry {
 }
 
 export function deleteEntry(id: string) {
-  getDb().update(journalEntries).set({ deletedAt: Date.now(), syncStatus: 'pending' }).where(eq(journalEntries.id, id)).run();
+  getDb().update(journalEntries).set({ deletedAt: Date.now(), updatedAt: Date.now(), syncStatus: 'pending' }).where(eq(journalEntries.id, id)).run();
 }
 
 function toPrompt(row: typeof journalPrompts.$inferSelect): JournalPrompt {

@@ -92,7 +92,7 @@ export function updateTransaction(id: string, input: UpdateTransactionInput) {
 export function deleteTransaction(id: string) {
   getDb()
     .update(budgetTransactions)
-    .set({ deletedAt: Date.now(), syncStatus: 'pending' })
+    .set({ deletedAt: Date.now(), updatedAt: Date.now(), syncStatus: 'pending' })
     .where(eq(budgetTransactions.id, id))
     .run();
 }
@@ -152,7 +152,7 @@ export function updateSavingsGoal(id: string, patch: Partial<Pick<SavingsGoal, '
 }
 
 export function deleteSavingsGoal(id: string) {
-  getDb().update(savingsGoals).set({ deletedAt: Date.now() }).where(eq(savingsGoals.id, id)).run();
+  getDb().update(savingsGoals).set({ deletedAt: Date.now(), updatedAt: Date.now() }).where(eq(savingsGoals.id, id)).run();
 }
 
 // ---- Settings ----

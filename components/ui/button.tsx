@@ -90,6 +90,8 @@ export function Button({ label, variant = 'primary', size, className, disabled, 
     >
       <Pressable
         disabled={disabled}
+        accessibilityRole="button"
+        accessibilityState={{ disabled: !!disabled }}
         className={cn(buttonVariants({ variant, size }), className)}
         onPressIn={(e) => {
           scale.value = withSpring(0.96, { damping: 16, stiffness: 400 });

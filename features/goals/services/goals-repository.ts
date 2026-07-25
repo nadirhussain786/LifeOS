@@ -211,7 +211,7 @@ export function archiveGoal(id: string) {
 
 export function deleteGoal(id: string) {
   const db = getDb();
-  db.update(goals).set({ deletedAt: Date.now(), syncStatus: 'pending' }).where(eq(goals.id, id)).run();
+  db.update(goals).set({ deletedAt: Date.now(), updatedAt: Date.now(), syncStatus: 'pending' }).where(eq(goals.id, id)).run();
   db.delete(goalMilestones).where(eq(goalMilestones.goalId, id)).run();
   db.delete(goalProgressLogs).where(eq(goalProgressLogs.goalId, id)).run();
 }

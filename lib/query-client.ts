@@ -1,12 +1,12 @@
 import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query';
 
-import { useDevErrorStore } from '@/lib/dev-error-store';
+import { reportError } from '@/lib/error-reporting';
 
-function reportDevError(scope: string, key: unknown, error: unknown) {
-  if (!__DEV__) return;
-  const message = error instanceof Error ? error.message : String(error);
-  console.error(`[${scope}]`, key, error);
-  useDevErrorStore.getState().setError(`${scope} failed: ${message}`);
+function reportQueryError(scope: string, key: unknown, error: unknown) {
+  // Reported in dev AND production now (console + registered sink, and the
+  // on-device DevErrorBanner in dev) — a failed query/mutation/sync used to be
+  // completely invisible in release builds.
+  reportError(error, { scope, key });
 }
 
 export const queryClient = new QueryClient({
@@ -16,12 +16,12 @@ export const queryClient = new QueryClient({
       retry: 2,
     },
   },
-  // Dev-only: surfaces silent query/mutation failures via DevErrorBanner
+  // Surfaces otherwise-silent query/mutation failures (dev banner + prod sink)
   // instead of a screen quietly rendering its empty state forever.
   queryCache: new QueryCache({
-    onError: (error, query) => reportDevError('Query', query.queryKey, error),
+    onError: (error, query) => reportQueryError('Query', query.queryKey, error),
   }),
   mutationCache: new MutationCache({
-    onError: (error, _variables, _context, mutation) => reportDevError('Mutation', mutation.options.mutationKey ?? mutation.options.mutationFn?.name, error),
+    onError: (error, _variables, _context, mutation) => reportQueryError('Mutation', mutation.options.mutationKey ?? mutation.options.mutationFn?.name, error),
   }),
 });

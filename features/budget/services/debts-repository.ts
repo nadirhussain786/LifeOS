@@ -132,7 +132,7 @@ export function setDebtReminderNotificationId(id: string, notificationId: string
 export function deleteDebt(id: string) {
   getDb()
     .update(budgetDebts)
-    .set({ deletedAt: Date.now(), syncStatus: 'pending' })
+    .set({ deletedAt: Date.now(), updatedAt: Date.now(), syncStatus: 'pending' })
     .where(eq(budgetDebts.id, id))
     .run();
 }
