@@ -101,7 +101,7 @@ export function HabitForm({ defaultValues, submitLabel, onSubmit }: Props) {
         </View>
       </View>
 
-      <View className="rounded-2xl border border-border bg-card px-4">
+      <View className="rounded-2xl border border-border bg-card px-4 shadow-e1">
         <AttributeRow icon={Sparkles} label="Type" isFirst>
           <Controller control={control} name="type" render={({ field }) => <HabitTypePicker value={field.value} onChange={field.onChange} />} />
         </AttributeRow>

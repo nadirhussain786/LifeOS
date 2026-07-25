@@ -29,8 +29,8 @@ export function MoodMonthStrip({ monthAnchor, entries, onSelectDate }: Props) {
   const leadingBlanks = getDay(start);
 
   return (
-    <View className="gap-2 rounded-2xl border border-border bg-card p-4">
-      <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
+    <View className="gap-2 rounded-2xl border border-border bg-card p-4 shadow-e1">
+      <Text variant="micro" className="font-sora-semibold">
         {format(monthAnchor, 'MMMM')}
       </Text>
 

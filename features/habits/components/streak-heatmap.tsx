@@ -3,7 +3,8 @@ import { View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 import { Text } from '@/components/ui/text';
-import { colors, habitDoneColor } from '@/constants/theme';
+import { colors as semanticColors } from '@/constants/design-tokens';
+import { colors } from '@/constants/theme';
 import { isHabitScheduledOn, toDateKey } from '@/features/habits/services/habit-streaks';
 import type { Habit, HabitLog, HabitSkip } from '@/features/habits/types/habit.types';
 
@@ -56,8 +57,8 @@ export function StreakHeatmap({ habit, logs, skips }: Props) {
               let backgroundColor: string = 'transparent';
               let borderColor: string = colors[scheme].border;
               if (cell.done) {
-                backgroundColor = habitDoneColor;
-                borderColor = habitDoneColor;
+                backgroundColor = semanticColors[scheme].success;
+                borderColor = semanticColors[scheme].success;
               } else if (cell.skipped) {
                 backgroundColor = colors[scheme].muted;
               } else if (!cell.scheduled || cell.isFuture) {
@@ -76,7 +77,7 @@ export function StreakHeatmap({ habit, logs, skips }: Props) {
       </View>
       <View className="flex-row items-center gap-3">
         <View className="flex-row items-center gap-1">
-          <View className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: habitDoneColor }} />
+          <View className="h-2.5 w-2.5 rounded-sm bg-success" />
           <Text variant="caption">Done</Text>
         </View>
         <View className="flex-row items-center gap-1">

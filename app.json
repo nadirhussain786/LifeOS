@@ -8,11 +8,6 @@
     "scheme": "lifeos",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.lifeos.app",
@@ -37,6 +32,25 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "LifeOS uses Face ID to unlock the app so only you can open it."
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#f8fbf9",
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "dark": {
+            "backgroundColor": "#0e1210",
+            "image": "./assets/splash-icon.png"
+          }
+        }
+      ],
       "expo-sqlite",
       "@react-native-community/datetimepicker",
       "expo-font",

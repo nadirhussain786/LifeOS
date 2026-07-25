@@ -7,7 +7,9 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
-import { colors, habitDoneColor } from '@/constants/theme';
+import { moduleTint } from '@/constants/design-tokens';
+import { colors } from '@/constants/theme';
+import { alpha } from '@/lib/color';
 import { WidgetCard } from '@/features/dashboard/components/widget-card';
 import { WidgetEmptyState } from '@/features/dashboard/components/widget-empty-state';
 import { useHabitRow } from '@/features/dashboard/hooks/use-widget-data';
@@ -19,6 +21,7 @@ export function HabitRowWidget() {
   const scheme = useColorScheme() ?? 'light';
   const { data, isLoading } = useHabitRow();
   const { logToday, unlogToday } = useHabitMutations();
+  const habitTint = moduleTint('habit', scheme);
 
   const toggleHabit = (id: string, doneToday: boolean) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -28,7 +31,7 @@ export function HabitRowWidget() {
   };
 
   return (
-    <WidgetCard icon={Repeat} title="Habits" actionLabel="View all" onActionPress={() => router.push('/(tabs)/habits')}>
+    <WidgetCard icon={Repeat} title="Habits" tint={moduleTint('habit', scheme)} actionLabel="View all" onActionPress={() => router.push('/(tabs)/habits')}>
       {isLoading || !data ? (
         <View className="flex-row gap-3">
           <Skeleton className="h-16 w-16 rounded-full" />
@@ -44,8 +47,8 @@ export function HabitRowWidget() {
               <View
                 className="h-16 w-16 items-center justify-center rounded-full border-2"
                 style={{
-                  borderColor: habit.doneToday ? habitDoneColor : colors[scheme].border,
-                  backgroundColor: habit.doneToday ? habitDoneColor : 'transparent',
+                  borderColor: habit.doneToday ? habitTint : colors[scheme].border,
+                  backgroundColor: habit.doneToday ? alpha(habitTint, 0.14) : 'transparent',
                 }}
               >
                 <Text className="text-2xl">{habit.emoji}</Text>

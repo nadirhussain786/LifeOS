@@ -1,15 +1,16 @@
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
-import { ArrowUpDown, ChevronLeft, Search, Target } from 'lucide-react-native';
+import { ArrowUpDown, Search, Target } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/ui/empty-state';
 import { Fab } from '@/components/ui/fab';
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { Segmented } from '@/components/ui/segmented';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { GOAL_CATEGORIES } from '@/features/goals/config/goal-categories';
 import { GoalCard } from '@/features/goals/components/goal-card';
@@ -38,7 +39,6 @@ const SORT_CYCLE: GoalSort[] = ['manual', 'progress', 'due', 'priority', 'create
 export default function GoalsScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
-  const insets = useSafeAreaInsets();
   const [showSearch, setShowSearch] = useState(false);
 
   const { data: goals = [], isLoading } = useGoals();
@@ -60,7 +60,7 @@ export default function GoalsScreen() {
   };
 
   const header = (
-    <View className="gap-4 pb-2">
+    <View className="gap-5 pb-2">
       {stats && (statusFilter === 'active' ? stats.activeCount > 0 : true) && (
         <GoalsStatsHeader
           activeCount={stats.activeCount}
@@ -73,7 +73,7 @@ export default function GoalsScreen() {
       <Segmented options={STATUS_OPTIONS} value={statusFilter} onChange={setStatusFilter} />
 
       {showSearch && (
-        <View className="flex-row items-center gap-2 rounded-full bg-muted px-4 py-2.5">
+        <View className="flex-row items-center gap-2 rounded-full border border-border bg-surface px-4 py-2.5">
           <Search size={16} color={colors[scheme].mutedForeground} />
           <TextInput
             value={searchQuery}
@@ -92,26 +92,18 @@ export default function GoalsScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 8 }} className="flex-row items-center justify-between px-4 pb-2">
-        <View className="flex-row items-center gap-1">
-          <Pressable onPress={() => router.back()} hitSlop={8} className="-ml-1 p-1" accessibilityLabel="Back">
-            <ChevronLeft size={24} color={colors[scheme].foreground} />
-          </Pressable>
-          <Text variant="heading">Goals</Text>
-        </View>
-        <View className="flex-row items-center gap-4">
-          <Pressable onPress={() => setShowSearch((s) => !s)} hitSlop={8} accessibilityLabel="Search">
-            <Search size={20} color={colors[scheme].foreground} />
-          </Pressable>
-          <Pressable onPress={cycleSort} hitSlop={8} className="flex-row items-center gap-1" accessibilityLabel="Change sort">
-            <ArrowUpDown size={18} color={colors[scheme].foreground} />
-            <Text variant="caption">{SORT_LABELS[sort]}</Text>
-          </Pressable>
-        </View>
-      </View>
+      <ScreenHeader
+        title="Goals"
+        eyebrow="Focus & Growth"
+        tint={moduleTint('goals', scheme)}
+        actions={[
+          { icon: Search, label: 'Search', onPress: () => setShowSearch((s) => !s) },
+          { icon: ArrowUpDown, label: 'Change sort', onPress: cycleSort, text: SORT_LABELS[sort] },
+        ]}
+      />
 
       {isLoading ? (
-        <View className="gap-3 px-4 pt-2">
+        <View className="gap-3 px-5 pt-2">
           <Skeleton className="h-28 w-full rounded-2xl" />
           <Skeleton className="h-24 w-full rounded-2xl" />
           <Skeleton className="h-24 w-full rounded-2xl" />
@@ -121,7 +113,7 @@ export default function GoalsScreen() {
           data={goals}
           keyExtractor={(goal) => goal.id}
           ListHeaderComponent={header}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 4, paddingBottom: 120 }}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 4, paddingBottom: 120 }}
           ItemSeparatorComponent={() => <View className="h-3" />}
           ListEmptyComponent={
             <View style={{ minHeight: 340 }}>
@@ -133,7 +125,7 @@ export default function GoalsScreen() {
                     ? 'Set an ambition and track it to the finish line.'
                     : 'Goals you finish or archive will show up here.'
                 }
-                tint="#f97316"
+                tint={moduleTint('goals', scheme)}
                 actionLabel={statusFilter === 'active' ? 'Create a goal' : undefined}
                 onAction={statusFilter === 'active' ? () => router.push('/goals/new') : undefined}
               />

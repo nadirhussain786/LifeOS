@@ -6,6 +6,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { WidgetCard } from '@/features/dashboard/components/widget-card';
 import { WidgetEmptyState } from '@/features/dashboard/components/widget-empty-state';
@@ -21,7 +22,7 @@ export function TodayTimelineWidget() {
   const addEvent = () => router.push({ pathname: '/timeline/event/new', params: { date: todayKey } });
 
   return (
-    <WidgetCard icon={Clock3} title="Today's timeline" actionLabel="View all" onActionPress={() => router.push(`/timeline/${todayKey}`)}>
+    <WidgetCard icon={Clock3} title="Today's timeline" tint={moduleTint('calendar', scheme)} actionLabel="View all" onActionPress={() => router.push(`/timeline/${todayKey}`)}>
       {isLoading || !data ? (
         <View className="gap-2">
           <Skeleton className="h-8 w-full" />

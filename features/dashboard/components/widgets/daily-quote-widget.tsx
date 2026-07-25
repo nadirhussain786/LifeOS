@@ -3,19 +3,24 @@ import { View } from 'react-native';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
 import { WidgetCard } from '@/features/dashboard/components/widget-card';
 import { useDailyQuote } from '@/features/dashboard/hooks/use-widget-data';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export function DailyQuoteWidget() {
+  const scheme = useColorScheme() ?? 'light';
   const { data, isLoading } = useDailyQuote();
 
   return (
-    <WidgetCard icon={Quote} title="Daily quote">
+    <WidgetCard icon={Quote} title="Daily quote" tint={moduleTint('journal', scheme)}>
       {isLoading || !data ? (
         <Skeleton className="h-10 w-full" />
       ) : (
-        <View className="gap-1">
-          <Text variant="muted">&ldquo;{data.quote}&rdquo;</Text>
+        // A calm editorial moment: the quote itself is set in Literata (the
+        // journal serif) so it reads as something to sit with, not chrome.
+        <View className="gap-1.5">
+          <Text className="font-journal-italic text-lg leading-7 text-foreground">&ldquo;{data.quote}&rdquo;</Text>
           <Text variant="caption">— {data.author}</Text>
         </View>
       )}

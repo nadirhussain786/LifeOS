@@ -13,6 +13,8 @@ import {
 } from 'lucide-react-native';
 import { format } from 'date-fns';
 
+import { moduleTints } from '@/constants/design-tokens';
+
 /**
  * The Hub is LifeOS's "app drawer" — the bottom tab bar holds only the four
  * daily drivers (Dashboard, Tasks, Habits, Journal) plus this launcher, and
@@ -51,7 +53,7 @@ export const HUB_SECTIONS: HubSection[] = [
         title: 'Goals',
         subtitle: 'Ambitions & milestones',
         icon: Target,
-        tint: '#f97316',
+        tint: moduleTints.goals.light,
         status: 'ready',
         getRoute: () => '/goals',
       },
@@ -60,7 +62,7 @@ export const HUB_SECTIONS: HubSection[] = [
         title: 'Study',
         subtitle: 'Focus sessions & timer',
         icon: GraduationCap,
-        tint: '#8b5cf6',
+        tint: moduleTints.study.light,
         status: 'ready',
         getRoute: () => '/study',
       },
@@ -78,7 +80,7 @@ export const HUB_SECTIONS: HubSection[] = [
         title: 'Timeline',
         subtitle: 'Your day, hour by hour',
         icon: Clock3,
-        tint: '#14b8a6',
+        tint: moduleTints.calendar.light,
         status: 'ready',
         getRoute: () => `/timeline/${format(new Date(), 'yyyy-MM-dd')}`,
       },
@@ -93,7 +95,7 @@ export const HUB_SECTIONS: HubSection[] = [
         title: 'Sleep',
         subtitle: 'Rest & consistency',
         icon: Moon,
-        tint: '#6366f1',
+        tint: moduleTints.sleep.light,
         status: 'ready',
         getRoute: () => '/sleep',
       },
@@ -102,7 +104,7 @@ export const HUB_SECTIONS: HubSection[] = [
         title: 'Water',
         subtitle: 'Daily hydration',
         icon: GlassWater,
-        tint: '#38bdf8',
+        tint: moduleTints.water.light,
         status: 'ready',
         getRoute: () => '/water-intake/history',
       },
@@ -117,7 +119,7 @@ export const HUB_SECTIONS: HubSection[] = [
         title: 'Budget',
         subtitle: 'Income, spending & savings',
         icon: Wallet,
-        tint: '#22c55e',
+        tint: moduleTints.budget.light,
         status: 'ready',
         getRoute: () => '/budget',
       },
@@ -141,7 +143,7 @@ export const HUB_SECTIONS: HubSection[] = [
         title: 'Music',
         subtitle: 'Your offline library',
         icon: Music2,
-        tint: '#6366f1',
+        tint: '#14b8a6',
         status: 'ready',
         getRoute: () => '/music',
       },

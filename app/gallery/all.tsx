@@ -1,12 +1,11 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { CalendarClock, ChevronLeft, Grid3x3, Heart, Images, Plus, Search } from 'lucide-react-native';
+import { CalendarClock, Grid3x3, Heart, Images, Plus, Search } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/ui/empty-state';
 import { Fab } from '@/components/ui/fab';
-import { Text } from '@/components/ui/text';
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { colors } from '@/constants/theme';
 import { AddMediaSheet } from '@/features/gallery/components/add-media-sheet';
 import { PhotoGrid } from '@/features/gallery/components/photo-grid';
@@ -17,7 +16,6 @@ export default function AllPhotosScreen() {
   const { favorites: favoritesParam } = useLocalSearchParams<{ favorites?: string }>();
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
-  const insets = useSafeAreaInsets();
 
   const { data: photos = [] } = usePhotos();
   const [timeline, setTimeline] = useState(true);
@@ -41,31 +39,30 @@ export default function AllPhotosScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 8 }} className="flex-row items-center justify-between px-4 pb-2">
-        <View className="flex-row items-center gap-1">
-          <Pressable onPress={() => router.back()} hitSlop={8} className="-ml-1 p-1" accessibilityLabel="Back">
-            <ChevronLeft size={24} color={colors[scheme].foreground} />
-          </Pressable>
-          <Text variant="heading">{favoritesOnly ? 'Favorites' : 'All Photos'}</Text>
-        </View>
-        <View className="flex-row items-center gap-4">
-          <Pressable onPress={() => setShowSearch((s) => !s)} hitSlop={8} accessibilityLabel="Search">
-            <Search size={20} color={colors[scheme].foreground} />
-          </Pressable>
-          <Pressable onPress={() => setFavoritesOnly((f) => !f)} hitSlop={8} accessibilityLabel="Toggle favorites">
-            <Heart size={20} color={favoritesOnly ? '#ef4444' : colors[scheme].foreground} fill={favoritesOnly ? '#ef4444' : 'transparent'} />
-          </Pressable>
-          <Pressable onPress={() => setTimeline((t) => !t)} hitSlop={8} accessibilityLabel="Toggle timeline">
-            {timeline ? <Grid3x3 size={20} color={colors[scheme].foreground} /> : <CalendarClock size={20} color={colors[scheme].foreground} />}
-          </Pressable>
-          <Pressable onPress={() => setAddOpen(true)} hitSlop={8} accessibilityLabel="Add media">
-            <Plus size={22} color={colors[scheme].foreground} />
-          </Pressable>
-        </View>
-      </View>
+      <ScreenHeader
+        title={favoritesOnly ? 'Favorites' : 'All Photos'}
+        eyebrow="Progress"
+        tint="#ec4899"
+        right={
+          <View className="flex-row items-center gap-4">
+            <Pressable onPress={() => setShowSearch((s) => !s)} hitSlop={8} accessibilityLabel="Search">
+              <Search size={20} color={colors[scheme].foreground} />
+            </Pressable>
+            <Pressable onPress={() => setFavoritesOnly((f) => !f)} hitSlop={8} accessibilityLabel="Toggle favorites">
+              <Heart size={20} color={favoritesOnly ? '#ef4444' : colors[scheme].foreground} fill={favoritesOnly ? '#ef4444' : 'transparent'} />
+            </Pressable>
+            <Pressable onPress={() => setTimeline((t) => !t)} hitSlop={8} accessibilityLabel="Toggle timeline">
+              {timeline ? <Grid3x3 size={20} color={colors[scheme].foreground} /> : <CalendarClock size={20} color={colors[scheme].foreground} />}
+            </Pressable>
+            <Pressable onPress={() => setAddOpen(true)} hitSlop={8} accessibilityLabel="Add media">
+              <Plus size={22} color={colors[scheme].foreground} />
+            </Pressable>
+          </View>
+        }
+      />
 
       {showSearch && (
-        <View className="mx-4 mb-2 flex-row items-center gap-2 rounded-full bg-muted px-4 py-2.5">
+        <View className="mx-4 mb-2 flex-row items-center gap-2 rounded-full border border-border bg-surface px-4 py-2.5">
           <Search size={16} color={colors[scheme].mutedForeground} />
           <TextInput
             value={query}

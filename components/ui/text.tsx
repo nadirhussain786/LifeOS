@@ -11,6 +11,8 @@ const textVariants = cva('text-foreground', {
       subheading: 'text-lg font-sora-semibold',
       muted: 'text-sm text-muted-foreground',
       caption: 'text-xs text-muted-foreground',
+      // 11px uppercase eyebrow/label — the "micro" step of the type scale.
+      micro: 'text-[11px] uppercase tracking-wide font-sora-medium text-muted-foreground',
     },
   },
   defaultVariants: {

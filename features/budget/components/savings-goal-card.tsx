@@ -18,7 +18,7 @@ export function SavingsGoalCard({ goal, currency, onPress, onAdd }: Props) {
   const complete = goal.progress >= 1;
 
   return (
-    <Pressable onPress={() => onPress(goal)} className="gap-3 rounded-2xl border border-border bg-card p-4" accessibilityRole="button">
+    <Pressable onPress={() => onPress(goal)} className="gap-3 rounded-2xl border border-border bg-card p-4 shadow-e1" accessibilityRole="button">
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-2">
           <View className="h-3 w-3 rounded-full" style={{ backgroundColor: goal.colorToken }} />
@@ -42,7 +42,7 @@ export function SavingsGoalCard({ goal, currency, onPress, onAdd }: Props) {
           <Text className="font-sora-semibold text-foreground">{formatMoney(goal.savedCents, currency)}</Text> of{' '}
           {formatMoney(goal.targetCents, currency)}
         </Text>
-        <Text variant="caption" style={complete ? { color: '#22c55e' } : undefined} className="font-sora-semibold">
+        <Text variant="caption" className={complete ? 'font-sora-semibold text-success' : 'font-sora-semibold'}>
           {complete ? 'Reached 🎉' : goal.deadline ? `by ${format(goal.deadline, 'MMM yyyy')}` : `${Math.round(goal.progress * 100)}%`}
         </Text>
       </View>

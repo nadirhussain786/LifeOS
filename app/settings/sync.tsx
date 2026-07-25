@@ -1,10 +1,11 @@
 import { formatDistanceToNow } from 'date-fns';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { CheckCircle2, CloudOff, LogOut, RefreshCw, TriangleAlert, UserCircle } from 'lucide-react-native';
+import { CheckCircle2, CloudOff, LogOut, TriangleAlert, UserCircle } from 'lucide-react-native';
 import { Alert, Pressable, ScrollView, Switch, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import { useAuthStore } from '@/features/auth/services/auth-store';
@@ -40,7 +41,9 @@ export default function SyncSettingsScreen() {
   // Guest: no account — invite sign-in, explain data stays local.
   if (!session) {
     return (
-      <ScrollView className="flex-1 bg-background" contentContainerClassName="gap-6 p-4 pb-12">
+      <View className="flex-1 bg-background">
+        <ScreenHeader title="Sync & Account" eyebrow="Settings" tint="#737373" />
+        <ScrollView contentContainerClassName="gap-6 px-5 py-4 pb-12" showsVerticalScrollIndicator={false}>
         <View className="items-center gap-3 rounded-2xl border border-border bg-card p-6">
           <View className="h-14 w-14 items-center justify-center rounded-2xl" style={{ backgroundColor: theme.muted }}>
             <CloudOff size={26} color={theme.mutedForeground} />
@@ -52,7 +55,8 @@ export default function SyncSettingsScreen() {
           </Text>
           <Button label="Sign in or create account" variant="accent" size="lg" className="w-full" onPress={() => router.push('/(auth)/login')} />
         </View>
-      </ScrollView>
+        </ScrollView>
+      </View>
     );
   }
 
@@ -81,7 +85,9 @@ export default function SyncSettingsScreen() {
   const statusColor = status === 'error' ? theme.destructive : theme.accent;
 
   return (
-    <ScrollView className="flex-1 bg-background" contentContainerClassName="gap-6 p-4 pb-12">
+    <View className="flex-1 bg-background">
+      <ScreenHeader title="Sync & Account" eyebrow="Settings" tint="#737373" />
+      <ScrollView contentContainerClassName="gap-6 px-5 py-4 pb-12" showsVerticalScrollIndicator={false}>
       {/* Account */}
       <View className="gap-2">
         <SectionLabel>Account</SectionLabel>
@@ -152,6 +158,7 @@ export default function SyncSettingsScreen() {
           Sign out
         </Text>
       </Pressable>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }

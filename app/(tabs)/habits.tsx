@@ -12,7 +12,8 @@ import { Fab } from '@/components/ui/fab';
 import { ListSectionHeader } from '@/components/ui/list-section-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
-import { colors, habitDoneColor } from '@/constants/theme';
+import { moduleTint } from '@/constants/design-tokens';
+import { colors } from '@/constants/theme';
 import { HabitRow } from '@/features/habits/components/habit-row';
 import { HabitsFabSheet } from '@/features/habits/components/habits-fab-sheet';
 import { QuickLogSheet } from '@/features/habits/components/quick-log-sheet';
@@ -85,7 +86,7 @@ export default function HabitsScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 8 }} className="gap-3 px-4 pb-2">
+      <View style={{ paddingTop: insets.top + 8 }} className="gap-5 px-5 pb-2">
         <View className="flex-row items-center justify-between">
           <Text variant="heading">Habits</Text>
           {progress.total > 0 && (
@@ -98,13 +99,13 @@ export default function HabitsScreen() {
         {progress.total > 0 && (
           <View className="h-1.5 overflow-hidden rounded-full bg-muted">
             <View
-              className="h-full rounded-full"
-              style={{ width: `${(progress.done / progress.total) * 100}%`, backgroundColor: habitDoneColor }}
+              className="h-full rounded-full bg-success"
+              style={{ width: `${(progress.done / progress.total) * 100}%` }}
             />
           </View>
         )}
 
-        <View className="flex-row items-center gap-2 rounded-full bg-muted px-4 py-2.5">
+        <View className="flex-row items-center gap-2 rounded-full border border-border bg-surface px-4 py-2.5">
           <Search size={16} color={colors[scheme].mutedForeground} />
           <TextInput
             value={searchQuery}
@@ -117,7 +118,7 @@ export default function HabitsScreen() {
       </View>
 
       {isLoading ? (
-        <View className="gap-2.5 px-4">
+        <View className="gap-2.5 px-5">
           <Skeleton className="h-16 w-full rounded-2xl" />
           <Skeleton className="h-16 w-full rounded-2xl" />
           <Skeleton className="h-16 w-full rounded-2xl" />
@@ -127,7 +128,7 @@ export default function HabitsScreen() {
           icon={Repeat}
           title="No habits yet"
           description="Build routines you can actually keep — start with one habit."
-          tint={habitDoneColor}
+          tint={moduleTint('habit', scheme)}
         />
       ) : (
         <FlashList

@@ -4,6 +4,7 @@ import { BellOff, CheckCheck, Clock, Trash2 } from 'lucide-react-native';
 import { useMemo } from 'react';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
 
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import { useNotificationActions, useNotificationInbox } from '@/features/notifications/hooks/use-notifications-inbox';
@@ -118,20 +119,25 @@ export default function NotificationsInboxScreen() {
 
   if (notifications.length === 0) {
     return (
-      <View className="flex-1 items-center justify-center gap-3 bg-background p-8">
-        <View className="h-16 w-16 items-center justify-center rounded-2xl" style={{ backgroundColor: theme.muted }}>
-          <BellOff size={28} color={theme.mutedForeground} />
+      <View className="flex-1 bg-background">
+        <ScreenHeader title="Notifications" eyebrow="Inbox" tint="#737373" />
+        <View className="flex-1 items-center justify-center gap-3 p-8">
+          <View className="h-16 w-16 items-center justify-center rounded-2xl" style={{ backgroundColor: theme.muted }}>
+            <BellOff size={28} color={theme.mutedForeground} />
+          </View>
+          <Text className="font-sora-semibold text-lg text-foreground">You&rsquo;re all caught up</Text>
+          <Text variant="muted" className="text-center">
+            Reminders you schedule across LifeOS show up here. Turn them on from any item or from Settings → Notifications.
+          </Text>
         </View>
-        <Text className="font-sora-semibold text-lg text-foreground">You're all caught up</Text>
-        <Text variant="muted" className="text-center">
-          Reminders you schedule across LifeOS show up here. Turn them on from any item or from Settings → Notifications.
-        </Text>
       </View>
     );
   }
 
   return (
-    <ScrollView className="flex-1 bg-background" contentContainerClassName="gap-5 p-4 pb-10">
+    <View className="flex-1 bg-background">
+      <ScreenHeader title="Notifications" eyebrow="Inbox" tint="#737373" />
+      <ScrollView contentContainerClassName="gap-5 px-5 py-4 pb-10" showsVerticalScrollIndicator={false}>
       <View className="flex-row gap-2">
         <Pressable
           onPress={() => markAllRead.mutate()}
@@ -174,6 +180,7 @@ export default function NotificationsInboxScreen() {
       <Text variant="caption" className="px-1 text-center">
         Long-press a notification to remove it.
       </Text>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }

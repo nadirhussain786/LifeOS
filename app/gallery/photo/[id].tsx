@@ -1,11 +1,11 @@
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { format } from 'date-fns';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { CalendarDays, ChevronLeft, Heart, Trash2, X } from 'lucide-react-native';
+import { CalendarDays, Heart, Trash2, X } from 'lucide-react-native';
 import { useState } from 'react';
 import { Alert, Dimensions, Image, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import { GalleryVideo } from '@/features/gallery/components/gallery-video';
@@ -17,7 +17,6 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 export default function PhotoDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
   const { data: photo } = usePhoto(id);
   const { editPhoto, toggleFavorite, removePhoto } = useGalleryMutations();
@@ -74,19 +73,20 @@ export default function PhotoDetailScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-4 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full bg-muted">
-          <ChevronLeft size={20} color={colors[scheme].foreground} />
-        </Pressable>
-        <View className="flex-row items-center gap-4">
-          <Pressable onPress={() => toggleFavorite.mutate({ id: photo.id, isFavorite: !photo.isFavorite })} hitSlop={8} accessibilityLabel="Favorite">
-            <Heart size={22} color="#ef4444" fill={photo.isFavorite ? '#ef4444' : 'transparent'} />
-          </Pressable>
-          <Pressable onPress={confirmDelete} hitSlop={8} accessibilityLabel="Delete">
-            <Trash2 size={20} color={colors[scheme].destructive} />
-          </Pressable>
-        </View>
-      </View>
+      <ScreenHeader
+        eyebrow="Progress"
+        tint="#ec4899"
+        right={
+          <View className="flex-row items-center gap-4">
+            <Pressable onPress={() => toggleFavorite.mutate({ id: photo.id, isFavorite: !photo.isFavorite })} hitSlop={8} accessibilityLabel="Favorite">
+              <Heart size={22} color="#ef4444" fill={photo.isFavorite ? '#ef4444' : 'transparent'} />
+            </Pressable>
+            <Pressable onPress={confirmDelete} hitSlop={8} accessibilityLabel="Delete">
+              <Trash2 size={20} color={colors[scheme].destructive} />
+            </Pressable>
+          </View>
+        }
+      />
 
       <ScrollView contentContainerClassName="gap-5 pb-10" keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         {photo.mediaType === 'video' ? (
@@ -109,7 +109,7 @@ export default function PhotoDetailScreen() {
             {Platform.OS === 'ios' ? (
               <DateTimePicker value={new Date(photo.takenAt)} mode="date" display="compact" onChange={handleDate} />
             ) : (
-              <Pressable onPress={() => setShowDate(true)} className="rounded-lg bg-muted px-3 py-1.5">
+              <Pressable onPress={() => setShowDate(true)} className="rounded-lg bg-surface px-3 py-1.5">
                 <Text className="font-sora-semibold text-foreground">{format(photo.takenAt, 'MMM d, yyyy')}</Text>
               </Pressable>
             )}
@@ -142,7 +142,7 @@ export default function PhotoDetailScreen() {
                 <Pressable
                   key={tag}
                   onPress={() => removeTag(tag)}
-                  className="flex-row items-center gap-1 rounded-full bg-muted px-3 py-1.5"
+                  className="flex-row items-center gap-1 rounded-full border border-border bg-surface px-3 py-1.5"
                 >
                   <Text className="text-foreground">#{tag}</Text>
                   <X size={12} color={colors[scheme].mutedForeground} />

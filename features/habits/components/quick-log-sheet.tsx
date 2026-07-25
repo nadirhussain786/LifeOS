@@ -68,7 +68,8 @@ export const QuickLogSheet = forwardRef<BottomSheetModal, Props>(function QuickL
                 setValue(Number.isFinite(parsed) ? parsed : 0);
               }}
               keyboardType="decimal-pad"
-              className="min-w-10 text-center text-2xl font-sora-semibold text-foreground"
+              className="min-w-10 text-center text-2xl font-sora-extrabold text-foreground"
+              style={{ fontVariant: ['tabular-nums'] }}
             />
             {habit?.unit && <Text variant="muted">{habit.unit}</Text>}
           </View>

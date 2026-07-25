@@ -3,12 +3,11 @@ import { ArrowRight, Moon, Star, Sun } from 'lucide-react-native';
 import { Pressable, View } from 'react-native';
 
 import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { formatClock, formatDuration, minutesOfDay } from '@/features/sleep/services/sleep-stats';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { asleepMinutes, type SleepSession } from '@/features/sleep/types/sleep.types';
-
-const SLEEP_TINT = '#6366f1';
 
 type Props = {
   session: SleepSession;
@@ -18,6 +17,7 @@ type Props = {
 
 export function SleepSessionCard({ session, goalMinutes, onPress }: Props) {
   const scheme = useColorScheme() ?? 'light';
+  const sleepTint = moduleTint('sleep', scheme);
   const metGoal = session.durationMinutes >= goalMinutes;
 
   return (
@@ -27,8 +27,8 @@ export function SleepSessionCard({ session, goalMinutes, onPress }: Props) {
       accessibilityRole="button"
       accessibilityLabel={`Sleep on ${session.logDate}`}
     >
-      <View className="h-11 w-11 items-center justify-center rounded-xl" style={{ backgroundColor: `${SLEEP_TINT}1f` }}>
-        <Moon size={20} color={SLEEP_TINT} />
+      <View className="h-11 w-11 items-center justify-center rounded-xl" style={{ backgroundColor: `${sleepTint}1f` }}>
+        <Moon size={20} color={sleepTint} />
       </View>
 
       <View className="flex-1 gap-1">

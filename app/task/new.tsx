@@ -1,13 +1,13 @@
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-import { Bell, CalendarDays, Flag, Repeat, StickyNote, Tag, X } from 'lucide-react-native';
+import { Bell, CalendarDays, Flag, Repeat, StickyNote, Tag } from 'lucide-react-native';
 import { useState } from 'react';
-import { Pressable, ScrollView, Switch, TextInput, View } from 'react-native';
+import { ScrollView, Switch, TextInput, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/button';
+import { SheetHeader } from '@/components/ui/sheet-header';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import { AttributeRow } from '@/components/ui/attribute-row';
@@ -30,7 +30,6 @@ import { useKeyboardHeight } from '@/hooks/use-keyboard-height';
  */
 export default function NewTaskScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
   const keyboardHeight = useKeyboardHeight();
   const { create } = useTaskMutations();
@@ -69,19 +68,7 @@ export default function NewTaskScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-4 pb-2">
-        <Pressable
-          onPress={() => router.back()}
-          hitSlop={10}
-          className="h-8 w-8 items-center justify-center rounded-full bg-muted"
-        >
-          <X size={17} color={colors[scheme].foreground} />
-        </Pressable>
-        <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-          New Task
-        </Text>
-        <View className="h-8 w-8" />
-      </View>
+      <SheetHeader title="New Task" />
 
       <ScrollView
         contentContainerClassName="gap-6 px-5 pt-3"
@@ -109,7 +96,7 @@ export default function NewTaskScreen() {
           <Animated.View className="h-[3px] w-16 rounded-full bg-accent" style={underlineStyle} />
         </View>
 
-        <View className="rounded-2xl border border-border bg-card px-4">
+        <View className="rounded-2xl border border-border bg-card px-4 shadow-e1">
           <AttributeRow icon={Flag} label="Priority" isFirst>
             <PriorityPicker value={priority} onChange={setPriority} />
           </AttributeRow>
@@ -146,7 +133,7 @@ export default function NewTaskScreen() {
         <View className="gap-2.5">
           <View className="flex-row items-center gap-1.5">
             <StickyNote size={13} color={colors[scheme].mutedForeground} />
-            <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
+            <Text variant="micro" className="font-sora-semibold">
               Notes
             </Text>
           </View>
@@ -156,7 +143,7 @@ export default function NewTaskScreen() {
             multiline
             placeholder="Add notes…"
             placeholderTextColor={colors[scheme].mutedForeground}
-            className="min-h-24 rounded-2xl border border-border bg-card p-4 text-base text-foreground"
+            className="min-h-24 rounded-2xl border border-border bg-card p-4 text-base text-foreground shadow-e1"
             textAlignVertical="top"
           />
         </View>

@@ -1,11 +1,10 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { CalendarClock, ChevronLeft, Grid3x3, ImagePlus, Trash2 } from 'lucide-react-native';
+import { CalendarClock, Grid3x3, ImagePlus, Trash2 } from 'lucide-react-native';
 import { useState } from 'react';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/ui/empty-state';
-import { Text } from '@/components/ui/text';
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { colors } from '@/constants/theme';
 import { albumCategoryMeta } from '@/features/gallery/config/album-categories';
 import { AddMediaSheet } from '@/features/gallery/components/add-media-sheet';
@@ -17,7 +16,6 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 export default function AlbumDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
   const [timeline, setTimeline] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
@@ -40,32 +38,24 @@ export default function AlbumDetailScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 8 }} className="flex-row items-center justify-between px-4 pb-2">
-        <View className="flex-1 flex-row items-center gap-1">
-          <Pressable onPress={() => router.back()} hitSlop={8} className="-ml-1 p-1" accessibilityLabel="Back">
-            <ChevronLeft size={24} color={colors[scheme].foreground} />
-          </Pressable>
-          <View className="flex-1">
-            <Text variant="subheading" numberOfLines={1}>
-              {album.name}
-            </Text>
-            <Text variant="caption" style={{ color: meta.tint }} className="font-sora-medium">
-              {meta.label} · {photos.length} {photos.length === 1 ? 'item' : 'items'}
-            </Text>
+      <ScreenHeader
+        title={album.name}
+        eyebrow={`${meta.label} · ${photos.length} ${photos.length === 1 ? 'item' : 'items'}`}
+        tint={meta.tint}
+        right={
+          <View className="flex-row items-center gap-4">
+            <Pressable onPress={() => setTimeline((t) => !t)} hitSlop={8} accessibilityLabel="Toggle timeline">
+              {timeline ? <Grid3x3 size={20} color={colors[scheme].foreground} /> : <CalendarClock size={20} color={colors[scheme].foreground} />}
+            </Pressable>
+            <Pressable onPress={addPhotos} hitSlop={8} accessibilityLabel="Add photos">
+              <ImagePlus size={20} color={colors[scheme].foreground} />
+            </Pressable>
+            <Pressable onPress={confirmDelete} hitSlop={8} accessibilityLabel="Delete album">
+              <Trash2 size={19} color={colors[scheme].destructive} />
+            </Pressable>
           </View>
-        </View>
-        <View className="flex-row items-center gap-4">
-          <Pressable onPress={() => setTimeline((t) => !t)} hitSlop={8} accessibilityLabel="Toggle timeline">
-            {timeline ? <Grid3x3 size={20} color={colors[scheme].foreground} /> : <CalendarClock size={20} color={colors[scheme].foreground} />}
-          </Pressable>
-          <Pressable onPress={addPhotos} hitSlop={8} accessibilityLabel="Add photos">
-            <ImagePlus size={20} color={colors[scheme].foreground} />
-          </Pressable>
-          <Pressable onPress={confirmDelete} hitSlop={8} accessibilityLabel="Delete album">
-            <Trash2 size={19} color={colors[scheme].destructive} />
-          </Pressable>
-        </View>
-      </View>
+        }
+      />
 
       {photos.length === 0 ? (
         <EmptyState

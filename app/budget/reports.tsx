@@ -1,12 +1,11 @@
-import { useRouter } from 'expo-router';
-import { ChevronLeft } from 'lucide-react-native';
 import { useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ScrollView, View } from 'react-native';
 
 import { BarChart, type BarDatum } from '@/components/ui/bar-chart';
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { Segmented } from '@/components/ui/segmented';
 import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { ExpenseDonut } from '@/features/budget/components/expense-donut';
 import { periodLabel, type Period } from '@/features/budget/services/budget-stats';
@@ -21,8 +20,6 @@ const PERIOD_OPTIONS = [
 ];
 
 export default function BudgetReportsScreen() {
-  const router = useRouter();
-  const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
   const [period, setPeriod] = useState<Period>('month');
   const [anchorTime] = useState(() => Date.now());
@@ -50,14 +47,9 @@ export default function BudgetReportsScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 8 }} className="flex-row items-center gap-1 px-4 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={8} className="-ml-1 p-1" accessibilityLabel="Back">
-          <ChevronLeft size={24} color={colors[scheme].foreground} />
-        </Pressable>
-        <Text variant="heading">Reports</Text>
-      </View>
+      <ScreenHeader title="Reports" eyebrow="Budget" tint={moduleTint('budget', scheme)} />
 
-      <ScrollView contentContainerClassName="gap-5 px-4 pb-10" showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerClassName="gap-5 px-5 pb-10" showsVerticalScrollIndicator={false}>
         <Segmented options={PERIOD_OPTIONS} value={period} onChange={setPeriod} />
         <Text variant="muted" className="text-center">
           {periodLabel(period, new Date(anchorTime))}

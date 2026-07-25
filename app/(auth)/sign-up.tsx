@@ -64,7 +64,7 @@ export default function SignUpScreen() {
           <AuthField label="Password" value={password} onChangeText={setPassword} placeholder="At least 6 characters" secure autoComplete="new-password" />
 
           {error && (
-            <Text variant="caption" style={{ color: '#ef4444' }}>
+            <Text variant="caption" className="text-destructive">
               {error}
             </Text>
           )}

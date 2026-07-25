@@ -1,11 +1,12 @@
 import { useRouter } from 'expo-router';
-import { ChevronLeft, Minus, Plus, Trash2 } from 'lucide-react-native';
+import { Minus, Plus, Trash2 } from 'lucide-react-native';
 import { useState } from 'react';
 import { Alert, Pressable, ScrollView, TextInput, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/button';
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
 import { categoryColorPalette, colors } from '@/constants/theme';
 import { formatStudyDuration } from '@/features/study/services/study-stats';
 import { useStudyMutations } from '@/features/study/hooks/use-study-mutations';
@@ -43,7 +44,6 @@ function Stepper({ label, value, onDecrease, onIncrease }: StepperProps) {
 
 export default function StudySettingsScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
   const { data: settings } = useStudySettings();
   const { data: subjects = [] } = useStudySubjects();
@@ -83,12 +83,7 @@ export default function StudySettingsScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 8 }} className="flex-row items-center gap-1 px-4 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={8} className="-ml-1 p-1" accessibilityLabel="Back">
-          <ChevronLeft size={24} color={colors[scheme].foreground} />
-        </Pressable>
-        <Text variant="heading">Study Settings</Text>
-      </View>
+      <ScreenHeader title="Study Settings" eyebrow="Study" tint={moduleTint('study', scheme)} />
 
       <ScrollView contentContainerClassName="gap-5 px-5 pt-3 pb-10" keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         <View className="gap-3">

@@ -8,18 +8,19 @@ import Animated, { useAnimatedStyle, useSharedValue, withSequence, withSpring } 
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { WidgetCard } from '@/features/dashboard/components/widget-card';
 import { useTodayWaterTotal, useWaterIntakeMutations } from '@/features/water-intake/hooks/use-water-intake';
 import { useWaterSettingsStore } from '@/features/water-intake/store/water-settings-store';
 
 const GLASS_ML = 250;
-const WATER_TINT = '#0ea5e9';
 const QUICK_ADD_ML = [500, 1000] as const;
 
 export function WaterIntakeWidget() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const waterTint = moduleTint('water', scheme);
   const goalMl = useWaterSettingsStore((state) => state.goalMl);
   const { data: currentMl, isLoading } = useTodayWaterTotal();
   const { addWater, undoLast } = useWaterIntakeMutations();
@@ -50,21 +51,21 @@ export function WaterIntakeWidget() {
   };
 
   return (
-    <WidgetCard icon={GlassWater} title="Water intake" actionLabel="History" onActionPress={() => router.push('/water-intake/history')}>
+    <WidgetCard icon={GlassWater} title="Water intake" tint={waterTint} actionLabel="History" onActionPress={() => router.push('/water-intake/history')}>
       {isLoading || currentMl === undefined ? (
         <Skeleton className="h-8 w-full" />
       ) : (
         <View className="gap-4">
           <View className="flex-row items-center justify-between">
             <Animated.View style={celebrateStyle}>
-              <Text variant="muted" className="font-sora-semibold" style={goalReached ? { color: WATER_TINT } : undefined}>
+              <Text variant="muted" className="font-sora-semibold" style={goalReached ? { color: waterTint } : undefined}>
                 {currentMl} / {goalMl} ml{goalReached ? ' 🎉' : ''}
               </Text>
             </Animated.View>
             <Pressable
               onPress={() => router.push('/water-intake/settings')}
               hitSlop={8}
-              className="h-8 w-8 items-center justify-center rounded-full border border-border"
+              className="h-8 w-8 items-center justify-center rounded-full border border-border bg-surface"
             >
               <Settings2 size={14} color={colors[scheme].mutedForeground} />
             </Pressable>
@@ -81,11 +82,11 @@ export function WaterIntakeWidget() {
                   accessibilityLabel={`${index + 1} glass${index === 0 ? '' : 'es'}`}
                   className="h-9 w-9 items-center justify-center rounded-full border"
                   style={{
-                    borderColor: filled ? WATER_TINT : colors[scheme].border,
-                    backgroundColor: filled ? `${WATER_TINT}1f` : 'transparent',
+                    borderColor: filled ? waterTint : colors[scheme].border,
+                    backgroundColor: filled ? `${waterTint}1f` : 'transparent',
                   }}
                 >
-                  <Droplet size={16} color={filled ? WATER_TINT : colors[scheme].mutedForeground} fill={filled ? WATER_TINT : 'transparent'} />
+                  <Droplet size={16} color={filled ? waterTint : colors[scheme].mutedForeground} fill={filled ? waterTint : 'transparent'} />
                 </Pressable>
               );
             })}

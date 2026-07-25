@@ -21,7 +21,7 @@ export function WidgetCard({ icon: Icon, title, actionLabel, onActionPress, tint
   const accent = tint ?? colors[scheme].accent;
 
   return (
-    <View className="gap-3 rounded-3xl border border-border bg-card p-4">
+    <View className="gap-3 rounded-3xl border border-border bg-card p-4 shadow-e1">
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-2.5">
           <View className="h-8 w-8 items-center justify-center rounded-xl" style={{ backgroundColor: alpha(accent, 0.14) }}>

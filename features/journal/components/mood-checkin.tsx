@@ -6,7 +6,8 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import Animated, { useAnimatedStyle, useSharedValue, withSequence, withSpring } from 'react-native-reanimated';
 
 import { Text } from '@/components/ui/text';
-import { colors, habitDoneColor } from '@/constants/theme';
+import { moduleTint } from '@/constants/design-tokens';
+import { colors } from '@/constants/theme';
 import { MOOD_EMOJI, MOOD_LABEL, MOOD_TINT } from '@/features/journal/constants';
 import { MOOD_REASONS, type MoodOption } from '@/features/journal/types/journal.types';
 
@@ -76,7 +77,7 @@ function ScaleRow({ icon: Icon, label, value, levelLabels, tint, onChange }: Sca
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-1.5">
           <Icon size={13} color={tint} />
-          <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
+          <Text variant="micro" className="font-sora-semibold">
             {label}
           </Text>
         </View>
@@ -157,7 +158,7 @@ export function MoodCheckin({
   const reasons = new Set(moodReasons ?? []);
 
   return (
-    <View className="gap-5 rounded-2xl border border-border bg-card p-4">
+    <View className="gap-5 rounded-2xl border border-border bg-card p-4 shadow-e1">
       <View className="flex-row justify-between" accessibilityRole="radiogroup">
         {MOODS.map((option) => (
           <MoodButton key={option.value} option={option} selected={mood === option.value} onPress={() => {
@@ -181,7 +182,7 @@ export function MoodCheckin({
 
       <View className="flex-row items-center gap-2">
         <Moon size={13} color={SLEEP_TINT} />
-        <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
+        <Text variant="micro" className="font-sora-semibold">
           Hours slept
         </Text>
         <TextInput
@@ -199,7 +200,7 @@ export function MoodCheckin({
       </View>
 
       <View className="gap-1.5">
-        <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
+        <Text variant="micro" className="font-sora-semibold">
           What influenced today?
         </Text>
         <View className="flex-row flex-wrap gap-2">
@@ -214,8 +215,8 @@ export function MoodCheckin({
                 }}
                 className="rounded-full border px-3 py-1.5"
                 style={{
-                  borderColor: selected ? habitDoneColor : colors[scheme].border,
-                  backgroundColor: selected ? habitDoneColor : 'transparent',
+                  borderColor: selected ? moduleTint('journal', scheme) : colors[scheme].border,
+                  backgroundColor: selected ? moduleTint('journal', scheme) : 'transparent',
                 }}
               >
                 <Text

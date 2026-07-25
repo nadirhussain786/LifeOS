@@ -53,7 +53,7 @@ export function SleepTrackerCard() {
           <GradientButton label="I'm awake" tint="#f59e0b" icon={Sunrise} onPress={wake} />
           <Pressable onPress={cancelSleep} hitSlop={8} className="items-center">
             <Text style={{ color: alpha('#ffffff', 0.8), fontSize: 12 }} className="font-sora-medium">
-              Cancel — I didn't sleep
+              Cancel — I didn&apos;t sleep
             </Text>
           </Pressable>
         </View>
@@ -69,7 +69,7 @@ export function SleepTrackerCard() {
         </View>
         <View className="flex-1">
           <Text className="font-sora-semibold text-foreground">Going to sleep?</Text>
-          <Text variant="caption">Tap when you get in bed — we'll time it for you.</Text>
+          <Text variant="caption">Tap when you get in bed — we&apos;ll time it for you.</Text>
         </View>
       </View>
       <GradientButton label="Going to bed" tint={SLEEP_TINT} icon={Moon} onPress={startSleep} />
