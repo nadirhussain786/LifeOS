@@ -1,14 +1,14 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { CalendarClock, Grid3x3, Heart, Images, Plus, Search } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Pressable, TextInput, View } from 'react-native';
 
 import { EmptyState } from '@/components/ui/empty-state';
 import { Fab } from '@/components/ui/fab';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { colors } from '@/constants/theme';
 import { AddMediaSheet } from '@/features/gallery/components/add-media-sheet';
-import { PhotoGrid } from '@/features/gallery/components/photo-grid';
+import { PhotoGridList } from '@/features/gallery/components/photo-grid-list';
 import { usePhotos } from '@/features/gallery/hooks/use-gallery';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -87,9 +87,7 @@ export default function AllPhotosScreen() {
           onAction={!favoritesOnly && !query ? () => setAddOpen(true) : undefined}
         />
       ) : (
-        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
-          <PhotoGrid photos={filtered} timeline={timeline && !query} onPressPhoto={(photo) => router.push(`/gallery/photo/${photo.id}`)} />
-        </ScrollView>
+        <PhotoGridList photos={filtered} timeline={timeline && !query} onPressPhoto={(photo) => router.push(`/gallery/photo/${photo.id}`)} />
       )}
 
       {filtered.length > 0 && <Fab onPress={() => setAddOpen(true)} accessibilityLabel="Add media" />}

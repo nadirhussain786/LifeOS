@@ -1,5 +1,6 @@
+import { Image } from 'expo-image';
 import { Video } from 'lucide-react-native';
-import { Image, Pressable, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 import { Text } from '@/components/ui/text';
 import { albumCategoryMeta } from '@/features/gallery/config/album-categories';
@@ -19,7 +20,7 @@ export function AlbumCard({ album, width, onPress }: Props) {
     <Pressable onPress={() => onPress(album)} style={{ width }} accessibilityRole="button" accessibilityLabel={album.name}>
       <View style={{ width, height: width, borderRadius: 16, overflow: 'hidden', backgroundColor: `${meta.tint}1f` }}>
         {album.coverUri ? (
-          <Image source={{ uri: album.coverUri }} style={{ width, height: width }} />
+          <Image source={{ uri: album.coverUri }} style={{ width, height: width }} contentFit="cover" recyclingKey={album.id} transition={120} />
         ) : (
           <View className="flex-1 items-center justify-center">
             <Icon size={30} color={meta.tint} strokeWidth={1.75} />

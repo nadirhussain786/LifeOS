@@ -1,21 +1,23 @@
 import { format } from 'date-fns';
+import { Image } from 'expo-image';
 import { Heart, Play } from 'lucide-react-native';
 import { useMemo } from 'react';
-import { Dimensions, Image, Pressable, View } from 'react-native';
+import { Dimensions, Pressable, View } from 'react-native';
 
 import { Text } from '@/components/ui/text';
 import { displayUri, formatDuration, type GalleryPhoto } from '@/features/gallery/types/gallery.types';
 
-const COLUMNS = 3;
-const GAP = 4;
+export const COLUMNS = 3;
+export const GAP = 4;
 const H_PADDING = 16;
 
-function tileSize() {
+/** Square tile edge length for a 3-up grid at the current screen width. */
+export function tileSize() {
   const width = Dimensions.get('window').width;
   return (width - H_PADDING * 2 - GAP * (COLUMNS - 1)) / COLUMNS;
 }
 
-function PhotoTile({ photo, size, onPress }: { photo: GalleryPhoto; size: number; onPress: (p: GalleryPhoto) => void }) {
+export function PhotoTile({ photo, size, onPress }: { photo: GalleryPhoto; size: number; onPress: (p: GalleryPhoto) => void }) {
   const isVideo = photo.mediaType === 'video';
   return (
     <Pressable
@@ -24,7 +26,13 @@ function PhotoTile({ photo, size, onPress }: { photo: GalleryPhoto; size: number
       accessibilityRole="imagebutton"
       accessibilityLabel={photo.caption ?? (isVideo ? 'Video' : 'Photo')}
     >
-      <Image source={{ uri: displayUri(photo) }} style={{ width: size, height: size, borderRadius: 10, backgroundColor: '#00000010' }} />
+      <Image
+        source={{ uri: displayUri(photo) }}
+        style={{ width: size, height: size, borderRadius: 10, backgroundColor: '#00000010' }}
+        contentFit="cover"
+        recyclingKey={photo.id}
+        transition={120}
+      />
       {isVideo && (
         <>
           <View className="absolute inset-0 items-center justify-center">

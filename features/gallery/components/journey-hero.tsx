@@ -1,7 +1,8 @@
 import { differenceInCalendarDays, format } from 'date-fns';
+import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowRight, Play } from 'lucide-react-native';
-import { Image, Pressable, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 import { Text } from '@/components/ui/text';
 import { displayUri, type GalleryPhoto } from '@/features/gallery/types/gallery.types';
@@ -31,7 +32,7 @@ export function JourneyHero({ photos, onPlay }: Props) {
   const Thumb = ({ photo, label }: { photo: GalleryPhoto; label: string }) => (
     <View className="items-center gap-1.5">
       <View style={{ width: 76, height: 96, borderRadius: 16, overflow: 'hidden', borderWidth: 2, borderColor: alpha('#ffffff', 0.5) }}>
-        <Image source={{ uri: displayUri(photo) }} style={{ width: '100%', height: '100%' }} />
+        <Image source={{ uri: displayUri(photo) }} style={{ width: '100%', height: '100%' }} contentFit="cover" recyclingKey={photo.id} />
       </View>
       <Text style={{ color: alpha('#ffffff', 0.9), fontSize: 10, letterSpacing: 1 }} className="font-sora-bold uppercase">
         {label}

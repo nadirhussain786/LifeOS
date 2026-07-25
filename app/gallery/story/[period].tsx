@@ -1,8 +1,9 @@
 import { format } from 'date-fns';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Image } from 'expo-image';
 import { X } from 'lucide-react-native';
 import { useEffect, useMemo, useState } from 'react';
-import { Image, Pressable, useWindowDimensions, View } from 'react-native';
+import { Pressable, useWindowDimensions, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   cancelAnimation,
@@ -116,7 +117,7 @@ export default function StoryPlayerScreen() {
       <Animated.View style={[{ flex: 1, backgroundColor: '#000' }, containerStyle]}>
         {/* Ken Burns media */}
         <Animated.View style={[{ position: 'absolute', width, height }, kbStyle]}>
-          <Image source={{ uri: displayUri(current) }} style={{ width, height }} resizeMode="cover" />
+          <Image source={{ uri: displayUri(current) }} style={{ width, height }} contentFit="cover" recyclingKey={current.id} />
         </Animated.View>
         {/* Legibility scrims */}
         <View pointerEvents="none" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 160, backgroundColor: alpha('#000000', 0.35) }} />

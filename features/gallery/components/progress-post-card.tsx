@@ -1,7 +1,8 @@
 import { formatDistanceToNow } from 'date-fns';
+import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Camera, GitCompareArrows, Heart, Play, Share2, Video } from 'lucide-react-native';
-import { Dimensions, Image, Pressable, View } from 'react-native';
+import { Dimensions, Pressable, View } from 'react-native';
 
 import { Text } from '@/components/ui/text';
 import { displayUri, formatDuration, type GalleryPhoto } from '@/features/gallery/types/gallery.types';
@@ -49,7 +50,7 @@ export function ProgressPostCard({ photo, albumName, onOpen, onLike, onShare, on
 
       {/* Media */}
       <Pressable onPress={() => onOpen(photo)} accessibilityRole="imagebutton">
-        <Image source={{ uri: displayUri(photo) }} style={{ width: outerW, height: mediaH, backgroundColor: alpha(GALLERY_TINT, 0.08) }} />
+        <Image source={{ uri: displayUri(photo) }} style={{ width: outerW, height: mediaH, backgroundColor: alpha(GALLERY_TINT, 0.08) }} contentFit="cover" recyclingKey={photo.id} transition={150} />
         {isVideo && (
           <>
             <View className="absolute inset-0 items-center justify-center">

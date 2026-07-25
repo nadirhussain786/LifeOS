@@ -3,7 +3,8 @@ import { format } from 'date-fns';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { CalendarDays, Heart, Trash2, X } from 'lucide-react-native';
 import { useState } from 'react';
-import { Alert, Dimensions, Image, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Image } from 'expo-image';
+import { Alert, Dimensions, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
@@ -97,7 +98,7 @@ export default function PhotoDetailScreen() {
             </View>
           </View>
         ) : (
-          <Image source={{ uri: photo.uri }} style={{ width: screenWidth, height: imageHeight, backgroundColor: '#00000010' }} resizeMode="contain" />
+          <Image source={{ uri: photo.uri }} style={{ width: screenWidth, height: imageHeight, backgroundColor: '#00000010' }} contentFit="contain" recyclingKey={photo.id} />
         )}
 
         <View className="gap-5 px-5">
