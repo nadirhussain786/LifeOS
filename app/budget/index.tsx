@@ -14,6 +14,7 @@ import { useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 
 import { EmptyState } from '@/components/ui/empty-state';
+import { QueryError } from '@/components/ui/query-error';
 import { Fab } from '@/components/ui/fab';
 import { HeroCard } from '@/components/ui/hero-card';
 import { ProgressBar } from '@/components/ui/progress-bar';
@@ -44,7 +45,7 @@ export default function BudgetScreen() {
   const overview = useBudgetOverview('month', anchorTime);
   const { data: savingsGoals = [] } = useSavingsGoals();
   const { totals: debtTotals } = useDebts();
-  const { currency, summary, categories, accounts, periodTransactions, hasAny, isLoading, monthlyBudgetCents } = overview;
+  const { currency, summary, categories, accounts, periodTransactions, hasAny, isLoading, isError, refetch, monthlyBudgetCents } = overview;
 
   const budgetRatio = monthlyBudgetCents && monthlyBudgetCents > 0 ? summary.expenseCents / monthlyBudgetCents : 0;
   const overBudget = monthlyBudgetCents != null && summary.expenseCents > monthlyBudgetCents;
@@ -66,7 +67,9 @@ export default function BudgetScreen() {
         ]}
       />
 
-      {isLoading ? (
+      {isError ? (
+          <QueryError onRetry={() => refetch()} />
+        ) : isLoading ? (
         <View className="gap-3 px-5 pt-2">
           <Skeleton className="h-40 w-full rounded-2xl" />
           <Skeleton className="h-24 w-full rounded-2xl" />

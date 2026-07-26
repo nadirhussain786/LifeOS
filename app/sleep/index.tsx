@@ -6,6 +6,7 @@ import { ScrollView, View } from 'react-native';
 
 import { BarChart, type BarDatum } from '@/components/ui/bar-chart';
 import { EmptyState } from '@/components/ui/empty-state';
+import { QueryError } from '@/components/ui/query-error';
 import { Fab } from '@/components/ui/fab';
 import { HeroCard } from '@/components/ui/hero-card';
 import { ProgressRing } from '@/components/ui/progress-ring';
@@ -33,7 +34,7 @@ export default function SleepScreen() {
   const [range, setRange] = useState<'week' | 'month'>('week');
   const sleepTint = moduleTint('sleep', scheme);
 
-  const { isLoading, stats, trend, latest, goalMinutes, sessions } = useSleepInsights(range === 'week' ? 7 : 30);
+  const { isLoading, isError, refetch, stats, trend, latest, goalMinutes, sessions } = useSleepInsights(range === 'week' ? 7 : 30);
 
   const lastNightRatio = latest ? Math.min(1, latest.durationMinutes / goalMinutes) : 0;
 
@@ -54,7 +55,9 @@ export default function SleepScreen() {
         ]}
       />
 
-      {isLoading ? (
+      {isError ? (
+          <QueryError onRetry={() => refetch()} />
+        ) : isLoading ? (
         <View className="gap-5 px-5 pt-2">
           <Skeleton className="h-24 w-full rounded-2xl" />
           <Skeleton className="h-52 w-full rounded-2xl" />

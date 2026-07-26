@@ -21,11 +21,18 @@ export function reconcileAccountOnSignIn(uid: string): void {
   const previous = store.lastUserId;
 
   if (previous && previous !== uid) {
-    clearAllData();
-    queryClient.clear();
-    store.resetCursors();
-    useProfileStore.getState().reset();
+    wipeLocalData();
   }
 
   store.setLastUserId(uid);
+}
+
+/** Wipes all local data, the query cache, sync cursors, and the device profile.
+ * Used on an account switch and after account deletion. */
+export function wipeLocalData(): void {
+  clearAllData();
+  queryClient.clear();
+  useSyncStore.getState().resetCursors();
+  useSyncStore.getState().setLastUserId(null);
+  useProfileStore.getState().reset();
 }

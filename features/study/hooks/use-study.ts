@@ -24,9 +24,9 @@ export function useStudySettings() {
 /** Aggregates the study dashboard: today's progress vs goal, headline stats,
  * subject split and the daily trend series. */
 export function useStudyInsights(rangeDays: number) {
-  const { data: sessions = [], isLoading: sessionsLoading } = useStudySessions();
-  const { data: subjects = [], isLoading: subjectsLoading } = useStudySubjects();
-  const { data: settings, isLoading: settingsLoading } = useStudySettings();
+  const { data: sessions = [], isLoading: sessionsLoading, isError: sessionsError, refetch: refetchSessions } = useStudySessions();
+  const { data: subjects = [], isLoading: subjectsLoading, isError: subjectsError, refetch: refetchSubjects } = useStudySubjects();
+  const { data: settings, isLoading: settingsLoading, isError: settingsError, refetch: refetchSettings } = useStudySettings();
 
   const dailyGoalMinutes = settings?.dailyGoalMinutes ?? 120;
   const dailyGoalSeconds = dailyGoalMinutes * 60;
@@ -44,6 +44,12 @@ export function useStudyInsights(rangeDays: number) {
 
   return {
     isLoading: sessionsLoading || subjectsLoading || settingsLoading,
+    isError: sessionsError || subjectsError || settingsError,
+    refetch: () => {
+      void refetchSessions();
+      void refetchSubjects();
+      void refetchSettings();
+    },
     sessions,
     subjects,
     settings: settings ?? { dailyGoalMinutes, focusMinutes: 25, breakMinutes: 5 },

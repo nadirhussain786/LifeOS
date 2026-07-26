@@ -1,7 +1,7 @@
 import { formatDistanceToNow } from 'date-fns';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { CheckCircle2, CloudOff, LogOut, TriangleAlert, UserCircle } from 'lucide-react-native';
+import { CheckCircle2, CloudOff, LogOut, Trash2, TriangleAlert, UserCircle } from 'lucide-react-native';
 import { Alert, Pressable, ScrollView, Switch, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
@@ -31,6 +31,7 @@ export default function SyncSettingsScreen() {
   const session = useAuthStore((s) => s.session);
   const profile = useAuthStore((s) => s.profile);
   const signOut = useAuthStore((s) => s.signOut);
+  const deleteAccount = useAuthStore((s) => s.deleteAccount);
 
   const { status, lastSyncedAt, lastError } = useSyncStatus();
   const autoSync = useSyncStore((s) => s.autoSync);
@@ -70,6 +71,24 @@ export default function SyncSettingsScreen() {
       { text: 'Cancel', style: 'cancel' },
       { text: 'Sign out', style: 'destructive', onPress: () => void signOut() },
     ]);
+  };
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      'Delete account?',
+      'This permanently deletes your account and all your synced data from the cloud, and clears this device. This cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete account',
+          style: 'destructive',
+          onPress: async () => {
+            const result = await deleteAccount();
+            if (!result.ok) Alert.alert('Couldn’t delete account', result.error);
+          },
+        },
+      ],
+    );
   };
 
   const syncedLabel =
@@ -152,10 +171,18 @@ export default function SyncSettingsScreen() {
       </View>
 
       {/* Sign out */}
-      <Pressable onPress={handleSignOut} className="flex-row items-center justify-center gap-2 rounded-2xl border border-border py-3.5">
+      <Pressable onPress={handleSignOut} className="flex-row items-center justify-center gap-2 rounded-2xl border border-border py-3.5" accessibilityRole="button">
         <LogOut size={18} color={theme.destructive} />
         <Text className="font-sora-medium" style={{ color: theme.destructive }}>
           Sign out
+        </Text>
+      </Pressable>
+
+      {/* Delete account (App/Play store requirement for account-based apps) */}
+      <Pressable onPress={handleDeleteAccount} className="flex-row items-center justify-center gap-2 py-2" accessibilityRole="button">
+        <Trash2 size={16} color={theme.mutedForeground} />
+        <Text variant="caption" className="font-sora-medium" style={{ color: theme.mutedForeground }}>
+          Delete account
         </Text>
       </Pressable>
       </ScrollView>

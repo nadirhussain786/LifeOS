@@ -6,6 +6,7 @@ import { useState } from 'react';
 
 import { BarChart, type BarDatum } from '@/components/ui/bar-chart';
 import { EmptyState } from '@/components/ui/empty-state';
+import { QueryError } from '@/components/ui/query-error';
 import { GradientButton } from '@/components/ui/gradient-button';
 import { HeroCard } from '@/components/ui/hero-card';
 import { ProgressRing } from '@/components/ui/progress-ring';
@@ -48,7 +49,7 @@ export default function StudyScreen() {
   const [customMinutes, setCustomMinutes] = useState(50);
   const studyTint = moduleTint('study', scheme);
 
-  const { isLoading, stats, trend, breakdown, insights, subjects, settings, dailyGoalSeconds, sessions } = useStudyInsights(
+  const { isLoading, isError, refetch, stats, trend, breakdown, insights, subjects, settings, dailyGoalSeconds, sessions } = useStudyInsights(
     range === 'week' ? 7 : 30,
   );
   const { addSubject, removeSession } = useStudyMutations();
@@ -86,7 +87,9 @@ export default function StudyScreen() {
         ]}
       />
 
-      {isLoading ? (
+      {isError ? (
+          <QueryError onRetry={() => refetch()} />
+        ) : isLoading ? (
         <View className="gap-5 px-5 pt-2">
           <Skeleton className="h-52 w-full rounded-2xl" />
           <Skeleton className="h-40 w-full rounded-2xl" />

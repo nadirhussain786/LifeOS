@@ -43,7 +43,7 @@ export function useBudgetSettings() {
  * the single cached transaction list.
  */
 export function useBudgetOverview(period: Period, anchorTime: number) {
-  const { data: transactions = [], isLoading } = useTransactions();
+  const { data: transactions = [], isLoading, isError, refetch } = useTransactions();
   const { data: settings } = useBudgetSettings();
 
   const currency = settings?.currency ?? '$';
@@ -61,5 +61,5 @@ export function useBudgetOverview(period: Period, anchorTime: number) {
     };
   }, [transactions, period, anchorTime]);
 
-  return { isLoading, currency, monthlyBudgetCents: settings?.monthlyBudgetCents ?? null, ...value };
+  return { isLoading, isError, refetch, currency, monthlyBudgetCents: settings?.monthlyBudgetCents ?? null, ...value };
 }

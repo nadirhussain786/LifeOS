@@ -3,7 +3,7 @@ import type { Session, User } from '@supabase/supabase-js';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
-import { reconcileAccountOnSignIn } from '@/features/sync/services/account-reconcile';
+import { reconcileAccountOnSignIn, wipeLocalData } from '@/features/sync/services/account-reconcile';
 import { isSupabaseConfigured } from '@/lib/env';
 import { passwordResetRedirectUrl, supabase } from '@/lib/supabase';
 
@@ -42,6 +42,7 @@ type AuthState = {
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<AuthResult>;
   updatePassword: (newPassword: string) => Promise<AuthResult>;
+  deleteAccount: () => Promise<AuthResult>;
   continueAsGuest: () => void;
   loadProfile: () => Promise<void>;
   updateDisplayName: (displayName: string) => Promise<AuthResult>;
@@ -140,6 +141,19 @@ export const useAuthStore = create<AuthState>()(
         if (!isSupabaseConfigured) return NOT_CONFIGURED;
         const { error } = await supabase.auth.updateUser({ password: newPassword });
         if (error) return { ok: false, error: friendly(error.message) };
+        return { ok: true };
+      },
+
+      deleteAccount: async () => {
+        if (!isSupabaseConfigured) return NOT_CONFIGURED;
+        // Server-side deletion (auth user + all their rows) runs in an edge
+        // function — the client can't call auth.admin.deleteUser. See
+        // supabase/functions/delete-account. Requires App/Play store compliance.
+        const { error } = await supabase.functions.invoke('delete-account');
+        if (error) return { ok: false, error: friendly(error.message) };
+        wipeLocalData();
+        await supabase.auth.signOut();
+        set({ session: null, user: null, profile: null, isGuest: false });
         return { ok: true };
       },
 
