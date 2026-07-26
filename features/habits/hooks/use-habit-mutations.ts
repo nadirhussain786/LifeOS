@@ -15,7 +15,8 @@ import {
   unskipHabit,
   updateHabit,
 } from '@/features/habits/services/habits-repository';
-import type { CreateHabitInput, HabitSkipReason, UpdateHabitInput } from '@/features/habits/types/habit.types';
+import { useHabitsFilterStore } from '@/features/habits/store/habits-filter-store';
+import type { CreateHabitInput, HabitSkipReason, HabitTodayStatus, HabitWithToday, UpdateHabitInput } from '@/features/habits/types/habit.types';
 
 export function useHabitMutations() {
   const queryClient = useQueryClient();
@@ -23,6 +24,25 @@ export function useHabitMutations() {
   // Widget refresh happens via the query-cache subscription (use-widget-sync);
   // the feature no longer imports the widget module (avoids a dependency cycle).
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['habits'] });
+
+  /**
+   * Optimistically flips a habit's today-status so the checkbox animates
+   * instantly, without waiting for the write + refetch. Targets the exact list
+   * query key (['habits', showArchived]) — not the ['habits'] prefix — so it
+   * can't corrupt other habit queries. Returns a rollback context for onError.
+   */
+  const optimisticStatus = async (habitId: string, status: HabitTodayStatus) => {
+    const key = ['habits', useHabitsFilterStore.getState().showArchived] as const;
+    await queryClient.cancelQueries({ queryKey: key });
+    const previous = queryClient.getQueryData<HabitWithToday[]>(key);
+    queryClient.setQueryData<HabitWithToday[]>(key, (old) =>
+      old?.map((habit) => (habit.id === habitId ? { ...habit, todayStatus: status } : habit)),
+    );
+    return { key, previous };
+  };
+  const rollback = (ctx?: { key: readonly unknown[]; previous: HabitWithToday[] | undefined }) => {
+    if (ctx) queryClient.setQueryData(ctx.key, ctx.previous);
+  };
 
   const create = useMutation({
     mutationFn: async (input: CreateHabitInput) => {
@@ -73,12 +93,16 @@ export function useHabitMutations() {
   const logToday = useMutation({
     mutationFn: async ({ habitId, value }: { habitId: string; value?: number }) =>
       logHabit(habitId, toDateKey(new Date()), value ?? 1),
-    onSuccess: invalidate,
+    onMutate: ({ habitId }) => optimisticStatus(habitId, 'done'),
+    onError: (_e, _v, ctx) => rollback(ctx),
+    onSettled: invalidate,
   });
 
   const unlogToday = useMutation({
     mutationFn: async (habitId: string) => unlogHabit(habitId, toDateKey(new Date())),
-    onSuccess: invalidate,
+    onMutate: (habitId) => optimisticStatus(habitId, 'not_yet'),
+    onError: (_e, _v, ctx) => rollback(ctx),
+    onSettled: invalidate,
   });
 
   const logDate = useMutation({
