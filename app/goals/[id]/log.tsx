@@ -144,7 +144,7 @@ export default function LogProgressScreen() {
           <TextInput
             value={note}
             onChangeText={setNote}
-            placeholder="What did you get done?"
+            accessibilityLabel="Progress note" placeholder="What did you get done?"
             placeholderTextColor={colors[scheme].mutedForeground}
             multiline
             className="min-h-12 rounded-2xl border border-border bg-card px-4 py-3 text-foreground"

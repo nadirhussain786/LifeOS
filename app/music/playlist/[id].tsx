@@ -68,7 +68,7 @@ export default function PlaylistDetailScreen() {
         <TextInput
           value={name}
           onChangeText={setName}
-          placeholder="Playlist name"
+          accessibilityLabel="Playlist name" placeholder="Playlist name"
           placeholderTextColor={colors[scheme].mutedForeground}
           style={{ fontSize: 26, fontFamily: 'Sora_700Bold', color: colors[scheme].foreground }}
         />

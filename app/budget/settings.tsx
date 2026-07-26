@@ -72,7 +72,7 @@ export default function BudgetSettingsScreen() {
             <TextInput
               value={monthlyBudget}
               onChangeText={setMonthlyBudget}
-              placeholder="0"
+              accessibilityLabel="Monthly budget" placeholder="0"
               keyboardType="decimal-pad"
               placeholderTextColor={colors[scheme].mutedForeground}
               className="flex-1 text-foreground"

@@ -160,7 +160,7 @@ export default function JournalEntryScreen() {
           value={body}
           onChangeText={setBody}
           multiline
-          placeholder="How was today?"
+          accessibilityLabel="Journal entry" placeholder="How was today?"
           placeholderTextColor={colors[scheme].mutedForeground}
           style={{ fontFamily: 'Literata_400Regular', fontSize: 17, lineHeight: 25 }}
           className="min-h-32 rounded-2xl border border-border bg-card p-4 text-foreground"

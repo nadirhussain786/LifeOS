@@ -101,7 +101,7 @@ export default function TaskDetailScreen() {
           value={title}
           onChangeText={setTitle}
           multiline
-          placeholder="Task title"
+          accessibilityLabel="Task title" placeholder="Task title"
           placeholderTextColor={colors[scheme].mutedForeground}
           style={{ fontSize: 26, fontFamily: 'Sora_700Bold', lineHeight: 32, color: colors[scheme].foreground }}
         />
@@ -157,7 +157,7 @@ export default function TaskDetailScreen() {
             value={notes}
             onChangeText={setNotes}
             multiline
-            placeholder="Add notes…"
+            accessibilityLabel="Task notes" placeholder="Add notes…"
             placeholderTextColor={colors[scheme].mutedForeground}
             className="min-h-24 rounded-2xl border border-border bg-card p-4 text-base text-foreground shadow-e1"
             textAlignVertical="top"

@@ -38,7 +38,7 @@ export default function NewAlbumScreen() {
         <TextInput
           value={name}
           onChangeText={setName}
-          placeholder="Album name"
+          accessibilityLabel="Album name" placeholder="Album name"
           placeholderTextColor={colors[scheme].mutedForeground}
           autoFocus
           style={{ fontSize: 24, fontFamily: 'Sora_700Bold', color: colors[scheme].foreground }}

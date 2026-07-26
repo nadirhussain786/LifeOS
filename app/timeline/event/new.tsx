@@ -89,7 +89,7 @@ export default function NewCalendarEventScreen() {
           <TextInput
             value={title}
             onChangeText={setTitle}
-            placeholder="Team meeting, dentist appointment…"
+            accessibilityLabel="Event title" placeholder="Team meeting, dentist appointment…"
             placeholderTextColor={colors[scheme].mutedForeground}
             autoFocus
             multiline
@@ -204,7 +204,7 @@ export default function NewCalendarEventScreen() {
             value={notes}
             onChangeText={setNotes}
             multiline
-            placeholder="Add details…"
+            accessibilityLabel="Event details" placeholder="Add details…"
             placeholderTextColor={colors[scheme].mutedForeground}
             className="min-h-20 rounded-2xl border border-border bg-card p-4 text-base text-foreground"
             textAlignVertical="top"

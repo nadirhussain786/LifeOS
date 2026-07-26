@@ -80,7 +80,7 @@ export default function NewTaskScreen() {
           <TextInput
             value={title}
             onChangeText={setTitle}
-            placeholder="What needs to get done?"
+            accessibilityLabel="Task title" placeholder="What needs to get done?"
             placeholderTextColor={colors[scheme].mutedForeground}
             autoFocus
             multiline
@@ -141,7 +141,7 @@ export default function NewTaskScreen() {
             value={notes}
             onChangeText={setNotes}
             multiline
-            placeholder="Add notes…"
+            accessibilityLabel="Task notes" placeholder="Add notes…"
             placeholderTextColor={colors[scheme].mutedForeground}
             className="min-h-24 rounded-2xl border border-border bg-card p-4 text-base text-foreground shadow-e1"
             textAlignVertical="top"

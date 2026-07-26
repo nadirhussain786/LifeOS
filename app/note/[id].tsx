@@ -126,7 +126,7 @@ export default function NoteDetailScreen() {
           value={title}
           onChangeText={setTitle}
           multiline
-          placeholder="Note title"
+          accessibilityLabel="Note title" placeholder="Note title"
           placeholderTextColor={colors[scheme].mutedForeground}
           style={{ fontSize: 26, fontFamily: 'Sora_700Bold', lineHeight: 32, color: colors[scheme].foreground }}
         />

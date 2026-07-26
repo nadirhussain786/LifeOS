@@ -127,7 +127,7 @@ export default function StudySettingsScreen() {
             <TextInput
               value={newSubject}
               onChangeText={setNewSubject}
-              placeholder="Add a subject"
+              accessibilityLabel="Add a subject" placeholder="Add a subject"
               placeholderTextColor={colors[scheme].mutedForeground}
               onSubmitEditing={addNewSubject}
               returnKeyType="done"

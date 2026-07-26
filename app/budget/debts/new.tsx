@@ -113,7 +113,7 @@ export default function DebtFormScreen() {
         <TextInput
           value={counterparty}
           onChangeText={setCounterparty}
-          placeholder="Person's name"
+          accessibilityLabel="Person" placeholder="Person's name"
           placeholderTextColor={colors[scheme].mutedForeground}
           autoFocus={!isEdit}
           style={{ fontSize: 22, fontFamily: 'Sora_700Bold', color: colors[scheme].foreground }}
@@ -130,7 +130,7 @@ export default function DebtFormScreen() {
             <TextInput
               value={amount}
               onChangeText={setAmount}
-              placeholder="0"
+              accessibilityLabel="Amount" placeholder="0"
               keyboardType="decimal-pad"
               placeholderTextColor={colors[scheme].mutedForeground}
               className="flex-1 text-foreground"
@@ -198,7 +198,7 @@ export default function DebtFormScreen() {
         <TextInput
           value={note}
           onChangeText={setNote}
-          placeholder="What's it for? (optional)"
+          accessibilityLabel="Note" placeholder="What's it for? (optional)"
           placeholderTextColor={colors[scheme].mutedForeground}
           className="rounded-2xl border border-border bg-card px-4 py-3 text-foreground"
         />

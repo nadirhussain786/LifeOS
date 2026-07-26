@@ -86,7 +86,7 @@ export default function SongDetailScreen() {
           <TextInput
             value={artist}
             onChangeText={setArtist}
-            placeholder="Unknown artist"
+            accessibilityLabel="Artist" placeholder="Unknown artist"
             placeholderTextColor={colors[scheme].mutedForeground}
             className="text-lg text-foreground"
           />

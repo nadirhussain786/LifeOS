@@ -62,7 +62,7 @@ export default function NewNoteScreen() {
           <TextInput
             value={title}
             onChangeText={setTitle}
-            placeholder="Note title"
+            accessibilityLabel="Note title" placeholder="Note title"
             placeholderTextColor={colors[scheme].mutedForeground}
             autoFocus
             multiline
@@ -90,7 +90,7 @@ export default function NewNoteScreen() {
           value={body}
           onChangeText={setBody}
           multiline
-          placeholder="Write something…"
+          accessibilityLabel="Note body" placeholder="Write something…"
           placeholderTextColor={colors[scheme].mutedForeground}
           className="min-h-32 rounded-2xl border border-border bg-card p-4 text-base text-foreground"
           textAlignVertical="top"

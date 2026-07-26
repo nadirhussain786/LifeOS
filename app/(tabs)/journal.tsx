@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
+import { QueryError } from '@/components/ui/query-error';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
@@ -24,7 +25,7 @@ export default function JournalScreen() {
   const scheme = useColorScheme() ?? 'light';
   const todayKey = toDateKey(new Date());
 
-  const { data: entries = [], isLoading } = useJournalMonth();
+  const { data: entries = [], isLoading, isError, refetch } = useJournalMonth();
   const { data: streak = 0 } = useJournalStreak();
   const { data: todayEntry } = useJournalEntry(todayKey);
 
@@ -55,7 +56,9 @@ export default function JournalScreen() {
         />
       </View>
 
-      {isLoading ? (
+      {isError ? (
+          <QueryError onRetry={() => refetch()} />
+        ) : isLoading ? (
         <View className="gap-2.5 px-5">
           <Skeleton className="h-16 w-full rounded-2xl" />
           <Skeleton className="h-16 w-full rounded-2xl" />

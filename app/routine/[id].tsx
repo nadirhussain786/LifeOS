@@ -75,7 +75,7 @@ export default function RoutineDetailScreen() {
         <TextInput
           value={name}
           onChangeText={setName}
-          placeholder="Routine name"
+          accessibilityLabel="Routine name" placeholder="Routine name"
           placeholderTextColor={colors[scheme].mutedForeground}
           style={{ fontSize: 24, fontFamily: 'Sora_700Bold', color: colors[scheme].foreground }}
         />

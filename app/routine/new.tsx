@@ -33,7 +33,7 @@ export default function NewRoutineScreen() {
         <TextInput
           value={name}
           onChangeText={setName}
-          placeholder="Morning routine, Wind down…"
+          accessibilityLabel="Routine name" placeholder="Morning routine, Wind down…"
           placeholderTextColor={colors[scheme].mutedForeground}
           autoFocus
           onSubmitEditing={handleCreate}

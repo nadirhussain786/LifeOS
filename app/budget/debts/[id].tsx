@@ -114,7 +114,7 @@ export default function DebtDetailScreen() {
                   <TextInput
                     value={payText}
                     onChangeText={setPayText}
-                    placeholder="0"
+                    accessibilityLabel="Payment amount" placeholder="0"
                     keyboardType="decimal-pad"
                     placeholderTextColor={colors[scheme].mutedForeground}
                     className="flex-1 text-foreground"

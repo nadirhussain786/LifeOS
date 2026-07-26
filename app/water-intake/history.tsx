@@ -5,6 +5,7 @@ import { ScrollView, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 import { EmptyState } from '@/components/ui/empty-state';
+import { QueryError } from '@/components/ui/query-error';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
@@ -20,7 +21,7 @@ export default function WaterHistoryScreen() {
   const scheme = useColorScheme() ?? 'light';
   const waterTint = moduleTint('water', scheme);
   const goalMl = useWaterSettingsStore((state) => state.goalMl);
-  const { data: history, isLoading } = useWaterHistory(HISTORY_DAYS);
+  const { data: history, isLoading, isError, refetch } = useWaterHistory(HISTORY_DAYS);
 
   const hasAnyData = history?.some((day) => day.totalMl > 0);
 
@@ -35,7 +36,9 @@ export default function WaterHistoryScreen() {
         ]}
       />
 
-      {isLoading || !history ? (
+      {isError ? (
+          <QueryError onRetry={() => refetch()} />
+        ) : isLoading || !history ? (
         <View className="gap-2.5 px-5 pt-4">
           <Skeleton className="h-40 w-full rounded-2xl" />
         </View>

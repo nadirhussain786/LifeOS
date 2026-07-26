@@ -46,7 +46,7 @@ export default function CurrencyPickerScreen() {
         <TextInput
           value={query}
           onChangeText={setQuery}
-          placeholder="Search 80+ currencies"
+          accessibilityLabel="Search currencies" placeholder="Search 80+ currencies"
           placeholderTextColor={colors[scheme].mutedForeground}
           autoCapitalize="characters"
           className="flex-1 text-foreground"

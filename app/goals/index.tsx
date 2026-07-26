@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { EmptyState } from '@/components/ui/empty-state';
+import { QueryError } from '@/components/ui/query-error';
 import { Fab } from '@/components/ui/fab';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Segmented } from '@/components/ui/segmented';
@@ -41,7 +42,7 @@ export default function GoalsScreen() {
   const scheme = useColorScheme() ?? 'light';
   const [showSearch, setShowSearch] = useState(false);
 
-  const { data: goals = [], isLoading } = useGoals();
+  const { data: goals = [], isLoading, isError, refetch } = useGoals();
   const { data: stats } = useGoalStats();
   const {
     searchQuery,
@@ -102,7 +103,9 @@ export default function GoalsScreen() {
         ]}
       />
 
-      {isLoading ? (
+      {isError ? (
+          <QueryError onRetry={() => refetch()} />
+        ) : isLoading ? (
         <View className="gap-3 px-5 pt-2">
           <Skeleton className="h-28 w-full rounded-2xl" />
           <Skeleton className="h-24 w-full rounded-2xl" />

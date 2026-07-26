@@ -5,6 +5,7 @@ import { ListMusic, Play, Plus, Shuffle } from 'lucide-react-native';
 import { Pressable, ScrollView, View } from 'react-native';
 
 import { EmptyState } from '@/components/ui/empty-state';
+import { QueryError } from '@/components/ui/query-error';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
@@ -23,7 +24,7 @@ export default function MusicScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
 
-  const { data: songs = [], isLoading } = useSongs();
+  const { data: songs = [], isLoading, isError, refetch } = useSongs();
   const { data: playlists = [] } = usePlaylists();
   const { importFromDevice, remove } = useSongMutations();
   const { currentSong, isPlaying, playQueue, shuffleAll } = useNowPlaying();
@@ -56,7 +57,9 @@ export default function MusicScreen() {
         }
       />
 
-      {isLoading ? (
+      {isError ? (
+          <QueryError onRetry={() => refetch()} />
+        ) : isLoading ? (
         <View className="gap-2.5 px-4">
           <Skeleton className="h-20 w-full rounded-2xl" />
           <Skeleton className="h-16 w-full rounded-2xl" />

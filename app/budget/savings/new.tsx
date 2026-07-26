@@ -51,7 +51,7 @@ export default function NewSavingsGoalScreen() {
         <TextInput
           value={name}
           onChangeText={setName}
-          placeholder="Goal name (e.g. Emergency fund)"
+          accessibilityLabel="Goal name" placeholder="Goal name (e.g. Emergency fund)"
           placeholderTextColor={colors[scheme].mutedForeground}
           autoFocus
           style={{ fontSize: 22, fontFamily: 'Sora_700Bold', color: colors[scheme].foreground }}
@@ -68,7 +68,7 @@ export default function NewSavingsGoalScreen() {
             <TextInput
               value={target}
               onChangeText={setTarget}
-              placeholder="0"
+              accessibilityLabel="Target amount" placeholder="0"
               keyboardType="decimal-pad"
               placeholderTextColor={colors[scheme].mutedForeground}
               className="flex-1 text-foreground"
