@@ -176,7 +176,7 @@ export default function BudgetScreen() {
                 </Text>
               </View>
               <ProgressBar progress={Math.min(1, budgetRatio)} color={overBudget ? '#ef4444' : '#22c55e'} height={8} />
-              <Text variant="caption" style={{ color: overBudget ? '#dc2626' : '#16a34a' }} className="font-sora-medium">
+              <Text variant="caption" style={{ color: overBudget ? colors[scheme].destructive : colors[scheme].success }} className="font-sora-medium">
                 {overBudget
                   ? `Over budget by ${formatMoney(summary.expenseCents - monthlyBudgetCents, currency)}`
                   : `${formatMoney(monthlyBudgetCents - summary.expenseCents, currency)} left this month`}

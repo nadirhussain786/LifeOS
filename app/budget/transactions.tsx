@@ -130,7 +130,7 @@ export default function TransactionsScreen() {
                 <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
                   {dayLabel(item.logDate)}
                 </Text>
-                <Text variant="caption" style={{ color: item.dayNet >= 0 ? '#16a34a' : '#dc2626' }} className="font-sora-semibold">
+                <Text variant="caption" style={{ color: item.dayNet >= 0 ? colors[scheme].success : colors[scheme].destructive }} className="font-sora-semibold">
                   {item.dayNet >= 0 ? '+' : ''}
                   {formatMoney(item.dayNet, currency)}
                 </Text>
