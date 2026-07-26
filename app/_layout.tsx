@@ -34,8 +34,12 @@ import { colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { configureAndroidChannels, configureNotificationHandler } from '@/lib/notifications';
 import { queryClient } from '@/lib/query-client';
+import { initSentry } from '@/lib/sentry';
 
 SplashScreen.preventAutoHideAsync();
+
+// Route caught errors to Sentry when a DSN is configured (no-op otherwise).
+initSentry();
 
 // Without a handler, expo-notifications suppresses notifications delivered
 // while the app is foregrounded — water reminders should still show even if

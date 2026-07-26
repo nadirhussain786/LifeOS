@@ -18,6 +18,9 @@ export const env = {
   /** Where the password-reset email links back to. Optional — falls back to the
    * app's `lifeos://reset-password` deep link (see lib/supabase.ts). */
   EXPO_PUBLIC_SUPABASE_REDIRECT_URL: read(process.env.EXPO_PUBLIC_SUPABASE_REDIRECT_URL),
+  /** Sentry DSN. Optional — when absent, crash/error reporting stays local-only
+   * (console + dev banner). See lib/sentry.ts. */
+  EXPO_PUBLIC_SENTRY_DSN: read(process.env.EXPO_PUBLIC_SENTRY_DSN),
 };
 
 /** True only when both a real-looking URL and a plausible anon key are present.
