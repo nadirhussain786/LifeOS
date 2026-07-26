@@ -1,0 +1,57 @@
+{
+  "common": {
+    "save": "सहेजें",
+    "cancel": "रद्द करें",
+    "delete": "हटाएं",
+    "done": "पूर्ण",
+    "retry": "पुनः प्रयास करें",
+    "loading": "लोड हो रहा है…",
+    "somethingWrong": "कुछ गलत हो गया",
+    "couldntLoad": "यह लोड नहीं हो सका"
+  },
+  "tabs": {
+    "home": "होम",
+    "tasks": "कार्य",
+    "habits": "आदतें",
+    "journal": "जर्नल",
+    "more": "और"
+  },
+  "settings": {
+    "title": "सेटिंग्स",
+    "appearance": "रूप",
+    "system": "सिस्टम",
+    "light": "लाइट",
+    "dark": "डार्क",
+    "language": "भाषा",
+    "notifications": "सूचनाएं",
+    "privacy": "गोपनीयता",
+    "appLock": "ऐप लॉक",
+    "data": "डेटा",
+    "exportData": "डेटा निर्यात करें",
+    "clearData": "सारा डेटा साफ़ करें",
+    "about": "परिचय",
+    "version": "संस्करण",
+    "storage": "स्टोरेज",
+    "onThisDevice": "इस डिवाइस पर",
+    "syncAccount": "सिंक और खाता",
+    "privacyPolicy": "गोपनीयता नीति"
+  },
+  "auth": {
+    "welcomeBack": "वापसी पर स्वागत है",
+    "signIn": "साइन इन करें",
+    "signInSubtitle": "अपने डिवाइसों में LifeOS सिंक करने के लिए साइन इन करें।",
+    "createAccount": "खाता बनाएं",
+    "newHere": "नए हैं?",
+    "email": "ईमेल",
+    "password": "पासवर्ड",
+    "name": "नाम",
+    "forgotPassword": "पासवर्ड भूल गए?",
+    "continueGuest": "बिना खाते के जारी रखें"
+  },
+  "language": {
+    "en": "English",
+    "ur": "اردو",
+    "hi": "हिन्दी",
+    "ar": "العربية"
+  }
+}

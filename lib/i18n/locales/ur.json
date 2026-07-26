@@ -1,0 +1,57 @@
+{
+  "common": {
+    "save": "محفوظ کریں",
+    "cancel": "منسوخ کریں",
+    "delete": "حذف کریں",
+    "done": "مکمل",
+    "retry": "دوبارہ کوشش کریں",
+    "loading": "لوڈ ہو رہا ہے…",
+    "somethingWrong": "کچھ غلط ہو گیا",
+    "couldntLoad": "یہ لوڈ نہیں ہو سکا"
+  },
+  "tabs": {
+    "home": "ہوم",
+    "tasks": "کام",
+    "habits": "عادات",
+    "journal": "ڈائری",
+    "more": "مزید"
+  },
+  "settings": {
+    "title": "ترتیبات",
+    "appearance": "ظاہری شکل",
+    "system": "سسٹم",
+    "light": "روشن",
+    "dark": "تاریک",
+    "language": "زبان",
+    "notifications": "اطلاعات",
+    "privacy": "رازداری",
+    "appLock": "ایپ لاک",
+    "data": "ڈیٹا",
+    "exportData": "ڈیٹا برآمد کریں",
+    "clearData": "تمام ڈیٹا صاف کریں",
+    "about": "متعلق",
+    "version": "ورژن",
+    "storage": "اسٹوریج",
+    "onThisDevice": "اس ڈیوائس پر",
+    "syncAccount": "سِنک اور اکاؤنٹ",
+    "privacyPolicy": "رازداری کی پالیسی"
+  },
+  "auth": {
+    "welcomeBack": "خوش آمدید",
+    "signIn": "سائن ان کریں",
+    "signInSubtitle": "اپنے آلات پر LifeOS سِنک کرنے کے لیے سائن ان کریں۔",
+    "createAccount": "اکاؤنٹ بنائیں",
+    "newHere": "نئے ہیں؟",
+    "email": "ای میل",
+    "password": "پاس ورڈ",
+    "name": "نام",
+    "forgotPassword": "پاس ورڈ بھول گئے؟",
+    "continueGuest": "بغیر اکاؤنٹ کے جاری رکھیں"
+  },
+  "language": {
+    "en": "English",
+    "ur": "اردو",
+    "hi": "हिन्दी",
+    "ar": "العربية"
+  }
+}

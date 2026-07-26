@@ -1,4 +1,5 @@
 import '@/global.css';
+import i18n from '@/lib/i18n';
 
 import {
   Literata_400Regular,
@@ -24,6 +25,7 @@ import { applyDeliveryMode } from '@/features/notifications/services/delivery';
 import { syncTodayWidget } from '@/features/widgets/services/widget-data';
 import { useWidgetSync } from '@/features/widgets/hooks/use-widget-sync';
 import { useProfileStore } from '@/features/profile/store/profile-store';
+import { useLanguageStore } from '@/features/settings/store/language-store';
 import { AppLockOverlay } from '@/features/security/components/app-lock-overlay';
 import { useAppLock } from '@/features/security/hooks/use-app-lock';
 import { useAuthStore } from '@/features/auth/services/auth-store';
@@ -72,6 +74,15 @@ function SyncTrigger() {
 /** Refreshes the home-screen widget when tasks/habits/water change. Renders nothing. */
 function WidgetSync() {
   useWidgetSync();
+  return null;
+}
+
+/** Applies the persisted language to i18next once the store hydrates / changes. */
+function LanguageBridge() {
+  const language = useLanguageStore((s) => s.language);
+  useEffect(() => {
+    void i18n.changeLanguage(language);
+  }, [language]);
   return null;
 }
 
@@ -179,6 +190,7 @@ export default function RootLayout() {
             <AuthGate />
             <SyncTrigger />
             <WidgetSync />
+            <LanguageBridge />
             <AppLockController />
             <NotificationNavigationBridge />
             <MiniPlayerBar />

@@ -1,0 +1,57 @@
+{
+  "common": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "done": "تم",
+    "retry": "إعادة المحاولة",
+    "loading": "جارٍ التحميل…",
+    "somethingWrong": "حدث خطأ ما",
+    "couldntLoad": "تعذّر تحميل هذا"
+  },
+  "tabs": {
+    "home": "الرئيسية",
+    "tasks": "المهام",
+    "habits": "العادات",
+    "journal": "اليوميات",
+    "more": "المزيد"
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "appearance": "المظهر",
+    "system": "النظام",
+    "light": "فاتح",
+    "dark": "داكن",
+    "language": "اللغة",
+    "notifications": "الإشعارات",
+    "privacy": "الخصوصية",
+    "appLock": "قفل التطبيق",
+    "data": "البيانات",
+    "exportData": "تصدير البيانات",
+    "clearData": "مسح كل البيانات",
+    "about": "حول",
+    "version": "الإصدار",
+    "storage": "التخزين",
+    "onThisDevice": "على هذا الجهاز",
+    "syncAccount": "المزامنة والحساب",
+    "privacyPolicy": "سياسة الخصوصية"
+  },
+  "auth": {
+    "welcomeBack": "مرحبًا بعودتك",
+    "signIn": "تسجيل الدخول",
+    "signInSubtitle": "سجّل الدخول لمزامنة LifeOS عبر أجهزتك.",
+    "createAccount": "إنشاء حساب",
+    "newHere": "جديد هنا؟",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "name": "الاسم",
+    "forgotPassword": "هل نسيت كلمة المرور؟",
+    "continueGuest": "المتابعة بدون حساب"
+  },
+  "language": {
+    "en": "English",
+    "ur": "اردو",
+    "hi": "हिन्दी",
+    "ar": "العربية"
+  }
+}

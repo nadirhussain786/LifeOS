@@ -8,6 +8,7 @@ import {
   Download,
   Droplet,
   Info,
+  Languages,
   Laptop,
   LockKeyhole,
   Moon,
@@ -16,6 +17,7 @@ import {
   Trash2,
 } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, ScrollView, Switch, View } from 'react-native';
 
 import { ScreenHeader } from '@/components/ui/screen-header';
@@ -28,12 +30,13 @@ import { queryClient } from '@/lib/query-client';
 import { useProfileStore } from '@/features/profile/store/profile-store';
 import { authenticate, getBiometricLabel, isBiometricAvailable } from '@/features/security/lib/biometrics';
 import { useAppearanceStore, type ThemePreference } from '@/features/settings/store/appearance-store';
+import { LANGUAGES, useLanguageStore } from '@/features/settings/store/language-store';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
-const THEME_OPTIONS: { value: ThemePreference; label: string; icon: typeof Sun }[] = [
-  { value: 'system', label: 'System', icon: Laptop },
-  { value: 'light', label: 'Light', icon: Sun },
-  { value: 'dark', label: 'Dark', icon: Moon },
+const THEME_OPTIONS: { value: ThemePreference; labelKey: string; icon: typeof Sun }[] = [
+  { value: 'system', labelKey: 'settings.system', icon: Laptop },
+  { value: 'light', labelKey: 'settings.light', icon: Sun },
+  { value: 'dark', labelKey: 'settings.dark', icon: Moon },
 ];
 
 function SectionLabel({ children }: { children: string }) {
@@ -46,7 +49,10 @@ function SectionLabel({ children }: { children: string }) {
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const scheme = useColorScheme() ?? 'light';
+  const language = useLanguageStore((state) => state.language);
+  const setLanguage = useLanguageStore((state) => state.setLanguage);
   const themePreference = useAppearanceStore((state) => state.themePreference);
   const setThemePreference = useAppearanceStore((state) => state.setThemePreference);
 
@@ -107,12 +113,19 @@ export default function SettingsScreen() {
     );
   };
 
+  const pickLanguage = () => {
+    Alert.alert(t('settings.language'), undefined, [
+      ...LANGUAGES.map((lng) => ({ text: t(`language.${lng}`), onPress: () => setLanguage(lng) })),
+      { text: t('common.cancel'), style: 'cancel' as const },
+    ]);
+  };
+
   return (
     <View className="flex-1 bg-background">
-      <ScreenHeader title="Settings" eyebrow="System" tint="#737373" />
+      <ScreenHeader title={t('settings.title')} eyebrow="System" tint="#737373" />
       <ScrollView contentContainerClassName="gap-6 px-5 py-4 pb-10" showsVerticalScrollIndicator={false}>
         <View className="gap-2">
-          <SectionLabel>Appearance</SectionLabel>
+          <SectionLabel>{t('settings.appearance')}</SectionLabel>
         <View className="flex-row gap-2 rounded-2xl border border-border bg-card p-2">
           {THEME_OPTIONS.map((option) => {
             const selected = themePreference === option.value;
@@ -133,16 +146,19 @@ export default function SettingsScreen() {
                   className="font-sora-medium"
                   style={{ color: selected ? colors[scheme].accentForeground : colors[scheme].mutedForeground }}
                 >
-                  {option.label}
+                  {t(option.labelKey)}
                 </Text>
               </Pressable>
             );
           })}
         </View>
+        <View className="rounded-2xl border border-border bg-card px-4">
+          <SettingsRow icon={Languages} label={t('settings.language')} value={t(`language.${language}`)} isFirst onPress={pickLanguage} />
+        </View>
       </View>
 
       <View className="gap-2">
-        <SectionLabel>Notifications</SectionLabel>
+        <SectionLabel>{t('settings.notifications')}</SectionLabel>
         <View className="rounded-2xl border border-border bg-card px-4">
           <SettingsRow
             icon={Bell}
