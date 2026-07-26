@@ -7,6 +7,7 @@ import {
   Database,
   Download,
   Droplet,
+  FileText,
   Info,
   Languages,
   Laptop,
@@ -18,7 +19,7 @@ import {
 } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, ScrollView, Switch, View } from 'react-native';
+import { Alert, Linking, Pressable, ScrollView, Switch, View } from 'react-native';
 
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { SettingsRow } from '@/components/ui/settings-row';
@@ -32,6 +33,10 @@ import { authenticate, getBiometricLabel, isBiometricAvailable } from '@/feature
 import { useAppearanceStore, type ThemePreference } from '@/features/settings/store/appearance-store';
 import { LANGUAGES, useLanguageStore } from '@/features/settings/store/language-store';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+
+/** Public privacy-policy URL (PRIVACY.md in the repo). Replace with your hosted
+ * policy URL for store submission. */
+const PRIVACY_POLICY_URL = 'https://github.com/nadirhussain786/LifeOS/blob/main/PRIVACY.md';
 
 const THEME_OPTIONS: { value: ThemePreference; labelKey: string; icon: typeof Sun }[] = [
   { value: 'system', labelKey: 'settings.system', icon: Laptop },
@@ -230,11 +235,12 @@ export default function SettingsScreen() {
       </View>
 
       <View className="gap-2">
-        <SectionLabel>About</SectionLabel>
+        <SectionLabel>{t('settings.about')}</SectionLabel>
         <View className="rounded-2xl border border-border bg-card px-4">
-          <SettingsRow icon={Info} label="Version" value={Constants.expoConfig?.version ?? '1.0.0'} isFirst />
-          <SettingsRow icon={Database} label="Storage" value="On this device" />
-          <SettingsRow icon={ShieldCheck} label="Sync & account" subtitle="Backup, sync, and sign in" onPress={() => router.push('/settings/sync')} />
+          <SettingsRow icon={Info} label={t('settings.version')} value={Constants.expoConfig?.version ?? '1.0.0'} isFirst />
+          <SettingsRow icon={Database} label={t('settings.storage')} value={t('settings.onThisDevice')} />
+          <SettingsRow icon={ShieldCheck} label={t('settings.syncAccount')} subtitle="Backup, sync, and sign in" onPress={() => router.push('/settings/sync')} />
+          <SettingsRow icon={FileText} label={t('settings.privacyPolicy')} onPress={() => Linking.openURL(PRIVACY_POLICY_URL)} />
         </View>
       </View>
       </ScrollView>
