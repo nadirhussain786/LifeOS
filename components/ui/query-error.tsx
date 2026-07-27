@@ -1,4 +1,5 @@
 import { TriangleAlert } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
 import { Text } from '@/components/ui/text';
@@ -14,6 +15,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 export function QueryError({ onRetry, message }: { onRetry?: () => void; message?: string }) {
   const scheme = useColorScheme() ?? 'light';
   const theme = colors[scheme];
+  const { t } = useTranslation();
   return (
     <View className="flex-1 items-center justify-center gap-3 p-8">
       <View
@@ -22,18 +24,18 @@ export function QueryError({ onRetry, message }: { onRetry?: () => void; message
       >
         <TriangleAlert size={24} color={theme.mutedForeground} />
       </View>
-      <Text className="font-sora-semibold text-foreground">Couldn&apos;t load this</Text>
+      <Text className="font-sora-semibold text-foreground">{t('common.couldntLoad')}</Text>
       <Text variant="muted" className="text-center">
-        {message ?? 'Something went wrong. Check your connection and try again.'}
+        {message ?? t('common.loadFailedBody')}
       </Text>
       {onRetry && (
         <Pressable
           onPress={onRetry}
           className="mt-1 rounded-full border border-border bg-card px-5 py-2.5"
           accessibilityRole="button"
-          accessibilityLabel="Retry"
+          accessibilityLabel={t('common.retry')}
         >
-          <Text className="font-sora-medium text-foreground">Retry</Text>
+          <Text className="font-sora-medium text-foreground">{t('common.retry')}</Text>
         </Pressable>
       )}
     </View>

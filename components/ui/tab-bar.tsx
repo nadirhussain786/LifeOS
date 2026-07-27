@@ -8,6 +8,7 @@ import {
   Repeat,
   type LucideIcon,
 } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -16,12 +17,12 @@ import { colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 /** Per-route identity for the custom bar. Keys match the tab route file names. */
-const TABS: Record<string, { label: string; icon: LucideIcon }> = {
-  index: { label: 'Home', icon: Home },
-  tasks: { label: 'Tasks', icon: CheckSquare },
-  habits: { label: 'Habits', icon: Repeat },
-  journal: { label: 'Journal', icon: BookOpen },
-  hub: { label: 'More', icon: LayoutGrid },
+const TABS: Record<string, { labelKey: string; icon: LucideIcon }> = {
+  index: { labelKey: 'tabs.home', icon: Home },
+  tasks: { labelKey: 'tabs.tasks', icon: CheckSquare },
+  habits: { labelKey: 'tabs.habits', icon: Repeat },
+  journal: { labelKey: 'tabs.journal', icon: BookOpen },
+  hub: { labelKey: 'tabs.more', icon: LayoutGrid },
 };
 
 /**
@@ -36,6 +37,7 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
   const scheme = useColorScheme() ?? 'light';
   const theme = colors[scheme];
   const accent = theme.accent;
+  const { t } = useTranslation();
 
   return (
     <View
@@ -71,7 +73,7 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
             onPress={onPress}
             accessibilityRole="button"
             accessibilityState={{ selected: focused }}
-            accessibilityLabel={meta.label}
+            accessibilityLabel={t(meta.labelKey)}
             style={{
               flex: 1,
               alignItems: 'center',
@@ -88,7 +90,7 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
                 fontFamily: focused ? 'Sora_700Bold' : 'Sora_500Medium',
               }}
             >
-              {meta.label}
+              {t(meta.labelKey)}
             </Text>
           </Pressable>
         );

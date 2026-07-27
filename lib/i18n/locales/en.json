@@ -7,7 +7,29 @@
     "retry": "Retry",
     "loading": "Loading…",
     "somethingWrong": "Something went wrong",
-    "couldntLoad": "Couldn't load this"
+    "couldntLoad": "Couldn't load this",
+    "clear": "Clear",
+    "reload": "Reload",
+    "loadFailedBody": "Something went wrong. Check your connection and try again.",
+    "errorBody": "The app hit an unexpected error. Your data is safe — try again.",
+    "voiceNote": "Voice note",
+    "stopRecording": "Stop recording",
+    "add": "Add",
+    "edit": "Edit",
+    "remove": "Remove",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "skip": "Skip",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "search": "Search"
+  },
+  "reminder": {
+    "in1Hour": "In 1 hour",
+    "thisEvening": "This evening",
+    "tomorrow9am": "Tomorrow 9am",
+    "nextWeek": "Next week"
   },
   "tabs": {
     "home": "Home",

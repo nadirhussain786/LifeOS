@@ -7,6 +7,7 @@ import {
 import * as Haptics from 'expo-haptics';
 import { Mic, Square } from 'lucide-react-native';
 import { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -19,6 +20,7 @@ type Props = {
 
 export function VoiceNoteRecorder({ onRecorded }: Props) {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const state = useAudioRecorderState(recorder);
   const startedAt = useRef(0);
@@ -51,7 +53,7 @@ export function VoiceNoteRecorder({ onRecorded }: Props) {
         <Mic size={16} color={colors[scheme].mutedForeground} />
       )}
       <Text variant="caption" className="font-sora-medium">
-        {state.isRecording ? 'Stop recording' : 'Voice note'}
+        {state.isRecording ? t('common.stopRecording') : t('common.voiceNote')}
       </Text>
     </Pressable>
   );

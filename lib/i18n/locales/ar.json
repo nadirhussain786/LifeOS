@@ -7,7 +7,29 @@
     "retry": "إعادة المحاولة",
     "loading": "جارٍ التحميل…",
     "somethingWrong": "حدث خطأ ما",
-    "couldntLoad": "تعذّر تحميل هذا"
+    "couldntLoad": "تعذّر تحميل هذا",
+    "clear": "مسح",
+    "reload": "إعادة تحميل",
+    "loadFailedBody": "حدث خطأ ما. تحقق من اتصالك وحاول مرة أخرى.",
+    "errorBody": "واجه التطبيق خطأً غير متوقع. بياناتك آمنة — حاول مرة أخرى.",
+    "voiceNote": "ملاحظة صوتية",
+    "stopRecording": "إيقاف التسجيل",
+    "add": "إضافة",
+    "edit": "تعديل",
+    "remove": "إزالة",
+    "close": "إغلاق",
+    "back": "رجوع",
+    "next": "التالي",
+    "skip": "تخطٍ",
+    "today": "اليوم",
+    "yesterday": "أمس",
+    "search": "بحث"
+  },
+  "reminder": {
+    "in1Hour": "خلال ساعة",
+    "thisEvening": "هذا المساء",
+    "tomorrow9am": "غدًا 9 صباحًا",
+    "nextWeek": "الأسبوع القادم"
   },
   "tabs": {
     "home": "الرئيسية",
