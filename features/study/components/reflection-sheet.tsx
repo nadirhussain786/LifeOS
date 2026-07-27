@@ -33,16 +33,32 @@ export function ReflectionSheet({ visible, focusSeconds, onSave }: Props) {
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={commit} statusBarTranslucent>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={commit}
+      statusBarTranslucent
+    >
       <Pressable className="flex-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} onPress={commit}>
         <View className="flex-1 justify-end">
-          <Pressable onPress={(e) => e.stopPropagation()} style={{ paddingBottom: insets.bottom + 14 }} className="gap-4 rounded-t-3xl bg-card px-5 pt-3">
-            <View className="mb-1 h-1 w-10 self-center rounded-full" style={{ backgroundColor: colors[scheme].border }} />
+          <Pressable
+            onPress={(e) => e.stopPropagation()}
+            style={{ paddingBottom: insets.bottom + 14 }}
+            className="gap-4 rounded-t-3xl bg-card px-5 pt-3"
+          >
+            <View
+              className="mb-1 h-1 w-10 self-center rounded-full"
+              style={{ backgroundColor: colors[scheme].border }}
+            />
 
             <View className="items-center gap-1">
               <Text variant="heading">Nice work! 🎉</Text>
               <Text variant="muted">
-                You focused for <Text className="font-sora-bold" style={{ color: STUDY_TINT }}>{formatStudyDuration(focusSeconds)}</Text>
+                You focused for{' '}
+                <Text className="font-sora-bold" style={{ color: STUDY_TINT }}>
+                  {formatStudyDuration(focusSeconds)}
+                </Text>
               </Text>
             </View>
 
@@ -56,6 +72,7 @@ export function ReflectionSheet({ visible, focusSeconds, onSave }: Props) {
             <TextInput
               value={note}
               onChangeText={setNote}
+              accessibilityLabel="Session reflection"
               placeholder="What did you work on? (optional)"
               placeholderTextColor={colors[scheme].mutedForeground}
               className="rounded-2xl border border-border px-4 py-3 text-foreground"

@@ -14,6 +14,9 @@ import ur from '@/lib/i18n/locales/ur.json';
  * the source-of-truth resource and the fallback for any missing key, so a
  * not-yet-translated string never renders blank.
  */
+// `i18n.use(...)` is the standard i18next bootstrap idiom; the lint rule
+// flags it only because i18next also exposes `use` as a named export.
+// eslint-disable-next-line import/no-named-as-default-member
 void i18n.use(initReactI18next).init({
   resources: {
     en: { translation: en },

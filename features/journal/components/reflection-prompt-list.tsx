@@ -35,6 +35,7 @@ function PromptField({
         value={answer}
         onChangeText={setAnswer}
         multiline
+        accessibilityLabel={prompt.text}
         placeholder="Write a few words…"
         placeholderTextColor={colors[scheme].mutedForeground}
         style={{ fontFamily: 'Literata_400Regular', fontSize: 16, lineHeight: 23 }}
@@ -52,7 +53,9 @@ type Props = {
 };
 
 export function ReflectionPromptList({ prompts, reflections, onAnswer }: Props) {
-  const answerByPrompt = new Map(reflections.map((reflection) => [reflection.promptId, reflection.answerText]));
+  const answerByPrompt = new Map(
+    reflections.map((reflection) => [reflection.promptId, reflection.answerText]),
+  );
 
   return (
     <View className="gap-4">

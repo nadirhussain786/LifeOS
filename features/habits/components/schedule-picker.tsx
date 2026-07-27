@@ -74,7 +74,11 @@ export function SchedulePicker({
               <Text
                 variant="caption"
                 className="font-sora-medium"
-                style={{ color: selected ? colors[scheme].accentForeground : colors[scheme].mutedForeground }}
+                style={{
+                  color: selected
+                    ? colors[scheme].accentForeground
+                    : colors[scheme].mutedForeground,
+                }}
               >
                 {option.label}
               </Text>
@@ -100,7 +104,11 @@ export function SchedulePicker({
                 <Text
                   variant="caption"
                   className="font-sora-semibold"
-                  style={{ color: selected ? colors[scheme].accentForeground : colors[scheme].mutedForeground }}
+                  style={{
+                    color: selected
+                      ? colors[scheme].accentForeground
+                      : colors[scheme].mutedForeground,
+                  }}
                 >
                   {day.label}
                 </Text>
@@ -114,6 +122,7 @@ export function SchedulePicker({
         <View className="flex-row items-center gap-2">
           <Text variant="muted">Repeat every</Text>
           <TextInput
+            accessibilityLabel="Repeat interval in days"
             value={scheduleIntervalDays ? String(scheduleIntervalDays) : ''}
             onChangeText={(text) => {
               const parsed = parseInt(text, 10);

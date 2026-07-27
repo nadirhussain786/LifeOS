@@ -10,7 +10,13 @@ import {
   reopenTask,
   updateTask,
 } from '@/features/tasks/services/tasks-repository';
-import type { CreateTaskInput, UpdateTaskInput } from '@/features/tasks/types/task.types';
+import { useTasksFilterStore } from '@/features/tasks/store/tasks-filter-store';
+import type {
+  CreateTaskInput,
+  Task,
+  TaskStatus,
+  UpdateTaskInput,
+} from '@/features/tasks/types/task.types';
 
 export function useTaskMutations() {
   const queryClient = useQueryClient();
@@ -19,6 +25,31 @@ export function useTaskMutations() {
   // (features/widgets/hooks/use-widget-sync) — the feature no longer imports the
   // widget module, avoiding a features↔widgets dependency cycle.
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['tasks'] });
+
+  /**
+   * Optimistically flips a task's status so its checkbox fills instantly,
+   * without waiting for the write + refetch. Targets the exact list query key
+   * (['tasks', filter, sort]) so it can't corrupt detail/other list queries;
+   * the settle invalidation re-filters the list (e.g. drops a now-completed
+   * task out of the 'active' filter). Returns a rollback context for onError.
+   */
+  const optimisticStatus = async (
+    taskId: string,
+    status: TaskStatus,
+    completedAt: number | null,
+  ) => {
+    const { filter, sort } = useTasksFilterStore.getState();
+    const key = ['tasks', filter, sort] as const;
+    await queryClient.cancelQueries({ queryKey: key });
+    const previous = queryClient.getQueryData<Task[]>(key);
+    queryClient.setQueryData<Task[]>(key, (old) =>
+      old?.map((task) => (task.id === taskId ? { ...task, status, completedAt } : task)),
+    );
+    return { key, previous };
+  };
+  const rollback = (ctx?: { key: readonly unknown[]; previous: Task[] | undefined }) => {
+    if (ctx) queryClient.setQueryData(ctx.key, ctx.previous);
+  };
 
   const create = useMutation({
     mutationFn: async (input: CreateTaskInput) => {
@@ -44,7 +75,9 @@ export function useTaskMutations() {
       completeTask(id);
       if (task) await cancelTaskReminder(task);
     },
-    onSuccess: invalidate,
+    onMutate: (id) => optimisticStatus(id, 'completed', Date.now()),
+    onError: (_e, _v, ctx) => rollback(ctx),
+    onSettled: invalidate,
   });
 
   const reopen = useMutation({
@@ -53,7 +86,9 @@ export function useTaskMutations() {
       const task = getTask(id);
       if (task) await syncTaskReminder(task);
     },
-    onSuccess: invalidate,
+    onMutate: (id) => optimisticStatus(id, 'todo', null),
+    onError: (_e, _v, ctx) => rollback(ctx),
+    onSettled: invalidate,
   });
 
   const archive = useMutation({

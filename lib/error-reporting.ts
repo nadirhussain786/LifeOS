@@ -26,7 +26,6 @@ export function setErrorSink(fn: Sink): void {
  */
 export function reportError(error: unknown, context?: ErrorContext): void {
   const message = error instanceof Error ? error.message : String(error);
-  // eslint-disable-next-line no-console
   console.error('[error]', context?.scope ?? '', message, error);
 
   if (__DEV__) {

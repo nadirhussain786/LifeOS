@@ -55,23 +55,35 @@ export function CategoryPicker({
   };
 
   const confirmDelete = (category: CategoryOption) => {
-    Alert.alert('Delete category?', `"${category.name}" will no longer be selectable. Tasks or notes already using it keep it.`, [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => onDeleteCategory(category.id) },
-    ]);
+    Alert.alert(
+      'Delete category?',
+      `"${category.name}" will no longer be selectable. Tasks or notes already using it keep it.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', style: 'destructive', onPress: () => onDeleteCategory(category.id) },
+      ],
+    );
   };
 
   // The assigned category may have been soft-deleted elsewhere and dropped
   // from the active list — still render it (dimmed, no delete affordance)
   // so this task/note doesn't appear to silently lose its label.
-  const isOrphanedSelection = !!selectedCategory && !categories.some((category) => category.id === selectedCategory.id);
+  const isOrphanedSelection =
+    !!selectedCategory && !categories.some((category) => category.id === selectedCategory.id);
   const displayedCategories = isOrphanedSelection ? [...categories, selectedCategory!] : categories;
 
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="items-center gap-2">
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerClassName="items-center gap-2"
+    >
       <Pressable
         onPress={() => select(null)}
-        className={cn('rounded-full border px-3 py-1.5', value === null ? 'border-foreground bg-foreground' : 'border-border')}
+        className={cn(
+          'rounded-full border px-3 py-1.5',
+          value === null ? 'border-foreground bg-foreground' : 'border-border',
+        )}
       >
         <Text className={value === null ? 'text-background' : 'text-muted-foreground'}>None</Text>
       </Pressable>
@@ -85,13 +97,25 @@ export function CategoryPicker({
             onPress={() => select(category.id)}
             onLongPress={() => !isDeleted && confirmDelete(category)}
             style={[
-              selected ? { backgroundColor: category.colorToken, borderColor: category.colorToken } : undefined,
+              selected
+                ? { backgroundColor: category.colorToken, borderColor: category.colorToken }
+                : undefined,
               isDeleted ? { opacity: 0.5 } : undefined,
             ]}
-            className={cn('flex-row items-center gap-1.5 rounded-full border px-3 py-1.5', !selected && 'border-border')}
+            className={cn(
+              'flex-row items-center gap-1.5 rounded-full border px-3 py-1.5',
+              !selected && 'border-border',
+            )}
           >
-            {!selected && <View className="h-2 w-2 rounded-full" style={{ backgroundColor: category.colorToken }} />}
-            <Text className={selected ? 'font-sora-medium text-white' : 'text-muted-foreground'}>{category.name}</Text>
+            {!selected && (
+              <View
+                className="h-2 w-2 rounded-full"
+                style={{ backgroundColor: category.colorToken }}
+              />
+            )}
+            <Text className={selected ? 'font-sora-medium text-white' : 'text-muted-foreground'}>
+              {category.name}
+            </Text>
           </Pressable>
         );
       })}
@@ -101,6 +125,7 @@ export function CategoryPicker({
           <TextInput
             value={name}
             onChangeText={setName}
+            accessibilityLabel="Category name"
             placeholder="Category name"
             placeholderTextColor={colors[scheme].mutedForeground}
             autoFocus
@@ -110,7 +135,10 @@ export function CategoryPicker({
           />
         </View>
       ) : (
-        <Pressable onPress={() => setIsAdding(true)} className="flex-row items-center gap-1 rounded-full border border-dashed border-border px-3 py-1.5">
+        <Pressable
+          onPress={() => setIsAdding(true)}
+          className="flex-row items-center gap-1 rounded-full border border-dashed border-border px-3 py-1.5"
+        >
           <Plus size={14} color={colors[scheme].mutedForeground} />
           <Text variant="muted">New</Text>
         </Pressable>

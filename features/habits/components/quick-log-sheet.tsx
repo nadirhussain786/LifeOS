@@ -1,4 +1,9 @@
-import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView, type BottomSheetBackdropProps } from '@gorhom/bottom-sheet';
+import {
+  BottomSheetBackdrop,
+  BottomSheetModal,
+  BottomSheetView,
+  type BottomSheetBackdropProps,
+} from '@gorhom/bottom-sheet';
 import * as Haptics from 'expo-haptics';
 import { Minus, Plus } from 'lucide-react-native';
 import { forwardRef, useCallback, useEffect, useState } from 'react';
@@ -15,7 +20,10 @@ type Props = {
   onSubmit: (value: number) => void;
 };
 
-export const QuickLogSheet = forwardRef<BottomSheetModal, Props>(function QuickLogSheet({ habit, onSubmit }, ref) {
+export const QuickLogSheet = forwardRef<BottomSheetModal, Props>(function QuickLogSheet(
+  { habit, onSubmit },
+  ref,
+) {
   const scheme = useColorScheme() ?? 'light';
   const [value, setValue] = useState(1);
 
@@ -24,7 +32,9 @@ export const QuickLogSheet = forwardRef<BottomSheetModal, Props>(function QuickL
   }, [habit?.id, habit?.todayValue, habit?.targetValue]);
 
   const renderBackdrop = useCallback(
-    (props: BottomSheetBackdropProps) => <BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} opacity={0.4} />,
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} opacity={0.4} />
+    ),
     [],
   );
 
@@ -67,8 +77,9 @@ export const QuickLogSheet = forwardRef<BottomSheetModal, Props>(function QuickL
                 const parsed = parseFloat(text);
                 setValue(Number.isFinite(parsed) ? parsed : 0);
               }}
+              accessibilityLabel="Amount"
               keyboardType="decimal-pad"
-              className="min-w-10 text-center text-2xl font-sora-extrabold text-foreground"
+              className="min-w-10 text-center font-sora-extrabold text-2xl text-foreground"
               style={{ fontVariant: ['tabular-nums'] }}
             />
             {habit?.unit && <Text variant="muted">{habit.unit}</Text>}

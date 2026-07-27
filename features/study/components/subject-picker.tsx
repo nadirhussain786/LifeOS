@@ -39,12 +39,21 @@ export function SubjectPicker({ subjects, value, onChange, onCreate }: Props) {
   };
 
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="items-center gap-2">
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerClassName="items-center gap-2"
+    >
       <Pressable
         onPress={() => select(null)}
-        className={cn('rounded-full border px-3 py-1.5', value === null ? 'border-foreground bg-foreground' : 'border-border')}
+        className={cn(
+          'rounded-full border px-3 py-1.5',
+          value === null ? 'border-foreground bg-foreground' : 'border-border',
+        )}
       >
-        <Text className={value === null ? 'text-background' : 'text-muted-foreground'}>General</Text>
+        <Text className={value === null ? 'text-background' : 'text-muted-foreground'}>
+          General
+        </Text>
       </Pressable>
 
       {subjects.map((subject) => {
@@ -53,11 +62,25 @@ export function SubjectPicker({ subjects, value, onChange, onCreate }: Props) {
           <Pressable
             key={subject.id}
             onPress={() => select(subject.id)}
-            style={selected ? { backgroundColor: subject.colorToken, borderColor: subject.colorToken } : undefined}
-            className={cn('flex-row items-center gap-1.5 rounded-full border px-3 py-1.5', !selected && 'border-border')}
+            style={
+              selected
+                ? { backgroundColor: subject.colorToken, borderColor: subject.colorToken }
+                : undefined
+            }
+            className={cn(
+              'flex-row items-center gap-1.5 rounded-full border px-3 py-1.5',
+              !selected && 'border-border',
+            )}
           >
-            {!selected && <View className="h-2 w-2 rounded-full" style={{ backgroundColor: subject.colorToken }} />}
-            <Text className={selected ? 'font-sora-medium text-white' : 'text-muted-foreground'}>{subject.name}</Text>
+            {!selected && (
+              <View
+                className="h-2 w-2 rounded-full"
+                style={{ backgroundColor: subject.colorToken }}
+              />
+            )}
+            <Text className={selected ? 'font-sora-medium text-white' : 'text-muted-foreground'}>
+              {subject.name}
+            </Text>
           </Pressable>
         );
       })}
@@ -67,6 +90,7 @@ export function SubjectPicker({ subjects, value, onChange, onCreate }: Props) {
           <TextInput
             value={name}
             onChangeText={setName}
+            accessibilityLabel="Subject name"
             placeholder="Subject"
             placeholderTextColor={colors[scheme].mutedForeground}
             autoFocus
@@ -76,7 +100,10 @@ export function SubjectPicker({ subjects, value, onChange, onCreate }: Props) {
           />
         </View>
       ) : (
-        <Pressable onPress={() => setIsAdding(true)} className="flex-row items-center gap-1 rounded-full border border-dashed border-border px-3 py-1.5">
+        <Pressable
+          onPress={() => setIsAdding(true)}
+          className="flex-row items-center gap-1 rounded-full border border-dashed border-border px-3 py-1.5"
+        >
           <Plus size={14} color={colors[scheme].mutedForeground} />
           <Text variant="muted">New</Text>
         </Pressable>

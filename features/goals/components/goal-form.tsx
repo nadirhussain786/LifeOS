@@ -82,6 +82,7 @@ export function GoalForm({ defaultValues, submitLabel, onSubmit, showMilestones 
             <TextInput
               value={field.value}
               onChangeText={field.onChange}
+              accessibilityLabel="Goal title"
               placeholder="What do you want to achieve?"
               placeholderTextColor={colors[scheme].mutedForeground}
               autoFocus
@@ -105,6 +106,7 @@ export function GoalForm({ defaultValues, submitLabel, onSubmit, showMilestones 
           <TextInput
             value={field.value ?? ''}
             onChangeText={(text) => field.onChange(text || null)}
+            accessibilityLabel="Goal description"
             placeholder="Add a note or why this matters (optional)"
             placeholderTextColor={colors[scheme].mutedForeground}
             multiline
@@ -139,7 +141,9 @@ export function GoalForm({ defaultValues, submitLabel, onSubmit, showMilestones 
           <Controller
             control={control}
             name="priority"
-            render={({ field }) => <Segmented options={PRIORITY_OPTIONS} value={field.value} onChange={field.onChange} />}
+            render={({ field }) => (
+              <Segmented options={PRIORITY_OPTIONS} value={field.value} onChange={field.onChange} />
+            )}
           />
         </AttributeRow>
 
@@ -148,7 +152,13 @@ export function GoalForm({ defaultValues, submitLabel, onSubmit, showMilestones 
             <Controller
               control={control}
               name="progressMode"
-              render={({ field }) => <Segmented options={PROGRESS_OPTIONS} value={field.value} onChange={field.onChange} />}
+              render={({ field }) => (
+                <Segmented
+                  options={PROGRESS_OPTIONS}
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+              )}
             />
 
             {progressMode === 'count' && (
@@ -163,6 +173,7 @@ export function GoalForm({ defaultValues, submitLabel, onSubmit, showMilestones 
                         const parsed = parseFloat(text);
                         field.onChange(Number.isFinite(parsed) ? parsed : null);
                       }}
+                      accessibilityLabel="Target value"
                       placeholder="Target"
                       keyboardType="decimal-pad"
                       placeholderTextColor={colors[scheme].mutedForeground}
@@ -177,6 +188,7 @@ export function GoalForm({ defaultValues, submitLabel, onSubmit, showMilestones 
                     <TextInput
                       value={field.value ?? ''}
                       onChangeText={(text) => field.onChange(text || null)}
+                      accessibilityLabel="Unit"
                       placeholder="books, kg, $…"
                       placeholderTextColor={colors[scheme].mutedForeground}
                       className="flex-1 rounded-lg border border-border px-3 py-2 text-foreground"
@@ -191,7 +203,9 @@ export function GoalForm({ defaultValues, submitLabel, onSubmit, showMilestones 
                 <Controller
                   control={control}
                   name="milestones"
-                  render={({ field }) => <MilestoneEditor value={field.value} onChange={field.onChange} />}
+                  render={({ field }) => (
+                    <MilestoneEditor value={field.value} onChange={field.onChange} />
+                  )}
                 />
               ) : (
                 <Text variant="caption">Manage milestones from the goal screen.</Text>
@@ -200,7 +214,13 @@ export function GoalForm({ defaultValues, submitLabel, onSubmit, showMilestones 
         </AttributeRow>
 
         <AttributeRow icon={CalendarClock} label="Target date">
-          <Controller control={control} name="dueDate" render={({ field }) => <GoalDueDateField value={field.value} onChange={field.onChange} />} />
+          <Controller
+            control={control}
+            name="dueDate"
+            render={({ field }) => (
+              <GoalDueDateField value={field.value} onChange={field.onChange} />
+            )}
+          />
         </AttributeRow>
       </View>
 
