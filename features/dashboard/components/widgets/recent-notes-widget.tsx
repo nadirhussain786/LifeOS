@@ -9,7 +9,15 @@ import { WidgetEmptyState } from '@/features/dashboard/components/widget-empty-s
 import { useRecentNotes } from '@/features/dashboard/hooks/use-widget-data';
 import { useRelativeTime } from '@/hooks/use-relative-time';
 
-function NoteRow({ title, snippet, updatedAt }: { title: string; snippet: string; updatedAt: Date }) {
+function NoteRow({
+  title,
+  snippet,
+  updatedAt,
+}: {
+  title: string;
+  snippet: string;
+  updatedAt: Date;
+}) {
   const relativeTime = useRelativeTime(updatedAt);
   return (
     <View className="gap-0.5">
@@ -33,14 +41,23 @@ export function RecentNotesWidget() {
   const { data, isLoading } = useRecentNotes();
 
   return (
-    <WidgetCard icon={StickyNote} title="Recent notes" actionLabel="View all" onActionPress={() => router.push('/notes')}>
+    <WidgetCard
+      icon={StickyNote}
+      title="Recent notes"
+      actionLabel="View all"
+      onActionPress={() => router.push('/notes')}
+    >
       {isLoading || !data ? (
         <View className="gap-2">
           <Skeleton className="h-10 w-full" />
           <Skeleton className="h-10 w-full" />
         </View>
       ) : data.notes.length === 0 ? (
-        <WidgetEmptyState message="No notes yet" actionLabel="Add note" onAction={() => router.push('/note/new')} />
+        <WidgetEmptyState
+          message="No notes yet"
+          actionLabel="Add note"
+          onAction={() => router.push('/note/new')}
+        />
       ) : (
         <View className="gap-3">
           {data.notes.map((note) => (

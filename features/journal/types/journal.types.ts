@@ -48,7 +48,15 @@ export type JournalReflection = {
   answerText: string;
 };
 
-export const MOOD_REASONS = ['work', 'family', 'health', 'friends', 'money', 'weather', 'relationships'] as const;
+export const MOOD_REASONS = [
+  'work',
+  'family',
+  'health',
+  'friends',
+  'money',
+  'weather',
+  'relationships',
+] as const;
 export type MoodReason = (typeof MOOD_REASONS)[number];
 
 export type JournalAttachmentKind = 'image' | 'audio' | 'pdf' | 'file';

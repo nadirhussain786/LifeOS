@@ -94,24 +94,25 @@ export function ScreenHeader({
         </View>
       </View>
 
-      {right ?? (actions && actions.length > 0 ? (
-        <View className="flex-row items-center gap-4 pl-2">
-          {actions.map((action) => (
-            <Pressable
-              key={action.label}
-              onPress={action.onPress}
-              hitSlop={8}
-              accessibilityRole="button"
-              accessibilityLabel={action.label}
-              className="min-h-[44px] flex-row items-center gap-1"
-              style={{ justifyContent: 'center' }}
-            >
-              <action.icon size={20} color={action.tint ?? c.foreground} />
-              {action.text ? <Text variant="caption">{action.text}</Text> : null}
-            </Pressable>
-          ))}
-        </View>
-      ) : null)}
+      {right ??
+        (actions && actions.length > 0 ? (
+          <View className="flex-row items-center gap-4 pl-2">
+            {actions.map((action) => (
+              <Pressable
+                key={action.label}
+                onPress={action.onPress}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel={action.label}
+                className="min-h-[44px] flex-row items-center gap-1"
+                style={{ justifyContent: 'center' }}
+              >
+                <action.icon size={20} color={action.tint ?? c.foreground} />
+                {action.text ? <Text variant="caption">{action.text}</Text> : null}
+              </Pressable>
+            ))}
+          </View>
+        ) : null)}
     </View>
   );
 }

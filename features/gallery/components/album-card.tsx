@@ -17,24 +17,49 @@ export function AlbumCard({ album, width, onPress }: Props) {
   const Icon = meta.icon;
 
   return (
-    <Pressable onPress={() => onPress(album)} style={{ width }} accessibilityRole="button" accessibilityLabel={album.name}>
-      <View style={{ width, height: width, borderRadius: 16, overflow: 'hidden', backgroundColor: `${meta.tint}1f` }}>
+    <Pressable
+      onPress={() => onPress(album)}
+      style={{ width }}
+      accessibilityRole="button"
+      accessibilityLabel={album.name}
+    >
+      <View
+        style={{
+          width,
+          height: width,
+          borderRadius: 16,
+          overflow: 'hidden',
+          backgroundColor: `${meta.tint}1f`,
+        }}
+      >
         {album.coverUri ? (
-          <Image source={{ uri: album.coverUri }} style={{ width, height: width }} contentFit="cover" recyclingKey={album.id} transition={120} />
+          <Image
+            source={{ uri: album.coverUri }}
+            style={{ width, height: width }}
+            contentFit="cover"
+            recyclingKey={album.id}
+            transition={120}
+          />
         ) : (
           <View className="flex-1 items-center justify-center">
             <Icon size={30} color={meta.tint} strokeWidth={1.75} />
           </View>
         )}
         <View className="absolute left-2 top-2 flex-row items-center gap-1.5">
-          <View className="flex-row items-center gap-1 rounded-full px-2 py-0.5" style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}>
+          <View
+            className="flex-row items-center gap-1 rounded-full px-2 py-0.5"
+            style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
+          >
             <Icon size={11} color="#ffffff" />
-            <Text className="text-[10px] font-sora-semibold text-white">{album.photoCount}</Text>
+            <Text className="font-sora-semibold text-[10px] text-white">{album.photoCount}</Text>
           </View>
           {album.videoCount > 0 && (
-            <View className="flex-row items-center gap-1 rounded-full px-2 py-0.5" style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}>
+            <View
+              className="flex-row items-center gap-1 rounded-full px-2 py-0.5"
+              style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
+            >
               <Video size={11} color="#ffffff" />
-              <Text className="text-[10px] font-sora-semibold text-white">{album.videoCount}</Text>
+              <Text className="font-sora-semibold text-[10px] text-white">{album.videoCount}</Text>
             </View>
           )}
         </View>

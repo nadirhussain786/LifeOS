@@ -64,7 +64,14 @@ export async function importSongs(): Promise<Song[]> {
     }
 
     const durationMs = await probeDurationMs(destination.uri);
-    imported.push(createSong({ title: titleFromFilename(asset.name), artist: null, uri: destination.uri, durationMs }));
+    imported.push(
+      createSong({
+        title: titleFromFilename(asset.name),
+        artist: null,
+        uri: destination.uri,
+        durationMs,
+      }),
+    );
   }
 
   return imported;

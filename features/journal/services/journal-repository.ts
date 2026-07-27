@@ -1,7 +1,12 @@
 import { and, desc, eq, gte, isNull, lte, or } from 'drizzle-orm';
 
 import { getDb } from '@/database/client';
-import { journalAttachments, journalEntries, journalPrompts, journalReflections } from '@/database/schema';
+import {
+  journalAttachments,
+  journalEntries,
+  journalPrompts,
+  journalReflections,
+} from '@/database/schema';
 import { generateId } from '@/lib/id';
 import { LOCAL_USER_ID } from '@/lib/local-user';
 import type {
@@ -44,7 +49,13 @@ export function getEntryByDate(entryDate: string): JournalEntry | null {
   const row = getDb()
     .select()
     .from(journalEntries)
-    .where(and(eq(journalEntries.userId, LOCAL_USER_ID), eq(journalEntries.entryDate, entryDate), isNull(journalEntries.deletedAt)))
+    .where(
+      and(
+        eq(journalEntries.userId, LOCAL_USER_ID),
+        eq(journalEntries.entryDate, entryDate),
+        isNull(journalEntries.deletedAt),
+      ),
+    )
     .get();
   return row ? toEntry(row) : null;
 }
@@ -72,7 +83,12 @@ export function upsertEntry(input: UpsertJournalEntryInput): JournalEntry {
   const db = getDb();
   const now = Date.now();
   const existing = getEntryByDate(input.entryDate);
-  const moodReasons = input.moodReasons !== undefined ? (input.moodReasons ? JSON.stringify(input.moodReasons) : null) : undefined;
+  const moodReasons =
+    input.moodReasons !== undefined
+      ? input.moodReasons
+        ? JSON.stringify(input.moodReasons)
+        : null
+      : undefined;
 
   if (existing) {
     db.update(journalEntries)
@@ -111,11 +127,21 @@ export function upsertEntry(input: UpsertJournalEntryInput): JournalEntry {
 }
 
 export function deleteEntry(id: string) {
-  getDb().update(journalEntries).set({ deletedAt: Date.now(), updatedAt: Date.now(), syncStatus: 'pending' }).where(eq(journalEntries.id, id)).run();
+  getDb()
+    .update(journalEntries)
+    .set({ deletedAt: Date.now(), updatedAt: Date.now(), syncStatus: 'pending' })
+    .where(eq(journalEntries.id, id))
+    .run();
 }
 
 function toPrompt(row: typeof journalPrompts.$inferSelect): JournalPrompt {
-  return { id: row.id, text: row.text, isActive: row.isActive, sortOrder: row.sortOrder, isCustom: row.userId !== null };
+  return {
+    id: row.id,
+    text: row.text,
+    isActive: row.isActive,
+    sortOrder: row.sortOrder,
+    isCustom: row.userId !== null,
+  };
 }
 
 function seedDefaultPrompts() {
@@ -123,7 +149,14 @@ function seedDefaultPrompts() {
   const now = Date.now();
   DEFAULT_PROMPTS.forEach((text, index) => {
     db.insert(journalPrompts)
-      .values({ id: generateId(), userId: null, text, isActive: true, sortOrder: index, createdAt: now })
+      .values({
+        id: generateId(),
+        userId: null,
+        text,
+        isActive: true,
+        sortOrder: index,
+        createdAt: now,
+      })
       .run();
   });
 }
@@ -157,10 +190,27 @@ export function listPrompts(): JournalPrompt[] {
 export function createPrompt(text: string): JournalPrompt {
   const db = getDb();
   const now = Date.now();
-  const maxSortOrder = db.select().from(journalPrompts).all().reduce((max, row) => Math.max(max, row.sortOrder), -1);
-  const prompt: JournalPrompt = { id: generateId(), text, isActive: true, sortOrder: maxSortOrder + 1, isCustom: true };
+  const maxSortOrder = db
+    .select()
+    .from(journalPrompts)
+    .all()
+    .reduce((max, row) => Math.max(max, row.sortOrder), -1);
+  const prompt: JournalPrompt = {
+    id: generateId(),
+    text,
+    isActive: true,
+    sortOrder: maxSortOrder + 1,
+    isCustom: true,
+  };
   db.insert(journalPrompts)
-    .values({ id: prompt.id, userId: LOCAL_USER_ID, text, isActive: true, sortOrder: prompt.sortOrder, createdAt: now })
+    .values({
+      id: prompt.id,
+      userId: LOCAL_USER_ID,
+      text,
+      isActive: true,
+      sortOrder: prompt.sortOrder,
+      createdAt: now,
+    })
     .run();
   return prompt;
 }
@@ -174,7 +224,12 @@ function toReflection(row: typeof journalReflections.$inferSelect): JournalRefle
 }
 
 export function listReflectionsForEntry(entryId: string): JournalReflection[] {
-  return getDb().select().from(journalReflections).where(eq(journalReflections.entryId, entryId)).all().map(toReflection);
+  return getDb()
+    .select()
+    .from(journalReflections)
+    .where(eq(journalReflections.entryId, entryId))
+    .all()
+    .map(toReflection);
 }
 
 export function upsertReflection(entryId: string, promptId: string, answerText: string) {
@@ -186,7 +241,10 @@ export function upsertReflection(entryId: string, promptId: string, answerText: 
     .get();
 
   if (existing) {
-    db.update(journalReflections).set({ answerText }).where(eq(journalReflections.id, existing.id)).run();
+    db.update(journalReflections)
+      .set({ answerText })
+      .where(eq(journalReflections.id, existing.id))
+      .run();
     return;
   }
 
@@ -240,5 +298,9 @@ export function addAttachment(
 }
 
 export function deleteAttachment(id: string) {
-  getDb().update(journalAttachments).set({ deletedAt: Date.now() }).where(eq(journalAttachments.id, id)).run();
+  getDb()
+    .update(journalAttachments)
+    .set({ deletedAt: Date.now() })
+    .where(eq(journalAttachments.id, id))
+    .run();
 }

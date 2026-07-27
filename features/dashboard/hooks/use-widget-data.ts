@@ -11,7 +11,13 @@ import { getDueBucket } from '@/features/tasks/services/task-grouping';
 import { getWeeklyCompletionStats, listTasks } from '@/features/tasks/services/tasks-repository';
 import { listTimelineForDate } from '@/features/timeline/services/timeline-repository';
 import { toDateKey } from '@/lib/date';
-import type { HabitRowData, RecentNotesData, ReflectData, TodayTasksData, TodayTimelineData } from '@/features/dashboard/types/dashboard.types';
+import type {
+  HabitRowData,
+  RecentNotesData,
+  ReflectData,
+  TodayTasksData,
+  TodayTimelineData,
+} from '@/features/dashboard/types/dashboard.types';
 
 export function useTodayTasks() {
   return useQuery({
@@ -64,7 +70,9 @@ export function useHabitRow() {
 export function useTodayTimeline() {
   return useQuery({
     queryKey: ['dashboard', 'today-timeline'],
-    queryFn: async (): Promise<TodayTimelineData> => ({ events: listTimelineForDate(toDateKey(new Date())) }),
+    queryFn: async (): Promise<TodayTimelineData> => ({
+      events: listTimelineForDate(toDateKey(new Date())),
+    }),
   });
 }
 
@@ -100,7 +108,10 @@ export function useRecentNotes() {
 }
 
 export function useProductivitySummary() {
-  return useQuery({ queryKey: ['dashboard', 'productivity-summary'], queryFn: async () => getWeeklyCompletionStats() });
+  return useQuery({
+    queryKey: ['dashboard', 'productivity-summary'],
+    queryFn: async () => getWeeklyCompletionStats(),
+  });
 }
 
 export function useDailyQuote() {

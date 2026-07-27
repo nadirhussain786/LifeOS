@@ -24,7 +24,11 @@ export function RecurrencePicker({ value, onChange }: Props) {
   const scheme = useColorScheme() ?? 'light';
 
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="items-center gap-2">
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerClassName="items-center gap-2"
+    >
       {OPTIONS.map((option) => {
         const selected = option.value === value;
         return (
@@ -34,7 +38,11 @@ export function RecurrencePicker({ value, onChange }: Props) {
               Haptics.selectionAsync();
               onChange(option.value);
             }}
-            style={selected ? { backgroundColor: colors[scheme].accent, borderColor: colors[scheme].accent } : undefined}
+            style={
+              selected
+                ? { backgroundColor: colors[scheme].accent, borderColor: colors[scheme].accent }
+                : undefined
+            }
             className={cn('rounded-full border px-3 py-1.5', !selected && 'border-border')}
           >
             <Text

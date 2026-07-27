@@ -15,12 +15,19 @@ const ALL_DAY_REMINDER_HOUR = 9;
 export async function syncTaskReminder(task: Task): Promise<void> {
   await cancelNotification(task.reminderNotificationId);
 
-  if (!task.reminderEnabled || !task.dueDate || task.status === 'completed' || task.status === 'archived') {
+  if (
+    !task.reminderEnabled ||
+    !task.dueDate ||
+    task.status === 'completed' ||
+    task.status === 'archived'
+  ) {
     setTaskReminderNotificationId(task.id, null);
     return;
   }
 
-  const triggerAt = task.hasDueTime ? task.dueDate : set(startOfDay(task.dueDate), { hours: ALL_DAY_REMINDER_HOUR }).getTime();
+  const triggerAt = task.hasDueTime
+    ? task.dueDate
+    : set(startOfDay(task.dueDate), { hours: ALL_DAY_REMINDER_HOUR }).getTime();
 
   const id = await scheduleOneTimeNotification({
     title: task.title,
@@ -31,7 +38,9 @@ export async function syncTaskReminder(task: Task): Promise<void> {
   setTaskReminderNotificationId(task.id, id);
 }
 
-export async function cancelTaskReminder(task: Pick<Task, 'id' | 'reminderNotificationId'>): Promise<void> {
+export async function cancelTaskReminder(
+  task: Pick<Task, 'id' | 'reminderNotificationId'>,
+): Promise<void> {
   await cancelNotification(task.reminderNotificationId);
   setTaskReminderNotificationId(task.id, null);
 }

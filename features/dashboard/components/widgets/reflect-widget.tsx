@@ -63,7 +63,12 @@ export function ReflectWidget() {
           <View className="flex-row items-center justify-between">
             <Text variant="muted">🔥 {data.journalStreak}-day journal streak</Text>
             {!data.hasWrittenToday && (
-              <Button label="Write" size="sm" variant="secondary" onPress={() => router.push(`/journal/${todayKey}`)} />
+              <Button
+                label="Write"
+                size="sm"
+                variant="secondary"
+                onPress={() => router.push(`/journal/${todayKey}`)}
+              />
             )}
           </View>
         </View>

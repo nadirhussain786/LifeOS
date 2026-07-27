@@ -10,7 +10,11 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import { MUSIC_TINT } from '@/features/music/components/song-row';
-import { usePlaylist, usePlaylistMutations, usePlaylistSongs } from '@/features/music/hooks/use-playlists';
+import {
+  usePlaylist,
+  usePlaylistMutations,
+  usePlaylistSongs,
+} from '@/features/music/hooks/use-playlists';
 import { useSongs } from '@/features/music/hooks/use-songs';
 import { formatDuration } from '@/features/music/utils/format-duration';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -34,8 +38,15 @@ export default function AddSongsToPlaylistScreen() {
     <View className="flex-1 bg-background">
       <Stack.Screen options={{ headerShown: false }} />
 
-      <View style={{ paddingTop: insets.top + 12 }} className="flex-row items-center justify-between px-4 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={10} className="h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
+      <View
+        style={{ paddingTop: insets.top + 12 }}
+        className="flex-row items-center justify-between px-4 pb-2"
+      >
+        <Pressable
+          onPress={() => router.back()}
+          hitSlop={10}
+          className="h-8 w-8 items-center justify-center rounded-full border border-border bg-surface"
+        >
           <X size={17} color={colors[scheme].foreground} />
         </Pressable>
         <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
@@ -45,7 +56,12 @@ export default function AddSongsToPlaylistScreen() {
       </View>
 
       {library.length === 0 ? (
-        <EmptyState icon={ListMusic} title="Your library is empty" description="Add songs from your device first." tint={MUSIC_TINT} />
+        <EmptyState
+          icon={ListMusic}
+          title="Your library is empty"
+          description="Add songs from your device first."
+          tint={MUSIC_TINT}
+        />
       ) : (
         <FlashList
           data={library}

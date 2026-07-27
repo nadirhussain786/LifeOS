@@ -1,6 +1,10 @@
 import { useQueryClient, useMutation, useQuery } from '@tanstack/react-query';
 
-import { getDailyTotal, logWater, undoLastLog } from '@/features/water-intake/services/water-intake-repository';
+import {
+  getDailyTotal,
+  logWater,
+  undoLastLog,
+} from '@/features/water-intake/services/water-intake-repository';
 import { toDateKey } from '@/lib/date';
 
 export function useTodayWaterTotal() {

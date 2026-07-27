@@ -32,20 +32,32 @@ export default function WaterHistoryScreen() {
         eyebrow="Wellbeing"
         tint={waterTint}
         actions={[
-          { icon: Settings2, label: 'Water settings', onPress: () => router.push('/water-intake/settings') },
+          {
+            icon: Settings2,
+            label: 'Water settings',
+            onPress: () => router.push('/water-intake/settings'),
+          },
         ]}
       />
 
       {isError ? (
-          <QueryError onRetry={() => refetch()} />
-        ) : isLoading || !history ? (
+        <QueryError onRetry={() => refetch()} />
+      ) : isLoading || !history ? (
         <View className="gap-2.5 px-5 pt-4">
           <Skeleton className="h-40 w-full rounded-2xl" />
         </View>
       ) : !hasAnyData ? (
-        <EmptyState icon={GlassWater} title="No history yet" description="Log some water today and it'll show up here." tint={waterTint} />
+        <EmptyState
+          icon={GlassWater}
+          title="No history yet"
+          description="Log some water today and it'll show up here."
+          tint={waterTint}
+        />
       ) : (
-        <ScrollView contentContainerClassName="gap-6 px-5 pt-4 pb-10" showsVerticalScrollIndicator={false}>
+        <ScrollView
+          contentContainerClassName="gap-6 px-5 pt-4 pb-10"
+          showsVerticalScrollIndicator={false}
+        >
           <View className="gap-3 rounded-2xl border border-border bg-card p-4 shadow-e1">
             <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
               Last {HISTORY_DAYS} days
@@ -59,10 +71,20 @@ export default function WaterHistoryScreen() {
                     <View className="h-24 w-full justify-end overflow-hidden rounded-sm bg-surface">
                       <View
                         className="w-full rounded-sm"
-                        style={{ height: `${ratio * 100}%`, backgroundColor: metGoal ? waterTint : `${waterTint}80` }}
+                        style={{
+                          height: `${ratio * 100}%`,
+                          backgroundColor: metGoal ? waterTint : `${waterTint}80`,
+                        }}
                       />
                     </View>
-                    <Text variant="caption" style={isToday(parseISO(day.date)) ? { color: colors[scheme].foreground } : undefined}>
+                    <Text
+                      variant="caption"
+                      style={
+                        isToday(parseISO(day.date))
+                          ? { color: colors[scheme].foreground }
+                          : undefined
+                      }
+                    >
                       {format(parseISO(day.date), 'EEEEE')}
                     </Text>
                   </View>
@@ -75,10 +97,17 @@ export default function WaterHistoryScreen() {
             {[...history].reverse().map((day, index) => (
               <View
                 key={day.date}
-                className={index === 0 ? 'flex-row items-center justify-between py-3' : 'flex-row items-center justify-between border-t border-border py-3'}
+                className={
+                  index === 0
+                    ? 'flex-row items-center justify-between py-3'
+                    : 'flex-row items-center justify-between border-t border-border py-3'
+                }
               >
                 <Text variant="muted">{format(parseISO(day.date), 'EEEE, MMM d')}</Text>
-                <Text className="font-sora-medium" style={day.totalMl >= goalMl && goalMl > 0 ? { color: waterTint } : undefined}>
+                <Text
+                  className="font-sora-medium"
+                  style={day.totalMl >= goalMl && goalMl > 0 ? { color: waterTint } : undefined}
+                >
                   {day.totalMl} ml
                 </Text>
               </View>

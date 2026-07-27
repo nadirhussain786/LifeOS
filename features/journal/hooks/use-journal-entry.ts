@@ -1,6 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { getEntryByDate, listAttachmentsForEntry, listPrompts, listReflectionsForEntry } from '@/features/journal/services/journal-repository';
+import {
+  getEntryByDate,
+  listAttachmentsForEntry,
+  listPrompts,
+  listReflectionsForEntry,
+} from '@/features/journal/services/journal-repository';
 
 export function useJournalEntry(entryDate: string) {
   return useQuery({

@@ -28,13 +28,25 @@ function Stepper({ label, value, onDecrease, onIncrease }: StepperProps) {
     <View className="flex-row items-center justify-between rounded-2xl border border-border bg-card px-4 py-3">
       <Text className="font-sora-medium text-foreground">{label}</Text>
       <View className="flex-row items-center gap-4">
-        <Pressable onPress={onDecrease} hitSlop={6} className="h-9 w-9 items-center justify-center rounded-xl bg-muted">
+        <Pressable
+          onPress={onDecrease}
+          hitSlop={6}
+          className="h-9 w-9 items-center justify-center rounded-xl bg-muted"
+        >
           <Minus size={16} color={colors[scheme].foreground} />
         </Pressable>
-        <Text className="font-sora-bold text-foreground" style={{ minWidth: 64, textAlign: 'center' }}>
+        <Text
+          className="font-sora-bold text-foreground"
+          style={{ minWidth: 64, textAlign: 'center' }}
+        >
           {value}
         </Text>
-        <Pressable onPress={onIncrease} hitSlop={6} className="h-9 w-9 items-center justify-center rounded-xl" style={{ backgroundColor: STUDY_TINT }}>
+        <Pressable
+          onPress={onIncrease}
+          hitSlop={6}
+          className="h-9 w-9 items-center justify-center rounded-xl"
+          style={{ backgroundColor: STUDY_TINT }}
+        >
           <Plus size={16} color="#ffffff" />
         </Pressable>
       </View>
@@ -70,22 +82,33 @@ export default function StudySettingsScreen() {
   const addNewSubject = () => {
     const trimmed = newSubject.trim();
     if (!trimmed) return;
-    addSubject.mutate({ name: trimmed, colorToken: categoryColorPalette[subjects.length % categoryColorPalette.length] });
+    addSubject.mutate({
+      name: trimmed,
+      colorToken: categoryColorPalette[subjects.length % categoryColorPalette.length],
+    });
     setNewSubject('');
   };
 
   const confirmRemove = (id: string, name: string) => {
-    Alert.alert('Delete subject?', `"${name}" will no longer be selectable. Past sessions keep their time.`, [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => removeSubject.mutate(id) },
-    ]);
+    Alert.alert(
+      'Delete subject?',
+      `"${name}" will no longer be selectable. Past sessions keep their time.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', style: 'destructive', onPress: () => removeSubject.mutate(id) },
+      ],
+    );
   };
 
   return (
     <View className="flex-1 bg-background">
       <ScreenHeader title="Study Settings" eyebrow="Study" tint={moduleTint('study', scheme)} />
 
-      <ScrollView contentContainerClassName="gap-5 px-5 pt-3 pb-10" keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerClassName="gap-5 px-5 pt-3 pb-10"
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <View className="gap-3">
           <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
             Goals & timer
@@ -115,8 +138,14 @@ export default function StudySettingsScreen() {
             Subjects
           </Text>
           {subjects.map((subject) => (
-            <View key={subject.id} className="flex-row items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3">
-              <View className="h-3 w-3 rounded-full" style={{ backgroundColor: subject.colorToken }} />
+            <View
+              key={subject.id}
+              className="flex-row items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3"
+            >
+              <View
+                className="h-3 w-3 rounded-full"
+                style={{ backgroundColor: subject.colorToken }}
+              />
               <Text className="flex-1 font-sora-medium text-foreground">{subject.name}</Text>
               <Pressable onPress={() => confirmRemove(subject.id, subject.name)} hitSlop={8}>
                 <Trash2 size={17} color={colors[scheme].mutedForeground} />
@@ -127,7 +156,8 @@ export default function StudySettingsScreen() {
             <TextInput
               value={newSubject}
               onChangeText={setNewSubject}
-              accessibilityLabel="Add a subject" placeholder="Add a subject"
+              accessibilityLabel="Add a subject"
+              placeholder="Add a subject"
               placeholderTextColor={colors[scheme].mutedForeground}
               onSubmitEditing={addNewSubject}
               returnKeyType="done"

@@ -1,6 +1,11 @@
 import { useEffect } from 'react';
 import { View, type ViewProps } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { cn } from '@/lib/utils';
 

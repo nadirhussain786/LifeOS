@@ -4,19 +4,9 @@
     "strict": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"]
     }
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "nativewind-env.d.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "supabase/functions"
-  ]
+  "include": ["**/*.ts", "**/*.tsx", "nativewind-env.d.ts"],
+  "exclude": ["node_modules", "dist", "supabase/functions"]
 }

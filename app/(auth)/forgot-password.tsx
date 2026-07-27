@@ -34,9 +34,19 @@ export default function ForgotPasswordScreen() {
   };
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1 bg-background">
-      <ScrollView contentContainerClassName="flex-grow gap-6 px-6 py-10" keyboardShouldPersistTaps="handled">
-        <Pressable onPress={() => router.back()} hitSlop={10} className="h-9 w-9 items-center justify-center rounded-full bg-muted">
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      className="flex-1 bg-background"
+    >
+      <ScrollView
+        contentContainerClassName="flex-grow gap-6 px-6 py-10"
+        keyboardShouldPersistTaps="handled"
+      >
+        <Pressable
+          onPress={() => router.back()}
+          hitSlop={10}
+          className="h-9 w-9 items-center justify-center rounded-full bg-muted"
+        >
           <ChevronLeft size={20} color={colors[scheme].foreground} />
         </Pressable>
 
@@ -47,8 +57,15 @@ export default function ForgotPasswordScreen() {
 
         {sent ? (
           <View className="gap-4">
-            <Text>If an account exists for {email.trim()}, a reset link is on its way. Check your inbox.</Text>
-            <Button label="Back to sign in" variant="accent" size="lg" onPress={() => router.replace('/(auth)/login')} />
+            <Text>
+              If an account exists for {email.trim()}, a reset link is on its way. Check your inbox.
+            </Text>
+            <Button
+              label="Back to sign in"
+              variant="accent"
+              size="lg"
+              onPress={() => router.replace('/(auth)/login')}
+            />
           </View>
         ) : (
           <View className="gap-4">
@@ -66,7 +83,13 @@ export default function ForgotPasswordScreen() {
                 {error}
               </Text>
             )}
-            <Button label={busy ? 'Sending…' : 'Send reset link'} variant="accent" size="lg" disabled={busy} onPress={handleReset} />
+            <Button
+              label={busy ? 'Sending…' : 'Send reset link'}
+              variant="accent"
+              size="lg"
+              disabled={busy}
+              onPress={handleReset}
+            />
           </View>
         )}
       </ScrollView>

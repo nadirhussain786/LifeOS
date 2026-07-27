@@ -16,7 +16,13 @@ import {
   updateHabit,
 } from '@/features/habits/services/habits-repository';
 import { useHabitsFilterStore } from '@/features/habits/store/habits-filter-store';
-import type { CreateHabitInput, HabitSkipReason, HabitTodayStatus, HabitWithToday, UpdateHabitInput } from '@/features/habits/types/habit.types';
+import type {
+  CreateHabitInput,
+  HabitSkipReason,
+  HabitTodayStatus,
+  HabitWithToday,
+  UpdateHabitInput,
+} from '@/features/habits/types/habit.types';
 
 export function useHabitMutations() {
   const queryClient = useQueryClient();
@@ -106,8 +112,15 @@ export function useHabitMutations() {
   });
 
   const logDate = useMutation({
-    mutationFn: async ({ habitId, logDate, value }: { habitId: string; logDate: string; value?: number }) =>
-      logHabit(habitId, logDate, value ?? 1),
+    mutationFn: async ({
+      habitId,
+      logDate,
+      value,
+    }: {
+      habitId: string;
+      logDate: string;
+      value?: number;
+    }) => logHabit(habitId, logDate, value ?? 1),
     onSuccess: invalidate,
   });
 

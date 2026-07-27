@@ -7,7 +7,8 @@ import { LOCAL_USER_ID } from '@/lib/local-user';
 import type { Playlist } from '@/features/music/types/music.types';
 
 function songCountFor(playlistId: string): number {
-  return getDb().select().from(playlistSongs).where(eq(playlistSongs.playlistId, playlistId)).all().length;
+  return getDb().select().from(playlistSongs).where(eq(playlistSongs.playlistId, playlistId)).all()
+    .length;
 }
 
 function toPlaylist(row: typeof playlists.$inferSelect): Playlist {
@@ -45,7 +46,13 @@ export function createPlaylist(name: string, colorToken: string | null): Playlis
     .all()
     .reduce((max, row) => Math.max(max, row.position), -1);
 
-  const playlist: Playlist = { id: generateId(), name, colorToken, position: maxPosition + 1, songCount: 0 };
+  const playlist: Playlist = {
+    id: generateId(),
+    name,
+    colorToken,
+    position: maxPosition + 1,
+    songCount: 0,
+  };
   db.insert(playlists)
     .values({
       id: playlist.id,
@@ -62,12 +69,19 @@ export function createPlaylist(name: string, colorToken: string | null): Playlis
 }
 
 export function renamePlaylist(id: string, name: string) {
-  getDb().update(playlists).set({ name, updatedAt: Date.now(), syncStatus: 'pending' }).where(eq(playlists.id, id)).run();
+  getDb()
+    .update(playlists)
+    .set({ name, updatedAt: Date.now(), syncStatus: 'pending' })
+    .where(eq(playlists.id, id))
+    .run();
 }
 
 export function deletePlaylist(id: string) {
   const db = getDb();
-  db.update(playlists).set({ deletedAt: Date.now(), syncStatus: 'pending' }).where(eq(playlists.id, id)).run();
+  db.update(playlists)
+    .set({ deletedAt: Date.now(), syncStatus: 'pending' })
+    .where(eq(playlists.id, id))
+    .run();
   db.delete(playlistSongs).where(eq(playlistSongs.playlistId, id)).run();
 }
 
@@ -97,7 +111,9 @@ export function addSongToPlaylist(playlistId: string, songId: string) {
     .where(eq(playlistSongs.playlistId, playlistId))
     .all()
     .reduce((max, row) => Math.max(max, row.position), -1);
-  db.insert(playlistSongs).values({ playlistId, songId, position: maxPosition + 1 }).run();
+  db.insert(playlistSongs)
+    .values({ playlistId, songId, position: maxPosition + 1 })
+    .run();
 }
 
 export function removeSongFromPlaylist(playlistId: string, songId: string) {

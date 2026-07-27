@@ -40,7 +40,10 @@ export function SleepTrackerCard() {
         <View className="gap-4">
           <View className="flex-row items-center gap-2">
             <Moon size={16} color="#ffffff" />
-            <Text className="font-sora-semibold uppercase tracking-wide" style={{ color: alpha('#ffffff', 0.85), fontSize: 12 }}>
+            <Text
+              className="font-sora-semibold uppercase tracking-wide"
+              style={{ color: alpha('#ffffff', 0.85), fontSize: 12 }}
+            >
               Sleeping since {formatClock(minutesOfDay(sleepingSince))}
             </Text>
           </View>
@@ -52,7 +55,10 @@ export function SleepTrackerCard() {
           </View>
           <GradientButton label="I'm awake" tint="#f59e0b" icon={Sunrise} onPress={wake} />
           <Pressable onPress={cancelSleep} hitSlop={8} className="items-center">
-            <Text style={{ color: alpha('#ffffff', 0.8), fontSize: 12 }} className="font-sora-medium">
+            <Text
+              style={{ color: alpha('#ffffff', 0.8), fontSize: 12 }}
+              className="font-sora-medium"
+            >
               Cancel — I didn&apos;t sleep
             </Text>
           </Pressable>
@@ -64,7 +70,10 @@ export function SleepTrackerCard() {
   return (
     <View className="gap-3 rounded-3xl border border-border bg-card p-4">
       <View className="flex-row items-center gap-3">
-        <View className="h-11 w-11 items-center justify-center rounded-2xl" style={{ backgroundColor: alpha(SLEEP_TINT, 0.14) }}>
+        <View
+          className="h-11 w-11 items-center justify-center rounded-2xl"
+          style={{ backgroundColor: alpha(SLEEP_TINT, 0.14) }}
+        >
           <Moon size={22} color={SLEEP_TINT} />
         </View>
         <View className="flex-1">

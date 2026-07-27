@@ -15,7 +15,9 @@ export function useHabits() {
     queryFn: async () => listHabitsWithToday(showArchived),
     select: (habits) =>
       searchQuery.trim()
-        ? habits.filter((habit) => habit.name.toLowerCase().includes(searchQuery.trim().toLowerCase()))
+        ? habits.filter((habit) =>
+            habit.name.toLowerCase().includes(searchQuery.trim().toLowerCase()),
+          )
         : habits,
   });
 }

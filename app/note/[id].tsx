@@ -14,7 +14,12 @@ import { BacklinksPanel } from '@/features/notes/components/backlinks-panel';
 import { NoteCategoryPicker } from '@/features/notes/components/note-category-picker';
 import { NoteEditorBody } from '@/features/notes/components/note-editor-body';
 import { TagPicker } from '@/features/notes/components/tag-picker';
-import { useNote, useNoteAttachments, useNoteBacklinks, useNoteTagsForNote } from '@/features/notes/hooks/use-note';
+import {
+  useNote,
+  useNoteAttachments,
+  useNoteBacklinks,
+  useNoteTagsForNote,
+} from '@/features/notes/hooks/use-note';
 import { useNoteMutations } from '@/features/notes/hooks/use-note-mutations';
 import { useNoteTags } from '@/features/notes/hooks/use-notes';
 import { createTag, deleteTag } from '@/features/notes/services/notes-repository';
@@ -38,7 +43,8 @@ export default function NoteDetailScreen() {
   const { data: allTags = [], refetch: refetchAllTags } = useNoteTags();
   const { data: attachments = [] } = useNoteAttachments(id);
   const { data: backlinks = [] } = useNoteBacklinks(id);
-  const { update, remove, archive, unarchive, setTags, attach, removeAttachment } = useNoteMutations();
+  const { update, remove, archive, unarchive, setTags, attach, removeAttachment } =
+    useNoteMutations();
 
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
@@ -52,13 +58,19 @@ export default function NoteDetailScreen() {
 
   useEffect(() => {
     if (!note || title === note.title) return;
-    const timeout = setTimeout(() => update.mutate({ id: note.id, input: { title } }), AUTOSAVE_DELAY_MS);
+    const timeout = setTimeout(
+      () => update.mutate({ id: note.id, input: { title } }),
+      AUTOSAVE_DELAY_MS,
+    );
     return () => clearTimeout(timeout);
   }, [title]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!note || body === (note.body ?? '')) return;
-    const timeout = setTimeout(() => update.mutate({ id: note.id, input: { body } }), AUTOSAVE_DELAY_MS);
+    const timeout = setTimeout(
+      () => update.mutate({ id: note.id, input: { body } }),
+      AUTOSAVE_DELAY_MS,
+    );
     return () => clearTimeout(timeout);
   }, [body]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -67,7 +79,9 @@ export default function NoteDetailScreen() {
   const selectedTagIds = noteTags.map((tag) => tag.id);
 
   const toggleTag = (tagId: string) => {
-    const next = selectedTagIds.includes(tagId) ? selectedTagIds.filter((id) => id !== tagId) : [...selectedTagIds, tagId];
+    const next = selectedTagIds.includes(tagId)
+      ? selectedTagIds.filter((id) => id !== tagId)
+      : [...selectedTagIds, tagId];
     setTags.mutate({ id: note.id, tagIds: next });
     refetchNoteTags();
   };
@@ -94,10 +108,22 @@ export default function NoteDetailScreen() {
         tint="#eab308"
         right={
           <View className="flex-row gap-4">
-            <Pressable onPress={() => update.mutate({ id: note.id, input: { isPinned: !note.isPinned } })} hitSlop={8}>
-              <Star size={20} color={colors[scheme].accent} fill={note.isPinned ? colors[scheme].accent : 'transparent'} />
+            <Pressable
+              onPress={() => update.mutate({ id: note.id, input: { isPinned: !note.isPinned } })}
+              hitSlop={8}
+            >
+              <Star
+                size={20}
+                color={colors[scheme].accent}
+                fill={note.isPinned ? colors[scheme].accent : 'transparent'}
+              />
             </Pressable>
-            <Pressable onPress={() => (note.isArchived ? unarchive.mutate(note.id) : archive.mutate(note.id))} hitSlop={8}>
+            <Pressable
+              onPress={() =>
+                note.isArchived ? unarchive.mutate(note.id) : archive.mutate(note.id)
+              }
+              hitSlop={8}
+            >
               {note.isArchived ? (
                 <ArchiveRestore size={19} color={colors[scheme].foreground} />
               ) : (
@@ -126,9 +152,15 @@ export default function NoteDetailScreen() {
           value={title}
           onChangeText={setTitle}
           multiline
-          accessibilityLabel="Note title" placeholder="Note title"
+          accessibilityLabel="Note title"
+          placeholder="Note title"
           placeholderTextColor={colors[scheme].mutedForeground}
-          style={{ fontSize: 26, fontFamily: 'Sora_700Bold', lineHeight: 32, color: colors[scheme].foreground }}
+          style={{
+            fontSize: 26,
+            fontFamily: 'Sora_700Bold',
+            lineHeight: 32,
+            color: colors[scheme].foreground,
+          }}
         />
 
         <View className="rounded-2xl border border-border bg-card px-4">
@@ -158,11 +190,17 @@ export default function NoteDetailScreen() {
         <NoteEditorBody value={body} onChangeText={setBody} placeholder="Write something…" />
 
         <View className="gap-2">
-          <VoiceNoteRecorder onRecorded={(uri, durationMs) => attach.mutate({ id: note.id, kind: 'audio', uri, durationMs })} />
+          <VoiceNoteRecorder
+            onRecorded={(uri, durationMs) =>
+              attach.mutate({ id: note.id, kind: 'audio', uri, durationMs })
+            }
+          />
           <AttachmentStrip
             attachments={attachments}
             onAddImage={(uri) => attach.mutate({ id: note.id, kind: 'image', uri })}
-            onRemove={(attachmentId) => removeAttachment.mutate({ id: attachmentId, noteId: note.id })}
+            onRemove={(attachmentId) =>
+              removeAttachment.mutate({ id: attachmentId, noteId: note.id })
+            }
           />
         </View>
 

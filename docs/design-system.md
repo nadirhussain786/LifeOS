@@ -12,12 +12,12 @@ published at
 
 **Where the tokens live (source of truth):**
 
-| Layer | File | Use it for |
-|---|---|---|
-| CSS variables (HSL) | [`global.css`](../global.css) | The values themselves, light + dark |
-| NativeWind classes | [`tailwind.config.js`](../tailwind.config.js) | Screens — `bg-card`, `text-habit`, `shadow-e2`, `rounded-xl` … |
-| Native mirror (TS) | [`constants/design-tokens.ts`](../constants/design-tokens.ts) | SVG, StatusBar, Reanimated, gradients — anywhere a className can't reach |
-| Color helpers | [`lib/color.ts`](../lib/color.ts) | Deriving gradients / glows / tints from a single module hex |
+| Layer               | File                                                          | Use it for                                                               |
+| ------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| CSS variables (HSL) | [`global.css`](../global.css)                                 | The values themselves, light + dark                                      |
+| NativeWind classes  | [`tailwind.config.js`](../tailwind.config.js)                 | Screens — `bg-card`, `text-habit`, `shadow-e2`, `rounded-xl` …           |
+| Native mirror (TS)  | [`constants/design-tokens.ts`](../constants/design-tokens.ts) | SVG, StatusBar, Reanimated, gradients — anywhere a className can't reach |
+| Color helpers       | [`lib/color.ts`](../lib/color.ts)                             | Deriving gradients / glows / tints from a single module hex              |
 
 **Reference implementation:** the dashboard hero
 [`features/dashboard/components/today-focus-card.tsx`](../features/dashboard/components/today-focus-card.tsx)
@@ -43,7 +43,7 @@ room: content rests on surfaces, rises when you touch it, and settles back.
   brand accent. Everything else recedes.
 
 **What we avoid:** dopamine-baiting badges, autoplay confetti, red notification
-bombs, infinite feeds. Reinforcement is gentle and tied to *meaningful*
+bombs, infinite feeds. Reinforcement is gentle and tied to _meaningful_
 completion.
 
 The five words the product should always feel like: **Calm · Focused · Premium
@@ -53,7 +53,7 @@ The five words the product should always feel like: **Calm · Focused · Premium
 
 ## 2. UX Principles
 
-Each screen is auditable against these. If a screen breaks one, the *screen* is
+Each screen is auditable against these. If a screen breaks one, the _screen_ is
 wrong — not the rule.
 
 1. **Reduce cognitive load before adding features.** Fewest things needed to
@@ -78,14 +78,14 @@ Behavioral science applied to make good habits **easier**, not usage
 **compulsive**. We reduce friction toward the user's own goals rather than
 engineering cravings.
 
-| Principle | How LifeOS uses it |
-|---|---|
-| **Progress principle** | Small visible wins are the strongest daily motivator. Rings fill, streaks tick, the day's bar advances. |
-| **Goal-gradient effect** | Near-complete rings brighten with a subtle glow, nudging the last step without pressure. |
-| **Cognitive load theory** | Whitespace, chunking, and one-action screens keep the UI under the working-memory threshold. |
-| **Peak-end + reinforcement** | A gentle haptic + soft ring bloom on meaningful completion — a calm reward, not a slot-machine payout. |
-| **Fresh-start effect** | Mornings, Mondays, month turns framed as clean slates. Streaks reset kindly. |
-| **Recognition over recall** | Color-coded modules and consistent icons mean users recognize where to go. |
+| Principle                    | How LifeOS uses it                                                                                      |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------- |
+| **Progress principle**       | Small visible wins are the strongest daily motivator. Rings fill, streaks tick, the day's bar advances. |
+| **Goal-gradient effect**     | Near-complete rings brighten with a subtle glow, nudging the last step without pressure.                |
+| **Cognitive load theory**    | Whitespace, chunking, and one-action screens keep the UI under the working-memory threshold.            |
+| **Peak-end + reinforcement** | A gentle haptic + soft ring bloom on meaningful completion — a calm reward, not a slot-machine payout.  |
+| **Fresh-start effect**       | Mornings, Mondays, month turns framed as clean slates. Streaks reset kindly.                            |
+| **Recognition over recall**  | Color-coded modules and consistent icons mean users recognize where to go.                              |
 
 ---
 
@@ -93,7 +93,7 @@ engineering cravings.
 
 Spend color like currency: **one brand accent · one signature tint per module ·
 a strictly separate semantic set.** Everything else is a near-grayscale neutral
-with a faint emerald bias, so chrome reads *chosen*, not clinical.
+with a faint emerald bias, so chrome reads _chosen_, not clinical.
 
 - **Contrast:** primary text clears **WCAG AAA** on its ground in both themes;
   body text ≥ AA (4.5:1); large text / UI ≥ 3:1.
@@ -102,27 +102,27 @@ with a faint emerald bias, so chrome reads *chosen*, not clinical.
 
 ### Core (light)
 
-| Token | Variable | HEX | RGB | HSL |
-|---|---|---|---|---|
-| Background | `--background` | `#F8FBF9` | `248 251 249` | `140 27% 98%` |
-| Surface | `--surface` | `#EEF3F0` | `238 243 240` | `144 17% 94%` |
-| Card | `--card` | `#FFFFFF` | `255 255 255` | `0 0% 100%` |
-| Foreground | `--foreground` | `#161C19` | `22 28 25` | `150 12% 10%` |
-| Muted fg | `--muted-foreground` | `#6D7A74` | `109 122 116` | `152 6% 45%` |
-| Accent | `--accent` | `#188B61` | `24 139 97` | `158 71% 32%` |
-| Border | `--border` | `#E2E9E5` | `226 233 229` | `146 14% 90%` |
+| Token      | Variable             | HEX       | RGB           | HSL           |
+| ---------- | -------------------- | --------- | ------------- | ------------- |
+| Background | `--background`       | `#F8FBF9` | `248 251 249` | `140 27% 98%` |
+| Surface    | `--surface`          | `#EEF3F0` | `238 243 240` | `144 17% 94%` |
+| Card       | `--card`             | `#FFFFFF` | `255 255 255` | `0 0% 100%`   |
+| Foreground | `--foreground`       | `#161C19` | `22 28 25`    | `150 12% 10%` |
+| Muted fg   | `--muted-foreground` | `#6D7A74` | `109 122 116` | `152 6% 45%`  |
+| Accent     | `--accent`           | `#188B61` | `24 139 97`   | `158 71% 32%` |
+| Border     | `--border`           | `#E2E9E5` | `226 233 229` | `146 14% 90%` |
 
 ### Core (dark)
 
-| Token | Variable | HEX | RGB | HSL |
-|---|---|---|---|---|
-| Background | `--background` | `#0E1210` | `14 18 16` | `150 13% 6%` |
-| Surface | `--surface` | `#161C19` | `22 28 25` | `150 12% 10%` |
-| Card | `--card` | `#1A201D` | `26 32 29` | `150 10% 11%` |
-| Foreground | `--foreground` | `#EEF3F0` | `238 243 240` | `144 17% 94%` |
-| Muted fg | `--muted-foreground` | `#9AA8A1` | `154 168 161` | `150 7% 63%` |
-| Accent | `--accent` | `#47D19F` | `71 209 159` | `158 60% 55%` |
-| Border | `--border` | `#2B332E` | `43 51 46` | `142 9% 18%` |
+| Token      | Variable             | HEX       | RGB           | HSL           |
+| ---------- | -------------------- | --------- | ------------- | ------------- |
+| Background | `--background`       | `#0E1210` | `14 18 16`    | `150 13% 6%`  |
+| Surface    | `--surface`          | `#161C19` | `22 28 25`    | `150 12% 10%` |
+| Card       | `--card`             | `#1A201D` | `26 32 29`    | `150 10% 11%` |
+| Foreground | `--foreground`       | `#EEF3F0` | `238 243 240` | `144 17% 94%` |
+| Muted fg   | `--muted-foreground` | `#9AA8A1` | `154 168 161` | `150 7% 63%`  |
+| Accent     | `--accent`           | `#47D19F` | `71 209 159`  | `158 60% 55%` |
+| Border     | `--border`           | `#2B332E` | `43 51 46`    | `142 9% 18%`  |
 
 **Psychology of the core:** green = growth & safety → the accent reads as calm
 confidence, never alarm. Neutrals carry a subtle emerald hue bias so the
@@ -133,12 +133,12 @@ grayscale feels warm and deliberate.
 Kept strictly distinct from the accent and module tints, so a red always means
 real stakes and a "done" green never reads as "tap me."
 
-| Token | Variable | HEX (light) | RGB | HSL | Purpose |
-|---|---|---|---|---|---|
-| Success | `--success` | `#16A34A` | `22 163 74` | `142 76% 36%` | Completion, confirmation |
-| Warning | `--warning` | `#D97706` | `217 119 6` | `32 95% 44%` | Caution, attention soon |
-| Error | `--destructive` | `#DC2626` | `220 38 38` | `0 72% 51%` | Destructive actions, validation |
-| Info | `--info` | `#2563EB` | `37 99 235` | `221 83% 53%` | Neutral info, tips |
+| Token   | Variable        | HEX (light) | RGB         | HSL           | Purpose                         |
+| ------- | --------------- | ----------- | ----------- | ------------- | ------------------------------- |
+| Success | `--success`     | `#16A34A`   | `22 163 74` | `142 76% 36%` | Completion, confirmation        |
+| Warning | `--warning`     | `#D97706`   | `217 119 6` | `32 95% 44%`  | Caution, attention soon         |
+| Error   | `--destructive` | `#DC2626`   | `220 38 38` | `0 72% 51%`   | Destructive actions, validation |
+| Info    | `--info`        | `#2563EB`   | `37 99 235` | `221 83% 53%` | Neutral info, tips              |
 
 Dark variants (brightened / desaturated to sit on deep grounds): success
 `#4ADE80`, warning `#FBBF24`, error `#F87171`, info `#60A5FA`.
@@ -150,17 +150,17 @@ series — **never** chrome. Conceptual map: **cool family** = structure & rest
 (calendar, water, sleep, journal); **warm family** = energy & aspiration
 (fitness, goals); **emerald** = growth (habits).
 
-| Module | Variable | HEX (light) | HEX (dark) | HSL (light) | Meaning |
-|---|---|---|---|---|---|
-| Habit | `--habit` | `#10B981` | `#34D399` | `160 84% 39%` | Growth, streaks |
-| Calendar | `--calendar` | `#3B82F6` | `#60A5FA` | `217 91% 60%` | Structure, time |
-| Water | `--water` | `#06B6D4` | `#22D3EE` | `189 94% 43%` | Hydration, clarity |
-| Sleep | `--sleep` | `#6366F1` | `#818CF8` | `239 84% 67%` | Night, rest |
-| Journal | `--journal` | `#8B5CF6` | `#A78BFA` | `258 90% 66%` | Reflection |
-| Fitness | `--fitness` | `#F97316` | `#FB923C` | `25 95% 53%` | Exertion, energy |
-| Goals | `--goals` | `#F43F5E` | `#FB7185` | `350 89% 60%` | Aspiration, achievement |
-| Budget | `--budget` | `#0D9488` | `#2DD4BF` | `175 84% 32%` | Balance, ledgers |
-| Study | `--study` | `#7C3AED` | `#A78BFA` | `262 83% 58%` | Focus |
+| Module   | Variable     | HEX (light) | HEX (dark) | HSL (light)   | Meaning                 |
+| -------- | ------------ | ----------- | ---------- | ------------- | ----------------------- |
+| Habit    | `--habit`    | `#10B981`   | `#34D399`  | `160 84% 39%` | Growth, streaks         |
+| Calendar | `--calendar` | `#3B82F6`   | `#60A5FA`  | `217 91% 60%` | Structure, time         |
+| Water    | `--water`    | `#06B6D4`   | `#22D3EE`  | `189 94% 43%` | Hydration, clarity      |
+| Sleep    | `--sleep`    | `#6366F1`   | `#818CF8`  | `239 84% 67%` | Night, rest             |
+| Journal  | `--journal`  | `#8B5CF6`   | `#A78BFA`  | `258 90% 66%` | Reflection              |
+| Fitness  | `--fitness`  | `#F97316`   | `#FB923C`  | `25 95% 53%`  | Exertion, energy        |
+| Goals    | `--goals`    | `#F43F5E`   | `#FB7185`  | `350 89% 60%` | Aspiration, achievement |
+| Budget   | `--budget`   | `#0D9488`   | `#2DD4BF`  | `175 84% 32%` | Balance, ledgers        |
+| Study    | `--study`    | `#7C3AED`   | `#A78BFA`  | `262 83% 58%` | Focus                   |
 
 Derive a module's full look from its one hex with [`lib/color.ts`](../lib/color.ts):
 `tintGradient()` / `tintGradientTriple()` for washes, `glowShadow()` for the
@@ -186,19 +186,19 @@ curated palette in [`constants/theme.ts`](../constants/theme.ts) —
 (reading-optimized serif) is reserved for the one place writing should feel
 literary: the Journal's own words. The contrast is the point.
 
-| Role | Size / line-height | Weight | Tracking | Notes |
-|---|---|---|---|---|
-| Display | 40 / 44 | ExtraBold 800 | -0.8 | Splash / big moments |
-| H1 | 30 / 36 | ExtraBold 800 | -0.5 | Screen greeting |
-| H2 | 24 / 30 | Bold 700 | -0.4 | Section title |
-| H3 | 20 / 26 | SemiBold 600 | -0.2 | Sub-section |
-| Title | 17 / 24 | SemiBold 600 | -0.1 | Card / list item title |
-| Body (lg) | 17 / 26 | Regular 400 | 0 | Comfortable reading |
-| Body | 15 / 23 | Regular 400 | 0 | Default |
-| Label | 13 / 18 | SemiBold 600 | 0 | Form labels |
-| Caption | 12 / 16 | Regular 400 | +0.1 | Metadata |
-| Micro | 11 / 14 | Medium 500 | +0.4 | UPPERCASE eyebrows |
-| Stat | 34 | ExtraBold 800 | -1.0 | Numeric readouts, **tabular** |
+| Role      | Size / line-height | Weight        | Tracking | Notes                         |
+| --------- | ------------------ | ------------- | -------- | ----------------------------- |
+| Display   | 40 / 44            | ExtraBold 800 | -0.8     | Splash / big moments          |
+| H1        | 30 / 36            | ExtraBold 800 | -0.5     | Screen greeting               |
+| H2        | 24 / 30            | Bold 700      | -0.4     | Section title                 |
+| H3        | 20 / 26            | SemiBold 600  | -0.2     | Sub-section                   |
+| Title     | 17 / 24            | SemiBold 600  | -0.1     | Card / list item title        |
+| Body (lg) | 17 / 26            | Regular 400   | 0        | Comfortable reading           |
+| Body      | 15 / 23            | Regular 400   | 0        | Default                       |
+| Label     | 13 / 18            | SemiBold 600  | 0        | Form labels                   |
+| Caption   | 12 / 16            | Regular 400   | +0.1     | Metadata                      |
+| Micro     | 11 / 14            | Medium 500    | +0.4     | UPPERCASE eyebrows            |
+| Stat      | 34                 | ExtraBold 800 | -1.0     | Numeric readouts, **tabular** |
 
 - **Numbers** use `font-variant-numeric: tabular-nums` + tight tracking so stats
   align in columns and don't jitter as they animate.
@@ -215,15 +215,15 @@ literary: the Journal's own words. The contrast is the point.
 Every gap, pad, and margin is a multiple of 4 — mostly 8. Consistent rhythm is
 what makes a layout feel calm before you can say why.
 
-| Key (× 4px) | px | Common use |
-|---|---|---|
-| `2` | 8 | Icon ↔ label |
-| `3` | 12 | List row gap |
-| `4` | 16 | Card padding |
-| `5` | 20 | **Screen gutter**, hero padding |
-| `6` | 24 | Section gap |
-| `8` | 32 | Major separation |
-| `10`–`24` | 40–96 | Empty-state / hero vertical space |
+| Key (× 4px) | px    | Common use                        |
+| ----------- | ----- | --------------------------------- |
+| `2`         | 8     | Icon ↔ label                      |
+| `3`         | 12    | List row gap                      |
+| `4`         | 16    | Card padding                      |
+| `5`         | 20    | **Screen gutter**, hero padding   |
+| `6`         | 24    | Section gap                       |
+| `8`         | 32    | Major separation                  |
+| `10`–`24`   | 40–96 | Empty-state / hero vertical space |
 
 Named layout constants (`layout.*` in the token file): screen gutter **20**,
 card padding **16**, section gap **24**, tab-bar height **64**, FAB **56**,
@@ -240,13 +240,13 @@ signals "tappable action." Cards use `lg`–`2xl`.
 **Elevation ladder** (neutral shadows for chrome; swap for `glowShadow(tint)` on
 colored surfaces):
 
-| Level | Class | Use |
-|---|---|---|
-| e0 | — | Flat, on-ground |
-| e1 | `shadow-e1` | Resting card |
-| e2 | `shadow-e2` | Raised card, hero, FAB |
-| e3 | `shadow-e3` | Bottom sheet |
-| e4 | `shadow-e4` | Modal / popover |
+| Level | Class       | Use                    |
+| ----- | ----------- | ---------------------- |
+| e0    | —           | Flat, on-ground        |
+| e1    | `shadow-e1` | Resting card           |
+| e2    | `shadow-e2` | Raised card, hero, FAB |
+| e3    | `shadow-e3` | Bottom sheet           |
+| e4    | `shadow-e4` | Modal / popover        |
 
 Native shadow objects (with the matching Android `elevation`) are in
 `elevation.e1…e4` in the token file. **On dark, elevation is expressed by
@@ -260,17 +260,17 @@ Every component ships with **resting, hover/press, focused, and disabled**
 states plus a defined radius, elevation, and motion. Interactive things look
 interactive; state is encoded in form as well as color.
 
-| Component | File | Notes |
-|---|---|---|
-| Button | [`components/ui/button.tsx`](../components/ui/button.tsx) | `primary · secondary · ghost · destructive · accent`. Accent paints a gradient + glow. Springs to 0.96 on press. |
-| Card | [`components/ui/card.tsx`](../components/ui/card.tsx) | `rounded-lg border bg-card` base surface |
-| Text | [`components/ui/text.tsx`](../components/ui/text.tsx) | Type-scale variants |
-| Progress ring | [`components/ui/progress-ring.tsx`](../components/ui/progress-ring.tsx) | Signature glowing arc — SVG + gradient, animated sweep |
-| Stat tile | [`components/ui/stat-tile.tsx`](../components/ui/stat-tile.tsx) | Tinted icon chip + big value, staggered entrance |
-| Hero card | [`components/ui/hero-card.tsx`](../components/ui/hero-card.tsx) | Gradient wash + glow + decorative orbs |
-| FAB | [`components/ui/fab.tsx`](../components/ui/fab.tsx) | Accent gradient, 56pt, scale-on-press |
-| Tab bar | [`components/ui/tab-bar.tsx`](../components/ui/tab-bar.tsx) | Bottom navigation |
-| Section header | [`components/ui/section-header.tsx`](../components/ui/section-header.tsx) | Title + optional action link |
+| Component      | File                                                                      | Notes                                                                                                            |
+| -------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Button         | [`components/ui/button.tsx`](../components/ui/button.tsx)                 | `primary · secondary · ghost · destructive · accent`. Accent paints a gradient + glow. Springs to 0.96 on press. |
+| Card           | [`components/ui/card.tsx`](../components/ui/card.tsx)                     | `rounded-lg border bg-card` base surface                                                                         |
+| Text           | [`components/ui/text.tsx`](../components/ui/text.tsx)                     | Type-scale variants                                                                                              |
+| Progress ring  | [`components/ui/progress-ring.tsx`](../components/ui/progress-ring.tsx)   | Signature glowing arc — SVG + gradient, animated sweep                                                           |
+| Stat tile      | [`components/ui/stat-tile.tsx`](../components/ui/stat-tile.tsx)           | Tinted icon chip + big value, staggered entrance                                                                 |
+| Hero card      | [`components/ui/hero-card.tsx`](../components/ui/hero-card.tsx)           | Gradient wash + glow + decorative orbs                                                                           |
+| FAB            | [`components/ui/fab.tsx`](../components/ui/fab.tsx)                       | Accent gradient, 56pt, scale-on-press                                                                            |
+| Tab bar        | [`components/ui/tab-bar.tsx`](../components/ui/tab-bar.tsx)               | Bottom navigation                                                                                                |
+| Section header | [`components/ui/section-header.tsx`](../components/ui/section-header.tsx) | Title + optional action link                                                                                     |
 
 **States at a glance:** focus grows a 4px accent halo on inputs; disabled =
 `opacity-40`; pressed = spring scale 0.96; destructive confirms before acting.
@@ -285,18 +285,18 @@ where content will land.
 Motion explains space and change: where a sheet came from, how a card expanded,
 that a tap registered. Durations stay short; springs feel physical.
 
-| Token | Value | Used for |
-|---|---|---|
-| `instant` | 100ms | State flips — checkbox, toggle |
-| `fast` | 160ms | Press feedback, small fades |
-| `base` | 220ms | Most enter/exit, card expand |
-| `slow` | 320ms | Page transitions, sheet present |
-| `slower` | 480ms | Ring sweeps, celebratory reveals |
-| `spring.press` | damping 16 · stiffness 400 | Snappy tap-down (scale 0.96) |
-| `spring.release` | damping 12 · stiffness 300 | Soft settle back |
-| `spring.gentle` | damping 18 · stiffness 180 | Sheets, reorder |
-| `spring.bouncy` | damping 10 · stiffness 220 | Streak celebration **only** |
-| `easing.standard` | `cubic-bezier(.2,0,0,1)` | Default enter + exit |
+| Token             | Value                      | Used for                         |
+| ----------------- | -------------------------- | -------------------------------- |
+| `instant`         | 100ms                      | State flips — checkbox, toggle   |
+| `fast`            | 160ms                      | Press feedback, small fades      |
+| `base`            | 220ms                      | Most enter/exit, card expand     |
+| `slow`            | 320ms                      | Page transitions, sheet present  |
+| `slower`          | 480ms                      | Ring sweeps, celebratory reveals |
+| `spring.press`    | damping 16 · stiffness 400 | Snappy tap-down (scale 0.96)     |
+| `spring.release`  | damping 12 · stiffness 300 | Soft settle back                 |
+| `spring.gentle`   | damping 18 · stiffness 180 | Sheets, reorder                  |
+| `spring.bouncy`   | damping 10 · stiffness 220 | Streak celebration **only**      |
+| `easing.standard` | `cubic-bezier(.2,0,0,1)`   | Default enter + exit             |
 
 Rings animate **from the last value**, never from zero, so change reads as
 change. **All celebratory / non-essential motion is gated behind
@@ -338,9 +338,9 @@ see [`hooks/use-color-scheme.ts`](../hooks/use-color-scheme.ts).
 ```tsx
 // spatial stack + one accent CTA
 <View className="bg-background">
-  <View className="bg-card rounded-lg border border-border shadow-e1 p-4">
-    <Text className="text-foreground font-sora-semibold">Today</Text>
-    <Text className="text-muted-foreground text-sm">3 tasks left</Text>
+  <View className="rounded-lg border border-border bg-card p-4 shadow-e1">
+    <Text className="font-sora-semibold text-foreground">Today</Text>
+    <Text className="text-sm text-muted-foreground">3 tasks left</Text>
   </View>
   <ProgressRing color={moduleTint('water', scheme)} gradient />
   <Button variant="accent" label="Log water" />
@@ -351,10 +351,10 @@ see [`hooks/use-color-scheme.ts`](../hooks/use-color-scheme.ts).
 
 ```ts
 const t = tokens('dark');
-t.module('habit')      // '#34d399'
-t.motion.spring.press  // { damping: 16, stiffness: 400 }
-t.elevation.e2         // native shadow object (+ Android elevation)
-t.typography.stat      // { size: 34, family: Sora ExtraBold, tracking: -1 }
+t.module('habit'); // '#34d399'
+t.motion.spring.press; // { damping: 16, stiffness: 400 }
+t.elevation.e2; // native shadow object (+ Android elevation)
+t.typography.stat; // { size: 34, family: Sora ExtraBold, tracking: -1 }
 ```
 
 ### Recommendations for React Native · NativeWind · Reanimated
@@ -371,7 +371,7 @@ t.typography.stat      // { size: 34, family: Sora ExtraBold, tracking: -1 }
 
 ---
 
-*This system extends LifeOS's existing language (emerald accent, Sora/Literata,
+_This system extends LifeOS's existing language (emerald accent, Sora/Literata,
 gradient rings) rather than replacing it. Keep `global.css`,
 `tailwind.config.js`, and `constants/design-tokens.ts` in sync when values
-change.*
+change._

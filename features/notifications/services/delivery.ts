@@ -1,6 +1,10 @@
 import { syncDigest } from '@/features/notifications/services/digest';
 import { useNotificationsStore } from '@/features/notifications/store/notifications-store';
-import { CATEGORY_META, CATEGORY_ORDER, type NotificationCategory } from '@/features/notifications/types/notification.types';
+import {
+  CATEGORY_META,
+  CATEGORY_ORDER,
+  type NotificationCategory,
+} from '@/features/notifications/types/notification.types';
 import { cancelScheduledInCategory } from '@/lib/notifications';
 
 /**
@@ -28,7 +32,9 @@ export const CONSOLIDATED_CATEGORIES: NotificationCategory[] = CATEGORY_ORDER.fi
 export async function applyDeliveryMode(): Promise<void> {
   const { deliveryMode } = useNotificationsStore.getState();
   if (deliveryMode === 'digest') {
-    await Promise.all(CONSOLIDATED_CATEGORIES.map((category) => cancelScheduledInCategory(category)));
+    await Promise.all(
+      CONSOLIDATED_CATEGORIES.map((category) => cancelScheduledInCategory(category)),
+    );
   }
   await syncDigest();
 }

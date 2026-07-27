@@ -22,14 +22,32 @@ const FELL_ASLEEP_OPTIONS = [0, 5, 10, 15, 20, 30, 45];
 /** Combines the night date with a time-of-day, rolling bedtime to the previous
  * day when it lands at/after the wake time (i.e. an overnight sleep). */
 function buildTimestamps(nightDate: Date, bed: Date, wake: Date) {
-  const wakeAt = set(nightDate, { hours: wake.getHours(), minutes: wake.getMinutes(), seconds: 0, milliseconds: 0 });
-  let bedAt = set(nightDate, { hours: bed.getHours(), minutes: bed.getMinutes(), seconds: 0, milliseconds: 0 });
+  const wakeAt = set(nightDate, {
+    hours: wake.getHours(),
+    minutes: wake.getMinutes(),
+    seconds: 0,
+    milliseconds: 0,
+  });
+  let bedAt = set(nightDate, {
+    hours: bed.getHours(),
+    minutes: bed.getMinutes(),
+    seconds: 0,
+    milliseconds: 0,
+  });
   if (bedAt.getTime() >= wakeAt.getTime()) bedAt = subDays(bedAt, 1);
-  return { bedtime: bedAt.getTime(), wakeTime: wakeAt.getTime(), logDate: format(nightDate, 'yyyy-MM-dd') };
+  return {
+    bedtime: bedAt.getTime(),
+    wakeTime: wakeAt.getTime(),
+    logDate: format(nightDate, 'yyyy-MM-dd'),
+  };
 }
 
 export default function SleepLogScreen() {
-  const { id, bedtimeTs, wakeTs } = useLocalSearchParams<{ id?: string; bedtimeTs?: string; wakeTs?: string }>();
+  const { id, bedtimeTs, wakeTs } = useLocalSearchParams<{
+    id?: string;
+    bedtimeTs?: string;
+    wakeTs?: string;
+  }>();
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
   const sleepTint = moduleTint('sleep', scheme);
@@ -45,14 +63,23 @@ export default function SleepLogScreen() {
 
   const [nightDate, setNightDate] = useState(() => {
     if (existing) return new Date(`${existing.logDate}T00:00:00`);
-    if (wakeParam) return set(new Date(wakeParam), { hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
+    if (wakeParam)
+      return set(new Date(wakeParam), { hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
     return new Date();
   });
   const [bed, setBed] = useState(() =>
-    existing ? new Date(existing.bedtime) : bedParam ? new Date(bedParam) : set(new Date(), { hours: 23, minutes: 0 }),
+    existing
+      ? new Date(existing.bedtime)
+      : bedParam
+        ? new Date(bedParam)
+        : set(new Date(), { hours: 23, minutes: 0 }),
   );
   const [wake, setWake] = useState(() =>
-    existing ? new Date(existing.wakeTime) : wakeParam ? new Date(wakeParam) : set(new Date(), { hours: 7, minutes: 0 }),
+    existing
+      ? new Date(existing.wakeTime)
+      : wakeParam
+        ? new Date(wakeParam)
+        : set(new Date(), { hours: 7, minutes: 0 }),
   );
   const [fellAsleep, setFellAsleep] = useState<number | null>(existing?.fellAsleepMinutes ?? null);
   const [quality, setQuality] = useState<number | null>(existing?.quality ?? null);
@@ -87,13 +114,33 @@ export default function SleepLogScreen() {
     const { bedtime, wakeTime, logDate } = buildTimestamps(nightDate, bed, wake);
     // Sleep can't happen in the future.
     if (wakeTime > Date.now()) {
-      Alert.alert("That's in the future", "Your wake-up time hasn't happened yet. Pick a night and wake time that have already passed.");
+      Alert.alert(
+        "That's in the future",
+        "Your wake-up time hasn't happened yet. Pick a night and wake time that have already passed.",
+      );
       return;
     }
     if (isEdit && existing) {
-      update.mutate({ id: existing.id, input: { bedtime, wakeTime, logDate, fellAsleepMinutes: fellAsleep, quality, note: note.trim() || null } });
+      update.mutate({
+        id: existing.id,
+        input: {
+          bedtime,
+          wakeTime,
+          logDate,
+          fellAsleepMinutes: fellAsleep,
+          quality,
+          note: note.trim() || null,
+        },
+      });
     } else {
-      create.mutate({ logDate, bedtime, wakeTime, fellAsleepMinutes: fellAsleep, quality, note: note.trim() || null });
+      create.mutate({
+        logDate,
+        bedtime,
+        wakeTime,
+        fellAsleepMinutes: fellAsleep,
+        quality,
+        note: note.trim() || null,
+      });
     }
     router.back();
   };
@@ -119,29 +166,55 @@ export default function SleepLogScreen() {
         title={isEdit ? 'Edit Sleep' : 'Log Sleep'}
         right={
           isEdit ? (
-            <Pressable onPress={confirmDelete} hitSlop={10} className="h-9 w-9 items-center justify-center" accessibilityLabel="Delete">
+            <Pressable
+              onPress={confirmDelete}
+              hitSlop={10}
+              className="h-9 w-9 items-center justify-center"
+              accessibilityLabel="Delete"
+            >
               <Trash2 size={18} color={colors[scheme].destructive} />
             </Pressable>
           ) : undefined
         }
       />
 
-      <ScrollView contentContainerClassName="gap-5 px-5 pt-3 pb-10" keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerClassName="gap-5 px-5 pt-3 pb-10"
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <View className="flex-row items-center justify-between rounded-2xl border border-border bg-card px-4 py-3">
           <View className="flex-row items-center gap-2">
             <CalendarDays size={16} color={colors[scheme].mutedForeground} />
             <Text className="font-sora-medium text-foreground">Night of</Text>
           </View>
           {Platform.OS === 'ios' ? (
-            <DateTimePicker value={nightDate} mode="date" display="compact" maximumDate={new Date()} onChange={handleDateChange} />
+            <DateTimePicker
+              value={nightDate}
+              mode="date"
+              display="compact"
+              maximumDate={new Date()}
+              onChange={handleDateChange}
+            />
           ) : (
-            <Pressable onPress={() => setShowDatePicker(true)} className="rounded-lg border border-border bg-surface px-3 py-1.5">
-              <Text className="font-sora-semibold text-foreground">{format(nightDate, 'MMM d, yyyy')}</Text>
+            <Pressable
+              onPress={() => setShowDatePicker(true)}
+              className="rounded-lg border border-border bg-surface px-3 py-1.5"
+            >
+              <Text className="font-sora-semibold text-foreground">
+                {format(nightDate, 'MMM d, yyyy')}
+              </Text>
             </Pressable>
           )}
         </View>
         {Platform.OS === 'android' && showDatePicker && (
-          <DateTimePicker value={nightDate} mode="date" display="default" maximumDate={new Date()} onChange={handleDateChange} />
+          <DateTimePicker
+            value={nightDate}
+            mode="date"
+            display="default"
+            maximumDate={new Date()}
+            onChange={handleDateChange}
+          />
         )}
 
         <View className="flex-row gap-3">
@@ -152,14 +225,20 @@ export default function SleepLogScreen() {
         <View className="flex-row gap-3 rounded-2xl bg-surface p-4">
           <View className="flex-1 items-center gap-1">
             <Text variant="micro">In bed</Text>
-            <Text className="font-sora-bold text-2xl text-foreground" style={{ fontVariant: ['tabular-nums'] }}>
+            <Text
+              className="font-sora-bold text-2xl text-foreground"
+              style={{ fontVariant: ['tabular-nums'] }}
+            >
               {formatDuration(previewMinutes)}
             </Text>
           </View>
           <View className="w-px bg-border" />
           <View className="flex-1 items-center gap-1">
             <Text variant="micro">Asleep</Text>
-            <Text className="font-sora-extrabold text-2xl text-sleep" style={{ fontVariant: ['tabular-nums'] }}>
+            <Text
+              className="font-sora-extrabold text-2xl text-sleep"
+              style={{ fontVariant: ['tabular-nums'] }}
+            >
               {formatDuration(asleepMinutes)}
             </Text>
           </View>
@@ -176,7 +255,9 @@ export default function SleepLogScreen() {
                   onPress={() => setFellAsleep(selected ? null : minutes)}
                   className={`rounded-full border px-3.5 py-2 ${selected ? 'border-sleep bg-sleep' : 'border-border'}`}
                 >
-                  <Text className={selected ? 'font-sora-semibold text-white' : 'text-muted-foreground'}>
+                  <Text
+                    className={selected ? 'font-sora-semibold text-white' : 'text-muted-foreground'}
+                  >
                     {minutes === 0 ? 'Instantly' : `${minutes}m`}
                   </Text>
                 </Pressable>
@@ -202,7 +283,12 @@ export default function SleepLogScreen() {
           />
         </View>
 
-        <Button label={isEdit ? 'Save changes' : 'Save sleep'} onPress={save} size="lg" variant="accent" />
+        <Button
+          label={isEdit ? 'Save changes' : 'Save sleep'}
+          onPress={save}
+          size="lg"
+          variant="accent"
+        />
       </ScrollView>
     </View>
   );

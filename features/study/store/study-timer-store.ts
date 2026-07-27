@@ -79,7 +79,8 @@ export const useStudyTimerStore = create<StudyTimerState>((set, get) => ({
       running: false,
       segmentStart: null,
       elapsedInPhase: state.elapsedInPhase + segment,
-      focusAccumulated: state.phase === 'focus' ? state.focusAccumulated + segment : state.focusAccumulated,
+      focusAccumulated:
+        state.phase === 'focus' ? state.focusAccumulated + segment : state.focusAccumulated,
     });
   },
 
@@ -92,7 +93,8 @@ export const useStudyTimerStore = create<StudyTimerState>((set, get) => ({
   // Focus block finished → bank the live segment and roll into a break.
   completeFocus: () => {
     const state = get();
-    const segment = state.running && state.segmentStart ? (Date.now() - state.segmentStart) / 1000 : 0;
+    const segment =
+      state.running && state.segmentStart ? (Date.now() - state.segmentStart) / 1000 : 0;
     set({
       phase: 'break',
       elapsedInPhase: 0,
@@ -128,6 +130,9 @@ export function remainingSeconds(state: StudyTimerState, now: number): number {
 
 /** Total focused seconds so far this session, including the live focus segment. */
 export function focusSecondsNow(state: StudyTimerState, now: number): number {
-  const live = state.running && state.phase === 'focus' && state.segmentStart ? (now - state.segmentStart) / 1000 : 0;
+  const live =
+    state.running && state.phase === 'focus' && state.segmentStart
+      ? (now - state.segmentStart) / 1000
+      : 0;
   return state.focusAccumulated + live;
 }

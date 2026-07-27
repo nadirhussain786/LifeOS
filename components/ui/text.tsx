@@ -25,5 +25,11 @@ type Props = TextProps & VariantProps<typeof textVariants> & { className?: strin
 export function Text({ className, variant, ...props }: Props) {
   // Cap dynamic-type scaling so large OS font sizes don't overflow the app's
   // fixed-height rows/controls. Overridable per-use (props spread wins).
-  return <RNText maxFontSizeMultiplier={1.4} className={cn(textVariants({ variant }), className)} {...props} />;
+  return (
+    <RNText
+      maxFontSizeMultiplier={1.4}
+      className={cn(textVariants({ variant }), className)}
+      {...props}
+    />
+  );
 }

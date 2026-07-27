@@ -49,7 +49,9 @@ export default function DebtsScreen() {
     const inFilter = debts.filter((d) => d.direction === filter);
     return {
       active: inFilter.filter((d) => !d.isSettled).sort(sortByUrgency),
-      settled: inFilter.filter((d) => d.isSettled).sort((a, b) => (b.settledAt ?? 0) - (a.settledAt ?? 0)),
+      settled: inFilter
+        .filter((d) => d.isSettled)
+        .sort((a, b) => (b.settledAt ?? 0) - (a.settledAt ?? 0)),
     };
   }, [debts, filter]);
 
@@ -72,12 +74,18 @@ export default function DebtsScreen() {
           onAction={() => router.push('/budget/debts/new')}
         />
       ) : (
-        <ScrollView contentContainerClassName="gap-5 px-4 pb-28" showsVerticalScrollIndicator={false}>
+        <ScrollView
+          contentContainerClassName="gap-5 px-4 pb-28"
+          showsVerticalScrollIndicator={false}
+        >
           {/* Net position hero */}
           <HeroCard tint={DEBT_TINT}>
             <View className="gap-4">
               <View className="items-center gap-1">
-                <Text className="font-sora-semibold uppercase tracking-wide" style={{ color: alpha('#ffffff', 0.85), fontSize: 12 }}>
+                <Text
+                  className="font-sora-semibold uppercase tracking-wide"
+                  style={{ color: alpha('#ffffff', 0.85), fontSize: 12 }}
+                >
                   Net position
                 </Text>
                 <Text className="font-sora-extrabold text-4xl" style={{ color: '#ffffff' }}>
@@ -85,10 +93,15 @@ export default function DebtsScreen() {
                   {formatMoney(Math.abs(totals.netCents), currency)}
                 </Text>
                 <Text style={{ color: alpha('#ffffff', 0.85), fontSize: 12 }}>
-                  {totals.netCents >= 0 ? "you're owed more than you owe" : 'you owe more than you’re owed'}
+                  {totals.netCents >= 0
+                    ? "you're owed more than you owe"
+                    : 'you owe more than you’re owed'}
                 </Text>
               </View>
-              <View className="flex-row rounded-2xl p-3" style={{ backgroundColor: alpha('#ffffff', 0.15) }}>
+              <View
+                className="flex-row rounded-2xl p-3"
+                style={{ backgroundColor: alpha('#ffffff', 0.15) }}
+              >
                 {[
                   { label: 'You owe', value: totals.oweCents },
                   { label: 'Owes you', value: totals.owedCents },
@@ -97,23 +110,36 @@ export default function DebtsScreen() {
                     <Text className="font-sora-bold" style={{ color: '#ffffff' }}>
                       {formatMoney(item.value, currency)}
                     </Text>
-                    <Text style={{ color: alpha('#ffffff', 0.85), fontSize: 11 }}>{item.label}</Text>
+                    <Text style={{ color: alpha('#ffffff', 0.85), fontSize: 11 }}>
+                      {item.label}
+                    </Text>
                   </View>
                 ))}
               </View>
             </View>
           </HeroCard>
 
-          <Segmented options={FILTER_OPTIONS} value={filter} onChange={setFilter} activeColor={DEBT_TINT} />
+          <Segmented
+            options={FILTER_OPTIONS}
+            value={filter}
+            onChange={setFilter}
+            activeColor={DEBT_TINT}
+          />
 
           {active.length === 0 ? (
             <Text variant="muted" className="px-1">
-              {filter === 'borrowed' ? 'Nothing outstanding — you owe no one right now.' : 'No one owes you right now.'}
+              {filter === 'borrowed'
+                ? 'Nothing outstanding — you owe no one right now.'
+                : 'No one owes you right now.'}
             </Text>
           ) : (
             <View className="gap-2.5">
               {active.map((debt) => (
-                <DebtCard key={debt.id} debt={debt} onPress={(d) => router.push(`/budget/debts/${d.id}`)} />
+                <DebtCard
+                  key={debt.id}
+                  debt={debt}
+                  onPress={(d) => router.push(`/budget/debts/${d.id}`)}
+                />
               ))}
             </View>
           )}
@@ -124,7 +150,11 @@ export default function DebtsScreen() {
                 Settled
               </Text>
               {settled.map((debt) => (
-                <DebtCard key={debt.id} debt={debt} onPress={(d) => router.push(`/budget/debts/${d.id}`)} />
+                <DebtCard
+                  key={debt.id}
+                  debt={debt}
+                  onPress={(d) => router.push(`/budget/debts/${d.id}`)}
+                />
               ))}
             </View>
           )}

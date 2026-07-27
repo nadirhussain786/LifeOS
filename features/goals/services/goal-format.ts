@@ -12,7 +12,10 @@ export function formatDueDate(dueDate: number): DueInfo {
 
   if (days < 0) {
     const overdueBy = Math.abs(days);
-    return { label: overdueBy === 1 ? 'Overdue by 1 day' : `Overdue by ${overdueBy} days`, state: 'overdue' };
+    return {
+      label: overdueBy === 1 ? 'Overdue by 1 day' : `Overdue by ${overdueBy} days`,
+      state: 'overdue',
+    };
   }
   if (isToday(date)) return { label: 'Due today', state: 'today' };
   if (isTomorrow(date)) return { label: 'Due tomorrow', state: 'soon' };

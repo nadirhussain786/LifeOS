@@ -27,7 +27,10 @@ export function useNotificationNavigation(): void {
         // Defer a tick so navigation runs after the router is mounted (matters
         // for the cold-start case).
         setTimeout(() => {
-          router.push({ pathname: payload.route as never, params: (payload.params ?? {}) as never });
+          router.push({
+            pathname: payload.route as never,
+            params: (payload.params ?? {}) as never,
+          });
         }, 0);
       }
     };

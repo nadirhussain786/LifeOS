@@ -2,7 +2,14 @@ import { endOfDay, parseISO, startOfDay } from 'date-fns';
 import { and, eq, gte, isNull, lte } from 'drizzle-orm';
 
 import { getDb } from '@/database/client';
-import { habitLogs, habits, journalEntries, notes, tasks, waterIntakeLogs } from '@/database/schema';
+import {
+  habitLogs,
+  habits,
+  journalEntries,
+  notes,
+  tasks,
+  waterIntakeLogs,
+} from '@/database/schema';
 import { listCalendarEventsBetween } from '@/features/timeline/services/calendar-events-repository';
 import { LOCAL_USER_ID } from '@/lib/local-user';
 import type { TimelineEvent } from '@/features/timeline/types/timeline.types';
@@ -23,7 +30,14 @@ export function listTimelineForDate(dateKey: string): TimelineEvent[] {
   const completedTasks = db
     .select()
     .from(tasks)
-    .where(and(eq(tasks.userId, LOCAL_USER_ID), isNull(tasks.deletedAt), gte(tasks.completedAt, dayStart), lte(tasks.completedAt, dayEnd)))
+    .where(
+      and(
+        eq(tasks.userId, LOCAL_USER_ID),
+        isNull(tasks.deletedAt),
+        gte(tasks.completedAt, dayStart),
+        lte(tasks.completedAt, dayEnd),
+      ),
+    )
     .all();
   for (const task of completedTasks) {
     events.push({
@@ -84,7 +98,14 @@ export function listTimelineForDate(dateKey: string): TimelineEvent[] {
   const createdNotes = db
     .select()
     .from(notes)
-    .where(and(eq(notes.userId, LOCAL_USER_ID), isNull(notes.deletedAt), gte(notes.createdAt, dayStart), lte(notes.createdAt, dayEnd)))
+    .where(
+      and(
+        eq(notes.userId, LOCAL_USER_ID),
+        isNull(notes.deletedAt),
+        gte(notes.createdAt, dayStart),
+        lte(notes.createdAt, dayEnd),
+      ),
+    )
     .all();
   for (const note of createdNotes) {
     events.push({
@@ -101,7 +122,13 @@ export function listTimelineForDate(dateKey: string): TimelineEvent[] {
   const entry = db
     .select()
     .from(journalEntries)
-    .where(and(eq(journalEntries.userId, LOCAL_USER_ID), eq(journalEntries.entryDate, dateKey), isNull(journalEntries.deletedAt)))
+    .where(
+      and(
+        eq(journalEntries.userId, LOCAL_USER_ID),
+        eq(journalEntries.entryDate, dateKey),
+        isNull(journalEntries.deletedAt),
+      ),
+    )
     .get();
   if (entry && entry.body.trim()) {
     events.push({

@@ -1,11 +1,19 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { PRIORITY_RANK } from '@/features/goals/config/goal-priority';
-import { getGoal, listGoals, listMilestones, listProgressLogs } from '@/features/goals/services/goals-repository';
+import {
+  getGoal,
+  listGoals,
+  listMilestones,
+  listProgressLogs,
+} from '@/features/goals/services/goals-repository';
 import { useGoalsFilterStore } from '@/features/goals/store/goals-filter-store';
 import type { GoalWithProgress } from '@/features/goals/types/goal.types';
 
-function sortGoals(goals: GoalWithProgress[], sort: ReturnType<typeof useGoalsFilterStore.getState>['sort']): GoalWithProgress[] {
+function sortGoals(
+  goals: GoalWithProgress[],
+  sort: ReturnType<typeof useGoalsFilterStore.getState>['sort'],
+): GoalWithProgress[] {
   const copy = [...goals];
   switch (sort) {
     case 'progress':
@@ -33,7 +41,11 @@ export function useGoals() {
       const query = searchQuery.trim().toLowerCase();
       const filtered = goals.filter((goal) => {
         if (categoryFilter !== 'all' && goal.category !== categoryFilter) return false;
-        if (query && !goal.title.toLowerCase().includes(query) && !(goal.description ?? '').toLowerCase().includes(query)) {
+        if (
+          query &&
+          !goal.title.toLowerCase().includes(query) &&
+          !(goal.description ?? '').toLowerCase().includes(query)
+        ) {
           return false;
         }
         return true;
@@ -54,9 +66,9 @@ export function useGoalStats() {
       const avgProgress = active.length
         ? active.reduce((sum, goal) => sum + goal.progress, 0) / active.length
         : 0;
-      const nextDue = active
-        .filter((goal) => goal.dueDate)
-        .sort((a, b) => (a.dueDate ?? 0) - (b.dueDate ?? 0))[0]?.dueDate ?? null;
+      const nextDue =
+        active.filter((goal) => goal.dueDate).sort((a, b) => (a.dueDate ?? 0) - (b.dueDate ?? 0))[0]
+          ?.dueDate ?? null;
       return { activeCount: active.length, completedCount: completed.length, avgProgress, nextDue };
     },
   });

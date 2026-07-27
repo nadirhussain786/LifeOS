@@ -196,7 +196,10 @@ export type LoggedNotification = {
 
 export type LoggedNotificationStatus = 'scheduled' | 'delivered' | 'canceled';
 
-export function notificationStatus(row: Pick<LoggedNotification, 'scheduledAt' | 'canceledAt' | 'repeats'>, now: number): LoggedNotificationStatus {
+export function notificationStatus(
+  row: Pick<LoggedNotification, 'scheduledAt' | 'canceledAt' | 'repeats'>,
+  now: number,
+): LoggedNotificationStatus {
   if (row.canceledAt) return 'canceled';
   // A daily reminder is always "scheduled" — its scheduledAt is just the next fire.
   if (row.repeats === 'daily') return 'scheduled';

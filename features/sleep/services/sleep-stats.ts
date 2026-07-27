@@ -57,7 +57,10 @@ function circularMean(minutesList: number[]): { mean: number | null; r: number }
  * ending at the most recent tracked night. A missed night or an untracked gap
  * breaks the streak.
  */
-function computeStreaks(sessions: SleepSession[], goalMinutes: number): { current: number; best: number } {
+function computeStreaks(
+  sessions: SleepSession[],
+  goalMinutes: number,
+): { current: number; best: number } {
   if (sessions.length === 0) return { current: 0, best: 0 };
   // Newest first.
   const sorted = [...sessions].sort((a, b) => b.logDate.localeCompare(a.logDate));
@@ -125,7 +128,9 @@ export function computeSleepStats(sessions: SleepSession[], goalMinutes: number)
 
   const withLatency = sessions.filter((s) => s.fellAsleepMinutes != null);
   const avgFellAsleep =
-    withLatency.length > 0 ? withLatency.reduce((sum, s) => sum + (s.fellAsleepMinutes ?? 0), 0) / withLatency.length : null;
+    withLatency.length > 0
+      ? withLatency.reduce((sum, s) => sum + (s.fellAsleepMinutes ?? 0), 0) / withLatency.length
+      : null;
 
   return {
     nightsTracked: sessions.length,
@@ -142,13 +147,21 @@ export function computeSleepStats(sessions: SleepSession[], goalMinutes: number)
 
 /** Builds an ordered (oldest→newest) trend series for the last `days` nights,
  * leaving gaps out (chart renders only tracked nights). */
-export function buildTrend(sessions: SleepSession[], goalMinutes: number, days: number): SleepTrendPoint[] {
+export function buildTrend(
+  sessions: SleepSession[],
+  goalMinutes: number,
+  days: number,
+): SleepTrendPoint[] {
   const cutoff = differenceInCalendarDays;
   const today = new Date();
   return [...sessions]
     .filter((s) => cutoff(today, parseISO(s.logDate)) < days)
     .sort((a, b) => a.logDate.localeCompare(b.logDate))
-    .map((s) => ({ date: s.logDate, durationMinutes: s.durationMinutes, metGoal: s.durationMinutes >= goalMinutes }));
+    .map((s) => ({
+      date: s.logDate,
+      durationMinutes: s.durationMinutes,
+      metGoal: s.durationMinutes >= goalMinutes,
+    }));
 }
 
 /** wake − bed in whole minutes; callers guarantee wake ≥ bed by rolling the

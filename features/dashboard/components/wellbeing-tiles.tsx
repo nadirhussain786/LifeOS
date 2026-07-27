@@ -8,7 +8,10 @@ import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { useReflect } from '@/features/dashboard/hooks/use-widget-data';
 import { useJournalMutations } from '@/features/journal/hooks/use-journal-mutations';
-import { useTodayWaterTotal, useWaterIntakeMutations } from '@/features/water-intake/hooks/use-water-intake';
+import {
+  useTodayWaterTotal,
+  useWaterIntakeMutations,
+} from '@/features/water-intake/hooks/use-water-intake';
 import { useWaterSettingsStore } from '@/features/water-intake/store/water-settings-store';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { alpha } from '@/lib/color';
@@ -49,7 +52,10 @@ export function WaterTile() {
 
   return (
     <Pressable onPress={addGlass} className={tileClass()} accessibilityLabel="Add a glass of water">
-      <View className="h-8 w-8 items-center justify-center rounded-xl" style={{ backgroundColor: alpha(tint, 0.14) }}>
+      <View
+        className="h-8 w-8 items-center justify-center rounded-xl"
+        style={{ backgroundColor: alpha(tint, 0.14) }}
+      >
         <Droplet size={17} color={tint} />
       </View>
       <View>
@@ -96,7 +102,10 @@ export function MoodTile() {
 
   return (
     <View className={tileClass()}>
-      <View className="h-8 w-8 items-center justify-center rounded-xl" style={{ backgroundColor: alpha(tint, 0.14) }}>
+      <View
+        className="h-8 w-8 items-center justify-center rounded-xl"
+        style={{ backgroundColor: alpha(tint, 0.14) }}
+      >
         <BookHeart size={17} color={tint} />
       </View>
       <View>
@@ -110,7 +119,9 @@ export function MoodTile() {
             onPress={() => selectMood(mood.value)}
             hitSlop={6}
             className="flex-1 items-center justify-center rounded-full py-1.5"
-            style={data?.todaysMood === mood.value ? { backgroundColor: alpha(tint, 0.16) } : undefined}
+            style={
+              data?.todaysMood === mood.value ? { backgroundColor: alpha(tint, 0.16) } : undefined
+            }
           >
             <Text className="text-lg">{mood.emoji}</Text>
           </Pressable>

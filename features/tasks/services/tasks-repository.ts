@@ -91,7 +91,11 @@ export function updateTask(id: string, input: UpdateTaskInput) {
 }
 
 export function setTaskReminderNotificationId(id: string, notificationId: string | null) {
-  getDb().update(tasks).set({ reminderNotificationId: notificationId }).where(eq(tasks.id, id)).run();
+  getDb()
+    .update(tasks)
+    .set({ reminderNotificationId: notificationId })
+    .where(eq(tasks.id, id))
+    .run();
 }
 
 function nextRecurrenceDueDate(dueDate: number, frequency: TaskRecurrenceFrequency): number {
@@ -218,7 +222,8 @@ export function getWeeklyCompletionStats(): WeeklyCompletionStats {
 
   const totalCompleted = completedCounts.reduce((sum, count) => sum + count, 0);
   const totalDue = dueCounts.reduce((sum, count) => sum + count, 0);
-  const weeklyCompletionRate = totalDue === 0 ? (totalCompleted > 0 ? 1 : 0) : Math.min(totalCompleted / totalDue, 1);
+  const weeklyCompletionRate =
+    totalDue === 0 ? (totalCompleted > 0 ? 1 : 0) : Math.min(totalCompleted / totalDue, 1);
 
   const peak = Math.max(...completedCounts, 1);
   const trend = completedCounts.map((count) => count / peak);

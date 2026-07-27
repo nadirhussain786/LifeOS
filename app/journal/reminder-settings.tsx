@@ -13,7 +13,10 @@ import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
 import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
-import { cancelJournalReminder, scheduleJournalReminder } from '@/features/journal/services/journal-reminders';
+import {
+  cancelJournalReminder,
+  scheduleJournalReminder,
+} from '@/features/journal/services/journal-reminders';
 import { useJournalReminderStore } from '@/features/journal/store/journal-reminder-store';
 import { CategoryOffNotice } from '@/features/notifications/components/category-off-notice';
 import { notificationsAvailable } from '@/lib/notifications';
@@ -30,7 +33,12 @@ export default function JournalReminderSettingsScreen() {
   const [showPicker, setShowPicker] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const time = set(new Date(), { hours: draft.hour, minutes: draft.minute, seconds: 0, milliseconds: 0 });
+  const time = set(new Date(), {
+    hours: draft.hour,
+    minutes: draft.minute,
+    seconds: 0,
+    milliseconds: 0,
+  });
 
   const handleTimeChange = (event: DateTimePickerEvent, next?: Date) => {
     if (Platform.OS === 'android') setShowPicker(false);
@@ -61,9 +69,16 @@ export default function JournalReminderSettingsScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <ScreenHeader title="Journal Reminder" eyebrow="Journal" tint={moduleTint('journal', scheme)} />
+      <ScreenHeader
+        title="Journal Reminder"
+        eyebrow="Journal"
+        tint={moduleTint('journal', scheme)}
+      />
 
-      <ScrollView contentContainerClassName="gap-6 px-5 pt-3 pb-10" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerClassName="gap-6 px-5 pt-3 pb-10"
+        showsVerticalScrollIndicator={false}
+      >
         <CategoryOffNotice category="journal" />
         <View className="rounded-2xl border border-border bg-card px-4 shadow-e1">
           <AttributeRow icon={Bell} label="Daily reminder" isFirst>
@@ -80,7 +95,12 @@ export default function JournalReminderSettingsScreen() {
           {draft.enabled && (
             <AttributeRow icon={Clock} label="Time">
               {Platform.OS === 'ios' ? (
-                <DateTimePicker value={time} mode="time" display="compact" onChange={handleTimeChange} />
+                <DateTimePicker
+                  value={time}
+                  mode="time"
+                  display="compact"
+                  onChange={handleTimeChange}
+                />
               ) : (
                 <Pressable
                   onPress={() => setShowPicker(true)}
@@ -95,14 +115,23 @@ export default function JournalReminderSettingsScreen() {
         </View>
 
         {draft.enabled && (
-          <Text variant="muted">You&apos;ll get a nudge to write today&apos;s entry every day at {format(time, 'h:mm a')}.</Text>
+          <Text variant="muted">
+            You&apos;ll get a nudge to write today&apos;s entry every day at{' '}
+            {format(time, 'h:mm a')}.
+          </Text>
         )}
 
         {Platform.OS === 'android' && showPicker ? (
           <DateTimePicker value={time} mode="time" display="default" onChange={handleTimeChange} />
         ) : null}
 
-        <Button label={saving ? 'Saving…' : 'Save'} onPress={handleSave} disabled={saving} size="lg" variant="accent" />
+        <Button
+          label={saving ? 'Saving…' : 'Save'}
+          onPress={handleSave}
+          disabled={saving}
+          size="lg"
+          variant="accent"
+        />
       </ScrollView>
     </View>
   );

@@ -22,7 +22,9 @@ export async function syncNoteReminder(note: Note): Promise<void> {
   setNoteReminderNotificationId(note.id, id);
 }
 
-export async function cancelNoteReminder(note: Pick<Note, 'id' | 'reminderNotificationId'>): Promise<void> {
+export async function cancelNoteReminder(
+  note: Pick<Note, 'id' | 'reminderNotificationId'>,
+): Promise<void> {
   await cancelNotification(note.reminderNotificationId);
   setNoteReminderNotificationId(note.id, null);
 }

@@ -2,7 +2,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
-import { CATEGORY_ORDER, type NotificationCategory } from '@/features/notifications/types/notification.types';
+import {
+  CATEGORY_ORDER,
+  type NotificationCategory,
+} from '@/features/notifications/types/notification.types';
 
 export type DeliveryMode = 'digest' | 'individual';
 
@@ -62,7 +65,8 @@ export const useNotificationsStore = create<NotificationsState>()(
       setCategoryEnabled: (category, enabled) =>
         set((state) => ({ categories: { ...state.categories, [category]: enabled } })),
       setQuietHoursEnabled: (quietHoursEnabled) => set({ quietHoursEnabled }),
-      setQuietHours: (quietStartMinutes, quietEndMinutes) => set({ quietStartMinutes, quietEndMinutes }),
+      setQuietHours: (quietStartMinutes, quietEndMinutes) =>
+        set({ quietStartMinutes, quietEndMinutes }),
       setDeliveryMode: (deliveryMode) => set({ deliveryMode }),
       setDigestTime: (digestHour, digestMinute) => set({ digestHour, digestMinute }),
       setDigestNotificationId: (digestNotificationId) => set({ digestNotificationId }),

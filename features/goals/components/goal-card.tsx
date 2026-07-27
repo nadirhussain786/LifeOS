@@ -43,11 +43,24 @@ export function GoalCard({ goal, onPress }: Props) {
       accessibilityLabel={goal.title}
     >
       <View className="flex-row items-center gap-3">
-        <View className="h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: `${meta.tint}1f` }}>
-          {isCompleted ? <CheckCircle2 size={20} color={meta.tint} /> : <Icon size={20} color={meta.tint} strokeWidth={2} />}
+        <View
+          className="h-10 w-10 items-center justify-center rounded-xl"
+          style={{ backgroundColor: `${meta.tint}1f` }}
+        >
+          {isCompleted ? (
+            <CheckCircle2 size={20} color={meta.tint} />
+          ) : (
+            <Icon size={20} color={meta.tint} strokeWidth={2} />
+          )}
         </View>
         <View className="flex-1 gap-0.5">
-          <Text className={cn('font-sora-semibold text-base', isCompleted && 'text-muted-foreground line-through')} numberOfLines={1}>
+          <Text
+            className={cn(
+              'font-sora-semibold text-base',
+              isCompleted && 'text-muted-foreground line-through',
+            )}
+            numberOfLines={1}
+          >
             {goal.title}
           </Text>
           <View className="flex-row items-center gap-1.5">
@@ -55,7 +68,11 @@ export function GoalCard({ goal, onPress }: Props) {
               {goalCategoryLabel(goal.category, goal.categoryLabel)}
             </Text>
             <View className="h-1 w-1 rounded-full bg-muted-foreground" />
-            <Flag size={11} color={goalPriorityColor(goal.priority)} fill={goalPriorityColor(goal.priority)} />
+            <Flag
+              size={11}
+              color={goalPriorityColor(goal.priority)}
+              fill={goalPriorityColor(goal.priority)}
+            />
             <Text variant="caption" className="capitalize">
               {goal.priority}
             </Text>
@@ -99,7 +116,13 @@ export function GoalCard({ goal, onPress }: Props) {
           {due && (
             <Text
               variant="caption"
-              className={due.state === 'later' ? undefined : due.state === 'overdue' ? 'text-destructive' : 'text-warning'}
+              className={
+                due.state === 'later'
+                  ? undefined
+                  : due.state === 'overdue'
+                    ? 'text-destructive'
+                    : 'text-warning'
+              }
             >
               {due.label}
             </Text>

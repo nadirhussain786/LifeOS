@@ -21,16 +21,36 @@ export function makeGoalFormSchema(requireMilestones: boolean) {
     })
     .superRefine((values, ctx) => {
       if (values.category === 'custom' && !values.categoryLabel?.trim()) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Name your custom category', path: ['categoryLabel'] });
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Name your custom category',
+          path: ['categoryLabel'],
+        });
       }
       if (values.progressMode === 'count' && !values.targetValue) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Set a target amount', path: ['targetValue'] });
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Set a target amount',
+          path: ['targetValue'],
+        });
       }
       if (values.progressMode === 'count' && !values.unit?.trim()) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Add a unit (e.g. books, kg, $)', path: ['unit'] });
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Add a unit (e.g. books, kg, $)',
+          path: ['unit'],
+        });
       }
-      if (requireMilestones && values.progressMode === 'milestones' && values.milestones.filter((m) => m.trim()).length === 0) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Add at least one milestone', path: ['milestones'] });
+      if (
+        requireMilestones &&
+        values.progressMode === 'milestones' &&
+        values.milestones.filter((m) => m.trim()).length === 0
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Add at least one milestone',
+          path: ['milestones'],
+        });
       }
     });
 }

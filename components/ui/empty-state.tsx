@@ -2,7 +2,13 @@ import { type LucideIcon } from 'lucide-react-native';
 import { useEffect } from 'react';
 import { View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withDelay, withSpring } from 'react-native-reanimated';
+import Animated, {
+  FadeIn,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withSpring,
+} from 'react-native-reanimated';
 
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
@@ -32,7 +38,10 @@ export function EmptyState({ icon: Icon, title, description, actionLabel, onActi
   return (
     <View className="flex-1 items-center justify-center gap-3 px-10">
       <Animated.View style={iconStyle}>
-        <View className="h-16 w-16 items-center justify-center rounded-full" style={{ backgroundColor: `${tintColor}1a` }}>
+        <View
+          className="h-16 w-16 items-center justify-center rounded-full"
+          style={{ backgroundColor: `${tintColor}1a` }}
+        >
           <Icon color={tintColor} size={28} strokeWidth={1.75} />
         </View>
       </Animated.View>
@@ -44,7 +53,13 @@ export function EmptyState({ icon: Icon, title, description, actionLabel, onActi
           {description}
         </Text>
         {actionLabel && onAction && (
-          <Button label={actionLabel} onPress={onAction} variant="accent" size="sm" className="mt-2" />
+          <Button
+            label={actionLabel}
+            onPress={onAction}
+            variant="accent"
+            size="sm"
+            className="mt-2"
+          />
         )}
       </Animated.View>
     </View>

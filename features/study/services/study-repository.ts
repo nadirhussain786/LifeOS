@@ -55,11 +55,19 @@ export function createStudySubject(name: string, colorToken: string): StudySubje
 }
 
 export function renameStudySubject(id: string, name: string) {
-  getDb().update(studySubjects).set({ name: name.trim(), updatedAt: Date.now() }).where(eq(studySubjects.id, id)).run();
+  getDb()
+    .update(studySubjects)
+    .set({ name: name.trim(), updatedAt: Date.now() })
+    .where(eq(studySubjects.id, id))
+    .run();
 }
 
 export function deleteStudySubject(id: string) {
-  getDb().update(studySubjects).set({ deletedAt: Date.now(), updatedAt: Date.now() }).where(eq(studySubjects.id, id)).run();
+  getDb()
+    .update(studySubjects)
+    .set({ deletedAt: Date.now(), updatedAt: Date.now() })
+    .where(eq(studySubjects.id, id))
+    .run();
 }
 
 // ---- Sessions ----
@@ -106,14 +114,26 @@ export function deleteStudySession(id: string) {
 // ---- Settings ----
 
 export function getStudySettings(): StudySettings {
-  const row = getDb().select().from(studySettings).where(eq(studySettings.userId, LOCAL_USER_ID)).get();
+  const row = getDb()
+    .select()
+    .from(studySettings)
+    .where(eq(studySettings.userId, LOCAL_USER_ID))
+    .get();
   if (!row) return { ...DEFAULTS };
-  return { dailyGoalMinutes: row.dailyGoalMinutes, focusMinutes: row.focusMinutes, breakMinutes: row.breakMinutes };
+  return {
+    dailyGoalMinutes: row.dailyGoalMinutes,
+    focusMinutes: row.focusMinutes,
+    breakMinutes: row.breakMinutes,
+  };
 }
 
 export function updateStudySettings(input: Partial<StudySettings>) {
   const db = getDb();
-  const existing = db.select().from(studySettings).where(eq(studySettings.userId, LOCAL_USER_ID)).get();
+  const existing = db
+    .select()
+    .from(studySettings)
+    .where(eq(studySettings.userId, LOCAL_USER_ID))
+    .get();
   const now = Date.now();
   if (!existing) {
     db.insert(studySettings)

@@ -34,11 +34,15 @@ export default function NewAlbumScreen() {
     <View className="flex-1 bg-background">
       <SheetHeader title="New Album" />
 
-      <ScrollView contentContainerClassName="gap-5 px-5 pt-3 pb-10" keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerClassName="gap-5 px-5 pt-3 pb-10"
+        keyboardShouldPersistTaps="handled"
+      >
         <TextInput
           value={name}
           onChangeText={setName}
-          accessibilityLabel="Album name" placeholder="Album name"
+          accessibilityLabel="Album name"
+          placeholder="Album name"
           placeholderTextColor={colors[scheme].mutedForeground}
           autoFocus
           style={{ fontSize: 24, fontFamily: 'Sora_700Bold', color: colors[scheme].foreground }}
@@ -56,18 +60,33 @@ export default function NewAlbumScreen() {
                 <Pressable
                   key={item.id}
                   onPress={() => setCategory(item.id)}
-                  style={selected ? { backgroundColor: item.tint, borderColor: item.tint } : undefined}
-                  className={cn('flex-row items-center gap-1.5 rounded-full border px-3 py-2', !selected && 'border-border')}
+                  style={
+                    selected ? { backgroundColor: item.tint, borderColor: item.tint } : undefined
+                  }
+                  className={cn(
+                    'flex-row items-center gap-1.5 rounded-full border px-3 py-2',
+                    !selected && 'border-border',
+                  )}
                 >
                   <Icon size={15} color={selected ? '#ffffff' : item.tint} strokeWidth={2.2} />
-                  <Text className={selected ? 'font-sora-medium text-white' : 'text-muted-foreground'}>{item.label}</Text>
+                  <Text
+                    className={selected ? 'font-sora-medium text-white' : 'text-muted-foreground'}
+                  >
+                    {item.label}
+                  </Text>
                 </Pressable>
               );
             })}
           </View>
         </View>
 
-        <Button label="Create album" onPress={save} disabled={!canSave} size="lg" variant="accent" />
+        <Button
+          label="Create album"
+          onPress={save}
+          disabled={!canSave}
+          size="lg"
+          variant="accent"
+        />
       </ScrollView>
     </View>
   );

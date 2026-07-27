@@ -1,13 +1,22 @@
 import { addDays, differenceInCalendarDays, getDay, parseISO, subDays } from 'date-fns';
 
 import { toDateKey } from '@/lib/date';
-import type { Habit, HabitLog, HabitSkip, HabitStreakSummary, HabitTodayStatus } from '@/features/habits/types/habit.types';
+import type {
+  Habit,
+  HabitLog,
+  HabitSkip,
+  HabitStreakSummary,
+  HabitTodayStatus,
+} from '@/features/habits/types/habit.types';
 
 export { toDateKey } from '@/lib/date';
 
 const MAX_STREAK_LOOKBACK_DAYS = 3650;
 
-type ScheduleHabit = Pick<Habit, 'scheduleType' | 'scheduleDays' | 'scheduleIntervalDays' | 'createdAt'>;
+type ScheduleHabit = Pick<
+  Habit,
+  'scheduleType' | 'scheduleDays' | 'scheduleIntervalDays' | 'createdAt'
+>;
 
 /**
  * Whether a habit is expected on a given day. 'weekly' | 'monthly' | 'flexible'
@@ -94,7 +103,10 @@ export function calculateHabitStreaks(
     let run = 0;
     let cursor = asOf;
     let isToday = true;
-    const earliestLog = logs.reduce((min, l) => Math.min(min, parseISO(l.logDate).getTime()), asOf.getTime());
+    const earliestLog = logs.reduce(
+      (min, l) => Math.min(min, parseISO(l.logDate).getTime()),
+      asOf.getTime(),
+    );
     for (let i = 0; i < MAX_STREAK_LOOKBACK_DAYS; i += 1) {
       if (cursor.getTime() < earliestLog) break;
       const dateKey = toDateKey(cursor);

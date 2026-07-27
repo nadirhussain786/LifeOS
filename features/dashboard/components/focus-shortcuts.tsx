@@ -43,7 +43,10 @@ export function FocusShortcuts() {
               onPress={() => router.push(area.route as never)}
               className="flex-row items-center gap-2.5 rounded-2xl border border-border bg-card py-2.5 pl-2.5 pr-4 shadow-e1"
             >
-              <View className="h-8 w-8 items-center justify-center rounded-xl" style={{ backgroundColor: alpha(tint, 0.14) }}>
+              <View
+                className="h-8 w-8 items-center justify-center rounded-xl"
+                style={{ backgroundColor: alpha(tint, 0.14) }}
+              >
                 <Icon size={17} color={tint} />
               </View>
               <Text className="font-sora-semibold">{area.label}</Text>

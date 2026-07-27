@@ -37,7 +37,11 @@ export function parseMarkdownLines(body: string): MarkdownLine[] {
 
     const checklistMatch = raw.match(CHECKLIST_PATTERN);
     if (checklistMatch) {
-      lines.push({ type: 'checklist', checked: checklistMatch[1].toLowerCase() === 'x', text: checklistMatch[2] });
+      lines.push({
+        type: 'checklist',
+        checked: checklistMatch[1].toLowerCase() === 'x',
+        text: checklistMatch[2],
+      });
       continue;
     }
     if (raw.startsWith('## ')) {

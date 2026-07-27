@@ -57,8 +57,8 @@ export default function JournalScreen() {
       </View>
 
       {isError ? (
-          <QueryError onRetry={() => refetch()} />
-        ) : isLoading ? (
+        <QueryError onRetry={() => refetch()} />
+      ) : isLoading ? (
         <View className="gap-2.5 px-5">
           <Skeleton className="h-16 w-full rounded-2xl" />
           <Skeleton className="h-16 w-full rounded-2xl" />
@@ -71,7 +71,11 @@ export default function JournalScreen() {
           contentContainerStyle={{ paddingTop: 4, paddingBottom: 40 }}
           ListHeaderComponent={
             <View className="mx-5 mb-4">
-              <MoodMonthStrip monthAnchor={new Date()} entries={entries} onSelectDate={(dateKey) => router.push(`/journal/${dateKey}`)} />
+              <MoodMonthStrip
+                monthAnchor={new Date()}
+                entries={entries}
+                onSelectDate={(dateKey) => router.push(`/journal/${dateKey}`)}
+              />
             </View>
           }
           ListEmptyComponent={

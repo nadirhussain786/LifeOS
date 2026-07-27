@@ -32,18 +32,25 @@ export function useRoutineMutations() {
   });
 
   const addHabit = useMutation({
-    mutationFn: async ({ routineId, habitId }: { routineId: string; habitId: string }) => addHabitToRoutine(routineId, habitId),
+    mutationFn: async ({ routineId, habitId }: { routineId: string; habitId: string }) =>
+      addHabitToRoutine(routineId, habitId),
     onSuccess: invalidate,
   });
 
   const removeHabit = useMutation({
-    mutationFn: async ({ routineId, habitId }: { routineId: string; habitId: string }) => removeHabitFromRoutine(routineId, habitId),
+    mutationFn: async ({ routineId, habitId }: { routineId: string; habitId: string }) =>
+      removeHabitFromRoutine(routineId, habitId),
     onSuccess: invalidate,
   });
 
   const reorder = useMutation({
-    mutationFn: async ({ routineId, orderedHabitIds }: { routineId: string; orderedHabitIds: string[] }) =>
-      reorderRoutineHabits(routineId, orderedHabitIds),
+    mutationFn: async ({
+      routineId,
+      orderedHabitIds,
+    }: {
+      routineId: string;
+      orderedHabitIds: string[];
+    }) => reorderRoutineHabits(routineId, orderedHabitIds),
     onSuccess: invalidate,
   });
 

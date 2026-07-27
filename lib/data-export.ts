@@ -94,6 +94,9 @@ export async function exportAllData(): Promise<void> {
   file.write(JSON.stringify(data, null, 2));
 
   if (await Sharing.isAvailableAsync()) {
-    await Sharing.shareAsync(file.uri, { mimeType: 'application/json', dialogTitle: 'Export LifeOS data' });
+    await Sharing.shareAsync(file.uri, {
+      mimeType: 'application/json',
+      dialogTitle: 'Export LifeOS data',
+    });
   }
 }

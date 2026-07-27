@@ -48,7 +48,9 @@ export function PhotoGridList({
     const out: Row[] = [];
     for (const [month, monthPhotos] of map) {
       out.push({ type: 'header', key: `h-${month}`, month });
-      chunk(monthPhotos, COLUMNS).forEach((items, i) => out.push({ type: 'photos', key: `r-${month}-${i}`, items }));
+      chunk(monthPhotos, COLUMNS).forEach((items, i) =>
+        out.push({ type: 'photos', key: `r-${month}-${i}`, items }),
+      );
     }
     return out;
   }, [photos, timeline]);
@@ -60,11 +62,16 @@ export function PhotoGridList({
       getItemType={(row) => row.type}
       renderItem={({ item }) =>
         item.type === 'header' ? (
-          <Text variant="caption" className="px-4 pb-1 pt-4 font-sora-semibold uppercase tracking-wide">
+          <Text
+            variant="caption"
+            className="px-4 pb-1 pt-4 font-sora-semibold uppercase tracking-wide"
+          >
             {item.month}
           </Text>
         ) : (
-          <View style={{ flexDirection: 'row', gap: GAP, paddingHorizontal: 16, marginBottom: GAP }}>
+          <View
+            style={{ flexDirection: 'row', gap: GAP, paddingHorizontal: 16, marginBottom: GAP }}
+          >
             {item.items.map((photo) => (
               <PhotoTile key={photo.id} photo={photo} size={size} onPress={onPressPhoto} />
             ))}

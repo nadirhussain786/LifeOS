@@ -4,7 +4,12 @@ import { Archive, Check, Trash2 } from 'lucide-react-native';
 import { useEffect, useRef } from 'react';
 import { Pressable, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import Animated, { useAnimatedStyle, useSharedValue, withSequence, withSpring } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+} from 'react-native-reanimated';
 
 import { SwipeableRow } from '@/components/ui/swipeable-row';
 import { Text } from '@/components/ui/text';
@@ -23,9 +28,14 @@ type Props = {
 function DueDateLabel({ task }: { task: Task }) {
   if (!task.dueDate) return null;
   const bucket = getDueBucket(task);
-  const variant = bucket === 'overdue' ? 'text-destructive' : bucket === 'today' ? 'text-foreground' : 'text-muted-foreground';
+  const variant =
+    bucket === 'overdue'
+      ? 'text-destructive'
+      : bucket === 'today'
+        ? 'text-foreground'
+        : 'text-muted-foreground';
   return (
-    <Text className={`text-xs font-sora-medium ${variant}`}>
+    <Text className={`font-sora-medium text-xs ${variant}`}>
       {isToday(task.dueDate) ? 'Today' : format(task.dueDate, 'MMM d')}
     </Text>
   );
@@ -46,13 +56,18 @@ export function TaskRow({ task, onPress, onToggleComplete, onArchive, onDelete }
     // Pop outward then settle — a small, satisfying "done" beat rather than
     // an instant color swap. Skipped on mount so rows don't all pop when a
     // list first loads.
-    scale.value = withSequence(withSpring(1.3, { damping: 8, stiffness: 400 }), withSpring(1, { damping: 10, stiffness: 300 }));
+    scale.value = withSequence(
+      withSpring(1.3, { damping: 8, stiffness: 400 }),
+      withSpring(1, { damping: 10, stiffness: 300 }),
+    );
   }, [isCompleted, scale]);
 
   const checkboxStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
   const handleToggle = () => {
-    Haptics.impactAsync(isCompleted ? Haptics.ImpactFeedbackStyle.Light : Haptics.ImpactFeedbackStyle.Medium);
+    Haptics.impactAsync(
+      isCompleted ? Haptics.ImpactFeedbackStyle.Light : Haptics.ImpactFeedbackStyle.Medium,
+    );
     onToggleComplete();
   };
 
@@ -62,7 +77,9 @@ export function TaskRow({ task, onPress, onToggleComplete, onArchive, onDelete }
         { name: 'archive', label: 'Archive' },
         { name: 'delete', label: 'Delete' },
       ]}
-      onAccessibilityAction={(name) => (name === 'archive' ? onArchive() : name === 'delete' ? onDelete() : undefined)}
+      onAccessibilityAction={(name) =>
+        name === 'archive' ? onArchive() : name === 'delete' ? onDelete() : undefined
+      }
       actions={
         <>
           <Pressable
@@ -83,13 +100,20 @@ export function TaskRow({ task, onPress, onToggleComplete, onArchive, onDelete }
       }
     >
       <Pressable onPress={onPress} className="flex-row items-center gap-3 py-3.5 pl-4 pr-4">
-        {accentColor && <View className="absolute bottom-2 left-0 top-2 w-1 rounded-full" style={{ backgroundColor: accentColor }} />}
+        {accentColor && (
+          <View
+            className="absolute bottom-2 left-0 top-2 w-1 rounded-full"
+            style={{ backgroundColor: accentColor }}
+          />
+        )}
         <Pressable
           onPress={handleToggle}
           hitSlop={8}
           accessibilityRole="checkbox"
           accessibilityState={{ checked: isCompleted }}
-          accessibilityLabel={isCompleted ? `Mark "${task.title}" as not done` : `Mark "${task.title}" as done`}
+          accessibilityLabel={
+            isCompleted ? `Mark "${task.title}" as not done` : `Mark "${task.title}" as done`
+          }
         >
           <Animated.View style={checkboxStyle}>
             <View
@@ -105,7 +129,14 @@ export function TaskRow({ task, onPress, onToggleComplete, onArchive, onDelete }
         </Pressable>
 
         <View className="flex-1 gap-1">
-          <Text className={isCompleted ? 'font-sora-medium text-muted-foreground line-through' : 'font-sora-medium'} numberOfLines={1}>
+          <Text
+            className={
+              isCompleted
+                ? 'font-sora-medium text-muted-foreground line-through'
+                : 'font-sora-medium'
+            }
+            numberOfLines={1}
+          >
             {task.title}
           </Text>
           <DueDateLabel task={task} />

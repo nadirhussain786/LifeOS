@@ -25,10 +25,18 @@ const SLIDE_MS = 3800;
 
 /** One segment bar at the top; fills as its slide plays. */
 function Segment({ progress }: { progress: SharedValue<number> }) {
-  const style = useAnimatedStyle(() => ({ width: `${Math.min(100, Math.max(0, progress.value * 100))}%` }));
+  const style = useAnimatedStyle(() => ({
+    width: `${Math.min(100, Math.max(0, progress.value * 100))}%`,
+  }));
   return (
-    <View className="h-1 flex-1 overflow-hidden rounded-full" style={{ backgroundColor: alpha('#ffffff', 0.3) }}>
-      <Animated.View className="h-full rounded-full" style={[{ backgroundColor: '#ffffff' }, style]} />
+    <View
+      className="h-1 flex-1 overflow-hidden rounded-full"
+      style={{ backgroundColor: alpha('#ffffff', 0.3) }}
+    >
+      <Animated.View
+        className="h-full rounded-full"
+        style={[{ backgroundColor: '#ffffff' }, style]}
+      />
     </View>
   );
 }
@@ -93,7 +101,11 @@ export default function StoryPlayerScreen() {
   }, [index, paused, current]);
 
   const kbStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: 1 + kb.value * 0.14 }, { translateX: kb.value * -10 }, { translateY: kb.value * -6 }],
+    transform: [
+      { scale: 1 + kb.value * 0.14 },
+      { translateX: kb.value * -10 },
+      { translateY: kb.value * -6 },
+    ],
   }));
   const containerStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: dragY.value }],
@@ -117,25 +129,69 @@ export default function StoryPlayerScreen() {
       <Animated.View style={[{ flex: 1, backgroundColor: '#000' }, containerStyle]}>
         {/* Ken Burns media */}
         <Animated.View style={[{ position: 'absolute', width, height }, kbStyle]}>
-          <Image source={{ uri: displayUri(current) }} style={{ width, height }} contentFit="cover" recyclingKey={current.id} />
+          <Image
+            source={{ uri: displayUri(current) }}
+            style={{ width, height }}
+            contentFit="cover"
+            recyclingKey={current.id}
+          />
         </Animated.View>
         {/* Legibility scrims */}
-        <View pointerEvents="none" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 160, backgroundColor: alpha('#000000', 0.35) }} />
-        <View pointerEvents="none" style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 200, backgroundColor: alpha('#000000', 0.4) }} />
+        <View
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 160,
+            backgroundColor: alpha('#000000', 0.35),
+          }}
+        />
+        <View
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 200,
+            backgroundColor: alpha('#000000', 0.4),
+          }}
+        />
 
         {/* Tap zones: left third = prev, right = next; hold to pause */}
         <View style={{ position: 'absolute', inset: 0, flexDirection: 'row' }}>
-          <Pressable style={{ width: '32%' }} onPress={goPrev} onLongPress={() => setPaused(true)} onPressOut={() => setPaused(false)} delayLongPress={180} />
-          <Pressable style={{ flex: 1 }} onPress={goNext} onLongPress={() => setPaused(true)} onPressOut={() => setPaused(false)} delayLongPress={180} />
+          <Pressable
+            style={{ width: '32%' }}
+            onPress={goPrev}
+            onLongPress={() => setPaused(true)}
+            onPressOut={() => setPaused(false)}
+            delayLongPress={180}
+          />
+          <Pressable
+            style={{ flex: 1 }}
+            onPress={goNext}
+            onLongPress={() => setPaused(true)}
+            onPressOut={() => setPaused(false)}
+            delayLongPress={180}
+          />
         </View>
 
         {/* Top: segments + close */}
         <View style={{ position: 'absolute', top: insets.top + 8, left: 12, right: 12, gap: 10 }}>
           <View className="flex-row gap-1.5">
             {story.map((p, i) => (
-              <View key={p.id} className="h-1 flex-1 overflow-hidden rounded-full" style={{ backgroundColor: alpha('#ffffff', 0.3) }}>
+              <View
+                key={p.id}
+                className="h-1 flex-1 overflow-hidden rounded-full"
+                style={{ backgroundColor: alpha('#ffffff', 0.3) }}
+              >
                 {i < index ? (
-                  <View className="h-full w-full rounded-full" style={{ backgroundColor: '#ffffff' }} />
+                  <View
+                    className="h-full w-full rounded-full"
+                    style={{ backgroundColor: '#ffffff' }}
+                  />
                 ) : i === index ? (
                   <Segment progress={seg} />
                 ) : null}
@@ -154,7 +210,15 @@ export default function StoryPlayerScreen() {
 
         {/* Bottom: caption + tags */}
         {(current.caption || current.tags.length > 0) && (
-          <View style={{ position: 'absolute', bottom: insets.bottom + 24, left: 20, right: 20, gap: 6 }}>
+          <View
+            style={{
+              position: 'absolute',
+              bottom: insets.bottom + 24,
+              left: 20,
+              right: 20,
+              gap: 6,
+            }}
+          >
             {current.caption ? (
               <Text style={{ color: '#ffffff', fontSize: 16 }} className="font-sora-medium">
                 {current.caption}
@@ -163,7 +227,11 @@ export default function StoryPlayerScreen() {
             {current.tags.length > 0 && (
               <View className="flex-row flex-wrap gap-2">
                 {current.tags.map((tag) => (
-                  <Text key={tag} style={{ color: '#ec4899', fontSize: 13 }} className="font-sora-semibold">
+                  <Text
+                    key={tag}
+                    style={{ color: '#ec4899', fontSize: 13 }}
+                    className="font-sora-semibold"
+                  >
                     #{tag}
                   </Text>
                 ))}

@@ -25,7 +25,8 @@ export function useStudyMutations() {
   });
 
   const addSubject = useMutation({
-    mutationFn: async ({ name, colorToken }: { name: string; colorToken: string }) => createStudySubject(name, colorToken),
+    mutationFn: async ({ name, colorToken }: { name: string; colorToken: string }) =>
+      createStudySubject(name, colorToken),
     onSuccess: invalidate,
   });
 

@@ -7,7 +7,11 @@ import {
   updateSleepSettings,
 } from '@/features/sleep/services/sleep-repository';
 import { syncBedtimeReminder } from '@/features/sleep/services/sleep-reminders';
-import type { CreateSleepInput, SleepSettings, UpdateSleepInput } from '@/features/sleep/types/sleep.types';
+import type {
+  CreateSleepInput,
+  SleepSettings,
+  UpdateSleepInput,
+} from '@/features/sleep/types/sleep.types';
 
 export function useSleepMutations() {
   const queryClient = useQueryClient();
@@ -19,7 +23,8 @@ export function useSleepMutations() {
   });
 
   const update = useMutation({
-    mutationFn: async ({ id, input }: { id: string; input: UpdateSleepInput }) => updateSleepSession(id, input),
+    mutationFn: async ({ id, input }: { id: string; input: UpdateSleepInput }) =>
+      updateSleepSession(id, input),
     onSuccess: invalidate,
   });
 

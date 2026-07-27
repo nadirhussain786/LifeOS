@@ -23,7 +23,12 @@ type Props = {
  * shadow lives on a non-clipping outer View since `overflow: hidden` (needed
  * to clip the sliding content to the rounded corners) also clips shadows.
  */
-export function SwipeableRow({ children, actions, accessibilityActions, onAccessibilityAction }: Props) {
+export function SwipeableRow({
+  children,
+  actions,
+  accessibilityActions,
+  onAccessibilityAction,
+}: Props) {
   const scheme = useColorScheme() ?? 'light';
   const translateX = useSharedValue(0);
   const startX = useSharedValue(0);
@@ -60,7 +65,11 @@ export function SwipeableRow({ children, actions, accessibilityActions, onAccess
           <Animated.View
             style={[styles.content, rowStyle]}
             accessibilityActions={accessibilityActions}
-            onAccessibilityAction={onAccessibilityAction ? (e) => onAccessibilityAction(e.nativeEvent.actionName) : undefined}
+            onAccessibilityAction={
+              onAccessibilityAction
+                ? (e) => onAccessibilityAction(e.nativeEvent.actionName)
+                : undefined
+            }
           >
             {children}
           </Animated.View>

@@ -6,7 +6,13 @@ import {
   listStudySessions,
   listStudySubjects,
 } from '@/features/study/services/study-repository';
-import { buildStudyTrend, computeStudyInsights, computeStudyStats, subjectBreakdown, todayKey } from '@/features/study/services/study-stats';
+import {
+  buildStudyTrend,
+  computeStudyInsights,
+  computeStudyStats,
+  subjectBreakdown,
+  todayKey,
+} from '@/features/study/services/study-stats';
 import { format, subDays } from 'date-fns';
 
 export function useStudySubjects() {
@@ -24,9 +30,24 @@ export function useStudySettings() {
 /** Aggregates the study dashboard: today's progress vs goal, headline stats,
  * subject split and the daily trend series. */
 export function useStudyInsights(rangeDays: number) {
-  const { data: sessions = [], isLoading: sessionsLoading, isError: sessionsError, refetch: refetchSessions } = useStudySessions();
-  const { data: subjects = [], isLoading: subjectsLoading, isError: subjectsError, refetch: refetchSubjects } = useStudySubjects();
-  const { data: settings, isLoading: settingsLoading, isError: settingsError, refetch: refetchSettings } = useStudySettings();
+  const {
+    data: sessions = [],
+    isLoading: sessionsLoading,
+    isError: sessionsError,
+    refetch: refetchSessions,
+  } = useStudySessions();
+  const {
+    data: subjects = [],
+    isLoading: subjectsLoading,
+    isError: subjectsError,
+    refetch: refetchSubjects,
+  } = useStudySubjects();
+  const {
+    data: settings,
+    isLoading: settingsLoading,
+    isError: settingsError,
+    refetch: refetchSettings,
+  } = useStudySettings();
 
   const dailyGoalMinutes = settings?.dailyGoalMinutes ?? 120;
   const dailyGoalSeconds = dailyGoalMinutes * 60;

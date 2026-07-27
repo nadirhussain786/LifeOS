@@ -41,7 +41,8 @@ export default function PhotoDetailScreen() {
   const imageHeight = Math.min(screenWidth / aspect, Dimensions.get('window').height * 0.55);
 
   const commitCaption = () => {
-    if (caption.trim() !== (photo.caption ?? '')) editPhoto.mutate({ id: photo.id, input: { caption: caption.trim() || null } });
+    if (caption.trim() !== (photo.caption ?? ''))
+      editPhoto.mutate({ id: photo.id, input: { caption: caption.trim() || null } });
   };
 
   const addTag = () => {
@@ -62,13 +63,18 @@ export default function PhotoDetailScreen() {
 
   const handleDate = (event: DateTimePickerEvent, date?: Date) => {
     if (Platform.OS === 'android') setShowDate(false);
-    if (event.type === 'set' && date) editPhoto.mutate({ id: photo.id, input: { takenAt: date.getTime() } });
+    if (event.type === 'set' && date)
+      editPhoto.mutate({ id: photo.id, input: { takenAt: date.getTime() } });
   };
 
   const confirmDelete = () => {
     Alert.alert('Delete photo?', 'This photo will be permanently removed from your device.', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => (removePhoto.mutate(photo.id), router.back()) },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => (removePhoto.mutate(photo.id), router.back()),
+      },
     ]);
   };
 
@@ -79,8 +85,16 @@ export default function PhotoDetailScreen() {
         tint="#ec4899"
         right={
           <View className="flex-row items-center gap-4">
-            <Pressable onPress={() => toggleFavorite.mutate({ id: photo.id, isFavorite: !photo.isFavorite })} hitSlop={8} accessibilityLabel="Favorite">
-              <Heart size={22} color="#ef4444" fill={photo.isFavorite ? '#ef4444' : 'transparent'} />
+            <Pressable
+              onPress={() => toggleFavorite.mutate({ id: photo.id, isFavorite: !photo.isFavorite })}
+              hitSlop={8}
+              accessibilityLabel="Favorite"
+            >
+              <Heart
+                size={22}
+                color="#ef4444"
+                fill={photo.isFavorite ? '#ef4444' : 'transparent'}
+              />
             </Pressable>
             <Pressable onPress={confirmDelete} hitSlop={8} accessibilityLabel="Delete">
               <Trash2 size={20} color={colors[scheme].destructive} />
@@ -89,16 +103,33 @@ export default function PhotoDetailScreen() {
         }
       />
 
-      <ScrollView contentContainerClassName="gap-5 pb-10" keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerClassName="gap-5 pb-10"
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         {photo.mediaType === 'video' ? (
           <View>
-            <GalleryVideo uri={photo.uri} style={{ width: screenWidth, height: imageHeight, backgroundColor: '#000000' }} />
-            <View className="absolute bottom-2 right-2 rounded-md px-2 py-0.5" style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}>
-              <Text className="text-[11px] font-sora-semibold text-white">{formatDuration(photo.durationMs)}</Text>
+            <GalleryVideo
+              uri={photo.uri}
+              style={{ width: screenWidth, height: imageHeight, backgroundColor: '#000000' }}
+            />
+            <View
+              className="absolute bottom-2 right-2 rounded-md px-2 py-0.5"
+              style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}
+            >
+              <Text className="font-sora-semibold text-[11px] text-white">
+                {formatDuration(photo.durationMs)}
+              </Text>
             </View>
           </View>
         ) : (
-          <Image source={{ uri: photo.uri }} style={{ width: screenWidth, height: imageHeight, backgroundColor: '#00000010' }} contentFit="contain" recyclingKey={photo.id} />
+          <Image
+            source={{ uri: photo.uri }}
+            style={{ width: screenWidth, height: imageHeight, backgroundColor: '#00000010' }}
+            contentFit="contain"
+            recyclingKey={photo.id}
+          />
         )}
 
         <View className="gap-5 px-5">
@@ -108,15 +139,30 @@ export default function PhotoDetailScreen() {
               <Text className="font-sora-medium text-foreground">Date</Text>
             </View>
             {Platform.OS === 'ios' ? (
-              <DateTimePicker value={new Date(photo.takenAt)} mode="date" display="compact" onChange={handleDate} />
+              <DateTimePicker
+                value={new Date(photo.takenAt)}
+                mode="date"
+                display="compact"
+                onChange={handleDate}
+              />
             ) : (
-              <Pressable onPress={() => setShowDate(true)} className="rounded-lg bg-surface px-3 py-1.5">
-                <Text className="font-sora-semibold text-foreground">{format(photo.takenAt, 'MMM d, yyyy')}</Text>
+              <Pressable
+                onPress={() => setShowDate(true)}
+                className="rounded-lg bg-surface px-3 py-1.5"
+              >
+                <Text className="font-sora-semibold text-foreground">
+                  {format(photo.takenAt, 'MMM d, yyyy')}
+                </Text>
               </Pressable>
             )}
           </View>
           {Platform.OS === 'android' && showDate && (
-            <DateTimePicker value={new Date(photo.takenAt)} mode="date" display="default" onChange={handleDate} />
+            <DateTimePicker
+              value={new Date(photo.takenAt)}
+              mode="date"
+              display="default"
+              onChange={handleDate}
+            />
           )}
 
           <View className="gap-2">

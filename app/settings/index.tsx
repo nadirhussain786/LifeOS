@@ -29,8 +29,15 @@ import { exportAllData } from '@/lib/data-export';
 import { clearAllData } from '@/lib/data-management';
 import { queryClient } from '@/lib/query-client';
 import { useProfileStore } from '@/features/profile/store/profile-store';
-import { authenticate, getBiometricLabel, isBiometricAvailable } from '@/features/security/lib/biometrics';
-import { useAppearanceStore, type ThemePreference } from '@/features/settings/store/appearance-store';
+import {
+  authenticate,
+  getBiometricLabel,
+  isBiometricAvailable,
+} from '@/features/security/lib/biometrics';
+import {
+  useAppearanceStore,
+  type ThemePreference,
+} from '@/features/settings/store/appearance-store';
 import { LANGUAGES, useLanguageStore } from '@/features/settings/store/language-store';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -76,7 +83,10 @@ export default function SettingsScreen() {
   const toggleAppLock = async (next: boolean) => {
     if (next) {
       if (!bioAvailable) {
-        Alert.alert('Set up biometrics first', 'Add Face ID or a fingerprint in your device settings, then turn on App lock here.');
+        Alert.alert(
+          'Set up biometrics first',
+          'Add Face ID or a fingerprint in your device settings, then turn on App lock here.',
+        );
         return;
       }
       // Confirm the person can actually authenticate before arming the lock.
@@ -128,121 +138,162 @@ export default function SettingsScreen() {
   return (
     <View className="flex-1 bg-background">
       <ScreenHeader title={t('settings.title')} eyebrow="System" tint="#737373" />
-      <ScrollView contentContainerClassName="gap-6 px-5 py-4 pb-10" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerClassName="gap-6 px-5 py-4 pb-10"
+        showsVerticalScrollIndicator={false}
+      >
         <View className="gap-2">
           <SectionLabel>{t('settings.appearance')}</SectionLabel>
-        <View className="flex-row gap-2 rounded-2xl border border-border bg-card p-2">
-          {THEME_OPTIONS.map((option) => {
-            const selected = themePreference === option.value;
-            const Icon = option.icon;
-            return (
-              <Pressable
-                key={option.value}
-                onPress={() => {
-                  Haptics.selectionAsync();
-                  setThemePreference(option.value);
-                }}
-                className="flex-1 items-center gap-1.5 rounded-xl py-2.5"
-                style={{ backgroundColor: selected ? colors[scheme].accent : 'transparent' }}
-              >
-                <Icon size={17} color={selected ? colors[scheme].accentForeground : colors[scheme].mutedForeground} />
-                <Text
-                  variant="caption"
-                  className="font-sora-medium"
-                  style={{ color: selected ? colors[scheme].accentForeground : colors[scheme].mutedForeground }}
+          <View className="flex-row gap-2 rounded-2xl border border-border bg-card p-2">
+            {THEME_OPTIONS.map((option) => {
+              const selected = themePreference === option.value;
+              const Icon = option.icon;
+              return (
+                <Pressable
+                  key={option.value}
+                  onPress={() => {
+                    Haptics.selectionAsync();
+                    setThemePreference(option.value);
+                  }}
+                  className="flex-1 items-center gap-1.5 rounded-xl py-2.5"
+                  style={{ backgroundColor: selected ? colors[scheme].accent : 'transparent' }}
                 >
-                  {t(option.labelKey)}
-                </Text>
-              </Pressable>
-            );
-          })}
+                  <Icon
+                    size={17}
+                    color={
+                      selected ? colors[scheme].accentForeground : colors[scheme].mutedForeground
+                    }
+                  />
+                  <Text
+                    variant="caption"
+                    className="font-sora-medium"
+                    style={{
+                      color: selected
+                        ? colors[scheme].accentForeground
+                        : colors[scheme].mutedForeground,
+                    }}
+                  >
+                    {t(option.labelKey)}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+          <View className="rounded-2xl border border-border bg-card px-4">
+            <SettingsRow
+              icon={Languages}
+              label={t('settings.language')}
+              value={t(`language.${language}`)}
+              isFirst
+              onPress={pickLanguage}
+            />
+          </View>
         </View>
-        <View className="rounded-2xl border border-border bg-card px-4">
-          <SettingsRow icon={Languages} label={t('settings.language')} value={t(`language.${language}`)} isFirst onPress={pickLanguage} />
-        </View>
-      </View>
 
-      <View className="gap-2">
-        <SectionLabel>{t('settings.notifications')}</SectionLabel>
-        <View className="rounded-2xl border border-border bg-card px-4">
-          <SettingsRow
-            icon={Bell}
-            label="Notifications"
-            subtitle="Delivery, quiet hours & what you hear about"
-            isFirst
-            onPress={() => router.push('/settings/notifications')}
-          />
-          <SettingsRow
-            icon={Droplet}
-            label="Water intake reminders"
-            subtitle="Daily hydration nudges on your schedule"
-            onPress={() => router.push('/water-intake/settings')}
-          />
-          <SettingsRow
-            icon={BookOpen}
-            label="Journal reminder"
-            subtitle="A daily nudge to write today's entry"
-            onPress={() => router.push('/journal/reminder-settings')}
-          />
+        <View className="gap-2">
+          <SectionLabel>{t('settings.notifications')}</SectionLabel>
+          <View className="rounded-2xl border border-border bg-card px-4">
+            <SettingsRow
+              icon={Bell}
+              label="Notifications"
+              subtitle="Delivery, quiet hours & what you hear about"
+              isFirst
+              onPress={() => router.push('/settings/notifications')}
+            />
+            <SettingsRow
+              icon={Droplet}
+              label="Water intake reminders"
+              subtitle="Daily hydration nudges on your schedule"
+              onPress={() => router.push('/water-intake/settings')}
+            />
+            <SettingsRow
+              icon={BookOpen}
+              label="Journal reminder"
+              subtitle="A daily nudge to write today's entry"
+              onPress={() => router.push('/journal/reminder-settings')}
+            />
+          </View>
+          <Text variant="caption" className="px-1">
+            Tasks, notes, habits, and calendar events each have their own reminder — set it right
+            from the item.
+          </Text>
         </View>
-        <Text variant="caption" className="px-1">
-          Tasks, notes, habits, and calendar events each have their own reminder — set it right from the item.
-        </Text>
-      </View>
 
-      <View className="gap-2">
-        <SectionLabel>Privacy</SectionLabel>
-        <View className="rounded-2xl border border-border bg-card px-4">
-          <SettingsRow
-            icon={LockKeyhole}
-            label="App lock"
-            subtitle={bioAvailable ? `Require ${bioLabel} to open LifeOS` : 'Add Face ID or a fingerprint to enable'}
-            isFirst
-            right={
-              <Switch
-                value={appLockEnabled}
-                onValueChange={toggleAppLock}
-                disabled={!bioAvailable && !appLockEnabled}
-                trackColor={{ true: colors[scheme].accent, false: colors[scheme].border }}
-                thumbColor="#ffffff"
-              />
-            }
-          />
+        <View className="gap-2">
+          <SectionLabel>Privacy</SectionLabel>
+          <View className="rounded-2xl border border-border bg-card px-4">
+            <SettingsRow
+              icon={LockKeyhole}
+              label="App lock"
+              subtitle={
+                bioAvailable
+                  ? `Require ${bioLabel} to open LifeOS`
+                  : 'Add Face ID or a fingerprint to enable'
+              }
+              isFirst
+              right={
+                <Switch
+                  value={appLockEnabled}
+                  onValueChange={toggleAppLock}
+                  disabled={!bioAvailable && !appLockEnabled}
+                  trackColor={{ true: colors[scheme].accent, false: colors[scheme].border }}
+                  thumbColor="#ffffff"
+                />
+              }
+            />
+          </View>
         </View>
-      </View>
 
-      <View className="gap-2">
-        <SectionLabel>Data</SectionLabel>
-        <View className="rounded-2xl border border-border bg-card px-4">
-          <SettingsRow
-            icon={Download}
-            label={isExporting ? 'Preparing export…' : 'Export data'}
-            subtitle="Save a JSON backup of everything"
-            isFirst
-            disabled={isExporting}
-            onPress={handleExport}
-            chevron={false}
-          />
-          <SettingsRow
-            icon={Trash2}
-            label="Clear all data"
-            subtitle="Permanently delete everything on this device"
-            destructive
-            onPress={handleClearData}
-            chevron={false}
-          />
+        <View className="gap-2">
+          <SectionLabel>Data</SectionLabel>
+          <View className="rounded-2xl border border-border bg-card px-4">
+            <SettingsRow
+              icon={Download}
+              label={isExporting ? 'Preparing export…' : 'Export data'}
+              subtitle="Save a JSON backup of everything"
+              isFirst
+              disabled={isExporting}
+              onPress={handleExport}
+              chevron={false}
+            />
+            <SettingsRow
+              icon={Trash2}
+              label="Clear all data"
+              subtitle="Permanently delete everything on this device"
+              destructive
+              onPress={handleClearData}
+              chevron={false}
+            />
+          </View>
         </View>
-      </View>
 
-      <View className="gap-2">
-        <SectionLabel>{t('settings.about')}</SectionLabel>
-        <View className="rounded-2xl border border-border bg-card px-4">
-          <SettingsRow icon={Info} label={t('settings.version')} value={Constants.expoConfig?.version ?? '1.0.0'} isFirst />
-          <SettingsRow icon={Database} label={t('settings.storage')} value={t('settings.onThisDevice')} />
-          <SettingsRow icon={ShieldCheck} label={t('settings.syncAccount')} subtitle="Backup, sync, and sign in" onPress={() => router.push('/settings/sync')} />
-          <SettingsRow icon={FileText} label={t('settings.privacyPolicy')} onPress={() => Linking.openURL(PRIVACY_POLICY_URL)} />
+        <View className="gap-2">
+          <SectionLabel>{t('settings.about')}</SectionLabel>
+          <View className="rounded-2xl border border-border bg-card px-4">
+            <SettingsRow
+              icon={Info}
+              label={t('settings.version')}
+              value={Constants.expoConfig?.version ?? '1.0.0'}
+              isFirst
+            />
+            <SettingsRow
+              icon={Database}
+              label={t('settings.storage')}
+              value={t('settings.onThisDevice')}
+            />
+            <SettingsRow
+              icon={ShieldCheck}
+              label={t('settings.syncAccount')}
+              subtitle="Backup, sync, and sign in"
+              onPress={() => router.push('/settings/sync')}
+            />
+            <SettingsRow
+              icon={FileText}
+              label={t('settings.privacyPolicy')}
+              onPress={() => Linking.openURL(PRIVACY_POLICY_URL)}
+            />
+          </View>
         </View>
-      </View>
       </ScrollView>
     </View>
   );

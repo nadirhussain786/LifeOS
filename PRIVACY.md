@@ -10,6 +10,7 @@ enable cloud sync.
 ## What data LifeOS handles
 
 **On your device (always local):**
+
 - Content you create: tasks, notes, habits and habit logs, journal entries
   (including optional mood, energy, and — only if you enable it — a location tag
   with coordinates), calendar events, water logs, sleep and study sessions,
@@ -17,6 +18,7 @@ enable cloud sync.
 - App preferences: theme, language, notification settings, and app-lock setting.
 
 **In the cloud (only if you sign in and enable sync):**
+
 - The above records for the modules you choose to sync (you control this
   per-module in Settings → Sync & Account). Photos, audio, and reminders are
   **not** synced.
@@ -34,6 +36,7 @@ or write your data. Data is transmitted over HTTPS.
 ## Permissions
 
 LifeOS requests device permissions only for features you use:
+
 - **Notifications** — to deliver reminders you set.
 - **Camera / Photos** — to add media to the gallery, notes, and journal.
 - **Microphone** — to record voice notes.

@@ -22,6 +22,11 @@ export const queryClient = new QueryClient({
     onError: (error, query) => reportQueryError('Query', query.queryKey, error),
   }),
   mutationCache: new MutationCache({
-    onError: (error, _variables, _context, mutation) => reportQueryError('Mutation', mutation.options.mutationKey ?? mutation.options.mutationFn?.name, error),
+    onError: (error, _variables, _context, mutation) =>
+      reportQueryError(
+        'Mutation',
+        mutation.options.mutationKey ?? mutation.options.mutationFn?.name,
+        error,
+      ),
   }),
 });

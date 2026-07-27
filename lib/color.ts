@@ -11,7 +11,13 @@ function clamp(value: number): number {
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } {
   const normalized = hex.replace('#', '');
-  const full = normalized.length === 3 ? normalized.split('').map((c) => c + c).join('') : normalized;
+  const full =
+    normalized.length === 3
+      ? normalized
+          .split('')
+          .map((c) => c + c)
+          .join('')
+      : normalized;
   const int = parseInt(full, 16);
   return { r: (int >> 16) & 255, g: (int >> 8) & 255, b: int & 255 };
 }
@@ -24,7 +30,11 @@ function rgbToHex(r: number, g: number, b: number): string {
 function mix(hex: string, target: string, amount: number): string {
   const a = hexToRgb(hex);
   const b = hexToRgb(target);
-  return rgbToHex(a.r + (b.r - a.r) * amount, a.g + (b.g - a.g) * amount, a.b + (b.b - a.b) * amount);
+  return rgbToHex(
+    a.r + (b.r - a.r) * amount,
+    a.g + (b.g - a.g) * amount,
+    a.b + (b.b - a.b) * amount,
+  );
 }
 
 export function lighten(hex: string, amount: number): string {
@@ -48,7 +58,9 @@ export function tintGradientTriple(hex: string): [string, string, string] {
 
 /** Alpha-suffixed hex for subtle tinted fills (e.g. `${tint}1f`). `a` is 0–1. */
 export function alpha(hex: string, a: number): string {
-  const value = clamp(a * 255).toString(16).padStart(2, '0');
+  const value = clamp(a * 255)
+    .toString(16)
+    .padStart(2, '0');
   return `${hex}${value}`;
 }
 

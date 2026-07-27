@@ -17,7 +17,13 @@ export function useSongMutations() {
   });
 
   const update = useMutation({
-    mutationFn: async ({ id, input }: { id: string; input: { title?: string; artist?: string | null } }) => updateSong(id, input),
+    mutationFn: async ({
+      id,
+      input,
+    }: {
+      id: string;
+      input: { title?: string; artist?: string | null };
+    }) => updateSong(id, input),
     onSuccess: invalidate,
   });
 

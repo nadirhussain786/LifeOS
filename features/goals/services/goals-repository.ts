@@ -153,7 +153,14 @@ export function createGoal(input: CreateGoalInput): Goal {
     .filter(Boolean)
     .forEach((title, index) => {
       db.insert(goalMilestones)
-        .values({ id: generateId(), goalId: id, userId: LOCAL_USER_ID, title, position: index, createdAt: now })
+        .values({
+          id: generateId(),
+          goalId: id,
+          userId: LOCAL_USER_ID,
+          title,
+          position: index,
+          createdAt: now,
+        })
         .run();
     });
 
@@ -171,7 +178,11 @@ export function updateGoal(id: string, input: UpdateGoalInput) {
 export function setGoalManualProgress(id: string, progress: number) {
   getDb()
     .update(goals)
-    .set({ manualProgress: Math.max(0, Math.min(1, progress)), updatedAt: Date.now(), syncStatus: 'pending' })
+    .set({
+      manualProgress: Math.max(0, Math.min(1, progress)),
+      updatedAt: Date.now(),
+      syncStatus: 'pending',
+    })
     .where(eq(goals.id, id))
     .run();
 }
@@ -211,7 +222,10 @@ export function archiveGoal(id: string) {
 
 export function deleteGoal(id: string) {
   const db = getDb();
-  db.update(goals).set({ deletedAt: Date.now(), updatedAt: Date.now(), syncStatus: 'pending' }).where(eq(goals.id, id)).run();
+  db.update(goals)
+    .set({ deletedAt: Date.now(), updatedAt: Date.now(), syncStatus: 'pending' })
+    .where(eq(goals.id, id))
+    .run();
   db.delete(goalMilestones).where(eq(goalMilestones.goalId, id)).run();
   db.delete(goalProgressLogs).where(eq(goalProgressLogs.goalId, id)).run();
 }
@@ -273,7 +287,12 @@ export function listProgressLogs(goalId: string): GoalProgressLog[] {
  * is in the goal's native scale (fraction for percent goals, absolute count for
  * count goals); `delta` is the signed change for the activity feed.
  */
-export function logGoalProgress(goal: Goal, resultingValue: number, delta: number, note: string | null): GoalProgressLog {
+export function logGoalProgress(
+  goal: Goal,
+  resultingValue: number,
+  delta: number,
+  note: string | null,
+): GoalProgressLog {
   const db = getDb();
   const now = Date.now();
   const log: GoalProgressLog = {
@@ -286,13 +305,22 @@ export function logGoalProgress(goal: Goal, resultingValue: number, delta: numbe
     logDate: format(now, 'yyyy-MM-dd'),
     createdAt: now,
   };
-  db.insert(goalProgressLogs).values({ ...log, userId: LOCAL_USER_ID }).run();
+  db.insert(goalProgressLogs)
+    .values({ ...log, userId: LOCAL_USER_ID })
+    .run();
 
   if (goal.progressMode === 'count') {
-    db.update(goals).set({ currentValue: Math.max(0, resultingValue), updatedAt: now, syncStatus: 'pending' }).where(eq(goals.id, goal.id)).run();
+    db.update(goals)
+      .set({ currentValue: Math.max(0, resultingValue), updatedAt: now, syncStatus: 'pending' })
+      .where(eq(goals.id, goal.id))
+      .run();
   } else {
     db.update(goals)
-      .set({ manualProgress: Math.max(0, Math.min(1, resultingValue)), updatedAt: now, syncStatus: 'pending' })
+      .set({
+        manualProgress: Math.max(0, Math.min(1, resultingValue)),
+        updatedAt: now,
+        syncStatus: 'pending',
+      })
       .where(eq(goals.id, goal.id))
       .run();
   }
@@ -312,7 +340,11 @@ export function toggleMilestone(id: string, isCompleted: boolean) {
 }
 
 export function renameMilestone(id: string, title: string) {
-  getDb().update(goalMilestones).set({ title: title.trim() }).where(eq(goalMilestones.id, id)).run();
+  getDb()
+    .update(goalMilestones)
+    .set({ title: title.trim() })
+    .where(eq(goalMilestones.id, id))
+    .run();
 }
 
 export function deleteMilestone(id: string) {

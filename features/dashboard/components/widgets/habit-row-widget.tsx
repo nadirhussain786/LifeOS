@@ -31,7 +31,13 @@ export function HabitRowWidget() {
   };
 
   return (
-    <WidgetCard icon={Repeat} title="Habits" tint={moduleTint('habit', scheme)} actionLabel="View all" onActionPress={() => router.push('/(tabs)/habits')}>
+    <WidgetCard
+      icon={Repeat}
+      title="Habits"
+      tint={moduleTint('habit', scheme)}
+      actionLabel="View all"
+      onActionPress={() => router.push('/(tabs)/habits')}
+    >
       {isLoading || !data ? (
         <View className="flex-row gap-3">
           <Skeleton className="h-16 w-16 rounded-full" />
@@ -39,11 +45,23 @@ export function HabitRowWidget() {
           <Skeleton className="h-16 w-16 rounded-full" />
         </View>
       ) : data.habits.length === 0 ? (
-        <WidgetEmptyState message="No habits yet — start one today" actionLabel="Add habit" onAction={() => router.push('/(tabs)/habits')} />
+        <WidgetEmptyState
+          message="No habits yet — start one today"
+          actionLabel="Add habit"
+          onAction={() => router.push('/(tabs)/habits')}
+        />
       ) : (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-3">
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerClassName="gap-3"
+        >
           {data.habits.map((habit) => (
-            <Pressable key={habit.id} onPress={() => toggleHabit(habit.id, habit.doneToday)} className="items-center gap-1.5">
+            <Pressable
+              key={habit.id}
+              onPress={() => toggleHabit(habit.id, habit.doneToday)}
+              className="items-center gap-1.5"
+            >
               <View
                 className="h-16 w-16 items-center justify-center rounded-full border-2"
                 style={{

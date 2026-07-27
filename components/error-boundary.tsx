@@ -36,7 +36,11 @@ export class ErrorBoundary extends Component<Props, State> {
         <Text variant="muted" className="text-center">
           The app hit an unexpected error. Your data is safe — try again.
         </Text>
-        <Pressable onPress={this.reset} className="mt-2 rounded-full border border-border bg-card px-6 py-3" accessibilityRole="button">
+        <Pressable
+          onPress={this.reset}
+          className="mt-2 rounded-full border border-border bg-card px-6 py-3"
+          accessibilityRole="button"
+        >
           <Text className="font-sora-semibold text-foreground">Reload</Text>
         </Pressable>
       </View>

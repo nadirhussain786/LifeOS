@@ -42,7 +42,12 @@ export function getSongsByIds(ids: string[]): Song[] {
 
 /** Inserts an already-imported song row — the file copy + duration probe
  * happen in song-import.ts, which calls this once both are done. */
-export function createSong(input: { title: string; artist: string | null; uri: string; durationMs: number | null }): Song {
+export function createSong(input: {
+  title: string;
+  artist: string | null;
+  uri: string;
+  durationMs: number | null;
+}): Song {
   const now = Date.now();
   const song: Song = {
     id: generateId(),
@@ -60,7 +65,11 @@ export function createSong(input: { title: string; artist: string | null; uri: s
 }
 
 export function updateSong(id: string, input: { title?: string; artist?: string | null }) {
-  getDb().update(songs).set({ ...input, syncStatus: 'pending' }).where(eq(songs.id, id)).run();
+  getDb()
+    .update(songs)
+    .set({ ...input, syncStatus: 'pending' })
+    .where(eq(songs.id, id))
+    .run();
 }
 
 /** Removes the song everywhere (library, every playlist) and frees the disk
@@ -71,7 +80,10 @@ export function deleteSong(id: string) {
   const song = getSong(id);
   const db = getDb();
   db.delete(playlistSongs).where(eq(playlistSongs.songId, id)).run();
-  db.update(songs).set({ deletedAt: Date.now(), syncStatus: 'pending' }).where(eq(songs.id, id)).run();
+  db.update(songs)
+    .set({ deletedAt: Date.now(), syncStatus: 'pending' })
+    .where(eq(songs.id, id))
+    .run();
 
   if (song) {
     const file = new File(song.uri);

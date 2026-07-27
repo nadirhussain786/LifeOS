@@ -1,5 +1,8 @@
 import { WIDGET_REGISTRY } from '@/features/dashboard/config/widget-registry';
-import { DEFAULT_WIDGET_ORDER, useDashboardStore } from '@/features/dashboard/store/dashboard-store';
+import {
+  DEFAULT_WIDGET_ORDER,
+  useDashboardStore,
+} from '@/features/dashboard/store/dashboard-store';
 
 /**
  * Ordered list of {id, Component} ready to render — order is user-configurable

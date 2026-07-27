@@ -71,7 +71,11 @@ export function useDebtMutations() {
   const removeDebt = useMutation({
     mutationFn: async (id: string) => {
       const debt = getDebt(id);
-      if (debt) await cancelDebtReminder({ id: debt.id, reminderNotificationId: debt.reminderNotificationId });
+      if (debt)
+        await cancelDebtReminder({
+          id: debt.id,
+          reminderNotificationId: debt.reminderNotificationId,
+        });
       deleteDebt(id);
     },
     onSuccess: invalidate,

@@ -37,17 +37,26 @@ export default function TimelineScreen() {
           {
             icon: Plus,
             label: 'Add event',
-            onPress: () => router.push({ pathname: '/timeline/event/new', params: { date: dateKey } }),
+            onPress: () =>
+              router.push({ pathname: '/timeline/event/new', params: { date: dateKey } }),
           },
         ]}
       />
 
       <View className="flex-row items-center justify-between px-5 pb-3 pt-1">
-        <Pressable onPress={() => goToDate(subDays(date, 1))} hitSlop={10} className="h-9 w-9 items-center justify-center">
+        <Pressable
+          onPress={() => goToDate(subDays(date, 1))}
+          hitSlop={10}
+          className="h-9 w-9 items-center justify-center"
+        >
           <ChevronLeft size={18} color={colors[scheme].mutedForeground} />
         </Pressable>
         <Text variant="subheading">{format(date, 'EEEE, MMM d')}</Text>
-        <Pressable onPress={() => goToDate(addDays(date, 1))} hitSlop={10} className="h-9 w-9 items-center justify-center">
+        <Pressable
+          onPress={() => goToDate(addDays(date, 1))}
+          hitSlop={10}
+          className="h-9 w-9 items-center justify-center"
+        >
           <ChevronRight size={18} color={colors[scheme].mutedForeground} />
         </Pressable>
       </View>
@@ -59,13 +68,19 @@ export default function TimelineScreen() {
           <Skeleton className="h-14 w-full rounded-2xl" />
         </View>
       ) : events.length === 0 ? (
-        <EmptyState icon={Clock3} title="Nothing here yet" description="What you do today will show up here automatically." />
+        <EmptyState
+          icon={Clock3}
+          title="Nothing here yet"
+          description="What you do today will show up here automatically."
+        />
       ) : (
         <FlashList
           data={events}
           keyExtractor={(event) => event.id}
           contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 4, paddingBottom: 40 }}
-          renderItem={({ item }) => <TimelineEventRow event={item} onDeleteCalendarEvent={(id) => remove.mutate(id)} />}
+          renderItem={({ item }) => (
+            <TimelineEventRow event={item} onDeleteCalendarEvent={(id) => remove.mutate(id)} />
+          )}
         />
       )}
     </View>

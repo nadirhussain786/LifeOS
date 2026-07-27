@@ -30,9 +30,18 @@ function toSession(row: typeof sleepSessions.$inferSelect): SleepSession {
 }
 
 export function getSleepSettings(): SleepSettings {
-  const row = getDb().select().from(sleepSettings).where(eq(sleepSettings.userId, LOCAL_USER_ID)).get();
+  const row = getDb()
+    .select()
+    .from(sleepSettings)
+    .where(eq(sleepSettings.userId, LOCAL_USER_ID))
+    .get();
   if (!row) {
-    return { goalMinutes: DEFAULT_GOAL_MINUTES, targetBedtime: null, targetWakeTime: null, reminderEnabled: false };
+    return {
+      goalMinutes: DEFAULT_GOAL_MINUTES,
+      targetBedtime: null,
+      targetWakeTime: null,
+      reminderEnabled: false,
+    };
   }
   return {
     goalMinutes: row.goalMinutes,
@@ -44,7 +53,11 @@ export function getSleepSettings(): SleepSettings {
 
 /** The raw reminder notification id (kept out of the UI-facing SleepSettings). */
 export function getSleepReminderNotificationId(): string | null {
-  const row = getDb().select().from(sleepSettings).where(eq(sleepSettings.userId, LOCAL_USER_ID)).get();
+  const row = getDb()
+    .select()
+    .from(sleepSettings)
+    .where(eq(sleepSettings.userId, LOCAL_USER_ID))
+    .get();
   return row?.reminderNotificationId ?? null;
 }
 
@@ -58,7 +71,11 @@ export function setSleepReminderNotificationId(notificationId: string | null) {
 
 export function updateSleepSettings(input: Partial<SleepSettings>) {
   const db = getDb();
-  const existing = db.select().from(sleepSettings).where(eq(sleepSettings.userId, LOCAL_USER_ID)).get();
+  const existing = db
+    .select()
+    .from(sleepSettings)
+    .where(eq(sleepSettings.userId, LOCAL_USER_ID))
+    .get();
   const now = Date.now();
   if (!existing) {
     db.insert(sleepSettings)
@@ -98,7 +115,13 @@ export function getSleepSessionByDate(logDate: string): SleepSession | null {
   const row = getDb()
     .select()
     .from(sleepSessions)
-    .where(and(eq(sleepSessions.userId, LOCAL_USER_ID), eq(sleepSessions.logDate, logDate), isNull(sleepSessions.deletedAt)))
+    .where(
+      and(
+        eq(sleepSessions.userId, LOCAL_USER_ID),
+        eq(sleepSessions.logDate, logDate),
+        isNull(sleepSessions.deletedAt),
+      ),
+    )
     .get();
   return row ? toSession(row) : null;
 }

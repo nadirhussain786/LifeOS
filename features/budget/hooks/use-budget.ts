@@ -18,7 +18,10 @@ import {
 } from '@/features/budget/services/budget-stats';
 
 export function useTransactions() {
-  return useQuery({ queryKey: ['budget', 'transactions'], queryFn: async () => listTransactions() });
+  return useQuery({
+    queryKey: ['budget', 'transactions'],
+    queryFn: async () => listTransactions(),
+  });
 }
 
 export function useTransaction(id: string | undefined) {
@@ -30,7 +33,10 @@ export function useTransaction(id: string | undefined) {
 }
 
 export function useSavingsGoals() {
-  return useQuery({ queryKey: ['budget', 'savings-goals'], queryFn: async () => listSavingsGoalsWithProgress() });
+  return useQuery({
+    queryKey: ['budget', 'savings-goals'],
+    queryFn: async () => listSavingsGoalsWithProgress(),
+  });
 }
 
 export function useBudgetSettings() {
@@ -61,5 +67,12 @@ export function useBudgetOverview(period: Period, anchorTime: number) {
     };
   }, [transactions, period, anchorTime]);
 
-  return { isLoading, isError, refetch, currency, monthlyBudgetCents: settings?.monthlyBudgetCents ?? null, ...value };
+  return {
+    isLoading,
+    isError,
+    refetch,
+    currency,
+    monthlyBudgetCents: settings?.monthlyBudgetCents ?? null,
+    ...value,
+  };
 }

@@ -1,6 +1,13 @@
 import { type BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import * as Haptics from 'expo-haptics';
-import { BookOpen, CheckSquare, Home, LayoutGrid, Repeat, type LucideIcon } from 'lucide-react-native';
+import {
+  BookOpen,
+  CheckSquare,
+  Home,
+  LayoutGrid,
+  Repeat,
+  type LucideIcon,
+} from 'lucide-react-native';
 import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -50,7 +57,11 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
 
         const onPress = () => {
           Haptics.selectionAsync();
-          const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
+          const event = navigation.emit({
+            type: 'tabPress',
+            target: route.key,
+            canPreventDefault: true,
+          });
           if (!focused && !event.defaultPrevented) navigation.navigate(route.name);
         };
 
@@ -61,10 +72,24 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
             accessibilityRole="button"
             accessibilityState={{ selected: focused }}
             accessibilityLabel={meta.label}
-            style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 4, paddingVertical: 2 }}
+            style={{
+              flex: 1,
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 4,
+              paddingVertical: 2,
+            }}
           >
             <Icon size={22} color={color} strokeWidth={focused ? 2.5 : 2} />
-            <Text style={{ color, fontSize: 10.5, fontFamily: focused ? 'Sora_700Bold' : 'Sora_500Medium' }}>{meta.label}</Text>
+            <Text
+              style={{
+                color,
+                fontSize: 10.5,
+                fontFamily: focused ? 'Sora_700Bold' : 'Sora_500Medium',
+              }}
+            >
+              {meta.label}
+            </Text>
           </Pressable>
         );
       })}

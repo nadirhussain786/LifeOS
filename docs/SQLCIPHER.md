@@ -39,7 +39,9 @@ boot, before the first query. In `app/_layout.tsx`, gate rendering on it:
 
 ```ts
 const [dbReady, setDbReady] = useState(false);
-useEffect(() => { void initDatabase().then(() => setDbReady(true)); }, []);
+useEffect(() => {
+  void initDatabase().then(() => setDbReady(true));
+}, []);
 if (!fontsLoaded || !isInitialized || !profileHydrated || !dbReady) return null;
 ```
 
@@ -83,10 +85,14 @@ export function getDb() {
 export function getRawDb() {
   const db = raw!;
   return {
-    getAllSync: <T,>(sql: string, params: unknown[] = []) => (db.executeSync(sql, params).rows ?? []) as T[],
-    getFirstSync: <T,>(sql: string, params: unknown[] = []) => ((db.executeSync(sql, params).rows ?? [])[0] ?? null) as T | null,
+    getAllSync: <T>(sql: string, params: unknown[] = []) =>
+      (db.executeSync(sql, params).rows ?? []) as T[],
+    getFirstSync: <T>(sql: string, params: unknown[] = []) =>
+      ((db.executeSync(sql, params).rows ?? [])[0] ?? null) as T | null,
     runSync: (sql: string, params: unknown[] = []) => db.executeSync(sql, params),
-    execSync: (sql: string) => { for (const s of sql.split(';')) if (s.trim()) db.executeSync(s); },
+    execSync: (sql: string) => {
+      for (const s of sql.split(';')) if (s.trim()) db.executeSync(s);
+    },
   };
 }
 ```
@@ -98,6 +104,7 @@ export function getRawDb() {
 
 An existing **plaintext** `lifeos.db` cannot be read by the encrypted engine. For
 a fresh install there's nothing to do. For a device that already has data:
+
 - Simplest: Settings → Data → **Export data** (JSON) before upgrading, then the
   encrypted DB starts empty (re-import is manual today), **or**
 - Use SQLCipher's `sqlcipher_export` to copy the plaintext DB into an encrypted

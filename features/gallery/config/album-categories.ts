@@ -1,8 +1,22 @@
-import { Award, Dumbbell, GraduationCap, Images, Scale, Sparkles, User, type LucideIcon } from 'lucide-react-native';
+import {
+  Award,
+  Dumbbell,
+  GraduationCap,
+  Images,
+  Scale,
+  Sparkles,
+  User,
+  type LucideIcon,
+} from 'lucide-react-native';
 
 import type { AlbumCategory } from '@/features/gallery/types/gallery.types';
 
-export type AlbumCategoryMeta = { id: AlbumCategory; label: string; icon: LucideIcon; tint: string };
+export type AlbumCategoryMeta = {
+  id: AlbumCategory;
+  label: string;
+  icon: LucideIcon;
+  tint: string;
+};
 
 export const ALBUM_CATEGORIES: AlbumCategoryMeta[] = [
   { id: 'gym', label: 'Gym Progress', icon: Dumbbell, tint: '#ef4444' },

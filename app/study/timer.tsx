@@ -130,18 +130,34 @@ export default function StudyTimerScreen() {
     <View className="flex-1 bg-background" style={{ paddingTop: insets.top + 12 }}>
       <View className="flex-1 items-center justify-center gap-10 px-6">
         <View className="items-center gap-1.5">
-          <View className="flex-row items-center gap-2 rounded-full px-3 py-1" style={{ backgroundColor: `${tint}1f` }}>
+          <View
+            className="flex-row items-center gap-2 rounded-full px-3 py-1"
+            style={{ backgroundColor: `${tint}1f` }}
+          >
             <View className="h-2 w-2 rounded-full" style={{ backgroundColor: tint }} />
-            <Text className="font-sora-semibold uppercase tracking-wide" style={{ color: tint, fontSize: 12 }}>
+            <Text
+              className="font-sora-semibold uppercase tracking-wide"
+              style={{ color: tint, fontSize: 12 }}
+            >
               {phaseLabel}
             </Text>
           </View>
           <Text variant="muted">{subject?.name ?? 'General study'}</Text>
         </View>
 
-        <ProgressRing progress={ratio} size={260} strokeWidth={16} color={tint} duration={300} gradient>
+        <ProgressRing
+          progress={ratio}
+          size={260}
+          strokeWidth={16}
+          color={tint}
+          duration={300}
+          gradient
+        >
           <View className="items-center gap-1">
-            <Text className="font-sora-extrabold text-6xl text-foreground" style={{ fontVariant: ['tabular-nums'] }}>
+            <Text
+              className="font-sora-extrabold text-6xl text-foreground"
+              style={{ fontVariant: ['tabular-nums'] }}
+            >
               {formatTimer(displaySeconds)}
             </Text>
             <Text variant="caption">
@@ -168,7 +184,11 @@ export default function StudyTimerScreen() {
             style={{ backgroundColor: tint }}
             accessibilityLabel={store.running ? 'Pause' : 'Resume'}
           >
-            {store.running ? <Pause size={30} color="#ffffff" fill="#ffffff" /> : <Play size={30} color="#ffffff" fill="#ffffff" />}
+            {store.running ? (
+              <Pause size={30} color="#ffffff" fill="#ffffff" />
+            ) : (
+              <Play size={30} color="#ffffff" fill="#ffffff" />
+            )}
           </Pressable>
 
           <Pressable
@@ -176,7 +196,11 @@ export default function StudyTimerScreen() {
             className="h-14 w-14 items-center justify-center rounded-full border border-border"
             accessibilityLabel="End session"
           >
-            <Square size={20} color={colors[scheme].destructive} fill={colors[scheme].destructive} />
+            <Square
+              size={20}
+              color={colors[scheme].destructive}
+              fill={colors[scheme].destructive}
+            />
           </Pressable>
         </View>
 
@@ -190,7 +214,11 @@ export default function StudyTimerScreen() {
       </View>
 
       <CelebrationOverlay visible={celebrate} onDone={() => setCelebrate(false)} />
-      <ReflectionSheet visible={reflectOpen} focusSeconds={pendingFocusSecs} onSave={commitReflection} />
+      <ReflectionSheet
+        visible={reflectOpen}
+        focusSeconds={pendingFocusSecs}
+        onSave={commitReflection}
+      />
     </View>
   );
 }

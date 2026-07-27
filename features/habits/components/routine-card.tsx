@@ -29,7 +29,11 @@ export function RoutineCard({ routine, onEdit, onToggleHabit, onOpenHabit }: Pro
             {doneCount}/{routine.habits.length} done
           </Text>
         </View>
-        <Pressable onPress={onEdit} hitSlop={8} accessibilityLabel={`Edit "${routine.name}" routine`}>
+        <Pressable
+          onPress={onEdit}
+          hitSlop={8}
+          accessibilityLabel={`Edit "${routine.name}" routine`}
+        >
           <Pencil size={16} color={colors[scheme].mutedForeground} />
         </Pressable>
       </View>
@@ -59,13 +63,20 @@ export function RoutineCard({ routine, onEdit, onToggleHabit, onOpenHabit }: Pro
                 >
                   <Text className="text-sm">{habit.emoji ?? '🔥'}</Text>
                 </View>
-                <Text className={isDone ? 'flex-1 text-muted-foreground line-through' : 'flex-1'} numberOfLines={1}>
+                <Text
+                  className={isDone ? 'flex-1 text-muted-foreground line-through' : 'flex-1'}
+                  numberOfLines={1}
+                >
                   {habit.name}
                 </Text>
                 {!isQuantified && (
                   <Pressable
                     onPress={() => {
-                      Haptics.impactAsync(isDone ? Haptics.ImpactFeedbackStyle.Light : Haptics.ImpactFeedbackStyle.Medium);
+                      Haptics.impactAsync(
+                        isDone
+                          ? Haptics.ImpactFeedbackStyle.Light
+                          : Haptics.ImpactFeedbackStyle.Medium,
+                      );
                       onToggleHabit(habit.id, isDone);
                     }}
                     hitSlop={8}

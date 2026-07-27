@@ -31,7 +31,11 @@ export default function HubScreen() {
   );
 
   const readyCount = useMemo(
-    () => HUB_SECTIONS.reduce((sum, s) => sum + s.modules.filter((m) => m.status === 'ready').length, 0),
+    () =>
+      HUB_SECTIONS.reduce(
+        (sum, s) => sum + s.modules.filter((m) => m.status === 'ready').length,
+        0,
+      ),
     [],
   );
 

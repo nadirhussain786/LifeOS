@@ -22,11 +22,18 @@ export function TodayTasksWidget() {
 
   const completeTask = (id: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    complete.mutate(id, { onSuccess: () => queryClient.invalidateQueries({ queryKey: ['dashboard', 'today-tasks'] }) });
+    complete.mutate(id, {
+      onSuccess: () => queryClient.invalidateQueries({ queryKey: ['dashboard', 'today-tasks'] }),
+    });
   };
 
   return (
-    <WidgetCard icon={ListChecks} title="Today" actionLabel="View all" onActionPress={() => router.push('/(tabs)/tasks')}>
+    <WidgetCard
+      icon={ListChecks}
+      title="Today"
+      actionLabel="View all"
+      onActionPress={() => router.push('/(tabs)/tasks')}
+    >
       {isLoading || !data ? (
         <View className="gap-2">
           <Skeleton className="h-5 w-24" />
@@ -34,7 +41,11 @@ export function TodayTasksWidget() {
           <Skeleton className="h-10 w-full" />
         </View>
       ) : data.totalCount === 0 ? (
-        <WidgetEmptyState message="No tasks yet — plan your day" actionLabel="Add task" onAction={() => router.push('/task/new')} />
+        <WidgetEmptyState
+          message="No tasks yet — plan your day"
+          actionLabel="Add task"
+          onAction={() => router.push('/task/new')}
+        />
       ) : (
         <View className="gap-3">
           <Text variant="muted">
@@ -50,12 +61,22 @@ export function TodayTasksWidget() {
                   onPress={() => completeTask(task.id)}
                   className="flex-row items-center gap-3 rounded-xl bg-surface px-3 py-2.5"
                 >
-                  <View className="h-5 w-5 rounded-full border-2" style={{ borderColor: colors[scheme].border }} />
+                  <View
+                    className="h-5 w-5 rounded-full border-2"
+                    style={{ borderColor: colors[scheme].border }}
+                  />
                   <Text className="flex-1" numberOfLines={1}>
                     {task.title}
                   </Text>
                   {task.dueLabel ? (
-                    <Text variant="caption" style={task.dueLabel === 'Overdue' ? { color: colors[scheme].destructive } : undefined}>
+                    <Text
+                      variant="caption"
+                      style={
+                        task.dueLabel === 'Overdue'
+                          ? { color: colors[scheme].destructive }
+                          : undefined
+                      }
+                    >
                       {task.dueLabel}
                     </Text>
                   ) : null}

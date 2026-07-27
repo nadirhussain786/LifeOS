@@ -94,7 +94,14 @@ export function getAlbum(id: string): GalleryAlbum | null {
 
 export function createAlbum(name: string, category: AlbumCategory): GalleryAlbum {
   const now = Date.now();
-  const album: GalleryAlbum = { id: generateId(), name: name.trim(), category, coverPhotoId: null, createdAt: now, updatedAt: now };
+  const album: GalleryAlbum = {
+    id: generateId(),
+    name: name.trim(),
+    category,
+    coverPhotoId: null,
+    createdAt: now,
+    updatedAt: now,
+  };
   getDb()
     .insert(galleryAlbums)
     .values({ ...album, userId: LOCAL_USER_ID })
@@ -102,8 +109,15 @@ export function createAlbum(name: string, category: AlbumCategory): GalleryAlbum
   return album;
 }
 
-export function updateAlbum(id: string, patch: Partial<Pick<GalleryAlbum, 'name' | 'category' | 'coverPhotoId'>>) {
-  getDb().update(galleryAlbums).set({ ...patch, updatedAt: Date.now() }).where(eq(galleryAlbums.id, id)).run();
+export function updateAlbum(
+  id: string,
+  patch: Partial<Pick<GalleryAlbum, 'name' | 'category' | 'coverPhotoId'>>,
+) {
+  getDb()
+    .update(galleryAlbums)
+    .set({ ...patch, updatedAt: Date.now() })
+    .where(eq(galleryAlbums.id, id))
+    .run();
 }
 
 /** Soft-deletes an album and unfiles its photos (they move to All Photos rather
@@ -111,7 +125,10 @@ export function updateAlbum(id: string, patch: Partial<Pick<GalleryAlbum, 'name'
 export function deleteAlbum(id: string) {
   const db = getDb();
   db.update(galleryAlbums).set({ deletedAt: Date.now() }).where(eq(galleryAlbums.id, id)).run();
-  db.update(galleryPhotos).set({ albumId: null, updatedAt: Date.now() }).where(eq(galleryPhotos.albumId, id)).run();
+  db.update(galleryPhotos)
+    .set({ albumId: null, updatedAt: Date.now() })
+    .where(eq(galleryPhotos.albumId, id))
+    .run();
 }
 
 // ---- Photos ----
@@ -182,14 +199,24 @@ export function updatePhoto(id: string, input: UpdatePhotoInput) {
 }
 
 export function togglePhotoFavorite(id: string, isFavorite: boolean) {
-  getDb().update(galleryPhotos).set({ isFavorite, updatedAt: Date.now(), syncStatus: 'pending' }).where(eq(galleryPhotos.id, id)).run();
+  getDb()
+    .update(galleryPhotos)
+    .set({ isFavorite, updatedAt: Date.now(), syncStatus: 'pending' })
+    .where(eq(galleryPhotos.id, id))
+    .run();
 }
 
 export function deletePhoto(id: string) {
   const photo = getPhoto(id);
   const db = getDb();
-  db.update(galleryPhotos).set({ deletedAt: Date.now(), syncStatus: 'pending' }).where(eq(galleryPhotos.id, id)).run();
+  db.update(galleryPhotos)
+    .set({ deletedAt: Date.now(), syncStatus: 'pending' })
+    .where(eq(galleryPhotos.id, id))
+    .run();
   // Clear any album cover that pointed at this photo.
-  db.update(galleryAlbums).set({ coverPhotoId: null }).where(eq(galleryAlbums.coverPhotoId, id)).run();
+  db.update(galleryAlbums)
+    .set({ coverPhotoId: null })
+    .where(eq(galleryAlbums.coverPhotoId, id))
+    .run();
   if (photo) deleteMediaFiles(photo.uri, photo.thumbnailUri);
 }

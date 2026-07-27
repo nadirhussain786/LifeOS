@@ -1,6 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { getCategoryById, listCategories, listTasks } from '@/features/tasks/services/tasks-repository';
+import {
+  getCategoryById,
+  listCategories,
+  listTasks,
+} from '@/features/tasks/services/tasks-repository';
 import { useTasksFilterStore } from '@/features/tasks/store/tasks-filter-store';
 
 export function useTasks() {
@@ -11,7 +15,9 @@ export function useTasks() {
     queryFn: async () => listTasks(filter, sort),
     select: (tasks) =>
       searchQuery.trim()
-        ? tasks.filter((task) => task.title.toLowerCase().includes(searchQuery.trim().toLowerCase()))
+        ? tasks.filter((task) =>
+            task.title.toLowerCase().includes(searchQuery.trim().toLowerCase()),
+          )
         : tasks,
   });
 }

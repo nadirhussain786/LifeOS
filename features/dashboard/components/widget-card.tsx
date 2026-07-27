@@ -16,7 +16,14 @@ type Props = {
   children: React.ReactNode;
 };
 
-export function WidgetCard({ icon: Icon, title, actionLabel, onActionPress, tint, children }: Props) {
+export function WidgetCard({
+  icon: Icon,
+  title,
+  actionLabel,
+  onActionPress,
+  tint,
+  children,
+}: Props) {
   const scheme = useColorScheme() ?? 'light';
   const accent = tint ?? colors[scheme].accent;
 
@@ -24,7 +31,10 @@ export function WidgetCard({ icon: Icon, title, actionLabel, onActionPress, tint
     <View className="gap-3 rounded-3xl border border-border bg-card p-4 shadow-e1">
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-2.5">
-          <View className="h-8 w-8 items-center justify-center rounded-xl" style={{ backgroundColor: alpha(accent, 0.14) }}>
+          <View
+            className="h-8 w-8 items-center justify-center rounded-xl"
+            style={{ backgroundColor: alpha(accent, 0.14) }}
+          >
             <Icon color={accent} size={17} />
           </View>
           <Text variant="subheading">{title}</Text>

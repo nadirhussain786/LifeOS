@@ -30,7 +30,13 @@ export function StreakHeatmap({ habit, logs, skips }: Props) {
   const totalDays = WEEKS * 7;
   const start = subDays(today, totalDays - 1);
 
-  const columns: { key: string; done: boolean; skipped: boolean; scheduled: boolean; isFuture: boolean }[][] = [];
+  const columns: {
+    key: string;
+    done: boolean;
+    skipped: boolean;
+    scheduled: boolean;
+    isFuture: boolean;
+  }[][] = [];
   let cursor = start;
   for (let week = 0; week < WEEKS; week += 1) {
     const column = [];
@@ -81,7 +87,10 @@ export function StreakHeatmap({ habit, logs, skips }: Props) {
           <Text variant="caption">Done</Text>
         </View>
         <View className="flex-row items-center gap-1">
-          <View className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: colors[scheme].muted }} />
+          <View
+            className="h-2.5 w-2.5 rounded-sm"
+            style={{ backgroundColor: colors[scheme].muted }}
+          />
           <Text variant="caption">Skipped</Text>
         </View>
       </View>

@@ -11,10 +11,18 @@ import { SheetHeader } from '@/components/ui/sheet-header';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import { CategoryGrid } from '@/features/budget/components/category-grid';
-import { ACCOUNTS, EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '@/features/budget/config/budget-config';
+import {
+  ACCOUNTS,
+  EXPENSE_CATEGORIES,
+  INCOME_CATEGORIES,
+} from '@/features/budget/config/budget-config';
 import { formatMoney, parseAmountToCents } from '@/features/budget/services/money';
 import { useBudgetMutations } from '@/features/budget/hooks/use-budget-mutations';
-import { useBudgetSettings, useSavingsGoals, useTransaction } from '@/features/budget/hooks/use-budget';
+import {
+  useBudgetSettings,
+  useSavingsGoals,
+  useTransaction,
+} from '@/features/budget/hooks/use-budget';
 import type { BudgetAccount, TransactionType } from '@/features/budget/types/budget.types';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -24,10 +32,17 @@ const TYPE_OPTIONS = [
   { value: 'savings' as const, label: 'Savings' },
 ];
 const ACCOUNT_OPTIONS = ACCOUNTS.map((a) => ({ value: a.id, label: a.label }));
-const TYPE_TINT: Record<TransactionType, string> = { income: '#22c55e', expense: '#ef4444', savings: '#6366f1' };
+const TYPE_TINT: Record<TransactionType, string> = {
+  income: '#22c55e',
+  expense: '#ef4444',
+  savings: '#6366f1',
+};
 
 export default function TransactionScreen() {
-  const { id, savingsGoalId: presetGoalId } = useLocalSearchParams<{ id?: string; savingsGoalId?: string }>();
+  const { id, savingsGoalId: presetGoalId } = useLocalSearchParams<{
+    id?: string;
+    savingsGoalId?: string;
+  }>();
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
   const { addTransaction, editTransaction, removeTransaction } = useBudgetMutations();
@@ -107,7 +122,11 @@ export default function TransactionScreen() {
     if (!existing) return;
     Alert.alert('Delete transaction?', 'This entry will be removed.', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => (removeTransaction.mutate(existing.id), router.back()) },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => (removeTransaction.mutate(existing.id), router.back()),
+      },
     ]);
   };
 
@@ -119,14 +138,23 @@ export default function TransactionScreen() {
         title={isEdit ? 'Edit Transaction' : 'New Transaction'}
         right={
           isEdit ? (
-            <Pressable onPress={confirmDelete} hitSlop={10} className="h-9 w-9 items-center justify-center" accessibilityLabel="Delete">
+            <Pressable
+              onPress={confirmDelete}
+              hitSlop={10}
+              className="h-9 w-9 items-center justify-center"
+              accessibilityLabel="Delete"
+            >
               <Trash2 size={18} color={colors[scheme].destructive} />
             </Pressable>
           ) : undefined
         }
       />
 
-      <ScrollView contentContainerClassName="gap-5 px-5 pt-3 pb-10" keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerClassName="gap-5 px-5 pt-3 pb-10"
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <Segmented options={TYPE_OPTIONS} value={type} onChange={changeType} activeColor={tint} />
 
         <View className="items-center gap-1 py-2">
@@ -141,7 +169,13 @@ export default function TransactionScreen() {
               placeholderTextColor={colors[scheme].mutedForeground}
               keyboardType="decimal-pad"
               autoFocus={!isEdit}
-              style={{ fontSize: 48, fontFamily: 'Sora_800ExtraBold', color: colors[scheme].foreground, minWidth: 80, textAlign: 'center' }}
+              style={{
+                fontSize: 48,
+                fontFamily: 'Sora_800ExtraBold',
+                color: colors[scheme].foreground,
+                minWidth: 80,
+                textAlign: 'center',
+              }}
             />
           </View>
           {amountCents > 0 && <Text variant="caption">{formatMoney(amountCents, currency)}</Text>}
@@ -153,7 +187,9 @@ export default function TransactionScreen() {
               Toward a goal (optional)
             </Text>
             {savingsGoals.length === 0 ? (
-              <Text variant="muted">Create a savings goal to earmark this. It still counts as savings without one.</Text>
+              <Text variant="muted">
+                Create a savings goal to earmark this. It still counts as savings without one.
+              </Text>
             ) : (
               <View className="flex-row flex-wrap gap-2">
                 {savingsGoals.map((goal) => {
@@ -162,10 +198,20 @@ export default function TransactionScreen() {
                     <Pressable
                       key={goal.id}
                       onPress={() => setSavingsGoalId(selected ? null : goal.id)}
-                      style={selected ? { backgroundColor: goal.colorToken, borderColor: goal.colorToken } : undefined}
+                      style={
+                        selected
+                          ? { backgroundColor: goal.colorToken, borderColor: goal.colorToken }
+                          : undefined
+                      }
                       className="rounded-full border border-border px-3 py-2"
                     >
-                      <Text className={selected ? 'font-sora-medium text-white' : 'text-muted-foreground'}>{goal.name}</Text>
+                      <Text
+                        className={
+                          selected ? 'font-sora-medium text-white' : 'text-muted-foreground'
+                        }
+                      >
+                        {goal.name}
+                      </Text>
                     </Pressable>
                   );
                 })}
@@ -177,7 +223,11 @@ export default function TransactionScreen() {
             <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
               Category
             </Text>
-            <CategoryGrid items={type === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES} value={category} onChange={setCategory} />
+            <CategoryGrid
+              items={type === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES}
+              value={category}
+              onChange={setCategory}
+            />
           </View>
         )}
 
@@ -185,7 +235,12 @@ export default function TransactionScreen() {
           <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
             Account
           </Text>
-          <Segmented options={ACCOUNT_OPTIONS} value={account} onChange={setAccount} activeColor={tint} />
+          <Segmented
+            options={ACCOUNT_OPTIONS}
+            value={account}
+            onChange={setAccount}
+            activeColor={tint}
+          />
         </View>
 
         <View className="flex-row items-center justify-between rounded-2xl border border-border bg-card px-4 py-3">
@@ -194,15 +249,30 @@ export default function TransactionScreen() {
             <Text className="font-sora-medium text-foreground">Date</Text>
           </View>
           {Platform.OS === 'ios' ? (
-            <DateTimePicker value={new Date(occurredAt)} mode="date" display="compact" onChange={handleDateChange} />
+            <DateTimePicker
+              value={new Date(occurredAt)}
+              mode="date"
+              display="compact"
+              onChange={handleDateChange}
+            />
           ) : (
-            <Pressable onPress={() => setShowDate(true)} className="rounded-lg bg-muted px-3 py-1.5">
-              <Text className="font-sora-semibold text-foreground">{format(occurredAt, 'MMM d, yyyy')}</Text>
+            <Pressable
+              onPress={() => setShowDate(true)}
+              className="rounded-lg bg-muted px-3 py-1.5"
+            >
+              <Text className="font-sora-semibold text-foreground">
+                {format(occurredAt, 'MMM d, yyyy')}
+              </Text>
             </Pressable>
           )}
         </View>
         {Platform.OS === 'android' && showDate && (
-          <DateTimePicker value={new Date(occurredAt)} mode="date" display="default" onChange={handleDateChange} />
+          <DateTimePicker
+            value={new Date(occurredAt)}
+            mode="date"
+            display="default"
+            onChange={handleDateChange}
+          />
         )}
 
         <TextInput
@@ -213,7 +283,13 @@ export default function TransactionScreen() {
           className="rounded-2xl border border-border bg-card px-4 py-3 text-foreground"
         />
 
-        <Button label={isEdit ? 'Save changes' : 'Add transaction'} onPress={save} disabled={!canSave} size="lg" variant="accent" />
+        <Button
+          label={isEdit ? 'Save changes' : 'Add transaction'}
+          onPress={save}
+          disabled={!canSave}
+          size="lg"
+          variant="accent"
+        />
       </ScrollView>
     </View>
   );

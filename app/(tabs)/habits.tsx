@@ -53,7 +53,9 @@ export default function HabitsScreen() {
 
   const items = useMemo<ListItem[]>(() => {
     const routineItems: ListItem[] = routines.map((routine) => ({ type: 'routine', routine }));
-    const routinedIds = new Set(routines.flatMap((routine) => routine.habits.map((habit) => habit.id)));
+    const routinedIds = new Set(
+      routines.flatMap((routine) => routine.habits.map((habit) => habit.id)),
+    );
     const standalone = habits.filter((habit) => !routinedIds.has(habit.id));
 
     const byCategory = new Map<string | null, HabitWithToday[]>();
@@ -65,14 +67,25 @@ export default function HabitsScreen() {
     for (const category of categories) {
       const group = byCategory.get(category.id);
       if (!group?.length) continue;
-      groupedItems.push({ type: 'header', key: category.id, label: category.name, count: group.length, dotColor: category.colorToken });
+      groupedItems.push({
+        type: 'header',
+        key: category.id,
+        label: category.name,
+        count: group.length,
+        dotColor: category.colorToken,
+      });
       groupedItems.push(...group.map((habit) => ({ type: 'habit', habit }) as const));
     }
 
     const uncategorized = byCategory.get(null) ?? [];
     if (uncategorized.length > 0) {
       if (routineItems.length > 0 || groupedItems.length > 0) {
-        groupedItems.push({ type: 'header', key: 'other', label: 'Other', count: uncategorized.length });
+        groupedItems.push({
+          type: 'header',
+          key: 'other',
+          label: 'Other',
+          count: uncategorized.length,
+        });
       }
       groupedItems.push(...uncategorized.map((habit) => ({ type: 'habit', habit }) as const));
     }
@@ -136,17 +149,28 @@ export default function HabitsScreen() {
       ) : (
         <FlashList
           data={items}
-          keyExtractor={(item) => (item.type === 'header' ? `header-${item.key}` : item.type === 'routine' ? `routine-${item.routine.id}` : item.habit.id)}
+          keyExtractor={(item) =>
+            item.type === 'header'
+              ? `header-${item.key}`
+              : item.type === 'routine'
+                ? `routine-${item.routine.id}`
+                : item.habit.id
+          }
           contentContainerStyle={{ paddingTop: 4, paddingBottom: 120 }}
           renderItem={({ item }) => {
-            if (item.type === 'header') return <ListSectionHeader label={item.label} count={item.count} dotColor={item.dotColor} />;
+            if (item.type === 'header')
+              return (
+                <ListSectionHeader label={item.label} count={item.count} dotColor={item.dotColor} />
+              );
             if (item.type === 'routine') {
               return (
                 <RoutineCard
                   routine={item.routine}
                   onEdit={() => router.push(`/routine/${item.routine.id}`)}
                   onOpenHabit={(habitId) => router.push(`/habit/${habitId}`)}
-                  onToggleHabit={(habitId, done) => (done ? unlogToday.mutate(habitId) : logToday.mutate({ habitId }))}
+                  onToggleHabit={(habitId, done) =>
+                    done ? unlogToday.mutate(habitId) : logToday.mutate({ habitId })
+                  }
                 />
               );
             }
@@ -155,7 +179,11 @@ export default function HabitsScreen() {
               <HabitRow
                 habit={habit}
                 onPress={() => router.push(`/habit/${habit.id}`)}
-                onToggleDone={() => (habit.todayStatus === 'done' ? unlogToday.mutate(habit.id) : logToday.mutate({ habitId: habit.id }))}
+                onToggleDone={() =>
+                  habit.todayStatus === 'done'
+                    ? unlogToday.mutate(habit.id)
+                    : logToday.mutate({ habitId: habit.id })
+                }
                 onQuickLog={() => openQuickLog(habit)}
                 onArchive={() => archive.mutate(habit.id)}
                 onDelete={() => remove.mutate(habit.id)}
@@ -169,12 +197,16 @@ export default function HabitsScreen() {
         ref={quickLogRef}
         habit={quickLogHabit}
         onSubmit={(value) => {
-          if (quickLogHabit) logDate.mutate({ habitId: quickLogHabit.id, logDate: toDateKey(new Date()), value });
+          if (quickLogHabit)
+            logDate.mutate({ habitId: quickLogHabit.id, logDate: toDateKey(new Date()), value });
         }}
       />
 
       <HabitsFabSheet ref={fabSheetRef} />
-      <Fab onPress={() => fabSheetRef.current?.present()} accessibilityLabel="Add habit or routine" />
+      <Fab
+        onPress={() => fabSheetRef.current?.present()}
+        accessibilityLabel="Add habit or routine"
+      />
     </View>
   );
 }

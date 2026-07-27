@@ -5,7 +5,11 @@ import { useMemo } from 'react';
 import { Dimensions, Pressable, View } from 'react-native';
 
 import { Text } from '@/components/ui/text';
-import { displayUri, formatDuration, type GalleryPhoto } from '@/features/gallery/types/gallery.types';
+import {
+  displayUri,
+  formatDuration,
+  type GalleryPhoto,
+} from '@/features/gallery/types/gallery.types';
 
 export const COLUMNS = 3;
 export const GAP = 4;
@@ -17,7 +21,15 @@ export function tileSize() {
   return (width - H_PADDING * 2 - GAP * (COLUMNS - 1)) / COLUMNS;
 }
 
-export function PhotoTile({ photo, size, onPress }: { photo: GalleryPhoto; size: number; onPress: (p: GalleryPhoto) => void }) {
+export function PhotoTile({
+  photo,
+  size,
+  onPress,
+}: {
+  photo: GalleryPhoto;
+  size: number;
+  onPress: (p: GalleryPhoto) => void;
+}) {
   const isVideo = photo.mediaType === 'video';
   return (
     <Pressable
@@ -36,17 +48,28 @@ export function PhotoTile({ photo, size, onPress }: { photo: GalleryPhoto; size:
       {isVideo && (
         <>
           <View className="absolute inset-0 items-center justify-center">
-            <View className="h-8 w-8 items-center justify-center rounded-full" style={{ backgroundColor: 'rgba(0,0,0,0.45)' }}>
+            <View
+              className="h-8 w-8 items-center justify-center rounded-full"
+              style={{ backgroundColor: 'rgba(0,0,0,0.45)' }}
+            >
               <Play size={15} color="#ffffff" fill="#ffffff" />
             </View>
           </View>
-          <View className="absolute bottom-1 right-1 rounded-md px-1.5 py-0.5" style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}>
-            <Text className="text-[10px] font-sora-semibold text-white">{formatDuration(photo.durationMs)}</Text>
+          <View
+            className="absolute bottom-1 right-1 rounded-md px-1.5 py-0.5"
+            style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}
+          >
+            <Text className="font-sora-semibold text-[10px] text-white">
+              {formatDuration(photo.durationMs)}
+            </Text>
           </View>
         </>
       )}
       {photo.isFavorite && (
-        <View className="absolute left-1 top-1 h-5 w-5 items-center justify-center rounded-full" style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}>
+        <View
+          className="absolute left-1 top-1 h-5 w-5 items-center justify-center rounded-full"
+          style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
+        >
           <Heart size={11} color="#ffffff" fill="#ffffff" />
         </View>
       )}

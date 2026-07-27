@@ -25,15 +25,36 @@ export function HeroCard({ tint, children, style, glow = true, padded = true }: 
 
   return (
     <View style={[{ borderRadius: 28, overflow: 'hidden' }, glow && glowShadow(tint, 0.4), style]}>
-      <LinearGradient colors={[c1, c2, c3]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 28 }}>
+      <LinearGradient
+        colors={[c1, c2, c3]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ borderRadius: 28 }}
+      >
         {/* Decorative orbs — faint lighter circles for glassy depth. */}
         <View
           pointerEvents="none"
-          style={{ position: 'absolute', top: -50, right: -30, width: 150, height: 150, borderRadius: 75, backgroundColor: alpha('#ffffff', 0.12) }}
+          style={{
+            position: 'absolute',
+            top: -50,
+            right: -30,
+            width: 150,
+            height: 150,
+            borderRadius: 75,
+            backgroundColor: alpha('#ffffff', 0.12),
+          }}
         />
         <View
           pointerEvents="none"
-          style={{ position: 'absolute', bottom: -60, left: -20, width: 130, height: 130, borderRadius: 65, backgroundColor: alpha('#ffffff', 0.07) }}
+          style={{
+            position: 'absolute',
+            bottom: -60,
+            left: -20,
+            width: 130,
+            height: 130,
+            borderRadius: 65,
+            backgroundColor: alpha('#ffffff', 0.07),
+          }}
         />
         <View style={padded ? { padding: 20 } : undefined}>{children}</View>
       </LinearGradient>

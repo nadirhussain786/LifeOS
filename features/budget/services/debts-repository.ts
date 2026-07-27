@@ -98,7 +98,10 @@ export function updateDebt(id: string, input: UpdateDebtInput) {
 export function recordDebtPayment(id: string, amountCents: number): Debt | null {
   const debt = getDebt(id);
   if (!debt) return null;
-  const paidCents = Math.min(debt.principalCents, debt.paidCents + Math.max(0, Math.round(amountCents)));
+  const paidCents = Math.min(
+    debt.principalCents,
+    debt.paidCents + Math.max(0, Math.round(amountCents)),
+  );
   const settledAt = paidCents >= debt.principalCents ? Date.now() : null;
   updateDebt(id, { paidCents, settledAt });
   return getDebt(id);

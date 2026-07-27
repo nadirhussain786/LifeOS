@@ -19,7 +19,11 @@ export function SectionHeader({ title, actionLabel, onAction, actionTint }: Prop
       <Text variant="subheading">{title}</Text>
       {actionLabel && onAction ? (
         <Pressable onPress={onAction} hitSlop={8} className="flex-row items-center gap-0.5">
-          <Text variant="caption" className="font-sora-semibold" style={actionTint ? { color: actionTint } : undefined}>
+          <Text
+            variant="caption"
+            className="font-sora-semibold"
+            style={actionTint ? { color: actionTint } : undefined}
+          >
             {actionLabel}
           </Text>
           <ChevronRight size={13} color={actionTint} />

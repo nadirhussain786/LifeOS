@@ -51,7 +51,12 @@ export default function TasksScreen() {
       return tasks.map((task) => ({ type: 'task', task }) as const);
     }
     return groupTasksByDueDate(tasks).flatMap((section) => [
-      { type: 'header', bucket: section.bucket, label: section.label, count: section.tasks.length } as const,
+      {
+        type: 'header',
+        bucket: section.bucket,
+        label: section.label,
+        count: section.tasks.length,
+      } as const,
       ...section.tasks.map((task) => ({ type: 'task', task }) as const),
     ]);
   }, [tasks, filter]);
@@ -79,9 +84,21 @@ export default function TasksScreen() {
               <Pressable
                 key={tab.value}
                 onPress={() => setFilter(tab.value)}
-                className={selected ? 'flex-1 items-center rounded-full bg-primary py-2' : 'flex-1 items-center rounded-full py-2'}
+                className={
+                  selected
+                    ? 'flex-1 items-center rounded-full bg-primary py-2'
+                    : 'flex-1 items-center rounded-full py-2'
+                }
               >
-                <Text className={selected ? 'font-sora-semibold text-primary-foreground' : 'text-muted-foreground'}>{tab.label}</Text>
+                <Text
+                  className={
+                    selected
+                      ? 'font-sora-semibold text-primary-foreground'
+                      : 'text-muted-foreground'
+                  }
+                >
+                  {tab.label}
+                </Text>
               </Pressable>
             );
           })}
@@ -100,7 +117,11 @@ export default function TasksScreen() {
         <EmptyState
           icon={CheckCircle2}
           title={filter === 'active' ? 'Nothing to do' : `No ${filter} tasks`}
-          description={filter === 'active' ? 'Enjoy the calm, or add something new.' : 'Tasks will show up here.'}
+          description={
+            filter === 'active'
+              ? 'Enjoy the calm, or add something new.'
+              : 'Tasks will show up here.'
+          }
         />
       ) : (
         <FlashList
@@ -109,12 +130,20 @@ export default function TasksScreen() {
           contentContainerStyle={{ paddingTop: 4, paddingBottom: 120 }}
           renderItem={({ item }) =>
             item.type === 'header' ? (
-              <ListSectionHeader label={item.label} count={item.count} dotColor={bucketDotColor[item.bucket]} />
+              <ListSectionHeader
+                label={item.label}
+                count={item.count}
+                dotColor={bucketDotColor[item.bucket]}
+              />
             ) : (
               <TaskRow
                 task={item.task}
                 onPress={() => router.push(`/task/${item.task.id}`)}
-                onToggleComplete={() => (item.task.status === 'completed' ? reopen.mutate(item.task.id) : complete.mutate(item.task.id))}
+                onToggleComplete={() =>
+                  item.task.status === 'completed'
+                    ? reopen.mutate(item.task.id)
+                    : complete.mutate(item.task.id)
+                }
                 onArchive={() => archive.mutate(item.task.id)}
                 onDelete={() => remove.mutate(item.task.id)}
               />

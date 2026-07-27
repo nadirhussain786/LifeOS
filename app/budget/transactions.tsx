@@ -68,9 +68,14 @@ export default function TransactionsScreen() {
   // (unbounded) history can render in a virtualized FlashList instead of a
   // ScrollView that mounts every row at once.
   const items = useMemo(() => {
-    const out: ({ type: 'header'; logDate: string; dayNet: number } | { type: 'row'; tx: BudgetTransaction })[] = [];
+    const out: (
+      { type: 'header'; logDate: string; dayNet: number } | { type: 'row'; tx: BudgetTransaction }
+    )[] = [];
     for (const [logDate, dayTx] of groups) {
-      const dayNet = dayTx.reduce((sum, t) => sum + (t.type === 'income' ? t.amountCents : -t.amountCents), 0);
+      const dayNet = dayTx.reduce(
+        (sum, t) => sum + (t.type === 'income' ? t.amountCents : -t.amountCents),
+        0,
+      );
       out.push({ type: 'header', logDate, dayNet });
       for (const t of dayTx) out.push({ type: 'row', tx: t });
     }
@@ -116,7 +121,11 @@ export default function TransactionsScreen() {
         <EmptyState
           icon={Receipt}
           title="Nothing here"
-          description={query || filter !== 'all' ? 'No transactions match this filter.' : 'Your transactions will appear here.'}
+          description={
+            query || filter !== 'all'
+              ? 'No transactions match this filter.'
+              : 'Your transactions will appear here.'
+          }
           tint="#22c55e"
         />
       ) : (
@@ -130,14 +139,24 @@ export default function TransactionsScreen() {
                 <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
                   {dayLabel(item.logDate)}
                 </Text>
-                <Text variant="caption" style={{ color: item.dayNet >= 0 ? colors[scheme].success : colors[scheme].destructive }} className="font-sora-semibold">
+                <Text
+                  variant="caption"
+                  style={{
+                    color: item.dayNet >= 0 ? colors[scheme].success : colors[scheme].destructive,
+                  }}
+                  className="font-sora-semibold"
+                >
                   {item.dayNet >= 0 ? '+' : ''}
                   {formatMoney(item.dayNet, currency)}
                 </Text>
               </View>
             ) : (
               <View className="px-4 pb-2.5">
-                <TransactionRow transaction={item.tx} currency={currency} onPress={(tx) => router.push(`/budget/transaction?id=${tx.id}`)} />
+                <TransactionRow
+                  transaction={item.tx}
+                  currency={currency}
+                  onPress={(tx) => router.push(`/budget/transaction?id=${tx.id}`)}
+                />
               </View>
             )
           }

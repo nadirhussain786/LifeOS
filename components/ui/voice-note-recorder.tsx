@@ -1,4 +1,9 @@
-import { RecordingPresets, requestRecordingPermissionsAsync, useAudioRecorder, useAudioRecorderState } from 'expo-audio';
+import {
+  RecordingPresets,
+  requestRecordingPermissionsAsync,
+  useAudioRecorder,
+  useAudioRecorderState,
+} from 'expo-audio';
 import * as Haptics from 'expo-haptics';
 import { Mic, Square } from 'lucide-react-native';
 import { useEffect, useRef } from 'react';

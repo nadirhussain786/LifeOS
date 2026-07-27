@@ -20,7 +20,11 @@ type Props = {
  * distinct from the day-by-day timeline list below it. */
 export function MoodMonthStrip({ monthAnchor, entries, onSelectDate }: Props) {
   const scheme = useColorScheme() ?? 'light';
-  const moodByDate = new Map(entries.filter((entry) => entry.mood).map((entry) => [entry.entryDate, entry.mood as MoodOption]));
+  const moodByDate = new Map(
+    entries
+      .filter((entry) => entry.mood)
+      .map((entry) => [entry.entryDate, entry.mood as MoodOption]),
+  );
   const todayKey = toDateKey(new Date());
 
   const start = startOfMonth(monthAnchor);
@@ -44,7 +48,11 @@ export function MoodMonthStrip({ monthAnchor, entries, onSelectDate }: Props) {
 
       <View className="flex-row flex-wrap">
         {Array.from({ length: leadingBlanks }).map((_, index) => (
-          <View key={`blank-${index}`} style={{ width: `${100 / 7}%` }} className="aspect-square p-0.5" />
+          <View
+            key={`blank-${index}`}
+            style={{ width: `${100 / 7}%` }}
+            className="aspect-square p-0.5"
+          />
         ))}
         {days.map((day) => {
           const dateKey = toDateKey(day);

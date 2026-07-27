@@ -16,7 +16,10 @@ export function QueryError({ onRetry, message }: { onRetry?: () => void; message
   const theme = colors[scheme];
   return (
     <View className="flex-1 items-center justify-center gap-3 p-8">
-      <View className="h-14 w-14 items-center justify-center rounded-2xl" style={{ backgroundColor: theme.muted }}>
+      <View
+        className="h-14 w-14 items-center justify-center rounded-2xl"
+        style={{ backgroundColor: theme.muted }}
+      >
         <TriangleAlert size={24} color={theme.mutedForeground} />
       </View>
       <Text className="font-sora-semibold text-foreground">Couldn&apos;t load this</Text>

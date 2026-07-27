@@ -19,12 +19,20 @@ export function DashboardHeader() {
   const unread = useUnreadNotificationCount();
 
   return (
-    <View className="flex-row items-center justify-between pb-1" style={{ paddingTop: insets.top + 10 }}>
+    <View
+      className="flex-row items-center justify-between pb-1"
+      style={{ paddingTop: insets.top + 10 }}
+    >
       <View className="flex-1 gap-0.5">
-        <Text variant="caption" className="font-sora-semibold uppercase tracking-wide text-muted-foreground">
+        <Text
+          variant="caption"
+          className="font-sora-semibold uppercase tracking-wide text-muted-foreground"
+        >
           {dateLabel}
         </Text>
-        <Text className="font-sora-extrabold text-3xl tracking-tight text-foreground">{greeting}</Text>
+        <Text className="font-sora-extrabold text-3xl tracking-tight text-foreground">
+          {greeting}
+        </Text>
       </View>
       <View className="flex-row items-center gap-2">
         <Pressable
@@ -39,7 +47,9 @@ export function DashboardHeader() {
               className="absolute right-1.5 top-1.5 h-4 min-w-4 items-center justify-center rounded-full px-1"
               style={{ backgroundColor: colors[scheme].destructive }}
             >
-              <Text style={{ color: '#ffffff', fontSize: 9, fontFamily: 'Sora_700Bold' }}>{unread > 9 ? '9+' : unread}</Text>
+              <Text style={{ color: '#ffffff', fontSize: 9, fontFamily: 'Sora_700Bold' }}>
+                {unread > 9 ? '9+' : unread}
+              </Text>
             </View>
           )}
         </Pressable>

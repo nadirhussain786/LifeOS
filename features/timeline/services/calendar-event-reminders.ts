@@ -10,13 +10,22 @@ export async function scheduleCalendarEventReminder(event: CalendarEvent): Promi
   const triggerAt = event.startAt - event.reminderMinutesBefore * 60_000;
   const id = await scheduleOneTimeNotification({
     title: event.title,
-    body: event.reminderMinutesBefore === 0 ? 'Starting now.' : `Starting in ${event.reminderMinutesBefore} minutes.`,
+    body:
+      event.reminderMinutesBefore === 0
+        ? 'Starting now.'
+        : `Starting in ${event.reminderMinutesBefore} minutes.`,
     date: triggerAt,
-    data: { category: 'calendar', route: '/timeline/[date]', params: { date: format(event.startAt, 'yyyy-MM-dd') } },
+    data: {
+      category: 'calendar',
+      route: '/timeline/[date]',
+      params: { date: format(event.startAt, 'yyyy-MM-dd') },
+    },
   });
   setCalendarEventReminderNotificationId(event.id, id);
 }
 
-export async function cancelCalendarEventReminder(event: Pick<CalendarEvent, 'id' | 'reminderNotificationId'>): Promise<void> {
+export async function cancelCalendarEventReminder(
+  event: Pick<CalendarEvent, 'id' | 'reminderNotificationId'>,
+): Promise<void> {
   await cancelNotification(event.reminderNotificationId);
 }

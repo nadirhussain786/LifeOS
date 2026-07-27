@@ -26,4 +26,5 @@ export const env = {
 /** True only when both a real-looking URL and a plausible anon key are present.
  * Auth/sync gate on this so a build without creds runs cleanly in guest mode. */
 export const isSupabaseConfigured =
-  /^https?:\/\/[^\s]+\.[^\s]+$/.test(env.EXPO_PUBLIC_SUPABASE_URL) && env.EXPO_PUBLIC_SUPABASE_ANON_KEY.length > 20;
+  /^https?:\/\/[^\s]+\.[^\s]+$/.test(env.EXPO_PUBLIC_SUPABASE_URL) &&
+  env.EXPO_PUBLIC_SUPABASE_ANON_KEY.length > 20;

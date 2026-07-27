@@ -31,7 +31,10 @@ export function DebtCard({ debt, onPress }: Props) {
       accessibilityRole="button"
     >
       <View className="flex-row items-center gap-3">
-        <View className="h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: alpha(tint, 0.14) }}>
+        <View
+          className="h-10 w-10 items-center justify-center rounded-xl"
+          style={{ backgroundColor: alpha(tint, 0.14) }}
+        >
           <Icon size={19} color={tint} strokeWidth={2.4} />
         </View>
         <View className="flex-1">
@@ -41,11 +44,16 @@ export function DebtCard({ debt, onPress }: Props) {
           <Text variant="caption">{borrowed ? 'You owe' : 'Owes you'}</Text>
         </View>
         <View className="items-end">
-          <Text className="font-sora-bold text-foreground" style={{ textDecorationLine: debt.isSettled ? 'line-through' : 'none' }}>
+          <Text
+            className="font-sora-bold text-foreground"
+            style={{ textDecorationLine: debt.isSettled ? 'line-through' : 'none' }}
+          >
             {formatMoney(debt.isSettled ? debt.principalCents : debt.remainingCents, debt.currency)}
           </Text>
           <View className="flex-row items-center gap-1">
-            {debt.reminderDaysBefore != null && !debt.isSettled && <BellRing size={11} color={tint} />}
+            {debt.reminderDaysBefore != null && !debt.isSettled && (
+              <BellRing size={11} color={tint} />
+            )}
             <Text className="font-sora-medium" style={{ color: tint, fontSize: 11 }}>
               {statusLabel(debt)}
             </Text>
@@ -57,7 +65,8 @@ export function DebtCard({ debt, onPress }: Props) {
         <View className="gap-1">
           <ProgressBar progress={debt.progress} color={tint} height={5} />
           <Text variant="caption">
-            {formatMoney(debt.paidCents, debt.currency)} of {formatMoney(debt.principalCents, debt.currency)} paid
+            {formatMoney(debt.paidCents, debt.currency)} of{' '}
+            {formatMoney(debt.principalCents, debt.currency)} paid
           </Text>
         </View>
       )}

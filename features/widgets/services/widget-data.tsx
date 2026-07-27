@@ -4,7 +4,10 @@ import { requestWidgetUpdate } from 'react-native-android-widget';
 
 import { TodayWidget } from '@/features/widgets/components/today-widget';
 import { WIDGET_NAME } from '@/features/widgets/config';
-import { writeTodaySnapshot, type TodaySnapshot } from '@/features/widgets/services/widget-snapshot';
+import {
+  writeTodaySnapshot,
+  type TodaySnapshot,
+} from '@/features/widgets/services/widget-snapshot';
 import { listHabitsWithToday } from '@/features/habits/services/habits-repository';
 import { listTasks } from '@/features/tasks/services/tasks-repository';
 import { getDailyTotal } from '@/features/water-intake/services/water-intake-repository';
@@ -23,7 +26,9 @@ export function buildTodaySnapshot(): TodaySnapshot {
   let waterMl = 0;
 
   try {
-    tasksDue = listTasks('active', 'due-date').filter((t) => t.dueDate != null && isToday(t.dueDate)).length;
+    tasksDue = listTasks('active', 'due-date').filter(
+      (t) => t.dueDate != null && isToday(t.dueDate),
+    ).length;
   } catch {
     /* table not ready */
   }

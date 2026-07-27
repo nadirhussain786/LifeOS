@@ -12,8 +12,14 @@ import { Text } from '@/components/ui/text';
 import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { CategoryOffNotice } from '@/features/notifications/components/category-off-notice';
-import { cancelWaterReminders, scheduleWaterReminders } from '@/features/water-intake/services/water-reminders';
-import { GOAL_PRESETS_ML, useWaterSettingsStore } from '@/features/water-intake/store/water-settings-store';
+import {
+  cancelWaterReminders,
+  scheduleWaterReminders,
+} from '@/features/water-intake/services/water-reminders';
+import {
+  GOAL_PRESETS_ML,
+  useWaterSettingsStore,
+} from '@/features/water-intake/store/water-settings-store';
 import { REMINDER_INTERVALS_MIN } from '@/features/water-intake/types/water-intake.types';
 import { notificationsAvailable } from '@/lib/notifications';
 
@@ -23,7 +29,15 @@ function formatHour(hour: number) {
   return `${display}:00 ${period}`;
 }
 
-function HourStepper({ label, hour, onChange }: { label: string; hour: number; onChange: (hour: number) => void }) {
+function HourStepper({
+  label,
+  hour,
+  onChange,
+}: {
+  label: string;
+  hour: number;
+  onChange: (hour: number) => void;
+}) {
   const scheme = useColorScheme() ?? 'light';
   return (
     <View className="flex-1 items-center gap-1.5">
@@ -63,7 +77,10 @@ export default function WaterSettingsScreen() {
 
   const handleSave = async () => {
     if (draft.enabled && draft.startHour >= draft.endHour) {
-      Alert.alert('Check your times', 'The start of your reminder window needs to be before the end.');
+      Alert.alert(
+        'Check your times',
+        'The start of your reminder window needs to be before the end.',
+      );
       return;
     }
 
@@ -90,7 +107,10 @@ export default function WaterSettingsScreen() {
     <View className="flex-1 bg-background">
       <ScreenHeader title="Water Settings" eyebrow="Water" tint={waterTint} />
 
-      <ScrollView contentContainerClassName="gap-6 px-5 pt-3 pb-10" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerClassName="gap-6 px-5 pt-3 pb-10"
+        showsVerticalScrollIndicator={false}
+      >
         <CategoryOffNotice category="water" />
         <View className="rounded-2xl border border-border bg-card px-4 shadow-e1">
           <AttributeRow icon={Target} label="Daily goal" isFirst>
@@ -105,7 +125,10 @@ export default function WaterSettingsScreen() {
                       setGoal(ml);
                     }}
                     className="rounded-full border px-3 py-1.5"
-                    style={{ borderColor: selected ? waterTint : colors[scheme].border, backgroundColor: selected ? waterTint : 'transparent' }}
+                    style={{
+                      borderColor: selected ? waterTint : colors[scheme].border,
+                      backgroundColor: selected ? waterTint : 'transparent',
+                    }}
                   >
                     <Text
                       variant="caption"
@@ -151,7 +174,10 @@ export default function WaterSettingsScreen() {
                           setDraft((prev) => ({ ...prev, intervalMinutes: minutes }));
                         }}
                         className="flex-1 items-center rounded-full border py-1.5"
-                        style={{ borderColor: selected ? waterTint : colors[scheme].border, backgroundColor: selected ? waterTint : 'transparent' }}
+                        style={{
+                          borderColor: selected ? waterTint : colors[scheme].border,
+                          backgroundColor: selected ? waterTint : 'transparent',
+                        }}
                       >
                         <Text
                           variant="caption"
@@ -167,19 +193,36 @@ export default function WaterSettingsScreen() {
               </View>
 
               <View className="flex-row gap-3">
-                <HourStepper label="From" hour={draft.startHour} onChange={(startHour) => setDraft((prev) => ({ ...prev, startHour }))} />
-                <HourStepper label="Until" hour={draft.endHour} onChange={(endHour) => setDraft((prev) => ({ ...prev, endHour }))} />
+                <HourStepper
+                  label="From"
+                  hour={draft.startHour}
+                  onChange={(startHour) => setDraft((prev) => ({ ...prev, startHour }))}
+                />
+                <HourStepper
+                  label="Until"
+                  hour={draft.endHour}
+                  onChange={(endHour) => setDraft((prev) => ({ ...prev, endHour }))}
+                />
               </View>
 
               <Text variant="muted">
-                You&apos;ll get a nudge every {draft.intervalMinutes < 60 ? `${draft.intervalMinutes} minutes` : `${draft.intervalMinutes / 60} hour${draft.intervalMinutes > 60 ? 's' : ''}`} between{' '}
-                {formatHour(draft.startHour)} and {formatHour(draft.endHour)}.
+                You&apos;ll get a nudge every{' '}
+                {draft.intervalMinutes < 60
+                  ? `${draft.intervalMinutes} minutes`
+                  : `${draft.intervalMinutes / 60} hour${draft.intervalMinutes > 60 ? 's' : ''}`}{' '}
+                between {formatHour(draft.startHour)} and {formatHour(draft.endHour)}.
               </Text>
             </View>
           )}
         </View>
 
-        <Button label={saving ? 'Saving…' : 'Save'} onPress={handleSave} disabled={saving} size="lg" variant="accent" />
+        <Button
+          label={saving ? 'Saving…' : 'Save'}
+          onPress={handleSave}
+          disabled={saving}
+          size="lg"
+          variant="accent"
+        />
       </ScrollView>
     </View>
   );

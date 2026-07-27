@@ -34,12 +34,14 @@ export default function SleepScreen() {
   const [range, setRange] = useState<'week' | 'month'>('week');
   const sleepTint = moduleTint('sleep', scheme);
 
-  const { isLoading, isError, refetch, stats, trend, latest, goalMinutes, sessions } = useSleepInsights(range === 'week' ? 7 : 30);
+  const { isLoading, isError, refetch, stats, trend, latest, goalMinutes, sessions } =
+    useSleepInsights(range === 'week' ? 7 : 30);
 
   const lastNightRatio = latest ? Math.min(1, latest.durationMinutes / goalMinutes) : 0;
 
   const chartData: BarDatum[] = trend.map((point) => ({
-    label: range === 'week' ? format(parseISO(point.date), 'EEEEE') : format(parseISO(point.date), 'd'),
+    label:
+      range === 'week' ? format(parseISO(point.date), 'EEEEE') : format(parseISO(point.date), 'd'),
     value: point.durationMinutes,
     color: point.metGoal ? sleepTint : alpha(sleepTint, 0.4),
   }));
@@ -51,19 +53,26 @@ export default function SleepScreen() {
         eyebrow="Wellbeing"
         tint={sleepTint}
         actions={[
-          { icon: Settings2, label: 'Sleep settings', onPress: () => router.push('/sleep/settings') },
+          {
+            icon: Settings2,
+            label: 'Sleep settings',
+            onPress: () => router.push('/sleep/settings'),
+          },
         ]}
       />
 
       {isError ? (
-          <QueryError onRetry={() => refetch()} />
-        ) : isLoading ? (
+        <QueryError onRetry={() => refetch()} />
+      ) : isLoading ? (
         <View className="gap-5 px-5 pt-2">
           <Skeleton className="h-24 w-full rounded-2xl" />
           <Skeleton className="h-52 w-full rounded-2xl" />
         </View>
       ) : (
-        <ScrollView contentContainerClassName="gap-5 px-5 pb-28" showsVerticalScrollIndicator={false}>
+        <ScrollView
+          contentContainerClassName="gap-5 px-5 pb-28"
+          showsVerticalScrollIndicator={false}
+        >
           {/* Live bedtime tracker — always available, even before any history */}
           <SleepTrackerCard />
 
@@ -82,18 +91,31 @@ export default function SleepScreen() {
             <>
               <HeroCard tint={sleepTint}>
                 <View className="items-center gap-3">
-                  <ProgressRing progress={lastNightRatio} size={172} strokeWidth={14} color="#ffffff" trackColor={alpha('#ffffff', 0.25)}>
+                  <ProgressRing
+                    progress={lastNightRatio}
+                    size={172}
+                    strokeWidth={14}
+                    color="#ffffff"
+                    trackColor={alpha('#ffffff', 0.25)}
+                  >
                     <View className="items-center">
-                      <Text className="font-sora-extrabold text-3xl" style={{ color: '#ffffff', fontVariant: ['tabular-nums'] }}>
+                      <Text
+                        className="font-sora-extrabold text-3xl"
+                        style={{ color: '#ffffff', fontVariant: ['tabular-nums'] }}
+                      >
                         {latest ? formatDuration(latest.durationMinutes) : '—'}
                       </Text>
-                      <Text style={{ color: alpha('#ffffff', 0.8), fontSize: 12 }}>of {formatDuration(goalMinutes)} goal</Text>
+                      <Text style={{ color: alpha('#ffffff', 0.8), fontSize: 12 }}>
+                        of {formatDuration(goalMinutes)} goal
+                      </Text>
                     </View>
                   </ProgressRing>
                   {latest && (
                     <View className="flex-row items-center gap-2">
                       <Moon size={14} color={alpha('#ffffff', 0.85)} />
-                      <Text style={{ color: alpha('#ffffff', 0.9) }}>Last night · {format(parseISO(latest.logDate), 'EEE, MMM d')}</Text>
+                      <Text style={{ color: alpha('#ffffff', 0.9) }}>
+                        Last night · {format(parseISO(latest.logDate), 'EEE, MMM d')}
+                      </Text>
                     </View>
                   )}
                 </View>
@@ -105,7 +127,12 @@ export default function SleepScreen() {
                 <View className="flex-row items-center justify-between">
                   <Text variant="subheading">Trend</Text>
                   <View style={{ width: 160 }}>
-                    <Segmented options={RANGE_OPTIONS} value={range} onChange={setRange} activeColor={sleepTint} />
+                    <Segmented
+                      options={RANGE_OPTIONS}
+                      value={range}
+                      onChange={setRange}
+                      activeColor={sleepTint}
+                    />
                   </View>
                 </View>
                 {chartData.length === 0 ? (
@@ -113,7 +140,13 @@ export default function SleepScreen() {
                     No nights tracked in this range yet.
                   </Text>
                 ) : (
-                  <BarChart data={chartData} color={sleepTint} goalValue={goalMinutes} labelEvery={range === 'week' ? 1 : 5} height={170} />
+                  <BarChart
+                    data={chartData}
+                    color={sleepTint}
+                    goalValue={goalMinutes}
+                    labelEvery={range === 'week' ? 1 : 5}
+                    height={170}
+                  />
                 )}
               </View>
 
@@ -121,13 +154,17 @@ export default function SleepScreen() {
                 <View className="flex-row items-center justify-around rounded-2xl border border-border bg-card p-4 shadow-e1">
                   <View className="items-center gap-1">
                     <Moon size={18} color={sleepTint} />
-                    <Text className="font-sora-bold text-foreground">{formatClock(stats.avgBedtimeMinutes)}</Text>
+                    <Text className="font-sora-bold text-foreground">
+                      {formatClock(stats.avgBedtimeMinutes)}
+                    </Text>
                     <Text variant="caption">Typical bedtime</Text>
                   </View>
                   <View className="h-10 w-px bg-border" />
                   <View className="items-center gap-1">
                     <Sun size={18} color="#f59e0b" />
-                    <Text className="font-sora-bold text-foreground">{formatClock(stats.avgWakeMinutes)}</Text>
+                    <Text className="font-sora-bold text-foreground">
+                      {formatClock(stats.avgWakeMinutes)}
+                    </Text>
                     <Text variant="caption">Typical wake</Text>
                   </View>
                   {stats.avgFellAsleepMinutes !== null && (
@@ -135,7 +172,9 @@ export default function SleepScreen() {
                       <View className="h-10 w-px bg-border" />
                       <View className="items-center gap-1">
                         <Hourglass size={18} color="#22c55e" />
-                        <Text className="font-sora-bold text-foreground">{formatDuration(stats.avgFellAsleepMinutes)}</Text>
+                        <Text className="font-sora-bold text-foreground">
+                          {formatDuration(stats.avgFellAsleepMinutes)}
+                        </Text>
                         <Text variant="caption">To fall asleep</Text>
                       </View>
                     </>

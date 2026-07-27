@@ -59,7 +59,11 @@ export function TodayFocusCard() {
       style={elevation.e2}
     >
       <View className="flex-row items-center justify-between">
-        <Text variant="micro" className="font-sora-semibold uppercase tracking-wide text-muted-foreground" style={{ letterSpacing: 1 }}>
+        <Text
+          variant="micro"
+          className="font-sora-semibold uppercase tracking-wide text-muted-foreground"
+          style={{ letterSpacing: 1 }}
+        >
           Today’s momentum
         </Text>
         <Text variant="caption" className="text-muted-foreground">
@@ -88,26 +92,48 @@ export function TodayFocusCard() {
         />
       </View>
 
-      <View className="gap-3 border-t border-divider pt-4">
+      <View className="border-divider gap-3 border-t pt-4">
         <View>
-          <Text variant="micro" className="font-sora-semibold uppercase text-muted-foreground" style={{ letterSpacing: 1 }}>
+          <Text
+            variant="micro"
+            className="font-sora-semibold uppercase text-muted-foreground"
+            style={{ letterSpacing: 1 }}
+          >
             {next.eyebrow}
           </Text>
           <Text className="mt-1 font-sora-semibold text-base text-foreground" numberOfLines={1}>
             {next.title}
           </Text>
         </View>
-        <Button variant="accent" size="md" label={next.cta} onPress={() => router.push(next.href as never)} />
+        <Button
+          variant="accent"
+          size="md"
+          label={next.cta}
+          onPress={() => router.push(next.href as never)}
+        />
       </View>
     </Animated.View>
   );
 }
 
-function RingStat({ progress, value, label, tint }: { progress: number; value: string; label: string; tint: string }) {
+function RingStat({
+  progress,
+  value,
+  label,
+  tint,
+}: {
+  progress: number;
+  value: string;
+  label: string;
+  tint: string;
+}) {
   return (
     <View className="items-center gap-2">
       <ProgressRing progress={progress} size={80} strokeWidth={8} color={tint} gradient>
-        <Text className="font-sora-extrabold text-lg text-foreground" style={{ letterSpacing: -0.5, fontVariant: ['tabular-nums'] }}>
+        <Text
+          className="font-sora-extrabold text-lg text-foreground"
+          style={{ letterSpacing: -0.5, fontVariant: ['tabular-nums'] }}
+        >
           {value}
         </Text>
       </ProgressRing>
@@ -139,13 +165,33 @@ function resolveNextAction(input: {
 }): NextAction {
   if (input.pendingTasks > 0 && input.nextTask) {
     const when = input.nextTask.dueLabel ? ` · ${input.nextTask.dueLabel}` : '';
-    return { eyebrow: 'Next up', title: `${input.nextTask.title}${when}`, cta: 'View tasks', href: '/(tabs)/tasks' };
+    return {
+      eyebrow: 'Next up',
+      title: `${input.nextTask.title}${when}`,
+      cta: 'View tasks',
+      href: '/(tabs)/tasks',
+    };
   }
   if (!input.hasWrittenToday) {
-    return { eyebrow: 'A quiet moment', title: 'Reflect on how today went', cta: 'Write today’s entry', href: '/(tabs)/journal' };
+    return {
+      eyebrow: 'A quiet moment',
+      title: 'Reflect on how today went',
+      cta: 'Write today’s entry',
+      href: '/(tabs)/journal',
+    };
   }
   if (input.pendingHabits > 0) {
-    return { eyebrow: 'Keep it going', title: 'Check in on your habits', cta: 'Open habits', href: '/(tabs)/habits' };
+    return {
+      eyebrow: 'Keep it going',
+      title: 'Check in on your habits',
+      cta: 'Open habits',
+      href: '/(tabs)/habits',
+    };
   }
-  return { eyebrow: 'Nothing pressing', title: 'You’re all caught up — enjoy the day', cta: 'Review your week', href: '/(tabs)/hub' };
+  return {
+    eyebrow: 'Nothing pressing',
+    title: 'You’re all caught up — enjoy the day',
+    cta: 'Review your week',
+    href: '/(tabs)/hub',
+  };
 }

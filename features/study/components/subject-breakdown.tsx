@@ -21,7 +21,9 @@ export function SubjectBreakdownList({ breakdown }: { breakdown: Breakdown[] }) 
             <View className="flex-row items-center justify-between">
               <View className="flex-row items-center gap-2">
                 <View className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: color }} />
-                <Text className="font-sora-medium text-foreground">{entry.subject?.name ?? 'General'}</Text>
+                <Text className="font-sora-medium text-foreground">
+                  {entry.subject?.name ?? 'General'}
+                </Text>
               </View>
               <Text variant="caption">{formatStudyDuration(entry.seconds)}</Text>
             </View>

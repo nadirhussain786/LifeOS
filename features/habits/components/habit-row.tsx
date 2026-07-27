@@ -27,11 +27,16 @@ export function HabitRow({ habit, onPress, onToggleDone, onQuickLog, onArchive, 
   const tint = habit.colorToken ?? colors[scheme].accent;
 
   const handleToggle = () => {
-    Haptics.impactAsync(isDone ? Haptics.ImpactFeedbackStyle.Light : Haptics.ImpactFeedbackStyle.Medium);
+    Haptics.impactAsync(
+      isDone ? Haptics.ImpactFeedbackStyle.Light : Haptics.ImpactFeedbackStyle.Medium,
+    );
     onToggleDone();
   };
 
-  const streakLabel = habit.type === 'negative' ? `${habit.currentStreak}d without` : `${habit.currentStreak}d streak`;
+  const streakLabel =
+    habit.type === 'negative'
+      ? `${habit.currentStreak}d without`
+      : `${habit.currentStreak}d streak`;
 
   return (
     <SwipeableRow
@@ -55,7 +60,10 @@ export function HabitRow({ habit, onPress, onToggleDone, onQuickLog, onArchive, 
       }
     >
       <Pressable onPress={onPress} className="flex-row items-center gap-3 py-3 pl-4 pr-4">
-        <View className="h-11 w-11 items-center justify-center rounded-full" style={{ backgroundColor: `${tint}1f` }}>
+        <View
+          className="h-11 w-11 items-center justify-center rounded-full"
+          style={{ backgroundColor: `${tint}1f` }}
+        >
           <Text className="text-xl">{habit.emoji ?? '🔥'}</Text>
         </View>
 
@@ -95,7 +103,9 @@ export function HabitRow({ habit, onPress, onToggleDone, onQuickLog, onArchive, 
             hitSlop={8}
             accessibilityRole="checkbox"
             accessibilityState={{ checked: isDone }}
-            accessibilityLabel={isDone ? `Mark "${habit.name}" as not done` : `Mark "${habit.name}" as done`}
+            accessibilityLabel={
+              isDone ? `Mark "${habit.name}" as not done` : `Mark "${habit.name}" as done`
+            }
             className={`h-9 w-9 items-center justify-center rounded-full border ${
               isDone ? 'border-success bg-success' : 'border-border'
             }`}

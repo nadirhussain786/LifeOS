@@ -1,5 +1,15 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { Archive, Bell, CalendarDays, Clock3, Flag, Repeat, StickyNote, Tag, Trash2 } from 'lucide-react-native';
+import {
+  Archive,
+  Bell,
+  CalendarDays,
+  Clock3,
+  Flag,
+  Repeat,
+  StickyNote,
+  Tag,
+  Trash2,
+} from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, Switch, TextInput, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -45,13 +55,19 @@ export default function TaskDetailScreen() {
 
   useEffect(() => {
     if (!task || title === task.title) return;
-    const timeout = setTimeout(() => update.mutate({ id: task.id, input: { title } }), AUTOSAVE_DELAY_MS);
+    const timeout = setTimeout(
+      () => update.mutate({ id: task.id, input: { title } }),
+      AUTOSAVE_DELAY_MS,
+    );
     return () => clearTimeout(timeout);
   }, [title]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!task || notes === (task.notes ?? '')) return;
-    const timeout = setTimeout(() => update.mutate({ id: task.id, input: { notes } }), AUTOSAVE_DELAY_MS);
+    const timeout = setTimeout(
+      () => update.mutate({ id: task.id, input: { notes } }),
+      AUTOSAVE_DELAY_MS,
+    );
     return () => clearTimeout(timeout);
   }, [notes]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -66,7 +82,10 @@ export default function TaskDetailScreen() {
         right={
           <View className="flex-row gap-4">
             {task.dueDate && (
-              <Pressable onPress={() => router.push(`/timeline/${toDateKey(new Date(task.dueDate!))}`)} hitSlop={8}>
+              <Pressable
+                onPress={() => router.push(`/timeline/${toDateKey(new Date(task.dueDate!))}`)}
+                hitSlop={8}
+              >
                 <Clock3 size={20} color={colors[scheme].foreground} />
               </Pressable>
             )}
@@ -101,31 +120,46 @@ export default function TaskDetailScreen() {
           value={title}
           onChangeText={setTitle}
           multiline
-          accessibilityLabel="Task title" placeholder="Task title"
+          accessibilityLabel="Task title"
+          placeholder="Task title"
           placeholderTextColor={colors[scheme].mutedForeground}
-          style={{ fontSize: 26, fontFamily: 'Sora_700Bold', lineHeight: 32, color: colors[scheme].foreground }}
+          style={{
+            fontSize: 26,
+            fontFamily: 'Sora_700Bold',
+            lineHeight: 32,
+            color: colors[scheme].foreground,
+          }}
         />
 
         <View className="rounded-2xl border border-border bg-card px-4 shadow-e1">
           <AttributeRow icon={Flag} label="Priority" isFirst>
-            <PriorityPicker value={task.priority} onChange={(priority) => update.mutate({ id: task.id, input: { priority } })} />
+            <PriorityPicker
+              value={task.priority}
+              onChange={(priority) => update.mutate({ id: task.id, input: { priority } })}
+            />
           </AttributeRow>
 
           <AttributeRow icon={CalendarDays} label="Due date">
             <DueDateField
               value={task.dueDate}
               hasTime={task.hasDueTime}
-              onChange={(dueDate, hasDueTime) => update.mutate({ id: task.id, input: { dueDate, hasDueTime } })}
+              onChange={(dueDate, hasDueTime) =>
+                update.mutate({ id: task.id, input: { dueDate, hasDueTime } })
+              }
             />
           </AttributeRow>
 
           {task.dueDate !== null && (
             <AttributeRow icon={Bell} label="Reminder">
               <View className="flex-row items-center justify-between">
-                <Text variant="muted">Notify me {task.hasDueTime ? 'at the due time' : 'at 9:00 AM that day'}</Text>
+                <Text variant="muted">
+                  Notify me {task.hasDueTime ? 'at the due time' : 'at 9:00 AM that day'}
+                </Text>
                 <Switch
                   value={task.reminderEnabled}
-                  onValueChange={(reminderEnabled) => update.mutate({ id: task.id, input: { reminderEnabled } })}
+                  onValueChange={(reminderEnabled) =>
+                    update.mutate({ id: task.id, input: { reminderEnabled } })
+                  }
                 />
               </View>
             </AttributeRow>
@@ -134,7 +168,9 @@ export default function TaskDetailScreen() {
           <AttributeRow icon={Repeat} label="Repeat">
             <RecurrencePicker
               value={task.recurrenceFrequency}
-              onChange={(recurrenceFrequency) => update.mutate({ id: task.id, input: { recurrenceFrequency } })}
+              onChange={(recurrenceFrequency) =>
+                update.mutate({ id: task.id, input: { recurrenceFrequency } })
+              }
             />
           </AttributeRow>
 
@@ -157,7 +193,8 @@ export default function TaskDetailScreen() {
             value={notes}
             onChangeText={setNotes}
             multiline
-            accessibilityLabel="Task notes" placeholder="Add notes…"
+            accessibilityLabel="Task notes"
+            placeholder="Add notes…"
             placeholderTextColor={colors[scheme].mutedForeground}
             className="min-h-24 rounded-2xl border border-border bg-card p-4 text-base text-foreground shadow-e1"
             textAlignVertical="top"

@@ -41,7 +41,11 @@ export default function DebtDetailScreen() {
   const confirmDelete = () => {
     Alert.alert('Delete this IOU?', `The record for "${debt.counterparty}" will be removed.`, [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => (removeDebt.mutate(debt.id), router.back()) },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => (removeDebt.mutate(debt.id), router.back()),
+      },
     ]);
   };
 
@@ -51,17 +55,33 @@ export default function DebtDetailScreen() {
         eyebrow="Borrow & Lend"
         tint={moduleTint('budget', scheme)}
         actions={[
-          { icon: Pencil, label: 'Edit IOU', onPress: () => router.push(`/budget/debts/new?id=${debt.id}`) },
-          { icon: Trash2, label: 'Delete IOU', onPress: confirmDelete, tint: colors[scheme].destructive },
+          {
+            icon: Pencil,
+            label: 'Edit IOU',
+            onPress: () => router.push(`/budget/debts/new?id=${debt.id}`),
+          },
+          {
+            icon: Trash2,
+            label: 'Delete IOU',
+            onPress: confirmDelete,
+            tint: colors[scheme].destructive,
+          },
         ]}
       />
 
-      <ScrollView contentContainerClassName="gap-6 px-5 pt-2 pb-10" showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerClassName="gap-6 px-5 pt-2 pb-10"
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
         <View className="items-center gap-4">
           <ProgressRing progress={debt.progress} size={180} strokeWidth={14} color={tint} gradient>
             <View className="items-center">
               <Text className="font-sora-extrabold text-2xl text-foreground">
-                {formatMoney(debt.isSettled ? debt.principalCents : debt.remainingCents, debt.currency)}
+                {formatMoney(
+                  debt.isSettled ? debt.principalCents : debt.remainingCents,
+                  debt.currency,
+                )}
               </Text>
               <Text variant="caption">{debt.isSettled ? 'settled' : 'remaining'}</Text>
             </View>
@@ -114,21 +134,34 @@ export default function DebtDetailScreen() {
                   <TextInput
                     value={payText}
                     onChangeText={setPayText}
-                    accessibilityLabel="Payment amount" placeholder="0"
+                    accessibilityLabel="Payment amount"
+                    placeholder="0"
                     keyboardType="decimal-pad"
                     placeholderTextColor={colors[scheme].mutedForeground}
                     className="flex-1 text-foreground"
                     style={{ fontSize: 18, fontFamily: 'Sora_600SemiBold' }}
                   />
                 </View>
-                <Button label="Add" onPress={recordPayment} disabled={payCents <= 0} size="md" variant="accent" />
+                <Button
+                  label="Add"
+                  onPress={recordPayment}
+                  disabled={payCents <= 0}
+                  size="md"
+                  variant="accent"
+                />
               </View>
               <Text variant="caption">
-                {borrowed ? 'Log what you paid back' : 'Log what they paid you'} — {formatMoney(debt.remainingCents, debt.currency)} left.
+                {borrowed ? 'Log what you paid back' : 'Log what they paid you'} —{' '}
+                {formatMoney(debt.remainingCents, debt.currency)} left.
               </Text>
             </View>
 
-            <GradientButton label="Mark fully settled" tint="#22c55e" icon={CheckCircle2} onPress={() => markSettled.mutate(debt.id)} />
+            <GradientButton
+              label="Mark fully settled"
+              tint="#22c55e"
+              icon={CheckCircle2}
+              onPress={() => markSettled.mutate(debt.id)}
+            />
           </View>
         )}
       </ScrollView>

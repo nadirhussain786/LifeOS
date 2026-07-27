@@ -19,7 +19,9 @@ export function formatMoney(cents: number, currency = 'USD'): string {
   const iso = findCurrency(currency)?.code;
   if (iso) {
     try {
-      return new Intl.NumberFormat(deviceLocale(), { style: 'currency', currency: iso }).format(Math.round(cents) / 100);
+      return new Intl.NumberFormat(deviceLocale(), { style: 'currency', currency: iso }).format(
+        Math.round(cents) / 100,
+      );
     } catch {
       // Hermes build without full Intl currency support — use the manual path.
     }
@@ -44,7 +46,8 @@ export function formatMoneyCompact(cents: number, currency = 'USD'): string {
   const abs = Math.abs(Math.round(cents));
   const dollars = abs / 100;
   const sign = cents < 0 ? '-' : '';
-  if (dollars >= 1000) return `${sign}${symbol}${(dollars / 1000).toFixed(dollars >= 10000 ? 0 : 1)}k`;
+  if (dollars >= 1000)
+    return `${sign}${symbol}${(dollars / 1000).toFixed(dollars >= 10000 ? 0 : 1)}k`;
   return `${sign}${symbol}${Math.round(dollars)}`;
 }
 

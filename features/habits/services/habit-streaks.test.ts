@@ -21,7 +21,12 @@ describe('isHabitScheduledOn', () => {
   });
 
   it('custom_days respects the weekday set (Jul 20 2026 is a Monday = 1)', () => {
-    const monWed = { scheduleType: 'custom_days' as const, scheduleDays: [1, 3], scheduleIntervalDays: null, createdAt: 0 };
+    const monWed = {
+      scheduleType: 'custom_days' as const,
+      scheduleDays: [1, 3],
+      scheduleIntervalDays: null,
+      createdAt: 0,
+    };
     expect(isHabitScheduledOn(monWed, toDateKey(ASOF))).toBe(true); // Mon
     expect(isHabitScheduledOn(monWed, toDateKey(daysAgo(1)))).toBe(false); // Sun
   });
@@ -91,7 +96,12 @@ describe('calculateHabitStreaks — best streak', () => {
 
 describe('calculateHabitStreaks — completion rate', () => {
   it('is 1 when there are no scheduled days in the window', () => {
-    const noneScheduled = { scheduleType: 'custom_days' as const, scheduleDays: [], scheduleIntervalDays: null, createdAt: 0 };
+    const noneScheduled = {
+      scheduleType: 'custom_days' as const,
+      scheduleDays: [],
+      scheduleIntervalDays: null,
+      createdAt: 0,
+    };
     const r = calculateHabitStreaks(noneScheduled, [], [], ASOF);
     expect(r.completionRate30d).toBe(1);
   });

@@ -19,22 +19,38 @@ export function TodayTimelineWidget() {
   const { data, isLoading } = useTodayTimeline();
   const todayKey = toDateKey(new Date());
 
-  const addEvent = () => router.push({ pathname: '/timeline/event/new', params: { date: todayKey } });
+  const addEvent = () =>
+    router.push({ pathname: '/timeline/event/new', params: { date: todayKey } });
 
   return (
-    <WidgetCard icon={Clock3} title="Today's timeline" tint={moduleTint('calendar', scheme)} actionLabel="View all" onActionPress={() => router.push(`/timeline/${todayKey}`)}>
+    <WidgetCard
+      icon={Clock3}
+      title="Today's timeline"
+      tint={moduleTint('calendar', scheme)}
+      actionLabel="View all"
+      onActionPress={() => router.push(`/timeline/${todayKey}`)}
+    >
       {isLoading || !data ? (
         <View className="gap-2">
           <Skeleton className="h-8 w-full" />
           <Skeleton className="h-8 w-full" />
         </View>
       ) : data.events.length === 0 ? (
-        <WidgetEmptyState message="Nothing on the timeline yet — it fills in as you go." actionLabel="Add event" onAction={addEvent} />
+        <WidgetEmptyState
+          message="Nothing on the timeline yet — it fills in as you go."
+          actionLabel="Add event"
+          onAction={addEvent}
+        />
       ) : (
         <View className="gap-2.5">
           {data.events.slice(0, 4).map((event) => (
             <View key={event.id} className="flex-row items-center gap-2.5">
-              {event.colorToken && <View className="h-2 w-2 rounded-full" style={{ backgroundColor: event.colorToken }} />}
+              {event.colorToken && (
+                <View
+                  className="h-2 w-2 rounded-full"
+                  style={{ backgroundColor: event.colorToken }}
+                />
+              )}
               <Text className="text-sm">{event.emoji}</Text>
               <Text className="flex-1" numberOfLines={1}>
                 {event.title}

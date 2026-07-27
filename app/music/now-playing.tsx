@@ -1,5 +1,17 @@
 import { useRouter } from 'expo-router';
-import { ChevronDown, ListMusic, Moon, Pause, Play, Repeat, Repeat1, Shuffle, SkipBack, SkipForward, X } from 'lucide-react-native';
+import {
+  ChevronDown,
+  ListMusic,
+  Moon,
+  Pause,
+  Play,
+  Repeat,
+  Repeat1,
+  Shuffle,
+  SkipBack,
+  SkipForward,
+  X,
+} from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -20,14 +32,26 @@ const REPEAT_CYCLE: Record<RepeatMode, RepeatMode> = { off: 'all', all: 'one', o
 const WHITE = '#ffffff';
 
 /** Frosted round chip used for the header + secondary actions. */
-function GlassChip({ children, onPress, label }: { children: React.ReactNode; onPress: () => void; label: string }) {
+function GlassChip({
+  children,
+  onPress,
+  label,
+}: {
+  children: React.ReactNode;
+  onPress: () => void;
+  label: string;
+}) {
   return (
     <Pressable
       onPress={onPress}
       hitSlop={10}
       accessibilityLabel={label}
       className="h-10 w-10 items-center justify-center rounded-full"
-      style={{ backgroundColor: alpha(WHITE, 0.14), borderWidth: 1, borderColor: alpha(WHITE, 0.14) }}
+      style={{
+        backgroundColor: alpha(WHITE, 0.14),
+        borderWidth: 1,
+        borderColor: alpha(WHITE, 0.14),
+      }}
     >
       {children}
     </Pressable>
@@ -86,13 +110,19 @@ export default function NowPlayingScreen() {
     <View className="flex-1">
       <AuroraBackground color={accent} />
 
-      <View style={{ paddingTop: insets.top + 12, paddingBottom: insets.bottom + 16 }} className="flex-1 px-6">
+      <View
+        style={{ paddingTop: insets.top + 12, paddingBottom: insets.bottom + 16 }}
+        className="flex-1 px-6"
+      >
         {/* Header */}
         <View className="flex-row items-center justify-between">
           <GlassChip onPress={() => router.back()} label="Minimize">
             <ChevronDown size={20} color={WHITE} />
           </GlassChip>
-          <Text style={{ color: alpha(WHITE, 0.75), fontSize: 11, letterSpacing: 1 }} className="font-sora-semibold uppercase">
+          <Text
+            style={{ color: alpha(WHITE, 0.75), fontSize: 11, letterSpacing: 1 }}
+            className="font-sora-semibold uppercase"
+          >
             {queue.length > 0 ? `${currentIndex + 1} of ${queue.length}` : 'Now Playing'}
           </Text>
           <GlassChip onPress={dismiss} label="Stop and close">
@@ -159,7 +189,11 @@ export default function NowPlayingScreen() {
             </Pressable>
           </View>
 
-          <Pressable onPress={() => setRepeatMode(REPEAT_CYCLE[repeatMode])} hitSlop={12} accessibilityLabel="Repeat">
+          <Pressable
+            onPress={() => setRepeatMode(REPEAT_CYCLE[repeatMode])}
+            hitSlop={12}
+            accessibilityLabel="Repeat"
+          >
             <RepeatIcon size={20} color={repeatMode === 'off' ? alpha(WHITE, 0.55) : accent} />
           </Pressable>
         </View>
@@ -169,7 +203,11 @@ export default function NowPlayingScreen() {
           <Pressable
             onPress={() => setSleepOpen(true)}
             className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl py-3.5"
-            style={{ backgroundColor: alpha(WHITE, sleepActive ? 0.2 : 0.1), borderWidth: 1, borderColor: alpha(WHITE, 0.14) }}
+            style={{
+              backgroundColor: alpha(WHITE, sleepActive ? 0.2 : 0.1),
+              borderWidth: 1,
+              borderColor: alpha(WHITE, 0.14),
+            }}
           >
             <Moon size={16} color={sleepActive ? accent : WHITE} />
             <Text className="font-sora-semibold" style={{ color: WHITE }}>
@@ -179,7 +217,11 @@ export default function NowPlayingScreen() {
           <Pressable
             onPress={() => setQueueOpen(true)}
             className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl py-3.5"
-            style={{ backgroundColor: alpha(WHITE, 0.1), borderWidth: 1, borderColor: alpha(WHITE, 0.14) }}
+            style={{
+              backgroundColor: alpha(WHITE, 0.1),
+              borderWidth: 1,
+              borderColor: alpha(WHITE, 0.14),
+            }}
           >
             <ListMusic size={16} color={WHITE} />
             <Text className="font-sora-semibold" style={{ color: WHITE }}>
@@ -197,7 +239,13 @@ export default function NowPlayingScreen() {
         isPlaying={isPlaying}
         onJump={jumpToIndex}
       />
-      <SleepTimerSheet visible={sleepOpen} onClose={() => setSleepOpen(false)} remainingMs={sleepRemainingMs} active={sleepActive} onSelect={setSleepTimer} />
+      <SleepTimerSheet
+        visible={sleepOpen}
+        onClose={() => setSleepOpen(false)}
+        remainingMs={sleepRemainingMs}
+        active={sleepActive}
+        onSelect={setSleepTimer}
+      />
     </View>
   );
 }

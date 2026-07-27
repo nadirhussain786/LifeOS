@@ -25,13 +25,28 @@ type Props = {
 /** One tappable row within a settings card — icon, label + optional subtitle,
  * and a trailing chevron/value/custom control. Shared by every section of
  * the Settings screen. */
-export function SettingsRow({ icon: Icon, label, subtitle, value, destructive, isFirst, disabled, onPress, chevron = true, right }: Props) {
+export function SettingsRow({
+  icon: Icon,
+  label,
+  subtitle,
+  value,
+  destructive,
+  isFirst,
+  disabled,
+  onPress,
+  chevron = true,
+  right,
+}: Props) {
   const scheme = useColorScheme() ?? 'light';
   const tint = destructive ? colors[scheme].destructive : colors[scheme].foreground;
 
   const content = (
     <View
-      className={isFirst ? 'flex-row items-center gap-3 py-3.5' : 'flex-row items-center gap-3 border-t border-border py-3.5'}
+      className={
+        isFirst
+          ? 'flex-row items-center gap-3 py-3.5'
+          : 'flex-row items-center gap-3 border-t border-border py-3.5'
+      }
       style={{ opacity: disabled ? 0.5 : 1 }}
     >
       <Icon size={17} color={tint} />
@@ -41,11 +56,12 @@ export function SettingsRow({ icon: Icon, label, subtitle, value, destructive, i
         </Text>
         {subtitle && <Text variant="caption">{subtitle}</Text>}
       </View>
-      {right ?? (value ? (
-        <Text variant="muted">{value}</Text>
-      ) : onPress && chevron ? (
-        <ChevronRight size={17} color={colors[scheme].mutedForeground} />
-      ) : null)}
+      {right ??
+        (value ? (
+          <Text variant="muted">{value}</Text>
+        ) : onPress && chevron ? (
+          <ChevronRight size={17} color={colors[scheme].mutedForeground} />
+        ) : null)}
     </View>
   );
 

@@ -11,7 +11,10 @@ export const habitFormSchema = z
     scheduleType: z.enum(['daily', 'weekly', 'monthly', 'custom_days', 'every_x_days', 'flexible']),
     scheduleDays: z.array(z.number().int().min(0).max(6)).nullable(),
     scheduleIntervalDays: z.number().int().min(2).max(365).nullable(),
-    reminderTime: z.string().regex(/^\d{2}:\d{2}$/).nullable(),
+    reminderTime: z
+      .string()
+      .regex(/^\d{2}:\d{2}$/)
+      .nullable(),
     reminderAdaptive: z.boolean(),
   })
   .superRefine((values, ctx) => {
@@ -29,7 +32,10 @@ export const habitFormSchema = z
         path: ['scheduleIntervalDays'],
       });
     }
-    if ((values.type === 'count' || values.type === 'duration' || values.type === 'distance') && !values.unit) {
+    if (
+      (values.type === 'count' || values.type === 'duration' || values.type === 'distance') &&
+      !values.unit
+    ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: 'Give this habit a unit (e.g. glasses, minutes, km)',

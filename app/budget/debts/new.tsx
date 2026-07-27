@@ -101,19 +101,31 @@ export default function DebtFormScreen() {
     <View className="flex-1 bg-background">
       <SheetHeader title={isEdit ? 'Edit IOU' : 'New IOU'} />
 
-      <ScrollView contentContainerClassName="gap-5 px-5 pt-3 pb-10" keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerClassName="gap-5 px-5 pt-3 pb-10"
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         {isEdit ? (
           <View className="items-center">
-            <Text variant="muted">{direction === 'borrowed' ? 'You borrowed from' : 'You lent to'}</Text>
+            <Text variant="muted">
+              {direction === 'borrowed' ? 'You borrowed from' : 'You lent to'}
+            </Text>
           </View>
         ) : (
-          <Segmented options={DIRECTION_OPTIONS} value={direction} onChange={setDirection} activeColor={DEBT_TINT} />
+          <Segmented
+            options={DIRECTION_OPTIONS}
+            value={direction}
+            onChange={setDirection}
+            activeColor={DEBT_TINT}
+          />
         )}
 
         <TextInput
           value={counterparty}
           onChangeText={setCounterparty}
-          accessibilityLabel="Person" placeholder="Person's name"
+          accessibilityLabel="Person"
+          placeholder="Person's name"
           placeholderTextColor={colors[scheme].mutedForeground}
           autoFocus={!isEdit}
           style={{ fontSize: 22, fontFamily: 'Sora_700Bold', color: colors[scheme].foreground }}
@@ -130,13 +142,16 @@ export default function DebtFormScreen() {
             <TextInput
               value={amount}
               onChangeText={setAmount}
-              accessibilityLabel="Amount" placeholder="0"
+              accessibilityLabel="Amount"
+              placeholder="0"
               keyboardType="decimal-pad"
               placeholderTextColor={colors[scheme].mutedForeground}
               className="flex-1 text-foreground"
               style={{ fontSize: 20, fontFamily: 'Sora_600SemiBold' }}
             />
-            {principalCents > 0 && <Text variant="caption">{formatMoney(principalCents, currency)}</Text>}
+            {principalCents > 0 && (
+              <Text variant="caption">{formatMoney(principalCents, currency)}</Text>
+            )}
           </View>
         </View>
 
@@ -147,21 +162,40 @@ export default function DebtFormScreen() {
           </View>
           <View className="flex-row items-center gap-2">
             {Platform.OS === 'ios' ? (
-              <DateTimePicker value={dueDate ? new Date(dueDate) : new Date()} mode="date" display="compact" onChange={handleDate} />
+              <DateTimePicker
+                value={dueDate ? new Date(dueDate) : new Date()}
+                mode="date"
+                display="compact"
+                onChange={handleDate}
+              />
             ) : (
-              <Pressable onPress={() => setShowDate(true)} className="rounded-lg bg-muted px-3 py-1.5">
-                <Text className="font-sora-semibold text-foreground">{dueDate ? format(dueDate, 'MMM d, yyyy') : 'None'}</Text>
+              <Pressable
+                onPress={() => setShowDate(true)}
+                className="rounded-lg bg-muted px-3 py-1.5"
+              >
+                <Text className="font-sora-semibold text-foreground">
+                  {dueDate ? format(dueDate, 'MMM d, yyyy') : 'None'}
+                </Text>
               </Pressable>
             )}
             {dueDate != null && (
-              <Pressable onPress={() => setDueDate(null)} hitSlop={8} className="h-6 w-6 items-center justify-center rounded-full bg-muted">
+              <Pressable
+                onPress={() => setDueDate(null)}
+                hitSlop={8}
+                className="h-6 w-6 items-center justify-center rounded-full bg-muted"
+              >
                 <X size={13} color={colors[scheme].mutedForeground} />
               </Pressable>
             )}
           </View>
         </View>
         {Platform.OS === 'android' && showDate && (
-          <DateTimePicker value={dueDate ? new Date(dueDate) : new Date()} mode="date" display="default" onChange={handleDate} />
+          <DateTimePicker
+            value={dueDate ? new Date(dueDate) : new Date()}
+            mode="date"
+            display="default"
+            onChange={handleDate}
+          />
         )}
 
         {dueDate != null && (
@@ -179,10 +213,14 @@ export default function DebtFormScreen() {
                   <Pressable
                     key={days ?? 'off'}
                     onPress={() => setReminderDaysBefore(days)}
-                    style={selected ? { backgroundColor: DEBT_TINT, borderColor: DEBT_TINT } : undefined}
+                    style={
+                      selected ? { backgroundColor: DEBT_TINT, borderColor: DEBT_TINT } : undefined
+                    }
                     className="rounded-full border border-border px-3.5 py-2"
                   >
-                    <Text className={selected ? 'font-sora-medium text-white' : 'text-muted-foreground'}>
+                    <Text
+                      className={selected ? 'font-sora-medium text-white' : 'text-muted-foreground'}
+                    >
                       {days == null ? 'Off' : reminderLabel(days)}
                     </Text>
                   </Pressable>
@@ -198,12 +236,19 @@ export default function DebtFormScreen() {
         <TextInput
           value={note}
           onChangeText={setNote}
-          accessibilityLabel="Note" placeholder="What's it for? (optional)"
+          accessibilityLabel="Note"
+          placeholder="What's it for? (optional)"
           placeholderTextColor={colors[scheme].mutedForeground}
           className="rounded-2xl border border-border bg-card px-4 py-3 text-foreground"
         />
 
-        <Button label={isEdit ? 'Save changes' : 'Add IOU'} onPress={save} disabled={!canSave} size="lg" variant="accent" />
+        <Button
+          label={isEdit ? 'Save changes' : 'Add IOU'}
+          onPress={save}
+          disabled={!canSave}
+          size="lg"
+          variant="accent"
+        />
       </ScrollView>
     </View>
   );

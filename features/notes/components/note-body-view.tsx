@@ -14,7 +14,9 @@ function InlineText({ text, className }: { text: string; className?: string }) {
       {tokens.map((token, index) => (
         <Text
           key={index}
-          className={[token.bold && 'font-sora-bold', token.italic && 'italic'].filter(Boolean).join(' ')}
+          className={[token.bold && 'font-sora-bold', token.italic && 'italic']
+            .filter(Boolean)
+            .join(' ')}
         >
           {token.text}
         </Text>
@@ -49,7 +51,11 @@ export function NoteBodyView({ body, onToggleChecklist }: Props) {
         }
         if (line.type === 'heading2') {
           return (
-            <Text key={index} style={{ fontSize: 18 }} className="font-sora-semibold text-foreground">
+            <Text
+              key={index}
+              style={{ fontSize: 18 }}
+              className="font-sora-semibold text-foreground"
+            >
               {line.text}
             </Text>
           );
@@ -77,7 +83,10 @@ export function NoteBodyView({ body, onToggleChecklist }: Props) {
               >
                 {line.checked && <Check size={12} color="#ffffff" />}
               </View>
-              <InlineText text={line.text} className={line.checked ? 'flex-1 text-muted-foreground line-through' : 'flex-1'} />
+              <InlineText
+                text={line.text}
+                className={line.checked ? 'flex-1 text-muted-foreground line-through' : 'flex-1'}
+              />
             </Pressable>
           );
         }
@@ -92,14 +101,17 @@ export function NoteBodyView({ body, onToggleChecklist }: Props) {
         if (line.type === 'quote') {
           return (
             <View key={index} className="border-l-2 border-border pl-3">
-              <InlineText text={line.text} className="text-muted-foreground italic" />
+              <InlineText text={line.text} className="italic text-muted-foreground" />
             </View>
           );
         }
         if (line.type === 'code') {
           return (
             <View key={index} className="rounded-xl bg-muted p-3">
-              <Text style={{ fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', fontSize: 13 }} className="text-foreground">
+              <Text
+                style={{ fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', fontSize: 13 }}
+                className="text-foreground"
+              >
                 {line.text}
               </Text>
             </View>

@@ -4,7 +4,12 @@ import { GripVertical, Pause, Play, SkipForward, X } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import { Pressable, useWindowDimensions, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, {
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/ui/text';
@@ -32,7 +37,8 @@ export function MiniPlayerBar() {
   const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
   const { width: screenW, height: screenH } = useWindowDimensions();
-  const { currentSong, isPlaying, positionMs, durationMs, togglePlayPause, playNext, clearPlayer } = useNowPlaying();
+  const { currentSong, isPlaying, positionMs, durationMs, togglePlayPause, playNext, clearPlayer } =
+    useNowPlaying();
 
   const storeX = usePlayerUiStore((s) => s.x);
   const storeY = usePlayerUiStore((s) => s.y);
@@ -103,12 +109,21 @@ export function MiniPlayerBar() {
         style={[
           { position: 'absolute', left: 0, top: 0, width: barW },
           animatedStyle,
-          { shadowColor: MUSIC_TINT, shadowOpacity: 0.28, shadowRadius: 14, shadowOffset: { width: 0, height: 6 }, elevation: 10 },
+          {
+            shadowColor: MUSIC_TINT,
+            shadowOpacity: 0.28,
+            shadowRadius: 14,
+            shadowOffset: { width: 0, height: 6 },
+            elevation: 10,
+          },
         ]}
         className="overflow-hidden rounded-2xl border border-border bg-card"
       >
         <View className="h-[2px] w-full bg-muted">
-          <View className="h-full" style={{ width: `${progress * 100}%`, backgroundColor: MUSIC_TINT }} />
+          <View
+            className="h-full"
+            style={{ width: `${progress * 100}%`, backgroundColor: MUSIC_TINT }}
+          />
         </View>
         <View className="flex-row items-center gap-1.5 py-2 pl-1.5 pr-2.5">
           {/* Drag handle */}
@@ -117,8 +132,23 @@ export function MiniPlayerBar() {
           </View>
 
           {/* Tap target → Now Playing */}
-          <Pressable onPress={() => router.push('/music/now-playing')} className="flex-1 flex-row items-center gap-2.5" accessibilityLabel="Open now playing">
-            <LinearGradient colors={[c1, c2, c3]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ height: 38, width: 38, borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}>
+          <Pressable
+            onPress={() => router.push('/music/now-playing')}
+            className="flex-1 flex-row items-center gap-2.5"
+            accessibilityLabel="Open now playing"
+          >
+            <LinearGradient
+              colors={[c1, c2, c3]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={{
+                height: 38,
+                width: 38,
+                borderRadius: 10,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
               {isPlaying && <Equalizer size={13} playing color="#ffffff" />}
             </LinearGradient>
             <View className="flex-1">
@@ -131,17 +161,36 @@ export function MiniPlayerBar() {
             </View>
           </Pressable>
 
-          <Pressable onPress={togglePlayPause} hitSlop={6} className="h-9 w-9 items-center justify-center" accessibilityLabel={isPlaying ? 'Pause' : 'Play'}>
+          <Pressable
+            onPress={togglePlayPause}
+            hitSlop={6}
+            className="h-9 w-9 items-center justify-center"
+            accessibilityLabel={isPlaying ? 'Pause' : 'Play'}
+          >
             {isPlaying ? (
               <Pause size={20} color={colors[scheme].foreground} fill={colors[scheme].foreground} />
             ) : (
               <Play size={20} color={colors[scheme].foreground} fill={colors[scheme].foreground} />
             )}
           </Pressable>
-          <Pressable onPress={playNext} hitSlop={6} className="h-9 w-9 items-center justify-center" accessibilityLabel="Next track">
-            <SkipForward size={18} color={colors[scheme].foreground} fill={colors[scheme].foreground} />
+          <Pressable
+            onPress={playNext}
+            hitSlop={6}
+            className="h-9 w-9 items-center justify-center"
+            accessibilityLabel="Next track"
+          >
+            <SkipForward
+              size={18}
+              color={colors[scheme].foreground}
+              fill={colors[scheme].foreground}
+            />
           </Pressable>
-          <Pressable onPress={clearPlayer} hitSlop={6} className="h-9 w-9 items-center justify-center" accessibilityLabel="Stop and dismiss">
+          <Pressable
+            onPress={clearPlayer}
+            hitSlop={6}
+            className="h-9 w-9 items-center justify-center"
+            accessibilityLabel="Stop and dismiss"
+          >
             <X size={18} color={colors[scheme].mutedForeground} />
           </Pressable>
         </View>

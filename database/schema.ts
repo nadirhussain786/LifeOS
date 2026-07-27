@@ -573,7 +573,9 @@ export const galleryPhotos = sqliteTable('gallery_photos', {
    * so it survives relaunch). */
   uri: text('uri').notNull(),
   /** 'photo' or 'video' — videos also carry a durationMs + thumbnailUri. */
-  mediaType: text('media_type', { enum: ['photo', 'video'] }).notNull().default('photo'),
+  mediaType: text('media_type', { enum: ['photo', 'video'] })
+    .notNull()
+    .default('photo'),
   /** Video length in milliseconds (null for photos). */
   durationMs: integer('duration_ms'),
   /** Poster frame copied to app storage so the grid never decodes the video. */
@@ -1195,7 +1197,10 @@ export const INDEX_BOOTSTRAP_SQL = `
  */
 export const ADDITIVE_COLUMNS: Record<string, { name: string; ddl: string }[]> = {
   tasks: [
-    { name: 'has_due_time', ddl: "ALTER TABLE tasks ADD COLUMN has_due_time INTEGER NOT NULL DEFAULT 0" },
+    {
+      name: 'has_due_time',
+      ddl: 'ALTER TABLE tasks ADD COLUMN has_due_time INTEGER NOT NULL DEFAULT 0',
+    },
     {
       name: 'recurrence_frequency',
       ddl: "ALTER TABLE tasks ADD COLUMN recurrence_frequency TEXT NOT NULL DEFAULT 'none'",
@@ -1204,37 +1209,88 @@ export const ADDITIVE_COLUMNS: Record<string, { name: string; ddl: string }[]> =
     { name: 'source_note_id', ddl: 'ALTER TABLE tasks ADD COLUMN source_note_id TEXT' },
     { name: 'habit_id', ddl: 'ALTER TABLE tasks ADD COLUMN habit_id TEXT' },
     { name: 'habit_log_date', ddl: 'ALTER TABLE tasks ADD COLUMN habit_log_date TEXT' },
-    { name: 'reminder_enabled', ddl: 'ALTER TABLE tasks ADD COLUMN reminder_enabled INTEGER NOT NULL DEFAULT 0' },
-    { name: 'reminder_notification_id', ddl: 'ALTER TABLE tasks ADD COLUMN reminder_notification_id TEXT' },
+    {
+      name: 'reminder_enabled',
+      ddl: 'ALTER TABLE tasks ADD COLUMN reminder_enabled INTEGER NOT NULL DEFAULT 0',
+    },
+    {
+      name: 'reminder_notification_id',
+      ddl: 'ALTER TABLE tasks ADD COLUMN reminder_notification_id TEXT',
+    },
   ],
   notes: [
-    { name: 'is_archived', ddl: 'ALTER TABLE notes ADD COLUMN is_archived INTEGER NOT NULL DEFAULT 0' },
-    { name: 'word_count', ddl: 'ALTER TABLE notes ADD COLUMN word_count INTEGER NOT NULL DEFAULT 0' },
+    {
+      name: 'is_archived',
+      ddl: 'ALTER TABLE notes ADD COLUMN is_archived INTEGER NOT NULL DEFAULT 0',
+    },
+    {
+      name: 'word_count',
+      ddl: 'ALTER TABLE notes ADD COLUMN word_count INTEGER NOT NULL DEFAULT 0',
+    },
     { name: 'reminder_at', ddl: 'ALTER TABLE notes ADD COLUMN reminder_at INTEGER' },
-    { name: 'reminder_notification_id', ddl: 'ALTER TABLE notes ADD COLUMN reminder_notification_id TEXT' },
+    {
+      name: 'reminder_notification_id',
+      ddl: 'ALTER TABLE notes ADD COLUMN reminder_notification_id TEXT',
+    },
   ],
-  habits: [{ name: 'reminder_notification_id', ddl: 'ALTER TABLE habits ADD COLUMN reminder_notification_id TEXT' }],
+  habits: [
+    {
+      name: 'reminder_notification_id',
+      ddl: 'ALTER TABLE habits ADD COLUMN reminder_notification_id TEXT',
+    },
+  ],
   calendar_events: [
-    { name: 'reminder_minutes_before', ddl: 'ALTER TABLE calendar_events ADD COLUMN reminder_minutes_before INTEGER' },
-    { name: 'reminder_notification_id', ddl: 'ALTER TABLE calendar_events ADD COLUMN reminder_notification_id TEXT' },
+    {
+      name: 'reminder_minutes_before',
+      ddl: 'ALTER TABLE calendar_events ADD COLUMN reminder_minutes_before INTEGER',
+    },
+    {
+      name: 'reminder_notification_id',
+      ddl: 'ALTER TABLE calendar_events ADD COLUMN reminder_notification_id TEXT',
+    },
   ],
   songs: [
-    { name: 'sync_status', ddl: "ALTER TABLE songs ADD COLUMN sync_status TEXT NOT NULL DEFAULT 'pending'" },
+    {
+      name: 'sync_status',
+      ddl: "ALTER TABLE songs ADD COLUMN sync_status TEXT NOT NULL DEFAULT 'pending'",
+    },
     { name: 'server_updated_at', ddl: 'ALTER TABLE songs ADD COLUMN server_updated_at INTEGER' },
   ],
   playlists: [
-    { name: 'sync_status', ddl: "ALTER TABLE playlists ADD COLUMN sync_status TEXT NOT NULL DEFAULT 'pending'" },
-    { name: 'server_updated_at', ddl: 'ALTER TABLE playlists ADD COLUMN server_updated_at INTEGER' },
+    {
+      name: 'sync_status',
+      ddl: "ALTER TABLE playlists ADD COLUMN sync_status TEXT NOT NULL DEFAULT 'pending'",
+    },
+    {
+      name: 'server_updated_at',
+      ddl: 'ALTER TABLE playlists ADD COLUMN server_updated_at INTEGER',
+    },
   ],
   gallery_photos: [
-    { name: 'media_type', ddl: "ALTER TABLE gallery_photos ADD COLUMN media_type TEXT NOT NULL DEFAULT 'photo'" },
+    {
+      name: 'media_type',
+      ddl: "ALTER TABLE gallery_photos ADD COLUMN media_type TEXT NOT NULL DEFAULT 'photo'",
+    },
     { name: 'duration_ms', ddl: 'ALTER TABLE gallery_photos ADD COLUMN duration_ms INTEGER' },
     { name: 'thumbnail_uri', ddl: 'ALTER TABLE gallery_photos ADD COLUMN thumbnail_uri TEXT' },
   ],
-  sleep_sessions: [{ name: 'fell_asleep_minutes', ddl: 'ALTER TABLE sleep_sessions ADD COLUMN fell_asleep_minutes INTEGER' }],
-  study_sessions: [{ name: 'focus_rating', ddl: 'ALTER TABLE study_sessions ADD COLUMN focus_rating INTEGER' }],
+  sleep_sessions: [
+    {
+      name: 'fell_asleep_minutes',
+      ddl: 'ALTER TABLE sleep_sessions ADD COLUMN fell_asleep_minutes INTEGER',
+    },
+  ],
+  study_sessions: [
+    { name: 'focus_rating', ddl: 'ALTER TABLE study_sessions ADD COLUMN focus_rating INTEGER' },
+  ],
   sleep_settings: [
-    { name: 'reminder_enabled', ddl: 'ALTER TABLE sleep_settings ADD COLUMN reminder_enabled INTEGER NOT NULL DEFAULT 0' },
-    { name: 'reminder_notification_id', ddl: 'ALTER TABLE sleep_settings ADD COLUMN reminder_notification_id TEXT' },
+    {
+      name: 'reminder_enabled',
+      ddl: 'ALTER TABLE sleep_settings ADD COLUMN reminder_enabled INTEGER NOT NULL DEFAULT 0',
+    },
+    {
+      name: 'reminder_notification_id',
+      ddl: 'ALTER TABLE sleep_settings ADD COLUMN reminder_notification_id TEXT',
+    },
   ],
 };

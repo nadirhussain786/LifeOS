@@ -1,7 +1,10 @@
 import { CategoryPicker as GenericCategoryPicker } from '@/components/ui/category-picker';
 import { categoryColorPalette } from '@/constants/theme';
 import { useHabitCategories, useHabitCategoryById } from '@/features/habits/hooks/use-habits';
-import { createHabitCategory, deleteHabitCategory } from '@/features/habits/services/habits-repository';
+import {
+  createHabitCategory,
+  deleteHabitCategory,
+} from '@/features/habits/services/habits-repository';
 
 type Props = {
   value: string | null;
