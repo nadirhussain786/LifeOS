@@ -66,7 +66,11 @@ export default function LogProgressScreen() {
     <View className="flex-1 bg-background">
       <SheetHeader title="Log Progress" />
 
-      <ScrollView contentContainerClassName="gap-6 px-5 pt-3 pb-10" keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerClassName="gap-6 px-5 pt-3 pb-10"
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <View className="items-center gap-1">
           <Text className="text-center font-sora-bold text-xl text-foreground">{goal.title}</Text>
           <View className="flex-row items-center gap-2">
@@ -76,9 +80,14 @@ export default function LogProgressScreen() {
               {formatProgressPercent(resultingFraction)}
             </Text>
             {delta !== 0 && (
-              <View className="rounded-full px-2 py-0.5" style={{ backgroundColor: alpha(meta.tint, 0.15) }}>
+              <View
+                className="rounded-full px-2 py-0.5"
+                style={{ backgroundColor: alpha(meta.tint, 0.15) }}
+              >
                 <Text className="font-sora-semibold" style={{ color: meta.tint, fontSize: 12 }}>
-                  {isCount ? `${addCount > 0 ? '+' : ''}${addCount} ${goal.unit ?? ''}` : `${delta > 0 ? '+' : ''}${Math.round(delta * 100)}%`}
+                  {isCount
+                    ? `${addCount > 0 ? '+' : ''}${addCount} ${goal.unit ?? ''}`
+                    : `${delta > 0 ? '+' : ''}${Math.round(delta * 100)}%`}
                 </Text>
               </View>
             )}
@@ -88,22 +97,38 @@ export default function LogProgressScreen() {
         {isCount ? (
           <View className="gap-4 rounded-2xl border border-border bg-card p-5 shadow-e1">
             <View className="flex-row items-center justify-center gap-6">
-              <Pressable onPress={() => setAddCount((a) => a - countStep)} className="h-12 w-12 items-center justify-center rounded-2xl border border-border bg-surface">
+              <Pressable
+                onPress={() => setAddCount((a) => a - countStep)}
+                className="h-12 w-12 items-center justify-center rounded-2xl border border-border bg-surface"
+              >
                 <Minus size={20} color={colors[scheme].foreground} />
               </Pressable>
               <View className="items-center" style={{ minWidth: 90 }}>
-                <Text className="font-sora-extrabold text-3xl" style={{ color: meta.tint, fontVariant: ['tabular-nums'] }}>
+                <Text
+                  className="font-sora-extrabold text-3xl"
+                  style={{ color: meta.tint, fontVariant: ['tabular-nums'] }}
+                >
                   {resultingCount}
                 </Text>
-                <Text variant="caption">of {goal.targetValue} {goal.unit ?? ''}</Text>
+                <Text variant="caption">
+                  of {goal.targetValue} {goal.unit ?? ''}
+                </Text>
               </View>
-              <Pressable onPress={() => setAddCount((a) => a + countStep)} className="h-12 w-12 items-center justify-center rounded-2xl" style={{ backgroundColor: meta.tint }}>
+              <Pressable
+                onPress={() => setAddCount((a) => a + countStep)}
+                className="h-12 w-12 items-center justify-center rounded-2xl"
+                style={{ backgroundColor: meta.tint }}
+              >
                 <Plus size={20} color="#ffffff" />
               </Pressable>
             </View>
             <View className="flex-row justify-center gap-2">
               {[1, 5, 10].map((n) => (
-                <Pressable key={n} onPress={() => setAddCount((a) => a + n)} className="rounded-full border border-border px-3 py-1.5">
+                <Pressable
+                  key={n}
+                  onPress={() => setAddCount((a) => a + n)}
+                  className="rounded-full border border-border px-3 py-1.5"
+                >
                   <Text className="font-sora-medium text-foreground">+{n}</Text>
                 </Pressable>
               ))}
@@ -111,7 +136,10 @@ export default function LogProgressScreen() {
           </View>
         ) : (
           <View className="gap-4 rounded-2xl border border-border bg-card p-5 shadow-e1">
-            <Text className="text-center font-sora-extrabold text-4xl" style={{ color: meta.tint, fontVariant: ['tabular-nums'] }}>
+            <Text
+              className="text-center font-sora-extrabold text-4xl"
+              style={{ color: meta.tint, fontVariant: ['tabular-nums'] }}
+            >
               {targetPct}%
             </Text>
             <Slider
@@ -126,11 +154,19 @@ export default function LogProgressScreen() {
             />
             <View className="flex-row justify-center gap-2">
               {[5, 10, 25].map((n) => (
-                <Pressable key={n} onPress={() => setPct(Math.min(100, targetPct + n))} className="rounded-full border border-border px-3 py-1.5">
+                <Pressable
+                  key={n}
+                  onPress={() => setPct(Math.min(100, targetPct + n))}
+                  className="rounded-full border border-border px-3 py-1.5"
+                >
                   <Text className="font-sora-medium text-foreground">+{n}%</Text>
                 </Pressable>
               ))}
-              <Pressable onPress={() => setPct(100)} className="rounded-full px-3 py-1.5" style={{ backgroundColor: alpha(meta.tint, 0.15) }}>
+              <Pressable
+                onPress={() => setPct(100)}
+                className="rounded-full px-3 py-1.5"
+                style={{ backgroundColor: alpha(meta.tint, 0.15) }}
+              >
                 <Text className="font-sora-medium" style={{ color: meta.tint }}>
                   100%
                 </Text>
@@ -144,6 +180,7 @@ export default function LogProgressScreen() {
           <TextInput
             value={note}
             onChangeText={setNote}
+            accessibilityLabel="Progress note"
             placeholder="What did you get done?"
             placeholderTextColor={colors[scheme].mutedForeground}
             multiline

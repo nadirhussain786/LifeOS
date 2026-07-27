@@ -28,24 +28,36 @@ export function useGoalMutations() {
   });
 
   const update = useMutation({
-    mutationFn: async ({ id, input }: { id: string; input: UpdateGoalInput }) => updateGoal(id, input),
+    mutationFn: async ({ id, input }: { id: string; input: UpdateGoalInput }) =>
+      updateGoal(id, input),
     onSuccess: invalidate,
   });
 
   const setProgress = useMutation({
-    mutationFn: async ({ id, progress }: { id: string; progress: number }) => setGoalManualProgress(id, progress),
+    mutationFn: async ({ id, progress }: { id: string; progress: number }) =>
+      setGoalManualProgress(id, progress),
     onSuccess: invalidate,
   });
 
   const setCurrentValue = useMutation({
-    mutationFn: async ({ id, value }: { id: string; value: number }) => setGoalCurrentValue(id, value),
+    mutationFn: async ({ id, value }: { id: string; value: number }) =>
+      setGoalCurrentValue(id, value),
     onSuccess: invalidate,
   });
 
   /** Records a dated progress check-in and advances the goal's value. */
   const logProgress = useMutation({
-    mutationFn: async ({ goal, resultingValue, delta, note }: { goal: Goal; resultingValue: number; delta: number; note?: string | null }) =>
-      logGoalProgress(goal, resultingValue, delta, note ?? null),
+    mutationFn: async ({
+      goal,
+      resultingValue,
+      delta,
+      note,
+    }: {
+      goal: Goal;
+      resultingValue: number;
+      delta: number;
+      note?: string | null;
+    }) => logGoalProgress(goal, resultingValue, delta, note ?? null),
     onSuccess: invalidate,
   });
 
@@ -75,12 +87,14 @@ export function useGoalMutations() {
   });
 
   const addMilestoneMutation = useMutation({
-    mutationFn: async ({ goalId, title }: { goalId: string; title: string }) => addMilestone(goalId, title),
+    mutationFn: async ({ goalId, title }: { goalId: string; title: string }) =>
+      addMilestone(goalId, title),
     onSuccess: invalidate,
   });
 
   const toggleMilestoneMutation = useMutation({
-    mutationFn: async ({ id, isCompleted }: { id: string; isCompleted: boolean }) => toggleMilestone(id, isCompleted),
+    mutationFn: async ({ id, isCompleted }: { id: string; isCompleted: boolean }) =>
+      toggleMilestone(id, isCompleted),
     onSuccess: invalidate,
   });
 

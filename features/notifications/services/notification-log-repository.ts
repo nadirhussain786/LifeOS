@@ -109,7 +109,11 @@ export function unreadNotificationCount(now = Date.now()): number {
 }
 
 export function markNotificationRead(logId: string): void {
-  getDb().update(notificationLog).set({ readAt: Date.now() }).where(eq(notificationLog.id, logId)).run();
+  getDb()
+    .update(notificationLog)
+    .set({ readAt: Date.now() })
+    .where(eq(notificationLog.id, logId))
+    .run();
 }
 
 export function markAllNotificationsRead(): void {

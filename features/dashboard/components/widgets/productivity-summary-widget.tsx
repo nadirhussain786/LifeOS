@@ -15,14 +15,19 @@ export function ProductivitySummaryWidget() {
         <Skeleton className="h-14 w-full" />
       ) : (
         <View className="gap-3">
-          <Text variant="muted">{Math.round(data.weeklyCompletionRate * 100)}% of tasks completed</Text>
+          <Text variant="muted">
+            {Math.round(data.weeklyCompletionRate * 100)}% of tasks completed
+          </Text>
           <View className="h-14 flex-row items-end gap-1.5">
             {data.trend.map((value, index) => {
               // Today (the last bar) reads at full strength; earlier days sit
               // back at lower opacity so the eye lands on "now".
               const isToday = index === data.trend.length - 1;
               return (
-                <View key={index} className="h-full flex-1 justify-end overflow-hidden rounded-md bg-muted">
+                <View
+                  key={index}
+                  className="h-full flex-1 justify-end overflow-hidden rounded-md bg-muted"
+                >
                   <View
                     className="w-full rounded-md bg-accent"
                     style={{ height: `${Math.max(value * 100, 5)}%`, opacity: isToday ? 1 : 0.45 }}

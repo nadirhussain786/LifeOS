@@ -1,8 +1,19 @@
 import { and, eq, inArray, isNull } from 'drizzle-orm';
 
 import { getDb } from '@/database/client';
-import { habitCategories, habitLogs, habitRoutineItems, habitRoutines, habits, habitSkips } from '@/database/schema';
-import { calculateHabitStreaks, getTodayStatus, toDateKey } from '@/features/habits/services/habit-streaks';
+import {
+  habitCategories,
+  habitLogs,
+  habitRoutineItems,
+  habitRoutines,
+  habits,
+  habitSkips,
+} from '@/database/schema';
+import {
+  calculateHabitStreaks,
+  getTodayStatus,
+  toDateKey,
+} from '@/features/habits/services/habit-streaks';
 import { generateId } from '@/lib/id';
 import { LOCAL_USER_ID } from '@/lib/local-user';
 import type {
@@ -117,7 +128,9 @@ export function updateHabit(id: string, input: UpdateHabitInput) {
     .update(habits)
     .set({
       ...rest,
-      ...(scheduleDays !== undefined ? { scheduleDays: scheduleDays ? JSON.stringify(scheduleDays) : null } : {}),
+      ...(scheduleDays !== undefined
+        ? { scheduleDays: scheduleDays ? JSON.stringify(scheduleDays) : null }
+        : {}),
       updatedAt: Date.now(),
       syncStatus: 'pending',
     })
@@ -126,20 +139,35 @@ export function updateHabit(id: string, input: UpdateHabitInput) {
 }
 
 export function setHabitReminderNotificationId(id: string, notificationId: string | null) {
-  getDb().update(habits).set({ reminderNotificationId: notificationId }).where(eq(habits.id, id)).run();
+  getDb()
+    .update(habits)
+    .set({ reminderNotificationId: notificationId })
+    .where(eq(habits.id, id))
+    .run();
 }
 
 export function archiveHabit(id: string) {
-  getDb().update(habits).set({ isArchived: true, updatedAt: Date.now(), syncStatus: 'pending' }).where(eq(habits.id, id)).run();
+  getDb()
+    .update(habits)
+    .set({ isArchived: true, updatedAt: Date.now(), syncStatus: 'pending' })
+    .where(eq(habits.id, id))
+    .run();
 }
 
 export function unarchiveHabit(id: string) {
-  getDb().update(habits).set({ isArchived: false, updatedAt: Date.now(), syncStatus: 'pending' }).where(eq(habits.id, id)).run();
+  getDb()
+    .update(habits)
+    .set({ isArchived: false, updatedAt: Date.now(), syncStatus: 'pending' })
+    .where(eq(habits.id, id))
+    .run();
 }
 
 export function deleteHabit(id: string) {
   const db = getDb();
-  db.update(habits).set({ deletedAt: Date.now(), syncStatus: 'pending' }).where(eq(habits.id, id)).run();
+  db.update(habits)
+    .set({ deletedAt: Date.now(), updatedAt: Date.now(), syncStatus: 'pending' })
+    .where(eq(habits.id, id))
+    .run();
   db.delete(habitRoutineItems).where(eq(habitRoutineItems.habitId, id)).run();
 }
 
@@ -244,7 +272,11 @@ export function createHabitCategory(name: string, colorToken: string, icon: stri
 }
 
 export function deleteHabitCategory(id: string) {
-  getDb().update(habitCategories).set({ deletedAt: Date.now() }).where(eq(habitCategories.id, id)).run();
+  getDb()
+    .update(habitCategories)
+    .set({ deletedAt: Date.now(), updatedAt: Date.now() })
+    .where(eq(habitCategories.id, id))
+    .run();
 }
 
 // ---- Routines (habit stacking) ----
@@ -271,7 +303,11 @@ export function getRoutine(id: string): HabitRoutine | null {
 export function createRoutine(name: string): HabitRoutine {
   const db = getDb();
   const now = Date.now();
-  const maxPosition = db.select().from(habitRoutines).all().reduce((max, row) => Math.max(max, row.position), -1);
+  const maxPosition = db
+    .select()
+    .from(habitRoutines)
+    .all()
+    .reduce((max, row) => Math.max(max, row.position), -1);
   const routine: HabitRoutine = { id: generateId(), name, position: maxPosition + 1 };
   db.insert(habitRoutines)
     .values({ ...routine, userId: LOCAL_USER_ID, createdAt: now, updatedAt: now })
@@ -280,12 +316,19 @@ export function createRoutine(name: string): HabitRoutine {
 }
 
 export function renameRoutine(id: string, name: string) {
-  getDb().update(habitRoutines).set({ name, updatedAt: Date.now() }).where(eq(habitRoutines.id, id)).run();
+  getDb()
+    .update(habitRoutines)
+    .set({ name, updatedAt: Date.now() })
+    .where(eq(habitRoutines.id, id))
+    .run();
 }
 
 export function deleteRoutine(id: string) {
   const db = getDb();
-  db.update(habitRoutines).set({ deletedAt: Date.now(), updatedAt: Date.now() }).where(eq(habitRoutines.id, id)).run();
+  db.update(habitRoutines)
+    .set({ deletedAt: Date.now(), updatedAt: Date.now() })
+    .where(eq(habitRoutines.id, id))
+    .run();
   db.delete(habitRoutineItems).where(eq(habitRoutineItems.routineId, id)).run();
 }
 
@@ -303,7 +346,13 @@ export function listRoutineHabitIds(routineId: string): string[] {
 /** Every habit id that belongs to any routine — used to split the Today
  * list into "in a routine" vs. "standalone, grouped by category." */
 export function listRoutinedHabitIds(): Set<string> {
-  return new Set(getDb().select().from(habitRoutineItems).all().map((row) => row.habitId));
+  return new Set(
+    getDb()
+      .select()
+      .from(habitRoutineItems)
+      .all()
+      .map((row) => row.habitId),
+  );
 }
 
 export function addHabitToRoutine(routineId: string, habitId: string) {
@@ -321,7 +370,9 @@ export function addHabitToRoutine(routineId: string, habitId: string) {
     .where(eq(habitRoutineItems.routineId, routineId))
     .all()
     .reduce((max, row) => Math.max(max, row.position), -1);
-  db.insert(habitRoutineItems).values({ routineId, habitId, position: maxPosition + 1 }).run();
+  db.insert(habitRoutineItems)
+    .values({ routineId, habitId, position: maxPosition + 1 })
+    .run();
 }
 
 export function removeHabitFromRoutine(routineId: string, habitId: string) {
@@ -336,7 +387,9 @@ export function reorderRoutineHabits(routineId: string, orderedHabitIds: string[
   orderedHabitIds.forEach((habitId, index) => {
     db.update(habitRoutineItems)
       .set({ position: index })
-      .where(and(eq(habitRoutineItems.routineId, routineId), eq(habitRoutineItems.habitId, habitId)))
+      .where(
+        and(eq(habitRoutineItems.routineId, routineId), eq(habitRoutineItems.habitId, habitId)),
+      )
       .run();
   });
 }

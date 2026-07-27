@@ -1,7 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { calculateHabitStreaks } from '@/features/habits/services/habit-streaks';
-import { getHabit, listLogsForHabit, listSkipsForHabit } from '@/features/habits/services/habits-repository';
+import {
+  getHabit,
+  listLogsForHabit,
+  listSkipsForHabit,
+} from '@/features/habits/services/habits-repository';
 
 export function useHabit(id: string) {
   return useQuery({
@@ -22,7 +26,9 @@ export function useHabitStreaks(id: string) {
   const logs = useHabitLogs(id);
 
   const streaks =
-    habit.data && logs.data ? calculateHabitStreaks(habit.data, logs.data.logs, logs.data.skips) : null;
+    habit.data && logs.data
+      ? calculateHabitStreaks(habit.data, logs.data.logs, logs.data.skips)
+      : null;
 
   return { streaks, isLoading: habit.isLoading || logs.isLoading };
 }

@@ -3,6 +3,10 @@ import type { Session, User } from '@supabase/supabase-js';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
+import {
+  reconcileAccountOnSignIn,
+  wipeLocalData,
+} from '@/features/sync/services/account-reconcile';
 import { isSupabaseConfigured } from '@/lib/env';
 import { passwordResetRedirectUrl, supabase } from '@/lib/supabase';
 
@@ -11,7 +15,8 @@ import { passwordResetRedirectUrl, supabase } from '@/lib/supabase';
  * confusing "Network request failed"). */
 const NOT_CONFIGURED = {
   ok: false as const,
-  error: 'Cloud sync isn’t set up on this build. Add your Supabase keys to .env, then fully restart with `npx expo start -c`.',
+  error:
+    'Cloud sync isn’t set up on this build. Add your Supabase keys to .env, then fully restart with `npx expo start -c`.',
 };
 
 /** Result shape both sign-in and sign-up return so screens can show a friendly
@@ -41,6 +46,7 @@ type AuthState = {
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<AuthResult>;
   updatePassword: (newPassword: string) => Promise<AuthResult>;
+  deleteAccount: () => Promise<AuthResult>;
   continueAsGuest: () => void;
   loadProfile: () => Promise<void>;
   updateDisplayName: (displayName: string) => Promise<AuthResult>;
@@ -50,9 +56,11 @@ type AuthState = {
 function friendly(message: string): string {
   const m = message.toLowerCase();
   if (m.includes('invalid login')) return 'That email or password is incorrect.';
-  if (m.includes('already registered') || m.includes('already been registered')) return 'An account with this email already exists.';
+  if (m.includes('already registered') || m.includes('already been registered'))
+    return 'An account with this email already exists.';
   if (m.includes('password should be')) return 'Password must be at least 6 characters.';
-  if (m.includes('unable to validate email') || m.includes('invalid email')) return 'That email address looks invalid.';
+  if (m.includes('unable to validate email') || m.includes('invalid email'))
+    return 'That email address looks invalid.';
   if (m.includes('email not confirmed')) return 'Please confirm your email first, then sign in.';
   if (m.includes('network')) return 'Network error — check your connection and try again.';
   return message;
@@ -75,6 +83,7 @@ export const useAuthStore = create<AuthState>()(
         supabase.auth
           .getSession()
           .then(({ data }) => {
+            if (data.session) reconcileAccountOnSignIn(data.session.user.id);
             set({ session: data.session, user: data.session?.user ?? null });
             if (data.session) void get().loadProfile();
           })
@@ -90,6 +99,8 @@ export const useAuthStore = create<AuthState>()(
         }, 4000);
 
         supabase.auth.onAuthStateChange((_event, session) => {
+          // Wipe-before-sync if a different account signed in on this device.
+          if (session) reconcileAccountOnSignIn(session.user.id);
           set({ session, user: session?.user ?? null, isInitialized: true });
           // A real session means we're no longer a guest.
           if (session) set({ isGuest: false });
@@ -139,17 +150,37 @@ export const useAuthStore = create<AuthState>()(
         return { ok: true };
       },
 
+      deleteAccount: async () => {
+        if (!isSupabaseConfigured) return NOT_CONFIGURED;
+        // Server-side deletion (auth user + all their rows) runs in an edge
+        // function — the client can't call auth.admin.deleteUser. See
+        // supabase/functions/delete-account. Requires App/Play store compliance.
+        const { error } = await supabase.functions.invoke('delete-account');
+        if (error) return { ok: false, error: friendly(error.message) };
+        wipeLocalData();
+        await supabase.auth.signOut();
+        set({ session: null, user: null, profile: null, isGuest: false });
+        return { ok: true };
+      },
+
       continueAsGuest: () => set({ isGuest: true }),
 
       loadProfile: async () => {
         const user = get().user;
         if (!user) return;
-        const { data } = await supabase.from('profiles').select('id, email, display_name').eq('id', user.id).maybeSingle();
+        const { data } = await supabase
+          .from('profiles')
+          .select('id, email, display_name')
+          .eq('id', user.id)
+          .maybeSingle();
         set({
           profile: {
             id: user.id,
             email: data?.email ?? user.email ?? null,
-            displayName: data?.display_name ?? (user.user_metadata?.display_name as string | undefined) ?? null,
+            displayName:
+              data?.display_name ??
+              (user.user_metadata?.display_name as string | undefined) ??
+              null,
           },
         });
       },
@@ -157,9 +188,14 @@ export const useAuthStore = create<AuthState>()(
       updateDisplayName: async (displayName) => {
         const user = get().user;
         if (!user) return { ok: false, error: 'You need to be signed in.' };
-        const { error } = await supabase.from('profiles').update({ display_name: displayName.trim() }).eq('id', user.id);
+        const { error } = await supabase
+          .from('profiles')
+          .update({ display_name: displayName.trim() })
+          .eq('id', user.id);
         if (error) return { ok: false, error: friendly(error.message) };
-        set((s) => ({ profile: s.profile ? { ...s.profile, displayName: displayName.trim() } : s.profile }));
+        set((s) => ({
+          profile: s.profile ? { ...s.profile, displayName: displayName.trim() } : s.profile,
+        }));
         return { ok: true };
       },
     }),

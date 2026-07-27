@@ -33,14 +33,21 @@ export function DayCard({ entry, onPress }: Props) {
           </Text>
         </View>
 
-        <View className="h-10 w-10 items-center justify-center rounded-full" style={{ backgroundColor: `${tint}1f` }}>
+        <View
+          className="h-10 w-10 items-center justify-center rounded-full"
+          style={{ backgroundColor: `${tint}1f` }}
+        >
           <Text className="text-lg">{entry.mood ? MOOD_EMOJI[entry.mood] : '·'}</Text>
         </View>
 
         <View className="flex-1 gap-0.5">
           <Text
             numberOfLines={1}
-            className={snippet ? 'font-journal text-[15px]' : 'font-journal-italic text-[15px] text-muted-foreground'}
+            className={
+              snippet
+                ? 'font-journal text-[15px]'
+                : 'font-journal-italic text-[15px] text-muted-foreground'
+            }
           >
             {snippet || 'No reflection written'}
           </Text>

@@ -4,14 +4,22 @@ import { BarChart3, Droplet, GlassWater, Settings2 } from 'lucide-react-native';
 import { useEffect, useRef } from 'react';
 import { Pressable, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import Animated, { useAnimatedStyle, useSharedValue, withSequence, withSpring } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+} from 'react-native-reanimated';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
 import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { WidgetCard } from '@/features/dashboard/components/widget-card';
-import { useTodayWaterTotal, useWaterIntakeMutations } from '@/features/water-intake/hooks/use-water-intake';
+import {
+  useTodayWaterTotal,
+  useWaterIntakeMutations,
+} from '@/features/water-intake/hooks/use-water-intake';
 import { useWaterSettingsStore } from '@/features/water-intake/store/water-settings-store';
 
 const GLASS_ML = 250;
@@ -33,7 +41,10 @@ export function WaterIntakeWidget() {
   const wasReached = useRef(false);
   useEffect(() => {
     if (goalReached && !wasReached.current) {
-      celebrateScale.value = withSequence(withSpring(1.15, { damping: 6, stiffness: 400 }), withSpring(1, { damping: 8, stiffness: 300 }));
+      celebrateScale.value = withSequence(
+        withSpring(1.15, { damping: 6, stiffness: 400 }),
+        withSpring(1, { damping: 8, stiffness: 300 }),
+      );
     }
     wasReached.current = goalReached;
   }, [goalReached, celebrateScale]);
@@ -51,14 +62,24 @@ export function WaterIntakeWidget() {
   };
 
   return (
-    <WidgetCard icon={GlassWater} title="Water intake" tint={waterTint} actionLabel="History" onActionPress={() => router.push('/water-intake/history')}>
+    <WidgetCard
+      icon={GlassWater}
+      title="Water intake"
+      tint={waterTint}
+      actionLabel="History"
+      onActionPress={() => router.push('/water-intake/history')}
+    >
       {isLoading || currentMl === undefined ? (
         <Skeleton className="h-8 w-full" />
       ) : (
         <View className="gap-4">
           <View className="flex-row items-center justify-between">
             <Animated.View style={celebrateStyle}>
-              <Text variant="muted" className="font-sora-semibold" style={goalReached ? { color: waterTint } : undefined}>
+              <Text
+                variant="muted"
+                className="font-sora-semibold"
+                style={goalReached ? { color: waterTint } : undefined}
+              >
                 {currentMl} / {goalMl} ml{goalReached ? ' 🎉' : ''}
               </Text>
             </Animated.View>
@@ -86,7 +107,11 @@ export function WaterIntakeWidget() {
                     backgroundColor: filled ? `${waterTint}1f` : 'transparent',
                   }}
                 >
-                  <Droplet size={16} color={filled ? waterTint : colors[scheme].mutedForeground} fill={filled ? waterTint : 'transparent'} />
+                  <Droplet
+                    size={16}
+                    color={filled ? waterTint : colors[scheme].mutedForeground}
+                    fill={filled ? waterTint : 'transparent'}
+                  />
                 </Pressable>
               );
             })}
@@ -94,7 +119,11 @@ export function WaterIntakeWidget() {
 
           <View className="flex-row gap-2">
             {QUICK_ADD_ML.map((ml) => (
-              <Pressable key={ml} onPress={() => quickAdd(ml)} className="flex-1 items-center rounded-full border border-dashed border-border py-2">
+              <Pressable
+                key={ml}
+                onPress={() => quickAdd(ml)}
+                className="flex-1 items-center rounded-full border border-dashed border-border py-2"
+              >
                 <Text variant="caption" className="font-sora-medium">
                   + {ml >= 1000 ? `${ml / 1000}L bottle` : `${ml}ml`}
                 </Text>
@@ -102,7 +131,10 @@ export function WaterIntakeWidget() {
             ))}
           </View>
 
-          <Pressable onPress={() => router.push('/water-intake/history')} className="flex-row items-center justify-center gap-1.5">
+          <Pressable
+            onPress={() => router.push('/water-intake/history')}
+            className="flex-row items-center justify-center gap-1.5"
+          >
             <BarChart3 size={12} color={colors[scheme].mutedForeground} />
             <Text variant="caption">View last 14 days</Text>
           </Pressable>

@@ -6,7 +6,9 @@ export async function cancelJournalReminder(notificationId: string | null): Prom
 }
 
 /** Schedules a single DAILY-repeating "write today's entry" nudge. */
-export async function scheduleJournalReminder(settings: JournalReminderSettings): Promise<string | null> {
+export async function scheduleJournalReminder(
+  settings: JournalReminderSettings,
+): Promise<string | null> {
   if (!settings.enabled) return null;
 
   return scheduleDailyNotification({

@@ -4,7 +4,10 @@ import { getDb } from '@/database/client';
 import { calendarEvents } from '@/database/schema';
 import { generateId } from '@/lib/id';
 import { LOCAL_USER_ID } from '@/lib/local-user';
-import type { CalendarEvent, CreateCalendarEventInput } from '@/features/timeline/types/timeline.types';
+import type {
+  CalendarEvent,
+  CreateCalendarEventInput,
+} from '@/features/timeline/types/timeline.types';
 
 function toEvent(row: typeof calendarEvents.$inferSelect): CalendarEvent {
   return {
@@ -25,7 +28,11 @@ export function getCalendarEvent(id: string): CalendarEvent | null {
 }
 
 export function setCalendarEventReminderNotificationId(id: string, notificationId: string | null) {
-  getDb().update(calendarEvents).set({ reminderNotificationId: notificationId }).where(eq(calendarEvents.id, id)).run();
+  getDb()
+    .update(calendarEvents)
+    .set({ reminderNotificationId: notificationId })
+    .where(eq(calendarEvents.id, id))
+    .run();
 }
 
 export function listCalendarEventsBetween(startMs: number, endMs: number): CalendarEvent[] {
@@ -65,5 +72,9 @@ export function createCalendarEvent(input: CreateCalendarEventInput): CalendarEv
 }
 
 export function deleteCalendarEvent(id: string) {
-  getDb().update(calendarEvents).set({ deletedAt: Date.now() }).where(eq(calendarEvents.id, id)).run();
+  getDb()
+    .update(calendarEvents)
+    .set({ deletedAt: Date.now(), updatedAt: Date.now() })
+    .where(eq(calendarEvents.id, id))
+    .run();
 }

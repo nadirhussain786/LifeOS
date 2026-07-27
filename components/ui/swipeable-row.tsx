@@ -11,6 +11,10 @@ const ACTIONS_WIDTH = 144;
 type Props = {
   children: ReactNode;
   actions: ReactNode;
+  /** Exposes the swipe-only actions (archive/delete) to screen readers, which
+   * can't perform a swipe. Consumers pass the same actions they render. */
+  accessibilityActions?: { name: string; label: string }[];
+  onAccessibilityAction?: (name: string) => void;
 };
 
 /**
@@ -19,7 +23,12 @@ type Props = {
  * shadow lives on a non-clipping outer View since `overflow: hidden` (needed
  * to clip the sliding content to the rounded corners) also clips shadows.
  */
-export function SwipeableRow({ children, actions }: Props) {
+export function SwipeableRow({
+  children,
+  actions,
+  accessibilityActions,
+  onAccessibilityAction,
+}: Props) {
   const scheme = useColorScheme() ?? 'light';
   const translateX = useSharedValue(0);
   const startX = useSharedValue(0);
@@ -53,7 +62,17 @@ export function SwipeableRow({ children, actions }: Props) {
       <Animated.View onTouchStart={close} style={styles.container}>
         <Animated.View style={[styles.actions, { width: ACTIONS_WIDTH }]}>{actions}</Animated.View>
         <GestureDetector gesture={pan}>
-          <Animated.View style={[styles.content, rowStyle]}>{children}</Animated.View>
+          <Animated.View
+            style={[styles.content, rowStyle]}
+            accessibilityActions={accessibilityActions}
+            onAccessibilityAction={
+              onAccessibilityAction
+                ? (e) => onAccessibilityAction(e.nativeEvent.actionName)
+                : undefined
+            }
+          >
+            {children}
+          </Animated.View>
         </GestureDetector>
       </Animated.View>
     </Animated.View>

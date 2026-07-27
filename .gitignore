@@ -34,6 +34,9 @@ yarn-error.*
 .env
 .env*.local
 
+# EAS submit credentials (Google Play service account) — never commit
+google-play-service-account.json
+
 # typescript
 *.tsbuildinfo
 

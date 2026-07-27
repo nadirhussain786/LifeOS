@@ -1,14 +1,14 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { CalendarClock, Grid3x3, Heart, Images, Plus, Search } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Pressable, TextInput, View } from 'react-native';
 
 import { EmptyState } from '@/components/ui/empty-state';
 import { Fab } from '@/components/ui/fab';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { colors } from '@/constants/theme';
 import { AddMediaSheet } from '@/features/gallery/components/add-media-sheet';
-import { PhotoGrid } from '@/features/gallery/components/photo-grid';
+import { PhotoGridList } from '@/features/gallery/components/photo-grid-list';
 import { usePhotos } from '@/features/gallery/hooks/use-gallery';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -45,14 +45,34 @@ export default function AllPhotosScreen() {
         tint="#ec4899"
         right={
           <View className="flex-row items-center gap-4">
-            <Pressable onPress={() => setShowSearch((s) => !s)} hitSlop={8} accessibilityLabel="Search">
+            <Pressable
+              onPress={() => setShowSearch((s) => !s)}
+              hitSlop={8}
+              accessibilityLabel="Search"
+            >
               <Search size={20} color={colors[scheme].foreground} />
             </Pressable>
-            <Pressable onPress={() => setFavoritesOnly((f) => !f)} hitSlop={8} accessibilityLabel="Toggle favorites">
-              <Heart size={20} color={favoritesOnly ? '#ef4444' : colors[scheme].foreground} fill={favoritesOnly ? '#ef4444' : 'transparent'} />
+            <Pressable
+              onPress={() => setFavoritesOnly((f) => !f)}
+              hitSlop={8}
+              accessibilityLabel="Toggle favorites"
+            >
+              <Heart
+                size={20}
+                color={favoritesOnly ? '#ef4444' : colors[scheme].foreground}
+                fill={favoritesOnly ? '#ef4444' : 'transparent'}
+              />
             </Pressable>
-            <Pressable onPress={() => setTimeline((t) => !t)} hitSlop={8} accessibilityLabel="Toggle timeline">
-              {timeline ? <Grid3x3 size={20} color={colors[scheme].foreground} /> : <CalendarClock size={20} color={colors[scheme].foreground} />}
+            <Pressable
+              onPress={() => setTimeline((t) => !t)}
+              hitSlop={8}
+              accessibilityLabel="Toggle timeline"
+            >
+              {timeline ? (
+                <Grid3x3 size={20} color={colors[scheme].foreground} />
+              ) : (
+                <CalendarClock size={20} color={colors[scheme].foreground} />
+              )}
             </Pressable>
             <Pressable onPress={() => setAddOpen(true)} hitSlop={8} accessibilityLabel="Add media">
               <Plus size={22} color={colors[scheme].foreground} />
@@ -80,19 +100,27 @@ export default function AllPhotosScreen() {
           icon={favoritesOnly ? Heart : Images}
           title={favoritesOnly ? 'No favorites yet' : query ? 'No matches' : 'No photos yet'}
           description={
-            favoritesOnly ? 'Tap the heart on any photo to keep it here.' : query ? 'Try a different caption or tag.' : 'Add your first photo or video to get started.'
+            favoritesOnly
+              ? 'Tap the heart on any photo to keep it here.'
+              : query
+                ? 'Try a different caption or tag.'
+                : 'Add your first photo or video to get started.'
           }
           tint="#ec4899"
           actionLabel={!favoritesOnly && !query ? 'Add media' : undefined}
           onAction={!favoritesOnly && !query ? () => setAddOpen(true) : undefined}
         />
       ) : (
-        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
-          <PhotoGrid photos={filtered} timeline={timeline && !query} onPressPhoto={(photo) => router.push(`/gallery/photo/${photo.id}`)} />
-        </ScrollView>
+        <PhotoGridList
+          photos={filtered}
+          timeline={timeline && !query}
+          onPressPhoto={(photo) => router.push(`/gallery/photo/${photo.id}`)}
+        />
       )}
 
-      {filtered.length > 0 && <Fab onPress={() => setAddOpen(true)} accessibilityLabel="Add media" />}
+      {filtered.length > 0 && (
+        <Fab onPress={() => setAddOpen(true)} accessibilityLabel="Add media" />
+      )}
 
       <AddMediaSheet visible={addOpen} onClose={() => setAddOpen(false)} albumId={null} />
     </View>

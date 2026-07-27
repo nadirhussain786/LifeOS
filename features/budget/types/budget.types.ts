@@ -60,7 +60,10 @@ export type CreateTransactionInput = {
 };
 
 export type UpdateTransactionInput = Partial<
-  Pick<BudgetTransaction, 'amountCents' | 'category' | 'account' | 'note' | 'occurredAt' | 'savingsGoalId'>
+  Pick<
+    BudgetTransaction,
+    'amountCents' | 'category' | 'account' | 'note' | 'occurredAt' | 'savingsGoalId'
+  >
 >;
 
 /** 'borrowed' = you owe this person; 'lent' = this person owes you. */
@@ -103,7 +106,16 @@ export type CreateDebtInput = {
 };
 
 export type UpdateDebtInput = Partial<
-  Pick<Debt, 'counterparty' | 'principalCents' | 'paidCents' | 'note' | 'dueDate' | 'reminderDaysBefore' | 'settledAt'>
+  Pick<
+    Debt,
+    | 'counterparty'
+    | 'principalCents'
+    | 'paidCents'
+    | 'note'
+    | 'dueDate'
+    | 'reminderDaysBefore'
+    | 'settledAt'
+  >
 >;
 
 /** Aggregated IOU totals, converted to nothing — each side is summed in its

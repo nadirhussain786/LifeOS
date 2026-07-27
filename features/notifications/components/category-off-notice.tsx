@@ -5,7 +5,10 @@ import { Pressable, View } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import { useNotificationsStore } from '@/features/notifications/store/notifications-store';
-import { CATEGORY_META, type NotificationCategory } from '@/features/notifications/types/notification.types';
+import {
+  CATEGORY_META,
+  type NotificationCategory,
+} from '@/features/notifications/types/notification.types';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 /**
@@ -24,7 +27,9 @@ export function CategoryOffNotice({ category }: { category: NotificationCategory
 
   if (masterEnabled && categoryOn) return null;
 
-  const title = !masterEnabled ? 'All notifications are off' : `${CATEGORY_META[category].label} are off`;
+  const title = !masterEnabled
+    ? 'All notifications are off'
+    : `${CATEGORY_META[category].label} are off`;
 
   return (
     <Pressable

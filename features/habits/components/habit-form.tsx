@@ -67,6 +67,7 @@ export function HabitForm({ defaultValues, submitLabel, onSubmit }: Props) {
             <TextInput
               value={field.value ?? ''}
               onChangeText={(text) => field.onChange(text || null)}
+              accessibilityLabel="Habit emoji"
               placeholder="🔥"
               placeholderTextColor={colors[scheme].mutedForeground}
               maxLength={2}
@@ -83,6 +84,7 @@ export function HabitForm({ defaultValues, submitLabel, onSubmit }: Props) {
               <TextInput
                 value={field.value}
                 onChangeText={field.onChange}
+                accessibilityLabel="Habit name"
                 placeholder="Name your habit"
                 placeholderTextColor={colors[scheme].mutedForeground}
                 autoFocus
@@ -93,7 +95,11 @@ export function HabitForm({ defaultValues, submitLabel, onSubmit }: Props) {
                   field.onBlur();
                   focusProgress.value = withTiming(0, { duration: 220 });
                 }}
-                style={{ fontSize: 24, fontFamily: 'Sora_700Bold', color: colors[scheme].foreground }}
+                style={{
+                  fontSize: 24,
+                  fontFamily: 'Sora_700Bold',
+                  color: colors[scheme].foreground,
+                }}
               />
             )}
           />
@@ -103,7 +109,13 @@ export function HabitForm({ defaultValues, submitLabel, onSubmit }: Props) {
 
       <View className="rounded-2xl border border-border bg-card px-4 shadow-e1">
         <AttributeRow icon={Sparkles} label="Type" isFirst>
-          <Controller control={control} name="type" render={({ field }) => <HabitTypePicker value={field.value} onChange={field.onChange} />} />
+          <Controller
+            control={control}
+            name="type"
+            render={({ field }) => (
+              <HabitTypePicker value={field.value} onChange={field.onChange} />
+            )}
+          />
         </AttributeRow>
 
         {isQuantified && (
@@ -116,6 +128,7 @@ export function HabitForm({ defaultValues, submitLabel, onSubmit }: Props) {
                   <TextInput
                     value={field.value ?? ''}
                     onChangeText={(text) => field.onChange(text || null)}
+                    accessibilityLabel="Unit"
                     placeholder="glasses, min, km…"
                     placeholderTextColor={colors[scheme].mutedForeground}
                     className="flex-1 rounded-lg border border-border px-3 py-2 text-foreground"
@@ -132,6 +145,7 @@ export function HabitForm({ defaultValues, submitLabel, onSubmit }: Props) {
                       const parsed = parseFloat(text);
                       field.onChange(Number.isFinite(parsed) ? parsed : null);
                     }}
+                    accessibilityLabel="Target goal"
                     placeholder="Goal"
                     keyboardType="decimal-pad"
                     placeholderTextColor={colors[scheme].mutedForeground}
@@ -173,7 +187,13 @@ export function HabitForm({ defaultValues, submitLabel, onSubmit }: Props) {
         </AttributeRow>
 
         <AttributeRow icon={Tag} label="Category">
-          <Controller control={control} name="categoryId" render={({ field }) => <HabitCategoryPicker value={field.value} onChange={field.onChange} />} />
+          <Controller
+            control={control}
+            name="categoryId"
+            render={({ field }) => (
+              <HabitCategoryPicker value={field.value} onChange={field.onChange} />
+            )}
+          />
         </AttributeRow>
 
         <AttributeRow icon={Bell} label="Reminder">
@@ -185,6 +205,7 @@ export function HabitForm({ defaultValues, submitLabel, onSubmit }: Props) {
                 <TextInput
                   value={field.value ?? ''}
                   onChangeText={(text) => field.onChange(text || null)}
+                  accessibilityLabel="Reminder time"
                   placeholder="20:00"
                   placeholderTextColor={colors[scheme].mutedForeground}
                   className="w-20 rounded-lg border border-border px-3 py-2 text-center text-foreground"

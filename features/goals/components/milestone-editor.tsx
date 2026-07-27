@@ -28,11 +28,15 @@ export function MilestoneEditor({ value, onChange }: Props) {
   return (
     <View className="gap-2">
       {value.map((milestone, index) => (
-        <View key={index} className="flex-row items-center gap-2 rounded-lg border border-border px-2.5 py-1.5">
+        <View
+          key={index}
+          className="flex-row items-center gap-2 rounded-lg border border-border px-2.5 py-1.5"
+        >
           <GripVertical size={15} color={colors[scheme].mutedForeground} />
           <TextInput
             value={milestone}
             onChangeText={(text) => setAt(index, text)}
+            accessibilityLabel={`Milestone ${index + 1}`}
             placeholder={`Milestone ${index + 1}`}
             placeholderTextColor={colors[scheme].mutedForeground}
             className="flex-1 py-1 text-foreground"

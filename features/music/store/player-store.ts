@@ -47,7 +47,8 @@ export const usePlayerStore = create<PlayerState & PlayerActions>()((set) => ({
   ...initialState,
   setQueue: (originalQueue, queue, currentIndex) => set({ originalQueue, queue, currentIndex }),
   setIndex: (currentIndex) => set({ currentIndex }),
-  setPlaybackState: (isPlaying, positionMs, durationMs) => set({ isPlaying, positionMs, durationMs }),
+  setPlaybackState: (isPlaying, positionMs, durationMs) =>
+    set({ isPlaying, positionMs, durationMs }),
   setShuffle: (shuffle) => set({ shuffle }),
   setRepeatMode: (repeatMode) => set({ repeatMode }),
   setSleepTimerEndsAt: (sleepTimerEndsAt) => set({ sleepTimerEndsAt }),

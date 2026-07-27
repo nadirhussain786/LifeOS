@@ -27,14 +27,21 @@ export function SleepSessionCard({ session, goalMinutes, onPress }: Props) {
       accessibilityRole="button"
       accessibilityLabel={`Sleep on ${session.logDate}`}
     >
-      <View className="h-11 w-11 items-center justify-center rounded-xl" style={{ backgroundColor: `${sleepTint}1f` }}>
+      <View
+        className="h-11 w-11 items-center justify-center rounded-xl"
+        style={{ backgroundColor: `${sleepTint}1f` }}
+      >
         <Moon size={20} color={sleepTint} />
       </View>
 
       <View className="flex-1 gap-1">
         <View className="flex-row items-center gap-2">
-          <Text className="font-sora-semibold text-foreground">{format(parseISO(session.logDate), 'EEE, MMM d')}</Text>
-          {metGoal && <View className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: '#22c55e' }} />}
+          <Text className="font-sora-semibold text-foreground">
+            {format(parseISO(session.logDate), 'EEE, MMM d')}
+          </Text>
+          {metGoal && (
+            <View className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: '#22c55e' }} />
+          )}
         </View>
         <View className="flex-row items-center gap-1.5">
           <Moon size={12} color={colors[scheme].mutedForeground} />
@@ -45,13 +52,17 @@ export function SleepSessionCard({ session, goalMinutes, onPress }: Props) {
         </View>
         {session.fellAsleepMinutes != null && (
           <Text variant="caption">
-            {formatDuration(asleepMinutes(session))} asleep · {session.fellAsleepMinutes}m to nod off
+            {formatDuration(asleepMinutes(session))} asleep · {session.fellAsleepMinutes}m to nod
+            off
           </Text>
         )}
       </View>
 
       <View className="items-end gap-1">
-        <Text className="font-sora-bold" style={{ color: metGoal ? '#22c55e' : colors[scheme].foreground }}>
+        <Text
+          className="font-sora-bold"
+          style={{ color: metGoal ? '#22c55e' : colors[scheme].foreground }}
+        >
           {formatDuration(session.durationMinutes)}
         </Text>
         {session.quality ? (

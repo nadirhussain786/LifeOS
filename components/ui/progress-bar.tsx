@@ -29,10 +29,18 @@ export function ProgressBar({ progress, color, trackColor, height = 8, duration 
 
   return (
     <View
-      style={{ height, backgroundColor: trackColor ?? colors[scheme].muted, borderRadius: height / 2, overflow: 'hidden' }}
+      style={{
+        height,
+        backgroundColor: trackColor ?? colors[scheme].muted,
+        borderRadius: height / 2,
+        overflow: 'hidden',
+      }}
     >
       <Animated.View
-        style={[fillStyle, { height, borderRadius: height / 2, backgroundColor: color ?? colors[scheme].accent }]}
+        style={[
+          fillStyle,
+          { height, borderRadius: height / 2, backgroundColor: color ?? colors[scheme].accent },
+        ]}
       />
     </View>
   );

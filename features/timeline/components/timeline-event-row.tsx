@@ -35,7 +35,11 @@ export function TimelineEventRow({ event, onDeleteCalendarEvent }: Props) {
   const confirmDelete = () => {
     Alert.alert('Delete event?', `"${event.title}" will be removed from your timeline.`, [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => onDeleteCalendarEvent?.(event.sourceId) },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => onDeleteCalendarEvent?.(event.sourceId),
+      },
     ]);
   };
 
@@ -46,7 +50,11 @@ export function TimelineEventRow({ event, onDeleteCalendarEvent }: Props) {
       className="flex-row items-center gap-3 py-2.5"
     >
       <View className="w-14 items-end pr-1">
-        <Text variant="caption" className="font-sora-medium" style={{ color: colors[scheme].mutedForeground }}>
+        <Text
+          variant="caption"
+          className="font-sora-medium"
+          style={{ color: colors[scheme].mutedForeground }}
+        >
           {format(event.time, 'h:mm a')}
         </Text>
         {event.endTime && (

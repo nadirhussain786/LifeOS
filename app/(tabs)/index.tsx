@@ -58,7 +58,10 @@ export default function DashboardScreen() {
     setRefreshing(false);
   }, [queryClient]);
 
-  const placed = new Set<WidgetId>([...FULL_SECTIONS.flatMap((section) => section.ids), ...TILE_HANDLED]);
+  const placed = new Set<WidgetId>([
+    ...FULL_SECTIONS.flatMap((section) => section.ids),
+    ...TILE_HANDLED,
+  ]);
   const leftovers = (Object.keys(WIDGET_REGISTRY) as WidgetId[]).filter((id) => !placed.has(id));
 
   return (

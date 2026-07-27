@@ -55,10 +55,16 @@ export default function SleepSettingsScreen() {
     setSeeded(true);
   }
 
-  const adjust = (delta: number) => setGoal((g) => Math.min(MAX_GOAL, Math.max(MIN_GOAL, g + delta)));
+  const adjust = (delta: number) =>
+    setGoal((g) => Math.min(MAX_GOAL, Math.max(MIN_GOAL, g + delta)));
 
   const save = () => {
-    saveSettings.mutate({ goalMinutes: goal, targetBedtime: toHHmm(bedtime), targetWakeTime: toHHmm(wake), reminderEnabled });
+    saveSettings.mutate({
+      goalMinutes: goal,
+      targetBedtime: toHHmm(bedtime),
+      targetWakeTime: toHHmm(wake),
+      reminderEnabled,
+    });
     router.back();
   };
 
@@ -97,7 +103,13 @@ export default function SleepSettingsScreen() {
         <View className="gap-3">
           <Text variant="micro">Target schedule (optional)</Text>
           <View className="flex-row gap-3">
-            <TimeField icon={Moon} label="Bedtime" value={bedtime} onChange={setBedtime} tint={sleepTint} />
+            <TimeField
+              icon={Moon}
+              label="Bedtime"
+              value={bedtime}
+              onChange={setBedtime}
+              tint={sleepTint}
+            />
             <TimeField icon={Sun} label="Wake up" value={wake} onChange={setWake} tint="#f59e0b" />
           </View>
         </View>

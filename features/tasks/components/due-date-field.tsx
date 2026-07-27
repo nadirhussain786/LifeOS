@@ -35,14 +35,21 @@ export function DueDateField({ value, hasTime, onChange }: Props) {
   const handleTimeChange = (event: DateTimePickerEvent, date?: Date) => {
     if (Platform.OS === 'android') setShowTimePicker(false);
     if (event.type === 'set' && date && value) {
-      const combined = set(new Date(value), { hours: date.getHours(), minutes: date.getMinutes(), seconds: 0 });
+      const combined = set(new Date(value), {
+        hours: date.getHours(),
+        minutes: date.getMinutes(),
+        seconds: 0,
+      });
       onChange(combined.getTime(), true);
     }
   };
 
   const clearTime = () => {
     if (!value) return;
-    onChange(set(new Date(value), { hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).getTime(), false);
+    onChange(
+      set(new Date(value), { hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).getTime(),
+      false,
+    );
   };
 
   return (
@@ -73,7 +80,10 @@ export function DueDateField({ value, hasTime, onChange }: Props) {
       <Pressable
         onPress={() => value && setShowTimePicker(true)}
         disabled={!value}
-        className={cn('flex-row items-center gap-1.5 rounded-full border border-border px-3 py-1.5', !value && 'opacity-40')}
+        className={cn(
+          'flex-row items-center gap-1.5 rounded-full border border-border px-3 py-1.5',
+          !value && 'opacity-40',
+        )}
       >
         <Clock size={14} color={colors[scheme].mutedForeground} />
         <Text variant="muted">{hasTime && value ? format(value, 'h:mm a') : 'No time'}</Text>
@@ -86,7 +96,12 @@ export function DueDateField({ value, hasTime, onChange }: Props) {
       ) : null}
 
       {Platform.OS === 'android' && showPicker ? (
-        <DateTimePicker value={value ? new Date(value) : new Date()} mode="date" display="default" onChange={handleDateChange} />
+        <DateTimePicker
+          value={value ? new Date(value) : new Date()}
+          mode="date"
+          display="default"
+          onChange={handleDateChange}
+        />
       ) : null}
 
       {showTimePicker && value ? (

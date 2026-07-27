@@ -22,9 +22,13 @@ export function computeGoalProgress(goal: Goal, milestones: GoalMilestone[]): nu
     case 'percent':
       return clamp01(goal.manualProgress);
     case 'count':
-      return goal.targetValue && goal.targetValue > 0 ? clamp01(goal.currentValue / goal.targetValue) : 0;
+      return goal.targetValue && goal.targetValue > 0
+        ? clamp01(goal.currentValue / goal.targetValue)
+        : 0;
     case 'milestones':
-      return milestones.length > 0 ? clamp01(milestones.filter((m) => m.isCompleted).length / milestones.length) : 0;
+      return milestones.length > 0
+        ? clamp01(milestones.filter((m) => m.isCompleted).length / milestones.length)
+        : 0;
     default:
       return 0;
   }

@@ -30,7 +30,8 @@ export const useWaterSettingsStore = create<WaterSettingsState>()(
       reminders: DEFAULT_REMINDER_SETTINGS,
       scheduledNotificationIds: [],
       setGoal: (goalMl) => set({ goalMl }),
-      setReminders: (reminders, scheduledNotificationIds) => set({ reminders, scheduledNotificationIds }),
+      setReminders: (reminders, scheduledNotificationIds) =>
+        set({ reminders, scheduledNotificationIds }),
     }),
     {
       name: 'water-settings-store',

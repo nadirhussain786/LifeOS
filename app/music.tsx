@@ -5,6 +5,7 @@ import { ListMusic, Play, Plus, Shuffle } from 'lucide-react-native';
 import { Pressable, ScrollView, View } from 'react-native';
 
 import { EmptyState } from '@/components/ui/empty-state';
+import { QueryError } from '@/components/ui/query-error';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
@@ -23,7 +24,7 @@ export default function MusicScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
 
-  const { data: songs = [], isLoading } = useSongs();
+  const { data: songs = [], isLoading, isError, refetch } = useSongs();
   const { data: playlists = [] } = usePlaylists();
   const { importFromDevice, remove } = useSongMutations();
   const { currentSong, isPlaying, playQueue, shuffleAll } = useNowPlaying();
@@ -32,7 +33,8 @@ export default function MusicScreen() {
 
   const totalMs = songs.reduce((sum, song) => sum + (song.durationMs ?? 0), 0);
   const totalMin = Math.round(totalMs / 60000);
-  const totalLabel = totalMin >= 60 ? `${Math.floor(totalMin / 60)}h ${totalMin % 60}m` : `${totalMin}m`;
+  const totalLabel =
+    totalMin >= 60 ? `${Math.floor(totalMin / 60)}h ${totalMin % 60}m` : `${totalMin}m`;
   const [pg1, pg2] = tintGradient(MUSIC_TINT);
 
   return (
@@ -56,7 +58,9 @@ export default function MusicScreen() {
         }
       />
 
-      {isLoading ? (
+      {isError ? (
+        <QueryError onRetry={() => refetch()} />
+      ) : isLoading ? (
         <View className="gap-2.5 px-4">
           <Skeleton className="h-20 w-full rounded-2xl" />
           <Skeleton className="h-16 w-full rounded-2xl" />
@@ -87,7 +91,11 @@ export default function MusicScreen() {
                 >
                   <ArtworkOrb seed={currentSong.id} size={46} playing={isPlaying} />
                   <View className="flex-1">
-                    <Text variant="caption" className="font-sora-semibold uppercase tracking-wide" style={{ color: MUSIC_TINT }}>
+                    <Text
+                      variant="caption"
+                      className="font-sora-semibold uppercase tracking-wide"
+                      style={{ color: MUSIC_TINT }}
+                    >
                       Now Playing
                     </Text>
                     <Text className="font-sora-semibold text-foreground" numberOfLines={1}>
@@ -100,8 +108,22 @@ export default function MusicScreen() {
 
               {/* Play all / Shuffle */}
               <View className="mx-4 flex-row gap-3">
-                <Pressable onPress={() => playQueue(songs, 0)} className="flex-1 overflow-hidden rounded-full">
-                  <LinearGradient colors={[pg1, pg2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14 }}>
+                <Pressable
+                  onPress={() => playQueue(songs, 0)}
+                  className="flex-1 overflow-hidden rounded-full"
+                >
+                  <LinearGradient
+                    colors={[pg1, pg2]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 8,
+                      paddingVertical: 14,
+                    }}
+                  >
                     <Play size={17} color="#ffffff" fill="#ffffff" />
                     <Text className="font-sora-bold" style={{ color: '#ffffff' }}>
                       Play all
@@ -121,7 +143,8 @@ export default function MusicScreen() {
               </View>
 
               <Text variant="caption" className="px-5">
-                {songs.length} {songs.length === 1 ? 'song' : 'songs'} · {playlists.length} {playlists.length === 1 ? 'playlist' : 'playlists'} · {totalLabel}
+                {songs.length} {songs.length === 1 ? 'song' : 'songs'} · {playlists.length}{' '}
+                {playlists.length === 1 ? 'playlist' : 'playlists'} · {totalLabel}
               </Text>
 
               {/* Playlists */}
@@ -129,12 +152,20 @@ export default function MusicScreen() {
                 <View className="flex-row items-center justify-between px-4">
                   <Text variant="subheading">Playlists</Text>
                   <Pressable onPress={() => router.push('/music/playlist/new')} hitSlop={8}>
-                    <Text variant="caption" className="font-sora-semibold" style={{ color: MUSIC_TINT }}>
+                    <Text
+                      variant="caption"
+                      className="font-sora-semibold"
+                      style={{ color: MUSIC_TINT }}
+                    >
                       New playlist
                     </Text>
                   </Pressable>
                 </View>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-3 px-4 pb-1">
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerClassName="gap-3 px-4 pb-1"
+                >
                   {playlists.length === 0 ? (
                     <Pressable
                       onPress={() => router.push('/music/playlist/new')}
@@ -145,7 +176,11 @@ export default function MusicScreen() {
                     </Pressable>
                   ) : (
                     playlists.map((playlist) => (
-                      <PlaylistTile key={playlist.id} playlist={playlist} onPress={() => router.push(`/music/playlist/${playlist.id}`)} />
+                      <PlaylistTile
+                        key={playlist.id}
+                        playlist={playlist}
+                        onPress={() => router.push(`/music/playlist/${playlist.id}`)}
+                      />
                     ))
                   )}
                 </ScrollView>

@@ -56,7 +56,12 @@ export function Fab({ onPress, accessibilityLabel = 'Quick actions' }: Props) {
         },
       ]}
     >
-      <LinearGradient colors={ACCENT_GRADIENT} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFillObject} />
+      <LinearGradient
+        colors={ACCENT_GRADIENT}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={StyleSheet.absoluteFillObject}
+      />
       <Plus color={colors[scheme].accentForeground} size={26} />
     </AnimatedPressable>
   );

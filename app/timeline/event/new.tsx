@@ -40,7 +40,9 @@ export default function NewCalendarEventScreen() {
 
   const [title, setTitle] = useState('');
   const [notes, setNotes] = useState('');
-  const [time, setTime] = useState(() => set(parseISO(dateKey), { hours: 9, minutes: 0, seconds: 0, milliseconds: 0 }));
+  const [time, setTime] = useState(() =>
+    set(parseISO(dateKey), { hours: 9, minutes: 0, seconds: 0, milliseconds: 0 }),
+  );
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [colorToken, setColorToken] = useState<string>(categoryColorPalette[3]);
   const [durationMinutes, setDurationMinutes] = useState<number | null>(null);
@@ -51,7 +53,14 @@ export default function NewCalendarEventScreen() {
   const handleTimeChange = (event: DateTimePickerEvent, next?: Date) => {
     if (Platform.OS === 'android') setShowTimePicker(false);
     if (event.type === 'set' && next) {
-      setTime(set(parseISO(dateKey), { hours: next.getHours(), minutes: next.getMinutes(), seconds: 0, milliseconds: 0 }));
+      setTime(
+        set(parseISO(dateKey), {
+          hours: next.getHours(),
+          minutes: next.getMinutes(),
+          seconds: 0,
+          milliseconds: 0,
+        }),
+      );
     }
   };
 
@@ -72,7 +81,10 @@ export default function NewCalendarEventScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <LinearGradient colors={[wash, 'transparent']} style={[StyleSheet.absoluteFillObject, { height: 220 }]} />
+      <LinearGradient
+        colors={[wash, 'transparent']}
+        style={[StyleSheet.absoluteFillObject, { height: 220 }]}
+      />
 
       <SheetHeader title="New Event" />
 
@@ -89,18 +101,30 @@ export default function NewCalendarEventScreen() {
           <TextInput
             value={title}
             onChangeText={setTitle}
+            accessibilityLabel="Event title"
             placeholder="Team meeting, dentist appointment…"
             placeholderTextColor={colors[scheme].mutedForeground}
             autoFocus
             multiline
-            style={{ fontSize: 26, lineHeight: 32, minHeight: 64, fontFamily: 'Sora_700Bold', color: colors[scheme].foreground }}
+            style={{
+              fontSize: 26,
+              lineHeight: 32,
+              minHeight: 64,
+              fontFamily: 'Sora_700Bold',
+              color: colors[scheme].foreground,
+            }}
           />
         </View>
 
         <View className="rounded-2xl border border-border bg-card px-4">
           <AttributeRow icon={Clock} label="Time" isFirst>
             {Platform.OS === 'ios' ? (
-              <DateTimePicker value={time} mode="time" display="compact" onChange={handleTimeChange} />
+              <DateTimePicker
+                value={time}
+                mode="time"
+                display="compact"
+                onChange={handleTimeChange}
+              />
             ) : (
               <Pressable
                 onPress={() => setShowTimePicker(true)}
@@ -155,7 +179,11 @@ export default function NewCalendarEventScreen() {
                     }}
                     accessibilityLabel={`Color ${swatch}`}
                     className="h-8 w-8 items-center justify-center rounded-full"
-                    style={{ backgroundColor: swatch, borderWidth: selected ? 2 : 0, borderColor: colors[scheme].foreground }}
+                    style={{
+                      backgroundColor: swatch,
+                      borderWidth: selected ? 2 : 0,
+                      borderColor: colors[scheme].foreground,
+                    }}
                   />
                 );
               })}
@@ -163,7 +191,11 @@ export default function NewCalendarEventScreen() {
           </AttributeRow>
 
           <AttributeRow icon={Bell} label="Reminder">
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-2">
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerClassName="gap-2"
+            >
               {REMINDER_OPTIONS.map((option) => {
                 const selected = reminderMinutesBefore === option.minutesBefore;
                 return (
@@ -204,6 +236,7 @@ export default function NewCalendarEventScreen() {
             value={notes}
             onChangeText={setNotes}
             multiline
+            accessibilityLabel="Event details"
             placeholder="Add details…"
             placeholderTextColor={colors[scheme].mutedForeground}
             className="min-h-20 rounded-2xl border border-border bg-card p-4 text-base text-foreground"
@@ -215,7 +248,13 @@ export default function NewCalendarEventScreen() {
           <DateTimePicker value={time} mode="time" display="default" onChange={handleTimeChange} />
         ) : null}
 
-        <Button label="Add event" onPress={handleAdd} disabled={!title.trim()} size="lg" variant="accent" />
+        <Button
+          label="Add event"
+          onPress={handleAdd}
+          disabled={!title.trim()}
+          size="lg"
+          variant="accent"
+        />
       </ScrollView>
     </View>
   );

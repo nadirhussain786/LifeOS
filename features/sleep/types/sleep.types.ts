@@ -14,7 +14,9 @@ export type SleepSession = {
 };
 
 /** Actual time asleep = time in bed − time to fall asleep. */
-export function asleepMinutes(session: Pick<SleepSession, 'durationMinutes' | 'fellAsleepMinutes'>): number {
+export function asleepMinutes(
+  session: Pick<SleepSession, 'durationMinutes' | 'fellAsleepMinutes'>,
+): number {
   return Math.max(0, session.durationMinutes - (session.fellAsleepMinutes ?? 0));
 }
 

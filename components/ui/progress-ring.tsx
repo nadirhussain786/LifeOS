@@ -74,7 +74,14 @@ export function ProgressRing({
             </LinearGradient>
           </Defs>
         )}
-        <Circle cx={size / 2} cy={size / 2} r={radius} stroke={track} strokeWidth={strokeWidth} fill="none" />
+        <Circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke={track}
+          strokeWidth={strokeWidth}
+          fill="none"
+        />
         <AnimatedCircle
           cx={size / 2}
           cy={size / 2}

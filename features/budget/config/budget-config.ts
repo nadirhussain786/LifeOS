@@ -16,9 +16,18 @@ import {
   type LucideIcon,
 } from 'lucide-react-native';
 
-import type { BudgetAccount, ExpenseCategoryId, IncomeCategoryId } from '@/features/budget/types/budget.types';
+import type {
+  BudgetAccount,
+  ExpenseCategoryId,
+  IncomeCategoryId,
+} from '@/features/budget/types/budget.types';
 
-export type CategoryMeta<T extends string> = { id: T; label: string; icon: LucideIcon; tint: string };
+export type CategoryMeta<T extends string> = {
+  id: T;
+  label: string;
+  icon: LucideIcon;
+  tint: string;
+};
 
 /** Fixed expense catalog — each drives an icon + tint in lists and the donut. */
 export const EXPENSE_CATEGORIES: CategoryMeta<ExpenseCategoryId>[] = [
@@ -52,16 +61,23 @@ const EXPENSE_BY_ID = new Map(EXPENSE_CATEGORIES.map((c) => [c.id, c]));
 const INCOME_BY_ID = new Map(INCOME_CATEGORIES.map((c) => [c.id, c]));
 
 export function expenseCategoryMeta(id: string): CategoryMeta<ExpenseCategoryId> {
-  return EXPENSE_BY_ID.get(id as ExpenseCategoryId) ?? EXPENSE_CATEGORIES[EXPENSE_CATEGORIES.length - 1];
+  return (
+    EXPENSE_BY_ID.get(id as ExpenseCategoryId) ?? EXPENSE_CATEGORIES[EXPENSE_CATEGORIES.length - 1]
+  );
 }
 
 export function incomeCategoryMeta(id: string): CategoryMeta<IncomeCategoryId> {
-  return INCOME_BY_ID.get(id as IncomeCategoryId) ?? INCOME_CATEGORIES[INCOME_CATEGORIES.length - 1];
+  return (
+    INCOME_BY_ID.get(id as IncomeCategoryId) ?? INCOME_CATEGORIES[INCOME_CATEGORIES.length - 1]
+  );
 }
 
 /** Resolves category icon + tint for any transaction type (savings has no
  * sub-category, so it uses a fixed piggy-bank identity). */
-export function categoryMetaFor(type: string, categoryId: string): { label: string; icon: LucideIcon; tint: string } {
+export function categoryMetaFor(
+  type: string,
+  categoryId: string,
+): { label: string; icon: LucideIcon; tint: string } {
   if (type === 'income') return incomeCategoryMeta(categoryId);
   if (type === 'savings') return { label: 'Savings', icon: PiggyBank, tint: '#6366f1' };
   return expenseCategoryMeta(categoryId);

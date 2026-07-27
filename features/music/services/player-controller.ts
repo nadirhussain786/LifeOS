@@ -23,7 +23,11 @@ function ensurePlayer(): AudioPlayer {
   player.addListener('playbackStatusUpdate', (status) => {
     usePlayerStore
       .getState()
-      .setPlaybackState(status.playing, Math.round(status.currentTime * 1000), Math.round((status.duration || 0) * 1000));
+      .setPlaybackState(
+        status.playing,
+        Math.round(status.currentTime * 1000),
+        Math.round((status.duration || 0) * 1000),
+      );
     // Sleep timer: this listener keeps firing while audio plays (even in the
     // background), so it's a reliable place to enforce the auto-stop.
     if (sleepTimerEndsAt != null && Date.now() >= sleepTimerEndsAt) {
@@ -50,7 +54,11 @@ async function configureAudioMode() {
   audioModeConfigured = true;
   // 'doNotMix' matches how a dedicated music player is expected to behave —
   // it takes over audio focus rather than layering under whatever else is playing.
-  await setAudioModeAsync({ playsInSilentMode: true, shouldPlayInBackground: true, interruptionMode: 'doNotMix' });
+  await setAudioModeAsync({
+    playsInSilentMode: true,
+    shouldPlayInBackground: true,
+    interruptionMode: 'doNotMix',
+  });
 }
 
 function loadIndex(index: number, autoplay: boolean) {

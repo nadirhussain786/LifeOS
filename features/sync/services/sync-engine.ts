@@ -59,9 +59,10 @@ async function pullTable(uid: string, table: string): Promise<void> {
 
   for (const remote of data as Row[]) {
     maxUpdated = Math.max(maxUpdated, Number(remote.updated_at ?? 0));
-    const local = raw.getFirstSync<{ updated_at: number | null }>(`SELECT updated_at FROM ${table} WHERE id = ?`, [
-      remote.id as string,
-    ]);
+    const local = raw.getFirstSync<{ updated_at: number | null }>(
+      `SELECT updated_at FROM ${table} WHERE id = ?`,
+      [remote.id as string],
+    );
     // Last-write-wins: skip if the local copy is the same age or newer.
     if (local && Number(local.updated_at ?? 0) >= Number(remote.updated_at ?? 0)) continue;
 

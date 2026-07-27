@@ -30,7 +30,10 @@ function hslToHex(h: number, s: number, l: number): string {
   else if (hp < 5) [r, g, b] = [x, 0, c];
   else [r, g, b] = [c, 0, x];
   const m = l - c / 2;
-  const to = (v: number) => Math.round((v + m) * 255).toString(16).padStart(2, '0');
+  const to = (v: number) =>
+    Math.round((v + m) * 255)
+      .toString(16)
+      .padStart(2, '0');
   return `#${to(r)}${to(g)}${to(b)}`;
 }
 

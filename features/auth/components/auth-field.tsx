@@ -47,6 +47,7 @@ export function AuthField({
         <TextInput
           value={value}
           onChangeText={onChangeText}
+          accessibilityLabel={label}
           placeholder={placeholder}
           placeholderTextColor={theme.mutedForeground}
           secureTextEntry={hidden}
@@ -60,7 +61,11 @@ export function AuthField({
         />
         {secure && (
           <Pressable onPress={() => setHidden((h) => !h)} hitSlop={10} className="pl-2">
-            {hidden ? <EyeOff size={18} color={theme.mutedForeground} /> : <Eye size={18} color={theme.mutedForeground} />}
+            {hidden ? (
+              <EyeOff size={18} color={theme.mutedForeground} />
+            ) : (
+              <Eye size={18} color={theme.mutedForeground} />
+            )}
           </Pressable>
         )}
       </View>

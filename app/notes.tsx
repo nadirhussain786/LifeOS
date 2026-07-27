@@ -32,7 +32,10 @@ export default function NotesScreen() {
   const { remove, archive, unarchive } = useNoteMutations();
 
   const { data: notes = [], isLoading } = showArchived ? archivedNotes : activeNotes;
-  const categoryColorById = useMemo(() => new Map(categories.map((category) => [category.id, category.colorToken])), [categories]);
+  const categoryColorById = useMemo(
+    () => new Map(categories.map((category) => [category.id, category.colorToken])),
+    [categories],
+  );
 
   const items = useMemo<ListItem[]>(() => {
     if (showArchived) return notes.map((note) => ({ type: 'note', note }) as const);
@@ -45,7 +48,8 @@ export default function NotesScreen() {
       sections.push(...pinned.map((note) => ({ type: 'note', note }) as const));
     }
     if (rest.length > 0) {
-      if (pinned.length > 0) sections.push({ type: 'header', label: 'All Notes', count: rest.length });
+      if (pinned.length > 0)
+        sections.push({ type: 'header', label: 'All Notes', count: rest.length });
       sections.push(...rest.map((note) => ({ type: 'note', note }) as const));
     }
     return sections;
@@ -90,7 +94,9 @@ export default function NotesScreen() {
         <EmptyState
           icon={StickyNote}
           title={showArchived ? 'No archived notes' : 'No notes yet'}
-          description={showArchived ? 'Notes you archive show up here.' : 'Capture ideas and quick notes here.'}
+          description={
+            showArchived ? 'Notes you archive show up here.' : 'Capture ideas and quick notes here.'
+          }
         />
       ) : (
         <FlashList
@@ -103,10 +109,16 @@ export default function NotesScreen() {
             ) : (
               <NoteCard
                 note={item.note}
-                categoryColor={item.note.categoryId ? categoryColorById.get(item.note.categoryId) : undefined}
+                categoryColor={
+                  item.note.categoryId ? categoryColorById.get(item.note.categoryId) : undefined
+                }
                 onPress={() => router.push(`/note/${item.note.id}`)}
                 onDelete={() => remove.mutate(item.note.id)}
-                onToggleArchive={() => (item.note.isArchived ? unarchive.mutate(item.note.id) : archive.mutate(item.note.id))}
+                onToggleArchive={() =>
+                  item.note.isArchived
+                    ? unarchive.mutate(item.note.id)
+                    : archive.mutate(item.note.id)
+                }
               />
             )
           }

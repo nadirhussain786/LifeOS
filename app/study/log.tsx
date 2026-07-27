@@ -30,7 +30,9 @@ export default function StudyLogScreen() {
 
   const [subjectId, setSubjectId] = useState<string | null>(null);
   const [date, setDate] = useState(() => new Date());
-  const [startTime, setStartTime] = useState(() => set(new Date(), { seconds: 0, milliseconds: 0 }));
+  const [startTime, setStartTime] = useState(() =>
+    set(new Date(), { seconds: 0, milliseconds: 0 }),
+  );
   const [minutes, setMinutes] = useState(25);
   const [rating, setRating] = useState<number | null>(null);
   const [note, setNote] = useState('');
@@ -76,14 +78,23 @@ export default function StudyLogScreen() {
     <View className="flex-1 bg-background">
       <SheetHeader title="Log Study Time" />
 
-      <ScrollView contentContainerClassName="gap-5 px-5 pt-3 pb-10" keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerClassName="gap-5 px-5 pt-3 pb-10"
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <View className="gap-2.5">
           <Text variant="micro">Subject</Text>
           <SubjectPicker
             subjects={subjects}
             value={subjectId}
             onChange={setSubjectId}
-            onCreate={(name, colorToken) => addSubject.mutate({ name, colorToken }, { onSuccess: (created) => setSubjectId(created.id) })}
+            onCreate={(name, colorToken) =>
+              addSubject.mutate(
+                { name, colorToken },
+                { onSuccess: (created) => setSubjectId(created.id) },
+              )
+            }
           />
         </View>
 
@@ -91,13 +102,29 @@ export default function StudyLogScreen() {
         <View className="items-center gap-3 rounded-2xl border border-border bg-card p-5 shadow-e1">
           <Text variant="micro">How long did you study?</Text>
           <View className="flex-row items-center gap-6">
-            <Pressable onPress={() => adjust(-5)} className="h-11 w-11 items-center justify-center rounded-2xl border border-border bg-surface" accessibilityLabel="Less">
+            <Pressable
+              onPress={() => adjust(-5)}
+              className="h-11 w-11 items-center justify-center rounded-2xl border border-border bg-surface"
+              accessibilityLabel="Less"
+            >
               <Minus size={20} color={colors[scheme].foreground} />
             </Pressable>
-            <Text className="font-sora-extrabold text-3xl" style={{ color: studyTint, minWidth: 120, textAlign: 'center', fontVariant: ['tabular-nums'] }}>
+            <Text
+              className="font-sora-extrabold text-3xl"
+              style={{
+                color: studyTint,
+                minWidth: 120,
+                textAlign: 'center',
+                fontVariant: ['tabular-nums'],
+              }}
+            >
               {formatStudyDuration(minutes * 60)}
             </Text>
-            <Pressable onPress={() => adjust(5)} className="h-11 w-11 items-center justify-center rounded-2xl bg-study" accessibilityLabel="More">
+            <Pressable
+              onPress={() => adjust(5)}
+              className="h-11 w-11 items-center justify-center rounded-2xl bg-study"
+              accessibilityLabel="More"
+            >
               <Plus size={20} color="#ffffff" />
             </Pressable>
           </View>
@@ -107,9 +134,17 @@ export default function StudyLogScreen() {
                 key={m}
                 onPress={() => setMinutes(m)}
                 className="rounded-full border border-border px-3.5 py-1.5"
-                style={minutes === m ? { backgroundColor: studyTint, borderColor: studyTint } : undefined}
+                style={
+                  minutes === m ? { backgroundColor: studyTint, borderColor: studyTint } : undefined
+                }
               >
-                <Text className={minutes === m ? 'font-sora-semibold text-white' : 'text-muted-foreground'}>{m}m</Text>
+                <Text
+                  className={
+                    minutes === m ? 'font-sora-semibold text-white' : 'text-muted-foreground'
+                  }
+                >
+                  {m}m
+                </Text>
               </Pressable>
             ))}
           </View>
@@ -120,7 +155,13 @@ export default function StudyLogScreen() {
           <View className="flex-1 flex-row items-center justify-between rounded-2xl border border-border bg-card px-4 py-3">
             <CalendarDays size={16} color={colors[scheme].mutedForeground} />
             {Platform.OS === 'ios' ? (
-              <DateTimePicker value={date} mode="date" display="compact" maximumDate={new Date()} onChange={handleDate} />
+              <DateTimePicker
+                value={date}
+                mode="date"
+                display="compact"
+                maximumDate={new Date()}
+                onChange={handleDate}
+              />
             ) : (
               <Pressable onPress={() => setShowDate(true)}>
                 <Text className="font-sora-semibold text-foreground">{format(date, 'MMM d')}</Text>
@@ -130,18 +171,33 @@ export default function StudyLogScreen() {
           <View className="flex-1 flex-row items-center justify-between rounded-2xl border border-border bg-card px-4 py-3">
             <Clock size={16} color={colors[scheme].mutedForeground} />
             {Platform.OS === 'ios' ? (
-              <DateTimePicker value={startTime} mode="time" display="compact" onChange={handleTime} />
+              <DateTimePicker
+                value={startTime}
+                mode="time"
+                display="compact"
+                onChange={handleTime}
+              />
             ) : (
               <Pressable onPress={() => setShowTime(true)}>
-                <Text className="font-sora-semibold text-foreground">{format(startTime, 'h:mm a')}</Text>
+                <Text className="font-sora-semibold text-foreground">
+                  {format(startTime, 'h:mm a')}
+                </Text>
               </Pressable>
             )}
           </View>
         </View>
         {Platform.OS === 'android' && showDate && (
-          <DateTimePicker value={date} mode="date" display="default" maximumDate={new Date()} onChange={handleDate} />
+          <DateTimePicker
+            value={date}
+            mode="date"
+            display="default"
+            maximumDate={new Date()}
+            onChange={handleDate}
+          />
         )}
-        {Platform.OS === 'android' && showTime && <DateTimePicker value={startTime} mode="time" display="default" onChange={handleTime} />}
+        {Platform.OS === 'android' && showTime && (
+          <DateTimePicker value={startTime} mode="time" display="default" onChange={handleTime} />
+        )}
 
         <View className="items-center gap-2">
           <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">

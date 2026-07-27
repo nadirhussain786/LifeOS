@@ -1,7 +1,14 @@
 import { and, desc, eq, inArray, isNull } from 'drizzle-orm';
 
 import { getDb } from '@/database/client';
-import { entryLinks, noteAttachments, noteCategories, noteTagLinks, noteTags, notes } from '@/database/schema';
+import {
+  entryLinks,
+  noteAttachments,
+  noteCategories,
+  noteTagLinks,
+  noteTags,
+  notes,
+} from '@/database/schema';
 import { generateId } from '@/lib/id';
 import { LOCAL_USER_ID } from '@/lib/local-user';
 import type {
@@ -24,7 +31,9 @@ export function listNotes(): Note[] {
   return getDb()
     .select()
     .from(notes)
-    .where(and(eq(notes.userId, LOCAL_USER_ID), isNull(notes.deletedAt), eq(notes.isArchived, false)))
+    .where(
+      and(eq(notes.userId, LOCAL_USER_ID), isNull(notes.deletedAt), eq(notes.isArchived, false)),
+    )
     .orderBy(desc(notes.isPinned), desc(notes.updatedAt))
     .all();
 }
@@ -33,7 +42,9 @@ export function listArchivedNotes(): Note[] {
   return getDb()
     .select()
     .from(notes)
-    .where(and(eq(notes.userId, LOCAL_USER_ID), isNull(notes.deletedAt), eq(notes.isArchived, true)))
+    .where(
+      and(eq(notes.userId, LOCAL_USER_ID), isNull(notes.deletedAt), eq(notes.isArchived, true)),
+    )
     .orderBy(desc(notes.updatedAt))
     .all();
 }
@@ -81,21 +92,34 @@ export function updateNote(id: string, input: UpdateNoteInput) {
 }
 
 export function setNoteReminderNotificationId(id: string, notificationId: string | null) {
-  getDb().update(notes).set({ reminderNotificationId: notificationId }).where(eq(notes.id, id)).run();
+  getDb()
+    .update(notes)
+    .set({ reminderNotificationId: notificationId })
+    .where(eq(notes.id, id))
+    .run();
 }
 
 export function archiveNote(id: string) {
-  getDb().update(notes).set({ isArchived: true, updatedAt: Date.now(), syncStatus: 'pending' }).where(eq(notes.id, id)).run();
+  getDb()
+    .update(notes)
+    .set({ isArchived: true, updatedAt: Date.now(), syncStatus: 'pending' })
+    .where(eq(notes.id, id))
+    .run();
 }
 
 export function unarchiveNote(id: string) {
-  getDb().update(notes).set({ isArchived: false, updatedAt: Date.now(), syncStatus: 'pending' }).where(eq(notes.id, id)).run();
+  getDb()
+    .update(notes)
+    .set({ isArchived: false, updatedAt: Date.now(), syncStatus: 'pending' })
+    .where(eq(notes.id, id))
+    .run();
 }
 
 export function deleteNote(id: string) {
   getDb()
     .update(notes)
-    .set({ deletedAt: Date.now(), syncStatus: 'pending' })
+    // updatedAt must move so the delete is seen by the sync push (WHERE updated_at > cursor).
+    .set({ deletedAt: Date.now(), updatedAt: Date.now(), syncStatus: 'pending' })
     .where(eq(notes.id, id))
     .run();
 }
@@ -125,7 +149,7 @@ export function createNoteCategory(name: string, colorToken: string, icon: strin
 export function deleteNoteCategory(id: string) {
   getDb()
     .update(noteCategories)
-    .set({ deletedAt: Date.now() })
+    .set({ deletedAt: Date.now(), updatedAt: Date.now() })
     .where(eq(noteCategories.id, id))
     .run();
 }
@@ -192,7 +216,12 @@ export function listAttachmentsForNote(noteId: string): NoteAttachment[] {
     .map(toAttachment);
 }
 
-export function addNoteAttachment(noteId: string, kind: NoteAttachment['kind'], uri: string, durationMs?: number | null): NoteAttachment {
+export function addNoteAttachment(
+  noteId: string,
+  kind: NoteAttachment['kind'],
+  uri: string,
+  durationMs?: number | null,
+): NoteAttachment {
   const attachment: NoteAttachment = {
     id: generateId(),
     noteId,
@@ -210,7 +239,11 @@ export function addNoteAttachment(noteId: string, kind: NoteAttachment['kind'], 
 }
 
 export function deleteNoteAttachment(id: string) {
-  getDb().update(noteAttachments).set({ deletedAt: Date.now() }).where(eq(noteAttachments.id, id)).run();
+  getDb()
+    .update(noteAttachments)
+    .set({ deletedAt: Date.now() })
+    .where(eq(noteAttachments.id, id))
+    .run();
 }
 
 // ---- Backlinks — `[[Note Title]]` mentions, the seed of the knowledge graph ----
@@ -220,7 +253,15 @@ const WIKI_LINK_PATTERN = /\[\[([^[\]]+)\]\]/g;
 /** Re-derives this note's outgoing `mentions` links from its body text. Called on every body save. */
 export function syncNoteLinks(noteId: string, body: string) {
   const db = getDb();
-  db.delete(entryLinks).where(and(eq(entryLinks.sourceType, 'note'), eq(entryLinks.sourceId, noteId), eq(entryLinks.relation, 'mentions'))).run();
+  db.delete(entryLinks)
+    .where(
+      and(
+        eq(entryLinks.sourceType, 'note'),
+        eq(entryLinks.sourceId, noteId),
+        eq(entryLinks.relation, 'mentions'),
+      ),
+    )
+    .run();
 
   const titles = [...body.matchAll(WIKI_LINK_PATTERN)].map((match) => match[1].trim());
   if (titles.length === 0) return;
@@ -233,7 +274,9 @@ export function syncNoteLinks(noteId: string, body: string) {
 
   const seen = new Set<string>();
   for (const title of titles) {
-    const target = allNotes.find((note) => note.id !== noteId && note.title.toLowerCase() === title.toLowerCase());
+    const target = allNotes.find(
+      (note) => note.id !== noteId && note.title.toLowerCase() === title.toLowerCase(),
+    );
     if (!target || seen.has(target.id)) continue;
     seen.add(target.id);
     db.insert(entryLinks)
@@ -256,7 +299,13 @@ export function listBacklinksForNote(noteId: string): NoteBacklink[] {
   const links = getDb()
     .select()
     .from(entryLinks)
-    .where(and(eq(entryLinks.targetType, 'note'), eq(entryLinks.targetId, noteId), eq(entryLinks.relation, 'mentions')))
+    .where(
+      and(
+        eq(entryLinks.targetType, 'note'),
+        eq(entryLinks.targetId, noteId),
+        eq(entryLinks.relation, 'mentions'),
+      ),
+    )
     .all();
   if (links.length === 0) return [];
 

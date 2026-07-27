@@ -6,28 +6,31 @@ import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-na
 import { Text } from '@/components/ui/text';
 import { cn } from '@/lib/utils';
 
-const buttonVariants = cva('flex-row items-center justify-center overflow-hidden rounded-full disabled:opacity-40', {
-  variants: {
-    variant: {
-      primary: 'bg-primary',
-      secondary: 'bg-secondary',
-      ghost: 'bg-transparent',
-      destructive: 'bg-destructive',
-      // accent paints via a LinearGradient layer instead of a flat fill —
-      // no bg-* class here, see the gradient rendered behind the label below.
-      accent: '',
+const buttonVariants = cva(
+  'flex-row items-center justify-center overflow-hidden rounded-full disabled:opacity-40',
+  {
+    variants: {
+      variant: {
+        primary: 'bg-primary',
+        secondary: 'bg-secondary',
+        ghost: 'bg-transparent',
+        destructive: 'bg-destructive',
+        // accent paints via a LinearGradient layer instead of a flat fill —
+        // no bg-* class here, see the gradient rendered behind the label below.
+        accent: '',
+      },
+      size: {
+        sm: 'h-9 px-3',
+        md: 'h-11 px-4',
+        lg: 'h-14 px-6',
+      },
     },
-    size: {
-      sm: 'h-9 px-3',
-      md: 'h-11 px-4',
-      lg: 'h-14 px-6',
+    defaultVariants: {
+      variant: 'primary',
+      size: 'md',
     },
   },
-  defaultVariants: {
-    variant: 'primary',
-    size: 'md',
-  },
-});
+);
 
 const textVariants = cva('font-sora-semibold', {
   variants: {
@@ -66,7 +69,16 @@ type Props = PressableProps &
 // Pressable itself: Animated.createAnimatedComponent(Pressable) creates a
 // component NativeWind hasn't registered className/style interop for, so a
 // className passed directly to it is silently dropped (renders unstyled).
-export function Button({ label, variant = 'primary', size, className, disabled, onPressIn, onPressOut, ...props }: Props) {
+export function Button({
+  label,
+  variant = 'primary',
+  size,
+  className,
+  disabled,
+  onPressIn,
+  onPressOut,
+  ...props
+}: Props) {
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -90,6 +102,8 @@ export function Button({ label, variant = 'primary', size, className, disabled, 
     >
       <Pressable
         disabled={disabled}
+        accessibilityRole="button"
+        accessibilityState={{ disabled: !!disabled }}
         className={cn(buttonVariants({ variant, size }), className)}
         onPressIn={(e) => {
           scale.value = withSpring(0.96, { damping: 16, stiffness: 400 });
@@ -109,7 +123,9 @@ export function Button({ label, variant = 'primary', size, className, disabled, 
             style={StyleSheet.absoluteFillObject}
           />
         )}
-        {variant === 'accent' && disabled && <Animated.View className="absolute inset-0 bg-accent" />}
+        {variant === 'accent' && disabled && (
+          <Animated.View className="absolute inset-0 bg-accent" />
+        )}
         <Text className={textVariants({ variant, size })}>{label}</Text>
       </Pressable>
     </Animated.View>

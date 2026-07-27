@@ -26,7 +26,8 @@ export function useBudgetMutations() {
   });
 
   const editTransaction = useMutation({
-    mutationFn: async ({ id, input }: { id: string; input: UpdateTransactionInput }) => updateTransaction(id, input),
+    mutationFn: async ({ id, input }: { id: string; input: UpdateTransactionInput }) =>
+      updateTransaction(id, input),
     onSuccess: invalidate,
   });
 
@@ -51,8 +52,13 @@ export function useBudgetMutations() {
   });
 
   const editSavingsGoal = useMutation({
-    mutationFn: async ({ id, patch }: { id: string; patch: Partial<Pick<SavingsGoal, 'name' | 'targetCents' | 'deadline'>> }) =>
-      updateSavingsGoal(id, patch),
+    mutationFn: async ({
+      id,
+      patch,
+    }: {
+      id: string;
+      patch: Partial<Pick<SavingsGoal, 'name' | 'targetCents' | 'deadline'>>;
+    }) => updateSavingsGoal(id, patch),
     onSuccess: invalidate,
   });
 

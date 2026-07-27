@@ -30,10 +30,18 @@ export default function AlbumDetailScreen() {
   const addPhotos = () => setAddOpen(true);
 
   const confirmDelete = () => {
-    Alert.alert('Delete album?', `"${album.name}" will be removed. Its photos move to All Photos — they aren't deleted.`, [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete album', style: 'destructive', onPress: () => (removeAlbum.mutate(album.id), router.back()) },
-    ]);
+    Alert.alert(
+      'Delete album?',
+      `"${album.name}" will be removed. Its photos move to All Photos — they aren't deleted.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete album',
+          style: 'destructive',
+          onPress: () => (removeAlbum.mutate(album.id), router.back()),
+        },
+      ],
+    );
   };
 
   return (
@@ -44,8 +52,16 @@ export default function AlbumDetailScreen() {
         tint={meta.tint}
         right={
           <View className="flex-row items-center gap-4">
-            <Pressable onPress={() => setTimeline((t) => !t)} hitSlop={8} accessibilityLabel="Toggle timeline">
-              {timeline ? <Grid3x3 size={20} color={colors[scheme].foreground} /> : <CalendarClock size={20} color={colors[scheme].foreground} />}
+            <Pressable
+              onPress={() => setTimeline((t) => !t)}
+              hitSlop={8}
+              accessibilityLabel="Toggle timeline"
+            >
+              {timeline ? (
+                <Grid3x3 size={20} color={colors[scheme].foreground} />
+              ) : (
+                <CalendarClock size={20} color={colors[scheme].foreground} />
+              )}
             </Pressable>
             <Pressable onPress={addPhotos} hitSlop={8} accessibilityLabel="Add photos">
               <ImagePlus size={20} color={colors[scheme].foreground} />
@@ -67,8 +83,15 @@ export default function AlbumDetailScreen() {
           onAction={addPhotos}
         />
       ) : (
-        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
-          <PhotoGrid photos={photos} timeline={timeline} onPressPhoto={(photo) => router.push(`/gallery/photo/${photo.id}`)} />
+        <ScrollView
+          contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
+          showsVerticalScrollIndicator={false}
+        >
+          <PhotoGrid
+            photos={photos}
+            timeline={timeline}
+            onPressPhoto={(photo) => router.push(`/gallery/photo/${photo.id}`)}
+          />
         </ScrollView>
       )}
 

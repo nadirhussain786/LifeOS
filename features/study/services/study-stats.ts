@@ -110,7 +110,10 @@ export function computeStudyInsights(sessions: StudySession[]): StudyInsights {
   const avgSessionSeconds = sessions.length > 0 ? total / sessions.length : 0;
 
   const rated = sessions.filter((s) => s.focusRating != null);
-  const avgFocusRating = rated.length > 0 ? rated.reduce((sum, s) => sum + (s.focusRating ?? 0), 0) / rated.length : null;
+  const avgFocusRating =
+    rated.length > 0
+      ? rated.reduce((sum, s) => sum + (s.focusRating ?? 0), 0) / rated.length
+      : null;
 
   const byBucket = new Map<TimeOfDay, number>();
   for (const session of sessions) {
@@ -129,13 +132,20 @@ export function computeStudyInsights(sessions: StudySession[]): StudyInsights {
   const weekAgo = format(subDays(new Date(), 6), 'yyyy-MM-dd');
   const twoWeeksAgo = format(subDays(new Date(), 13), 'yyyy-MM-dd');
   const thisWeekSeconds = sumSeconds(sessions.filter((s) => s.logDate >= weekAgo));
-  const lastWeekSeconds = sumSeconds(sessions.filter((s) => s.logDate >= twoWeeksAgo && s.logDate < weekAgo));
-  const weekOverWeek = lastWeekSeconds > 0 ? (thisWeekSeconds - lastWeekSeconds) / lastWeekSeconds : null;
+  const lastWeekSeconds = sumSeconds(
+    sessions.filter((s) => s.logDate >= twoWeeksAgo && s.logDate < weekAgo),
+  );
+  const weekOverWeek =
+    lastWeekSeconds > 0 ? (thisWeekSeconds - lastWeekSeconds) / lastWeekSeconds : null;
 
   return { avgSessionSeconds, avgFocusRating, bestTimeOfDay, weekOverWeek, thisWeekSeconds };
 }
 
-export function subjectBreakdown(sessions: StudySession[], subjects: StudySubject[], sinceDate?: string): SubjectBreakdown[] {
+export function subjectBreakdown(
+  sessions: StudySession[],
+  subjects: StudySubject[],
+  sinceDate?: string,
+): SubjectBreakdown[] {
   const relevant = sinceDate ? sessions.filter((s) => s.logDate >= sinceDate) : sessions;
   const byId = new Map<string | null, number>();
   for (const session of relevant) {
@@ -150,7 +160,11 @@ export function subjectBreakdown(sessions: StudySession[], subjects: StudySubjec
 
 /** Daily totals for the last `days` days (oldest→newest), zero-filled so the
  * chart shows every day including rest days. */
-export function buildStudyTrend(sessions: StudySession[], days: number, dailyGoalSeconds: number): StudyTrendPoint[] {
+export function buildStudyTrend(
+  sessions: StudySession[],
+  days: number,
+  dailyGoalSeconds: number,
+): StudyTrendPoint[] {
   const totals = new Map<string, number>();
   for (const session of sessions) {
     totals.set(session.logDate, (totals.get(session.logDate) ?? 0) + session.durationSeconds);

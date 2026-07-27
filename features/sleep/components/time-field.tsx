@@ -27,15 +27,23 @@ export function TimeField({ icon: Icon, label, value, onChange, tint }: Props) {
 
   return (
     <View className="flex-1 items-center gap-2 rounded-2xl border border-border bg-card p-4">
-      <View className="h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: `${tint}1f` }}>
+      <View
+        className="h-10 w-10 items-center justify-center rounded-xl"
+        style={{ backgroundColor: `${tint}1f` }}
+      >
         <Icon size={18} color={tint} />
       </View>
       <Text variant="micro">{label}</Text>
       {Platform.OS === 'ios' ? (
         <DateTimePicker value={value} mode="time" display="compact" onChange={handleChange} />
       ) : (
-        <Pressable onPress={() => setShow(true)} className="rounded-lg border border-border bg-surface px-3 py-1.5">
-          <Text className="font-sora-semibold text-foreground">{formatClock(minutesOfDay(value.getTime()))}</Text>
+        <Pressable
+          onPress={() => setShow(true)}
+          className="rounded-lg border border-border bg-surface px-3 py-1.5"
+        >
+          <Text className="font-sora-semibold text-foreground">
+            {formatClock(minutesOfDay(value.getTime()))}
+          </Text>
         </Pressable>
       )}
       {Platform.OS === 'android' && show && (

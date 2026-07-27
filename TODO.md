@@ -11,6 +11,7 @@ verified with `tsc` + `expo config` + `expo export` (build-level only — see ca
 ---
 
 ## ✅ Shipped (this branch)
+
 - [x] Central notifications backbone (categories, quiet hours, deep-link tap, inbox)
 - [x] Unified Notification Settings screen + dashboard bell & unread badge
 - [x] Smart-digest delivery mode (folds water/habits/journal into one morning brief)
@@ -28,13 +29,15 @@ verified with `tsc` + `expo config` + `expo export` (build-level only — see ca
 ---
 
 ## 🔒 Needs you (blocked on account / asset / decision)
+
 - [ ] **Supabase project** — create one, run `supabase/migrations/0001_init.sql` in the SQL editor, and put the real URL + anon key in `.env` (currently placeholders). Required before auth or sync can run.
-- [ ] **Device validation** — run `eas login && eas init && eas build -p android --profile development`, install the APK, and confirm reminders fire + widget renders + sign-in/sync works. *#1 next step.*
+- [ ] **Device validation** — run `eas login && eas init && eas build -p android --profile development`, install the APK, and confirm reminders fire + widget renders + sign-in/sync works. _#1 next step._
 - [ ] **Notification status-bar icon** — provide a 96×96 white-on-transparent PNG in `assets/`; then wire `"icon"` into the `expo-notifications` plugin.
 - [ ] **Real bundle identifier** — replace the `com.lifeos.app` placeholder before any store submission.
 - [ ] **iOS widget prerequisite** — a paid Apple Developer account (to build/test on a device).
 
 ## 🔁 Sync v2 (deeper coverage)
+
 - [ ] Sync child/log tables (habit logs & skips, note tags/links, goal milestones & progress logs, journal reflections, study sessions, water logs, entry links) — need `updated_at` + a change strategy for append/join tables.
 - [ ] Sync per-module settings rows (sleep/study/budget settings — single-row, no id).
 - [ ] Media sync via Supabase Storage (gallery photos/videos, note & journal attachments, music files).
@@ -44,6 +47,7 @@ verified with `tsc` + `expo config` + `expo export` (build-level only — see ca
 ---
 
 ## 🟢 Buildable next (verifiable only on a device build)
+
 - [ ] **iOS widget** — "Today at a glance" via `expo-widgets` (SwiftUI/Expo UI).
 - [ ] **Water "+1 glass" widget** — quick-add button (needs headless background-write wiring).
 - [ ] **Habits check-off widget** — Streaks-style tappable habit list.
@@ -53,10 +57,12 @@ verified with `tsc` + `expo config` + `expo export` (build-level only — see ca
 ---
 
 ## ⚖️ Deferred (by design)
+
 - [ ] **Streak-at-risk notifications** — local notifications can't evaluate completion state at fire time, so any version nags after the habit is done. Revisit only with server push (FCM) or a background task. In-app confetti already covers celebrations.
 
 ---
 
 ## 🔵 Later / optional
+
 - [ ] **FCM (server push)** — only if we add remote/server-driven notifications. Local reminders don't need it.
 - [ ] **Re-enable Goals/Study/Streak categories** — currently hidden (no scheduler). Build goal-deadline & study reminders to bring their toggles back.

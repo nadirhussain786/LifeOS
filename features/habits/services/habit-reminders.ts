@@ -25,7 +25,7 @@ export async function syncHabitReminder(habit: Habit): Promise<void> {
 
   const id = await scheduleDailyNotification({
     title: `${habit.emoji ?? '💪'} ${habit.name}`,
-    body: "Time to check in on this habit.",
+    body: 'Time to check in on this habit.',
     hour: parsed.hour,
     minute: parsed.minute,
     data: { category: 'habits', route: '/habits' },
@@ -33,7 +33,9 @@ export async function syncHabitReminder(habit: Habit): Promise<void> {
   setHabitReminderNotificationId(habit.id, id);
 }
 
-export async function cancelHabitReminder(habit: Pick<Habit, 'id' | 'reminderNotificationId'>): Promise<void> {
+export async function cancelHabitReminder(
+  habit: Pick<Habit, 'id' | 'reminderNotificationId'>,
+): Promise<void> {
   await cancelNotification(habit.reminderNotificationId);
   setHabitReminderNotificationId(habit.id, null);
 }

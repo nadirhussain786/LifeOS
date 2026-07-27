@@ -29,7 +29,15 @@ type Props = {
   onRemove?: () => void;
 };
 
-export function SongRow({ song, isActive, isPlaying, onPress, onLongPress, onDelete, onRemove }: Props) {
+export function SongRow({
+  song,
+  isActive,
+  isPlaying,
+  onPress,
+  onLongPress,
+  onDelete,
+  onRemove,
+}: Props) {
   const scheme = useColorScheme() ?? 'light';
   const [c1, c2, c3] = songGradient(song.id);
 
@@ -44,8 +52,16 @@ export function SongRow({ song, isActive, isPlaying, onPress, onLongPress, onDel
     >
       {/* Generative art thumbnail */}
       <View className="h-11 w-11 overflow-hidden rounded-xl">
-        <LinearGradient colors={[c1, c2, c3]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-          <View className="h-6 w-6 items-center justify-center rounded-full" style={{ backgroundColor: 'rgba(0,0,0,0.32)' }}>
+        <LinearGradient
+          colors={[c1, c2, c3]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+        >
+          <View
+            className="h-6 w-6 items-center justify-center rounded-full"
+            style={{ backgroundColor: 'rgba(0,0,0,0.32)' }}
+          >
             {isActive && isPlaying ? (
               <Equalizer size={13} playing color="#ffffff" />
             ) : isActive ? (
@@ -58,7 +74,11 @@ export function SongRow({ song, isActive, isPlaying, onPress, onLongPress, onDel
       </View>
 
       <View className="flex-1 gap-0.5">
-        <Text className="font-sora-medium" numberOfLines={1} style={{ color: isActive ? MUSIC_TINT : colors[scheme].foreground }}>
+        <Text
+          className="font-sora-medium"
+          numberOfLines={1}
+          style={{ color: isActive ? MUSIC_TINT : colors[scheme].foreground }}
+        >
           {song.title}
         </Text>
         <Text variant="caption" numberOfLines={1}>
@@ -76,11 +96,19 @@ export function SongRow({ song, isActive, isPlaying, onPress, onLongPress, onDel
     <SwipeableRow
       actions={
         onDelete ? (
-          <Pressable onPress={onDelete} accessibilityLabel={`Delete "${song.title}"`} className="flex-1 items-center justify-center bg-destructive">
+          <Pressable
+            onPress={onDelete}
+            accessibilityLabel={`Delete "${song.title}"`}
+            className="flex-1 items-center justify-center bg-destructive"
+          >
             <Trash2 color={colors[scheme].primaryForeground} size={18} />
           </Pressable>
         ) : (
-          <Pressable onPress={onRemove} accessibilityLabel={`Remove "${song.title}" from playlist`} className="flex-1 items-center justify-center bg-secondary">
+          <Pressable
+            onPress={onRemove}
+            accessibilityLabel={`Remove "${song.title}" from playlist`}
+            className="flex-1 items-center justify-center bg-secondary"
+          >
             <X color={colors[scheme].foreground} size={18} />
           </Pressable>
         )

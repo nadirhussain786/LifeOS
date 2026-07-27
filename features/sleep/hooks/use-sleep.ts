@@ -39,17 +39,35 @@ export function useSleepSessionByDate(logDate: string | undefined) {
  * history); only the trend series is windowed to `rangeDays`.
  */
 export function useSleepInsights(rangeDays: number) {
-  const { data: sessions = [], isLoading: sessionsLoading } = useSleepSessions();
-  const { data: settings, isLoading: settingsLoading } = useSleepSettings();
+  const {
+    data: sessions = [],
+    isLoading: sessionsLoading,
+    isError: sessionsError,
+    refetch: refetchSessions,
+  } = useSleepSessions();
+  const {
+    data: settings,
+    isLoading: settingsLoading,
+    isError: settingsError,
+    refetch: refetchSettings,
+  } = useSleepSettings();
 
   const goalMinutes = settings?.goalMinutes ?? 480;
 
   const stats = useMemo(() => computeSleepStats(sessions, goalMinutes), [sessions, goalMinutes]);
-  const trend = useMemo(() => buildTrend(sessions, goalMinutes, rangeDays), [sessions, goalMinutes, rangeDays]);
+  const trend = useMemo(
+    () => buildTrend(sessions, goalMinutes, rangeDays),
+    [sessions, goalMinutes, rangeDays],
+  );
   const latest = sessions[0] ?? null;
 
   return {
     isLoading: sessionsLoading || settingsLoading,
+    isError: sessionsError || settingsError,
+    refetch: () => {
+      void refetchSessions();
+      void refetchSettings();
+    },
     sessions,
     goalMinutes,
     targetBedtime: settings?.targetBedtime ?? null,

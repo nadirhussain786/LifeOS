@@ -39,7 +39,8 @@ export default function GalleryScreen() {
 
   const share = async (photo: GalleryPhoto) => {
     try {
-      if (await Sharing.isAvailableAsync()) await Sharing.shareAsync(photo.uri, { dialogTitle: 'Share your progress' });
+      if (await Sharing.isAvailableAsync())
+        await Sharing.shareAsync(photo.uri, { dialogTitle: 'Share your progress' });
     } catch {
       Alert.alert('Could not share', 'Something went wrong sharing this moment.');
     }
@@ -48,9 +49,30 @@ export default function GalleryScreen() {
   const feedPreview = photos.slice(0, 3);
 
   const quickTiles = [
-    { key: 'all', label: 'All Media', icon: Images, tint: '#0ea5e9', count: photos.length, route: '/gallery/all' },
-    { key: 'fav', label: 'Favorites', icon: Heart, tint: '#ef4444', count: favorites.length, route: '/gallery/all?favorites=1' },
-    { key: 'compare', label: 'Before & After', icon: GitCompareArrows, tint: '#8b5cf6', count: null, route: '/gallery/compare' },
+    {
+      key: 'all',
+      label: 'All Media',
+      icon: Images,
+      tint: '#0ea5e9',
+      count: photos.length,
+      route: '/gallery/all',
+    },
+    {
+      key: 'fav',
+      label: 'Favorites',
+      icon: Heart,
+      tint: '#ef4444',
+      count: favorites.length,
+      route: '/gallery/all?favorites=1',
+    },
+    {
+      key: 'compare',
+      label: 'Before & After',
+      icon: GitCompareArrows,
+      tint: '#8b5cf6',
+      count: null,
+      route: '/gallery/compare',
+    },
   ];
 
   return (
@@ -72,7 +94,10 @@ export default function GalleryScreen() {
           onAction={() => setAddOpen(true)}
         />
       ) : (
-        <ScrollView contentContainerClassName="gap-6 px-5 pb-28 pt-1" showsVerticalScrollIndicator={false}>
+        <ScrollView
+          contentContainerClassName="gap-6 px-5 pb-28 pt-1"
+          showsVerticalScrollIndicator={false}
+        >
           {/* Journey hero → plays the whole story */}
           <JourneyHero photos={photos} onPlay={() => router.push('/gallery/story/all')} />
 
@@ -81,7 +106,10 @@ export default function GalleryScreen() {
             <Text variant="caption" className="px-5 font-sora-semibold uppercase tracking-wide">
               Story highlights
             </Text>
-            <StoryReels photos={photos} onOpen={(period) => router.push(`/gallery/story/${period}`)} />
+            <StoryReels
+              photos={photos}
+              onOpen={(period) => router.push(`/gallery/story/${period}`)}
+            />
           </View>
 
           {/* Quick tiles */}
@@ -93,14 +121,30 @@ export default function GalleryScreen() {
                 <Pressable
                   key={tile.key}
                   onPress={() => router.push(tile.route as never)}
-                  style={[{ flex: 1, borderRadius: 20, overflow: 'hidden' }, glowShadow(tile.tint, 0.25)]}
+                  style={[
+                    { flex: 1, borderRadius: 20, overflow: 'hidden' },
+                    glowShadow(tile.tint, 0.25),
+                  ]}
                 >
-                  <LinearGradient colors={[g1, g2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ alignItems: 'center', gap: 6, paddingVertical: 18 }}>
+                  <LinearGradient
+                    colors={[g1, g2]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={{ alignItems: 'center', gap: 6, paddingVertical: 18 }}
+                  >
                     <Icon size={20} color="#ffffff" />
-                    <Text className="font-sora-semibold" style={{ color: '#ffffff', fontSize: 13 }} numberOfLines={1}>
+                    <Text
+                      className="font-sora-semibold"
+                      style={{ color: '#ffffff', fontSize: 13 }}
+                      numberOfLines={1}
+                    >
                       {tile.label}
                     </Text>
-                    {tile.count !== null && <Text style={{ color: alpha('#ffffff', 0.85), fontSize: 11 }}>{tile.count}</Text>}
+                    {tile.count !== null && (
+                      <Text style={{ color: alpha('#ffffff', 0.85), fontSize: 11 }}>
+                        {tile.count}
+                      </Text>
+                    )}
                   </LinearGradient>
                 </Pressable>
               );
@@ -113,7 +157,11 @@ export default function GalleryScreen() {
               <View className="flex-row items-center justify-between">
                 <Text variant="subheading">Recent moments</Text>
                 <Pressable onPress={() => router.push('/gallery/feed')} hitSlop={8}>
-                  <Text variant="caption" style={{ color: GALLERY_TINT }} className="font-sora-semibold">
+                  <Text
+                    variant="caption"
+                    style={{ color: GALLERY_TINT }}
+                    className="font-sora-semibold"
+                  >
                     See feed
                   </Text>
                 </Pressable>
@@ -138,9 +186,17 @@ export default function GalleryScreen() {
           <View className="gap-3">
             <View className="flex-row items-center justify-between">
               <Text variant="subheading">Albums</Text>
-              <Pressable onPress={() => router.push('/gallery/album/new')} hitSlop={8} className="flex-row items-center gap-1">
+              <Pressable
+                onPress={() => router.push('/gallery/album/new')}
+                hitSlop={8}
+                className="flex-row items-center gap-1"
+              >
                 <Plus size={15} color={GALLERY_TINT} />
-                <Text variant="caption" style={{ color: GALLERY_TINT }} className="font-sora-semibold">
+                <Text
+                  variant="caption"
+                  style={{ color: GALLERY_TINT }}
+                  className="font-sora-semibold"
+                >
                   New album
                 </Text>
               </Pressable>
@@ -159,7 +215,12 @@ export default function GalleryScreen() {
             ) : (
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
                 {albums.map((album) => (
-                  <AlbumCard key={album.id} album={album} width={albumWidth} onPress={(a) => router.push(`/gallery/album/${a.id}`)} />
+                  <AlbumCard
+                    key={album.id}
+                    album={album}
+                    width={albumWidth}
+                    onPress={(a) => router.push(`/gallery/album/${a.id}`)}
+                  />
                 ))}
               </View>
             )}

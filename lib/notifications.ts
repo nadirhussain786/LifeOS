@@ -5,9 +5,19 @@ import {
   deleteLogByNotificationId,
   logScheduledNotification,
 } from '@/features/notifications/services/notification-log-repository';
-import { shiftDailyOutOfQuietHours, shiftTimestampOutOfQuietHours } from '@/features/notifications/services/quiet-hours';
-import { isCategoryEnabled, useNotificationsStore } from '@/features/notifications/store/notifications-store';
-import { CATEGORY_META, type NotificationCategory, type NotificationPayload } from '@/features/notifications/types/notification.types';
+import {
+  shiftDailyOutOfQuietHours,
+  shiftTimestampOutOfQuietHours,
+} from '@/features/notifications/services/quiet-hours';
+import {
+  isCategoryEnabled,
+  useNotificationsStore,
+} from '@/features/notifications/store/notifications-store';
+import {
+  CATEGORY_META,
+  type NotificationCategory,
+  type NotificationPayload,
+} from '@/features/notifications/types/notification.types';
 import { generateId } from '@/lib/id';
 
 /** Shared local-notification primitives — every module's reminder feature
@@ -118,7 +128,9 @@ export async function requestNotificationPermission(): Promise<boolean> {
 
   const existing = await Notifications.getPermissionsAsync();
   if (existing.granted) return true;
-  const requested = await Notifications.requestPermissionsAsync({ ios: { allowAlert: true, allowSound: true, allowBadge: false } });
+  const requested = await Notifications.requestPermissionsAsync({
+    ios: { allowAlert: true, allowSound: true, allowBadge: false },
+  });
   return requested.granted;
 }
 
@@ -153,7 +165,11 @@ function passesCategoryGate(payload?: NotificationPayload): boolean {
   if (!isCategoryEnabled(category)) return false;
 
   const { deliveryMode } = useNotificationsStore.getState();
-  if (deliveryMode === 'digest' && category !== 'digest' && !CATEGORY_META[category].bypassQuietHours) {
+  if (
+    deliveryMode === 'digest' &&
+    category !== 'digest' &&
+    !CATEGORY_META[category].bypassQuietHours
+  ) {
     return false;
   }
   return true;
@@ -198,7 +214,11 @@ export async function scheduleOneTimeNotification(params: {
 
   const scheduleId = await Notifications.scheduleNotificationAsync({
     content: { title: params.title, body: params.body, data },
-    trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: triggerAt, channelId: channelForCategory(category) },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.DATE,
+      date: triggerAt,
+      channelId: channelForCategory(category),
+    },
   });
 
   if (params.data?.category) {
@@ -246,7 +266,12 @@ export async function scheduleDailyNotification(params: {
 
   const scheduleId = await Notifications.scheduleNotificationAsync({
     content: { title: params.title, body: params.body, data },
-    trigger: { type: Notifications.SchedulableTriggerInputTypes.DAILY, hour, minute, channelId: channelForCategory(category) },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.DAILY,
+      hour,
+      minute,
+      channelId: channelForCategory(category),
+    },
   });
 
   if (params.data?.category) {
@@ -278,7 +303,9 @@ export async function cancelAllScheduled(): Promise<void> {
 
 /** Subscribes to notification taps. Returns an unsubscribe fn (or a no-op in
  * Expo Go Android). The handler receives the {@link NotificationPayload}. */
-export function addNotificationResponseListener(handler: (payload: NotificationPayload) => void): () => void {
+export function addNotificationResponseListener(
+  handler: (payload: NotificationPayload) => void,
+): () => void {
   const Notifications = getNotifications();
   if (!Notifications) return () => undefined;
   const sub = Notifications.addNotificationResponseReceivedListener((response) => {

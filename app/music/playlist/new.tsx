@@ -58,14 +58,24 @@ export default function NewPlaylistScreen() {
                   }}
                   accessibilityLabel={`Color ${swatch}`}
                   className="h-9 w-9 items-center justify-center rounded-full"
-                  style={{ backgroundColor: swatch, borderWidth: selected ? 2 : 0, borderColor: colors[scheme].foreground }}
+                  style={{
+                    backgroundColor: swatch,
+                    borderWidth: selected ? 2 : 0,
+                    borderColor: colors[scheme].foreground,
+                  }}
                 />
               );
             })}
           </View>
         </View>
 
-        <Button label="Create playlist" onPress={handleCreate} disabled={!name.trim()} size="lg" variant="accent" />
+        <Button
+          label="Create playlist"
+          onPress={handleCreate}
+          disabled={!name.trim()}
+          size="lg"
+          variant="accent"
+        />
       </View>
     </View>
   );

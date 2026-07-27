@@ -91,7 +91,11 @@ export function updateTask(id: string, input: UpdateTaskInput) {
 }
 
 export function setTaskReminderNotificationId(id: string, notificationId: string | null) {
-  getDb().update(tasks).set({ reminderNotificationId: notificationId }).where(eq(tasks.id, id)).run();
+  getDb()
+    .update(tasks)
+    .set({ reminderNotificationId: notificationId })
+    .where(eq(tasks.id, id))
+    .run();
 }
 
 function nextRecurrenceDueDate(dueDate: number, frequency: TaskRecurrenceFrequency): number {
@@ -153,7 +157,8 @@ export function archiveTask(id: string) {
 export function deleteTask(id: string) {
   getDb()
     .update(tasks)
-    .set({ deletedAt: Date.now(), syncStatus: 'pending' })
+    // updatedAt must move so the delete is seen by the sync push (WHERE updated_at > cursor).
+    .set({ deletedAt: Date.now(), updatedAt: Date.now(), syncStatus: 'pending' })
     .where(eq(tasks.id, id))
     .run();
 }
@@ -183,7 +188,7 @@ export function createCategory(name: string, colorToken: string, icon: string): 
 export function deleteCategory(id: string) {
   getDb()
     .update(taskCategories)
-    .set({ deletedAt: Date.now() })
+    .set({ deletedAt: Date.now(), updatedAt: Date.now() })
     .where(eq(taskCategories.id, id))
     .run();
 }
@@ -217,7 +222,8 @@ export function getWeeklyCompletionStats(): WeeklyCompletionStats {
 
   const totalCompleted = completedCounts.reduce((sum, count) => sum + count, 0);
   const totalDue = dueCounts.reduce((sum, count) => sum + count, 0);
-  const weeklyCompletionRate = totalDue === 0 ? (totalCompleted > 0 ? 1 : 0) : Math.min(totalCompleted / totalDue, 1);
+  const weeklyCompletionRate =
+    totalDue === 0 ? (totalCompleted > 0 ? 1 : 0) : Math.min(totalCompleted / totalDue, 1);
 
   const peak = Math.max(...completedCounts, 1);
   const trend = completedCounts.map((count) => count / peak);

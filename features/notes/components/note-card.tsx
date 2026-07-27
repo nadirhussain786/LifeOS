@@ -27,7 +27,9 @@ export function NoteCard({ note, categoryColor, onPress, onDelete, onToggleArchi
         <>
           <Pressable
             onPress={onToggleArchive}
-            accessibilityLabel={note.isArchived ? `Unarchive "${note.title}"` : `Archive "${note.title}"`}
+            accessibilityLabel={
+              note.isArchived ? `Unarchive "${note.title}"` : `Archive "${note.title}"`
+            }
             className="flex-1 items-center justify-center bg-secondary"
           >
             {note.isArchived ? (
@@ -47,12 +49,19 @@ export function NoteCard({ note, categoryColor, onPress, onDelete, onToggleArchi
       }
     >
       <Pressable onPress={onPress} className="gap-1.5 py-3.5 pl-4 pr-4">
-        {categoryColor && <View className="absolute bottom-2 left-0 top-2 w-1 rounded-full" style={{ backgroundColor: categoryColor }} />}
+        {categoryColor && (
+          <View
+            className="absolute bottom-2 left-0 top-2 w-1 rounded-full"
+            style={{ backgroundColor: categoryColor }}
+          />
+        )}
         <View className="flex-row items-center justify-between gap-2">
           <Text className="flex-1 font-sora-semibold" numberOfLines={1}>
             {note.title || 'Untitled note'}
           </Text>
-          {note.isPinned ? <Star size={14} color={colors[scheme].accent} fill={colors[scheme].accent} /> : null}
+          {note.isPinned ? (
+            <Star size={14} color={colors[scheme].accent} fill={colors[scheme].accent} />
+          ) : null}
           <Text variant="caption">{relativeTime}</Text>
         </View>
         {note.body ? (

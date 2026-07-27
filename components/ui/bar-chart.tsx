@@ -1,6 +1,11 @@
 import { useEffect } from 'react';
 import { View } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
@@ -27,7 +32,17 @@ type Props = {
   labelEvery?: number;
 };
 
-function Bar({ heightRatio, color, delay, barHeight }: { heightRatio: number; color: string; delay: number; barHeight: number }) {
+function Bar({
+  heightRatio,
+  color,
+  delay,
+  barHeight,
+}: {
+  heightRatio: number;
+  color: string;
+  delay: number;
+  barHeight: number;
+}) {
   const grow = useSharedValue(0);
   useEffect(() => {
     grow.value = withDelay(delay, withTiming(heightRatio, { duration: 550 }));
@@ -37,7 +52,9 @@ function Bar({ heightRatio, color, delay, barHeight }: { heightRatio: number; co
 
   return (
     <View style={{ flex: 1, height: barHeight, justifyContent: 'flex-end', alignItems: 'center' }}>
-      <Animated.View style={[style, { width: '72%', maxWidth: 22, borderRadius: 5, backgroundColor: color }]} />
+      <Animated.View
+        style={[style, { width: '72%', maxWidth: 22, borderRadius: 5, backgroundColor: color }]}
+      />
     </View>
   );
 }
@@ -48,7 +65,14 @@ function Bar({ heightRatio, color, delay, barHeight }: { heightRatio: number; co
  * optional dashed goal line overlays the plot. Deliberately generic so Sleep
  * (duration), Study (focus minutes) and Budget (monthly spend) share it.
  */
-export function BarChart({ data, height = 160, color, goalValue, maxValue, labelEvery = 1 }: Props) {
+export function BarChart({
+  data,
+  height = 160,
+  color,
+  goalValue,
+  maxValue,
+  labelEvery = 1,
+}: Props) {
   const scheme = useColorScheme() ?? 'light';
   const barColor = color ?? colors[scheme].accent;
 
@@ -81,7 +105,7 @@ export function BarChart({ data, height = 160, color, goalValue, maxValue, label
               heightRatio={datum.value / scaleMax}
               barHeight={plotHeight}
               delay={index * 35}
-              color={datum.highlight ? colors[scheme].foreground : datum.color ?? barColor}
+              color={datum.highlight ? colors[scheme].foreground : (datum.color ?? barColor)}
             />
           ))}
         </View>

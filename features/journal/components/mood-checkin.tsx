@@ -3,7 +3,12 @@ import { Battery, Moon, Target, Waves } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import Animated, { useAnimatedStyle, useSharedValue, withSequence, withSpring } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+} from 'react-native-reanimated';
 
 import { Text } from '@/components/ui/text';
 import { moduleTint } from '@/constants/design-tokens';
@@ -13,7 +18,12 @@ import { MOOD_REASONS, type MoodOption } from '@/features/journal/types/journal.
 
 const MOODS: { value: MoodOption; emoji: string; label: string; tint: string }[] = (
   ['great', 'good', 'okay', 'low', 'rough'] as const
-).map((value) => ({ value, emoji: MOOD_EMOJI[value], label: MOOD_LABEL[value], tint: MOOD_TINT[value] }));
+).map((value) => ({
+  value,
+  emoji: MOOD_EMOJI[value],
+  label: MOOD_LABEL[value],
+  tint: MOOD_TINT[value],
+}));
 
 const ENERGY_LABELS = ['Depleted', 'Low', 'Moderate', 'Energized', 'Peak'] as const;
 const STRESS_LABELS = ['Calm', 'Mild', 'Noticeable', 'High', 'Overwhelmed'] as const;
@@ -25,7 +35,15 @@ const STRESS_TINT = '#f97316';
 const FOCUS_TINT = '#0ea5e9';
 const SLEEP_TINT = '#8b5cf6';
 
-function MoodButton({ option, selected, onPress }: { option: (typeof MOODS)[number]; selected: boolean; onPress: () => void }) {
+function MoodButton({
+  option,
+  selected,
+  onPress,
+}: {
+  option: (typeof MOODS)[number];
+  selected: boolean;
+  onPress: () => void;
+}) {
   const scheme = useColorScheme() ?? 'light';
   const scale = useSharedValue(1);
   const isMounted = useRef(false);
@@ -35,7 +53,11 @@ function MoodButton({ option, selected, onPress }: { option: (typeof MOODS)[numb
       isMounted.current = true;
       return;
     }
-    if (selected) scale.value = withSequence(withSpring(1.25, { damping: 7, stiffness: 400 }), withSpring(1, { damping: 9, stiffness: 300 }));
+    if (selected)
+      scale.value = withSequence(
+        withSpring(1.25, { damping: 7, stiffness: 400 }),
+        withSpring(1, { damping: 9, stiffness: 300 }),
+      );
   }, [selected, scale]);
 
   const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
@@ -49,10 +71,16 @@ function MoodButton({ option, selected, onPress }: { option: (typeof MOODS)[numb
       className="items-center gap-1.5 rounded-2xl px-2 py-3"
       style={{ backgroundColor: selected ? `${option.tint}1f` : 'transparent' }}
     >
-      <Animated.View style={[{ height: 40, alignItems: 'center', justifyContent: 'center' }, animatedStyle]}>
+      <Animated.View
+        style={[{ height: 40, alignItems: 'center', justifyContent: 'center' }, animatedStyle]}
+      >
         <Text style={{ fontSize: 28, lineHeight: 34 }}>{option.emoji}</Text>
       </Animated.View>
-      <Text variant="caption" className="font-sora-medium" style={{ color: selected ? option.tint : colors[scheme].mutedForeground }}>
+      <Text
+        variant="caption"
+        className="font-sora-medium"
+        style={{ color: selected ? option.tint : colors[scheme].mutedForeground }}
+      >
         {option.label}
       </Text>
     </Pressable>
@@ -81,7 +109,11 @@ function ScaleRow({ icon: Icon, label, value, levelLabels, tint, onChange }: Sca
             {label}
           </Text>
         </View>
-        <Text variant="caption" className="font-sora-medium" style={{ color: descriptor ? tint : colors[scheme].mutedForeground }}>
+        <Text
+          variant="caption"
+          className="font-sora-medium"
+          style={{ color: descriptor ? tint : colors[scheme].mutedForeground }}
+        >
           {descriptor ?? 'Not set'}
         </Text>
       </View>
@@ -154,23 +186,51 @@ export function MoodCheckin({
   onToggleReason,
 }: Props) {
   const scheme = useColorScheme() ?? 'light';
-  const [sleepHoursText, setSleepHoursText] = useState(sleepHours !== null ? String(sleepHours) : '');
+  const [sleepHoursText, setSleepHoursText] = useState(
+    sleepHours !== null ? String(sleepHours) : '',
+  );
   const reasons = new Set(moodReasons ?? []);
 
   return (
     <View className="gap-5 rounded-2xl border border-border bg-card p-4 shadow-e1">
       <View className="flex-row justify-between" accessibilityRole="radiogroup">
         {MOODS.map((option) => (
-          <MoodButton key={option.value} option={option} selected={mood === option.value} onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            onChangeMood(option.value);
-          }} />
+          <MoodButton
+            key={option.value}
+            option={option}
+            selected={mood === option.value}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              onChangeMood(option.value);
+            }}
+          />
         ))}
       </View>
 
-      <ScaleRow icon={Battery} label="Energy" value={energy} levelLabels={ENERGY_LABELS} tint={ENERGY_TINT} onChange={onChangeEnergy} />
-      <ScaleRow icon={Waves} label="Stress" value={stress} levelLabels={STRESS_LABELS} tint={STRESS_TINT} onChange={onChangeStress} />
-      <ScaleRow icon={Target} label="Focus" value={focus} levelLabels={FOCUS_LABELS} tint={FOCUS_TINT} onChange={onChangeFocus} />
+      <ScaleRow
+        icon={Battery}
+        label="Energy"
+        value={energy}
+        levelLabels={ENERGY_LABELS}
+        tint={ENERGY_TINT}
+        onChange={onChangeEnergy}
+      />
+      <ScaleRow
+        icon={Waves}
+        label="Stress"
+        value={stress}
+        levelLabels={STRESS_LABELS}
+        tint={STRESS_TINT}
+        onChange={onChangeStress}
+      />
+      <ScaleRow
+        icon={Target}
+        label="Focus"
+        value={focus}
+        levelLabels={FOCUS_LABELS}
+        tint={FOCUS_TINT}
+        onChange={onChangeFocus}
+      />
       <ScaleRow
         icon={Moon}
         label="Sleep quality"

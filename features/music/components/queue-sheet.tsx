@@ -32,15 +32,28 @@ export function QueueSheet({ visible, onClose, queue, currentIndex, isPlaying, o
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
-      <Pressable className="flex-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} onPress={onClose}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}
+      statusBarTranslucent
+    >
+      <Pressable
+        className="flex-1"
+        style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+        onPress={onClose}
+      >
         <View className="flex-1 justify-end">
           <Pressable
             onPress={(e) => e.stopPropagation()}
             style={{ paddingBottom: insets.bottom + 8, maxHeight: height * 0.7 }}
             className="rounded-t-3xl bg-card px-2 pt-3"
           >
-            <View className="mb-1 h-1 w-10 self-center rounded-full" style={{ backgroundColor: colors[scheme].border }} />
+            <View
+              className="mb-1 h-1 w-10 self-center rounded-full"
+              style={{ backgroundColor: colors[scheme].border }}
+            />
             <View className="flex-row items-center gap-2 px-3 pb-2">
               <ListMusic size={18} color={MUSIC_TINT} />
               <Text variant="subheading">Up Next</Text>
@@ -68,7 +81,11 @@ export function QueueSheet({ visible, onClose, queue, currentIndex, isPlaying, o
                       )}
                     </View>
                     <View className="flex-1">
-                      <Text className="font-sora-medium" numberOfLines={1} style={{ color: isCurrent ? MUSIC_TINT : colors[scheme].foreground }}>
+                      <Text
+                        className="font-sora-medium"
+                        numberOfLines={1}
+                        style={{ color: isCurrent ? MUSIC_TINT : colors[scheme].foreground }}
+                      >
                         {song.title}
                       </Text>
                       <Text variant="caption" numberOfLines={1}>

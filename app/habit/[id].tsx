@@ -78,29 +78,58 @@ export default function HabitDetailScreen() {
         }
       />
 
-      <ScrollView contentContainerClassName="gap-6 px-5 pt-3 pb-10" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerClassName="gap-6 px-5 pt-3 pb-10"
+        showsVerticalScrollIndicator={false}
+      >
         <View className="flex-row items-center gap-3">
           <Text style={{ fontSize: 32 }}>{habit.emoji ?? '🔥'}</Text>
-          <Text style={{ fontSize: 24, fontFamily: 'Sora_700Bold' }} className="flex-1 text-foreground">
+          <Text
+            style={{ fontSize: 24, fontFamily: 'Sora_700Bold' }}
+            className="flex-1 text-foreground"
+          >
             {habit.name}
           </Text>
         </View>
 
         <View className="flex-row gap-3">
           <View className="flex-1 items-center gap-1 rounded-2xl border border-border bg-card py-4 shadow-e1">
-            <Text style={{ fontSize: 28, fontFamily: 'Sora_800ExtraBold', fontVariant: ['tabular-nums'] }} className="text-foreground">
+            <Text
+              style={{
+                fontSize: 28,
+                fontFamily: 'Sora_800ExtraBold',
+                fontVariant: ['tabular-nums'],
+              }}
+              className="text-foreground"
+            >
               {streaks.currentStreak}
             </Text>
-            <Text variant="caption">{habit.type === 'negative' ? 'Days without' : 'Current streak'}</Text>
+            <Text variant="caption">
+              {habit.type === 'negative' ? 'Days without' : 'Current streak'}
+            </Text>
           </View>
           <View className="flex-1 items-center gap-1 rounded-2xl border border-border bg-card py-4 shadow-e1">
-            <Text style={{ fontSize: 28, fontFamily: 'Sora_800ExtraBold', fontVariant: ['tabular-nums'] }} className="text-foreground">
+            <Text
+              style={{
+                fontSize: 28,
+                fontFamily: 'Sora_800ExtraBold',
+                fontVariant: ['tabular-nums'],
+              }}
+              className="text-foreground"
+            >
               {streaks.bestStreak}
             </Text>
             <Text variant="caption">Best streak</Text>
           </View>
           <View className="flex-1 items-center gap-1 rounded-2xl border border-border bg-card py-4 shadow-e1">
-            <Text style={{ fontSize: 28, fontFamily: 'Sora_800ExtraBold', fontVariant: ['tabular-nums'] }} className="text-foreground">
+            <Text
+              style={{
+                fontSize: 28,
+                fontFamily: 'Sora_800ExtraBold',
+                fontVariant: ['tabular-nums'],
+              }}
+              className="text-foreground"
+            >
               {Math.round(streaks.completionRate30d * 100)}%
             </Text>
             <Text variant="caption">Last 30 days</Text>
@@ -113,15 +142,22 @@ export default function HabitDetailScreen() {
             className="items-center rounded-2xl bg-success py-3.5"
           >
             <Text className="font-sora-semibold" style={{ color: '#ffffff' }}>
-              {todayLog ? `Logged ${todayLog.value}${habit.unit ? ` ${habit.unit}` : ''} today · tap to edit` : 'Log today'}
+              {todayLog
+                ? `Logged ${todayLog.value}${habit.unit ? ` ${habit.unit}` : ''} today · tap to edit`
+                : 'Log today'}
             </Text>
           </Pressable>
         ) : (
           <Pressable
-            onPress={() => (todayLog ? unlogToday.mutate(habit.id) : logToday.mutate({ habitId: habit.id }))}
+            onPress={() =>
+              todayLog ? unlogToday.mutate(habit.id) : logToday.mutate({ habitId: habit.id })
+            }
             className={`items-center rounded-2xl py-3.5 ${todayLog ? 'bg-success' : 'bg-surface'}`}
           >
-            <Text className="font-sora-semibold" style={{ color: todayLog ? '#ffffff' : colors[scheme].foreground }}>
+            <Text
+              className="font-sora-semibold"
+              style={{ color: todayLog ? '#ffffff' : colors[scheme].foreground }}
+            >
               {todayLog ? 'Done today ✓' : 'Mark done today'}
             </Text>
           </Pressable>
@@ -134,7 +170,9 @@ export default function HabitDetailScreen() {
 
         <View className="gap-2">
           <Text variant="subheading">Recent history</Text>
-          {recentLogs.length === 0 && <Text variant="muted">No logs yet — mark today done to start the streak.</Text>}
+          {recentLogs.length === 0 && (
+            <Text variant="muted">No logs yet — mark today done to start the streak.</Text>
+          )}
           {recentLogs.map((log) => (
             <Pressable
               key={log.id}
@@ -142,13 +180,20 @@ export default function HabitDetailScreen() {
               className="flex-row items-center justify-between border-t border-border py-2.5"
             >
               <Text variant="muted">{format(parseISO(log.logDate), 'EEE, MMM d')}</Text>
-              <Text className="font-sora-medium">{log.value}{habit.unit ? ` ${habit.unit}` : ''}</Text>
+              <Text className="font-sora-medium">
+                {log.value}
+                {habit.unit ? ` ${habit.unit}` : ''}
+              </Text>
             </Pressable>
           ))}
         </View>
       </ScrollView>
 
-      <QuickLogSheet ref={quickLogRef} habit={habitWithToday} onSubmit={(value) => logDate.mutate({ habitId: habit.id, logDate: todayKey, value })} />
+      <QuickLogSheet
+        ref={quickLogRef}
+        habit={habitWithToday}
+        onSubmit={(value) => logDate.mutate({ habitId: habit.id, logDate: todayKey, value })}
+      />
     </View>
   );
 }

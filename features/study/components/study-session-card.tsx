@@ -29,7 +29,10 @@ export function StudySessionCard({ session, subject, onLongPress }: Props) {
       className="flex-row items-center gap-3 rounded-2xl border border-border bg-card p-4"
       accessibilityHint="Long-press to delete"
     >
-      <View className="h-11 w-11 items-center justify-center rounded-xl" style={{ backgroundColor: `${color}1f` }}>
+      <View
+        className="h-11 w-11 items-center justify-center rounded-xl"
+        style={{ backgroundColor: `${color}1f` }}
+      >
         <BookOpen size={19} color={color} />
       </View>
       <View className="flex-1 gap-0.5">

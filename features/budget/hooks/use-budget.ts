@@ -18,7 +18,10 @@ import {
 } from '@/features/budget/services/budget-stats';
 
 export function useTransactions() {
-  return useQuery({ queryKey: ['budget', 'transactions'], queryFn: async () => listTransactions() });
+  return useQuery({
+    queryKey: ['budget', 'transactions'],
+    queryFn: async () => listTransactions(),
+  });
 }
 
 export function useTransaction(id: string | undefined) {
@@ -30,7 +33,10 @@ export function useTransaction(id: string | undefined) {
 }
 
 export function useSavingsGoals() {
-  return useQuery({ queryKey: ['budget', 'savings-goals'], queryFn: async () => listSavingsGoalsWithProgress() });
+  return useQuery({
+    queryKey: ['budget', 'savings-goals'],
+    queryFn: async () => listSavingsGoalsWithProgress(),
+  });
 }
 
 export function useBudgetSettings() {
@@ -43,7 +49,7 @@ export function useBudgetSettings() {
  * the single cached transaction list.
  */
 export function useBudgetOverview(period: Period, anchorTime: number) {
-  const { data: transactions = [], isLoading } = useTransactions();
+  const { data: transactions = [], isLoading, isError, refetch } = useTransactions();
   const { data: settings } = useBudgetSettings();
 
   const currency = settings?.currency ?? '$';
@@ -61,5 +67,12 @@ export function useBudgetOverview(period: Period, anchorTime: number) {
     };
   }, [transactions, period, anchorTime]);
 
-  return { isLoading, currency, monthlyBudgetCents: settings?.monthlyBudgetCents ?? null, ...value };
+  return {
+    isLoading,
+    isError,
+    refetch,
+    currency,
+    monthlyBudgetCents: settings?.monthlyBudgetCents ?? null,
+    ...value,
+  };
 }

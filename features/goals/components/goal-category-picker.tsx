@@ -25,7 +25,11 @@ export function GoalCategoryPicker({ value, customLabel, onChange, onChangeLabel
 
   return (
     <View className="gap-2.5">
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="items-center gap-2">
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerClassName="items-center gap-2"
+      >
         {GOAL_CATEGORIES.map((category) => {
           const selected = category.id === value;
           const Icon = category.icon;
@@ -33,11 +37,20 @@ export function GoalCategoryPicker({ value, customLabel, onChange, onChangeLabel
             <Pressable
               key={category.id}
               onPress={() => select(category.id)}
-              style={selected ? { backgroundColor: category.tint, borderColor: category.tint } : undefined}
-              className={cn('flex-row items-center gap-1.5 rounded-full border px-3 py-1.5', !selected && 'border-border')}
+              style={
+                selected
+                  ? { backgroundColor: category.tint, borderColor: category.tint }
+                  : undefined
+              }
+              className={cn(
+                'flex-row items-center gap-1.5 rounded-full border px-3 py-1.5',
+                !selected && 'border-border',
+              )}
             >
               <Icon size={14} color={selected ? '#ffffff' : category.tint} strokeWidth={2.2} />
-              <Text className={selected ? 'font-sora-medium text-white' : 'text-muted-foreground'}>{category.label}</Text>
+              <Text className={selected ? 'font-sora-medium text-white' : 'text-muted-foreground'}>
+                {category.label}
+              </Text>
             </Pressable>
           );
         })}
@@ -47,6 +60,7 @@ export function GoalCategoryPicker({ value, customLabel, onChange, onChangeLabel
         <TextInput
           value={customLabel ?? ''}
           onChangeText={(text) => onChangeLabel(text || null)}
+          accessibilityLabel="Category name"
           placeholder="Name your category"
           placeholderTextColor={colors[scheme].mutedForeground}
           maxLength={30}

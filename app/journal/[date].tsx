@@ -76,7 +76,9 @@ export default function JournalEntryScreen() {
 
     const position = await Location.getCurrentPositionAsync({});
     const [place] = await Location.reverseGeocodeAsync(position.coords).catch(() => []);
-    const label = place ? [place.city, place.region].filter(Boolean).join(', ') : 'Current location';
+    const label = place
+      ? [place.city, place.region].filter(Boolean).join(', ')
+      : 'Current location';
 
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     upsert.mutate({
@@ -95,7 +97,10 @@ export default function JournalEntryScreen() {
 
       {/* A soft mood-tinted wash behind the header, reacting live to whichever mood is picked below —
           the page itself reflects how the day felt, rather than staying neutral chrome regardless. */}
-      <LinearGradient colors={[wash, 'transparent']} style={[StyleSheet.absoluteFillObject, { height: 240 }]} />
+      <LinearGradient
+        colors={[wash, 'transparent']}
+        style={[StyleSheet.absoluteFillObject, { height: 240 }]}
+      />
 
       <ScreenHeader
         eyebrow="Journal"
@@ -128,7 +133,10 @@ export default function JournalEntryScreen() {
             </Text>
           </Pressable>
         </View>
-        <Text style={{ fontSize: 32, lineHeight: 40, fontFamily: 'Literata_600SemiBold' }} className="text-foreground">
+        <Text
+          style={{ fontSize: 32, lineHeight: 40, fontFamily: 'Literata_600SemiBold' }}
+          className="text-foreground"
+        >
           {format(date, 'MMMM d')}
         </Text>
       </View>
@@ -160,6 +168,7 @@ export default function JournalEntryScreen() {
           value={body}
           onChangeText={setBody}
           multiline
+          accessibilityLabel="Journal entry"
           placeholder="How was today?"
           placeholderTextColor={colors[scheme].mutedForeground}
           style={{ fontFamily: 'Literata_400Regular', fontSize: 17, lineHeight: 25 }}
@@ -179,7 +188,9 @@ export default function JournalEntryScreen() {
           </Pressable>
 
           <VoiceNoteRecorder
-            onRecorded={(uri, durationMs) => attach.mutate({ entryId: entry.id, kind: 'audio', uri, durationMs })}
+            onRecorded={(uri, durationMs) =>
+              attach.mutate({ entryId: entry.id, kind: 'audio', uri, durationMs })
+            }
           />
         </View>
 
@@ -192,7 +203,9 @@ export default function JournalEntryScreen() {
         <ReflectionPromptList
           prompts={prompts}
           reflections={reflections}
-          onAnswer={(promptId, text) => answerPrompt.mutate({ entryId: entry.id, promptId, answerText: text })}
+          onAnswer={(promptId, text) =>
+            answerPrompt.mutate({ entryId: entry.id, promptId, answerText: text })
+          }
         />
       </ScrollView>
     </View>

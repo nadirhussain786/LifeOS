@@ -36,7 +36,9 @@ export function buildDigestSummary(): DigestSummary {
   let waterBehind = false;
 
   try {
-    tasksDueToday = listTasks('active', 'due-date').filter((t) => t.dueDate != null && isToday(t.dueDate)).length;
+    tasksDueToday = listTasks('active', 'due-date').filter(
+      (t) => t.dueDate != null && isToday(t.dueDate),
+    ).length;
   } catch {
     // A module's table not being ready yet shouldn't sink the whole digest.
   }
@@ -56,7 +58,8 @@ export function buildDigestSummary(): DigestSummary {
     /* ignore */
   }
   try {
-    waterBehind = getDailyTotal(toDateKey(new Date())) < (useWaterSettingsStore.getState().goalMl ?? 2000);
+    waterBehind =
+      getDailyTotal(toDateKey(new Date())) < (useWaterSettingsStore.getState().goalMl ?? 2000);
   } catch {
     /* ignore */
   }
@@ -79,7 +82,7 @@ export function composeDigest(summary: DigestSummary): { title: string; body: st
   const title = 'Good morning ☀️';
   const body =
     parts.length === 0
-      ? "Nothing pressing today — enjoy the calm."
+      ? 'Nothing pressing today — enjoy the calm.'
       : `Today: ${listJoin(parts)}. Tap to plan your day.`;
   return { title, body };
 }
@@ -101,7 +104,8 @@ export async function syncDigest(): Promise<void> {
   await cancelNotification(store.digestNotificationId);
   store.setDigestNotificationId(null);
 
-  const digestOn = store.masterEnabled && store.deliveryMode === 'digest' && (store.categories.digest ?? true);
+  const digestOn =
+    store.masterEnabled && store.deliveryMode === 'digest' && (store.categories.digest ?? true);
   if (!digestOn) return;
 
   const { title, body } = composeDigest(buildDigestSummary());

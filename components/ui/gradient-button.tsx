@@ -44,13 +44,33 @@ export function GradientButton({ label, onPress, tint, icon: Icon, disabled, siz
       disabled={disabled}
       accessibilityRole="button"
       accessibilityLabel={label}
-      style={[style, { height, borderRadius: height / 2, opacity: disabled ? 0.5 : 1 }, !disabled && glowShadow(tint, 0.4)]}
+      style={[
+        style,
+        { height, borderRadius: height / 2, opacity: disabled ? 0.5 : 1 },
+        !disabled && glowShadow(tint, 0.4),
+      ]}
     >
       <View style={{ flex: 1, borderRadius: height / 2, overflow: 'hidden' }}>
-        <LinearGradient colors={[start, end]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
-        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+        <LinearGradient
+          colors={[start, end]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+        <View
+          style={{
+            flex: 1,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+          }}
+        >
           {Icon && <Icon size={size === 'lg' ? 20 : 17} color="#ffffff" strokeWidth={2.4} />}
-          <Text className="font-sora-bold" style={{ color: '#ffffff', fontSize: size === 'lg' ? 16 : 15 }}>
+          <Text
+            className="font-sora-bold"
+            style={{ color: '#ffffff', fontSize: size === 'lg' ? 16 : 15 }}
+          >
             {label}
           </Text>
         </View>

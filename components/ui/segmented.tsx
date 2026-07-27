@@ -37,14 +37,32 @@ export function Segmented<T extends string>({ options, value, onChange, activeCo
             // context" on the screens this control appears on.
             style={[
               selected && activeColor ? { backgroundColor: activeColor } : undefined,
-              selected ? { shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 2, shadowOffset: { width: 0, height: 1 }, elevation: 2 } : undefined,
+              selected
+                ? {
+                    shadowColor: '#000',
+                    shadowOpacity: 0.1,
+                    shadowRadius: 2,
+                    shadowOffset: { width: 0, height: 1 },
+                    elevation: 2,
+                  }
+                : undefined,
             ]}
-            className={cn('flex-1 items-center rounded-full py-1.5', selected && !activeColor && 'bg-background')}
+            className={cn(
+              'flex-1 items-center rounded-full py-1.5',
+              selected && !activeColor && 'bg-background',
+            )}
             accessibilityRole="button"
             accessibilityState={{ selected }}
           >
             <Text
-              className={cn('text-sm font-sora-medium', selected ? (activeColor ? 'text-white' : 'text-foreground') : 'text-muted-foreground')}
+              className={cn(
+                'font-sora-medium text-sm',
+                selected
+                  ? activeColor
+                    ? 'text-white'
+                    : 'text-foreground'
+                  : 'text-muted-foreground',
+              )}
             >
               {option.label}
             </Text>

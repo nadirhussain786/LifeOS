@@ -33,14 +33,23 @@ export default function NewRoutineScreen() {
         <TextInput
           value={name}
           onChangeText={setName}
+          accessibilityLabel="Routine name"
           placeholder="Morning routine, Wind down…"
           placeholderTextColor={colors[scheme].mutedForeground}
           autoFocus
           onSubmitEditing={handleCreate}
           style={{ fontSize: 24, fontFamily: 'Sora_700Bold', color: colors[scheme].foreground }}
         />
-        <Text variant="muted">You&apos;ll add habits to this routine next, in the order you want them done.</Text>
-        <Button label="Create routine" onPress={handleCreate} disabled={!name.trim()} size="lg" variant="accent" />
+        <Text variant="muted">
+          You&apos;ll add habits to this routine next, in the order you want them done.
+        </Text>
+        <Button
+          label="Create routine"
+          onPress={handleCreate}
+          disabled={!name.trim()}
+          size="lg"
+          variant="accent"
+        />
       </View>
     </View>
   );

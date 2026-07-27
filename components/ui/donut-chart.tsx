@@ -24,7 +24,14 @@ type Props = {
  * app has no chart library, so this is hand-rolled on react-native-svg and
  * shared by the budget expense breakdown (and available to any future split).
  */
-export function DonutChart({ data, size = 180, strokeWidth = 26, trackColor, children, gap = 2 }: Props) {
+export function DonutChart({
+  data,
+  size = 180,
+  strokeWidth = 26,
+  trackColor,
+  children,
+  gap = 2,
+}: Props) {
   const scheme = useColorScheme() ?? 'light';
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -36,7 +43,14 @@ export function DonutChart({ data, size = 180, strokeWidth = 26, trackColor, chi
   return (
     <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
       <Svg width={size} height={size} style={{ position: 'absolute' }}>
-        <Circle cx={size / 2} cy={size / 2} r={radius} stroke={trackColor ?? colors[scheme].muted} strokeWidth={strokeWidth} fill="none" />
+        <Circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke={trackColor ?? colors[scheme].muted}
+          strokeWidth={strokeWidth}
+          fill="none"
+        />
         {total > 0 &&
           data.map((slice, index) => {
             const rawLength = (slice.value / total) * circumference;

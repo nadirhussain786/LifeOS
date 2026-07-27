@@ -1,8 +1,9 @@
 import { format } from 'date-fns';
+import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Sparkles } from 'lucide-react-native';
 import { useMemo } from 'react';
-import { Image, Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
@@ -18,14 +19,59 @@ type Props = {
   onOpen: (period: string) => void;
 };
 
-function Reel({ cover, label, onPress, ring }: { cover: GalleryPhoto | null; label: string; onPress: () => void; ring: [string, string] }) {
+function Reel({
+  cover,
+  label,
+  onPress,
+  ring,
+}: {
+  cover: GalleryPhoto | null;
+  label: string;
+  onPress: () => void;
+  ring: [string, string];
+}) {
   const scheme = useColorScheme() ?? 'light';
   return (
-    <Pressable onPress={onPress} className="items-center gap-1.5" style={{ width: 76 }} accessibilityRole="button" accessibilityLabel={label}>
-      <LinearGradient colors={ring} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ width: 72, height: 72, borderRadius: 36, padding: 3, alignItems: 'center', justifyContent: 'center' }}>
-        <View style={{ width: 66, height: 66, borderRadius: 33, borderWidth: 2, borderColor: colors[scheme].background, overflow: 'hidden', alignItems: 'center', justifyContent: 'center', backgroundColor: colors[scheme].muted }}>
+    <Pressable
+      onPress={onPress}
+      className="items-center gap-1.5"
+      style={{ width: 76 }}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+    >
+      <LinearGradient
+        colors={ring}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{
+          width: 72,
+          height: 72,
+          borderRadius: 36,
+          padding: 3,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <View
+          style={{
+            width: 66,
+            height: 66,
+            borderRadius: 33,
+            borderWidth: 2,
+            borderColor: colors[scheme].background,
+            overflow: 'hidden',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: colors[scheme].muted,
+          }}
+        >
           {cover ? (
-            <Image source={{ uri: displayUri(cover) }} style={{ width: '100%', height: '100%' }} />
+            <Image
+              source={{ uri: displayUri(cover) }}
+              style={{ width: '100%', height: '100%' }}
+              contentFit="cover"
+              recyclingKey={cover.id}
+            />
           ) : (
             <Sparkles size={22} color={GALLERY_TINT} />
           )}
@@ -60,10 +106,20 @@ export function StoryReels({ photos, onOpen }: Props) {
   const allRing: [string, string] = ['#f59e0b', GALLERY_TINT];
 
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-3 px-4">
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerClassName="gap-3 px-4"
+    >
       <Reel cover={photos[0]} label="All" onPress={() => onOpen('all')} ring={allRing} />
       {buckets.map(([key, group]) => (
-        <Reel key={key} cover={group[0]} label={format(group[0].takenAt, 'MMM yyyy')} onPress={() => onOpen(key)} ring={[g1, g2]} />
+        <Reel
+          key={key}
+          cover={group[0]}
+          label={format(group[0].takenAt, 'MMM yyyy')}
+          onPress={() => onOpen(key)}
+          ring={[g1, g2]}
+        />
       ))}
     </ScrollView>
   );

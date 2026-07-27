@@ -1,6 +1,7 @@
 export type HabitType = 'boolean' | 'count' | 'duration' | 'distance' | 'time' | 'negative';
 
-export type HabitScheduleType = 'daily' | 'weekly' | 'monthly' | 'custom_days' | 'every_x_days' | 'flexible';
+export type HabitScheduleType =
+  'daily' | 'weekly' | 'monthly' | 'custom_days' | 'every_x_days' | 'flexible';
 
 export type HabitSkipReason = 'skip' | 'vacation';
 
@@ -64,7 +65,10 @@ export type CreateHabitInput = {
   reminderAdaptive?: boolean;
 };
 
-export type UpdateHabitInput = Partial<CreateHabitInput> & { isArchived?: boolean; position?: number };
+export type UpdateHabitInput = Partial<CreateHabitInput> & {
+  isArchived?: boolean;
+  position?: number;
+};
 
 /** Today's status for a single habit, derived (not stored) for the Today screen. */
 export type HabitTodayStatus = 'done' | 'skipped' | 'not_yet' | 'not_scheduled';

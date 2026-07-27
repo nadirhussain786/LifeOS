@@ -34,7 +34,11 @@ export function periodRange(period: Period, anchor: Date): { start: number; end:
   }
 }
 
-export function filterByRange(transactions: BudgetTransaction[], start: number, end: number): BudgetTransaction[] {
+export function filterByRange(
+  transactions: BudgetTransaction[],
+  start: number,
+  end: number,
+): BudgetTransaction[] {
   return transactions.filter((t) => t.occurredAt >= start && t.occurredAt <= end);
 }
 
@@ -47,7 +51,12 @@ export function summarize(transactions: BudgetTransaction[]): BudgetSummary {
     else if (t.type === 'expense') expenseCents += t.amountCents;
     else savingsCents += t.amountCents;
   }
-  return { incomeCents, expenseCents, savingsCents, balanceCents: incomeCents - expenseCents - savingsCents };
+  return {
+    incomeCents,
+    expenseCents,
+    savingsCents,
+    balanceCents: incomeCents - expenseCents - savingsCents,
+  };
 }
 
 /** Expense totals per category, largest first, with each slice's share of the
@@ -63,7 +72,13 @@ export function expenseByCategory(transactions: BudgetTransaction[]): CategorySl
   return [...totals.entries()]
     .map(([categoryId, amountCents]) => {
       const meta = expenseCategoryMeta(categoryId);
-      return { categoryId, label: meta.label, tint: meta.tint, amountCents, share: amountCents / grand };
+      return {
+        categoryId,
+        label: meta.label,
+        tint: meta.tint,
+        amountCents,
+        share: amountCents / grand,
+      };
     })
     .sort((a, b) => b.amountCents - a.amountCents);
 }
@@ -81,7 +96,10 @@ export function accountBalances(transactions: BudgetTransaction[]): AccountBalan
 }
 
 /** Income-vs-expense per month for the trailing `months` months (oldest→newest). */
-export function monthlyTrend(transactions: BudgetTransaction[], months: number): BudgetTrendPoint[] {
+export function monthlyTrend(
+  transactions: BudgetTransaction[],
+  months: number,
+): BudgetTrendPoint[] {
   const points: BudgetTrendPoint[] = [];
   for (let i = months - 1; i >= 0; i -= 1) {
     const anchor = subMonths(new Date(), i);

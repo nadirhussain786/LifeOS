@@ -1,7 +1,13 @@
 import * as Haptics from 'expo-haptics';
 import { useEffect, useRef, useState } from 'react';
 import { Dimensions, StyleSheet, View } from 'react-native';
-import Animated, { Easing, useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withTiming,
+} from 'react-native-reanimated';
 
 const CONFETTI_COLORS = ['#f97316', '#eab308', '#22c55e', '#0ea5e9', '#8b5cf6', '#ec4899'];
 const PIECE_COUNT = 28;
@@ -24,7 +30,10 @@ function ConfettiPiece({ index, play }: { index: number; play: number }) {
   useEffect(() => {
     if (play === 0) return;
     progress.value = 0;
-    progress.value = withDelay(delay, withTiming(1, { duration: 1400, easing: Easing.out(Easing.quad) }));
+    progress.value = withDelay(
+      delay,
+      withTiming(1, { duration: 1400, easing: Easing.out(Easing.quad) }),
+    );
   }, [play, delay, progress]);
 
   const style = useAnimatedStyle(() => ({

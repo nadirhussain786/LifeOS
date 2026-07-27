@@ -18,7 +18,11 @@ export function usePlaylists() {
 }
 
 export function usePlaylist(id: string) {
-  return useQuery({ queryKey: ['music', 'playlists', id], queryFn: () => getPlaylist(id), enabled: !!id });
+  return useQuery({
+    queryKey: ['music', 'playlists', id],
+    queryFn: () => getPlaylist(id),
+    enabled: !!id,
+  });
 }
 
 export function usePlaylistSongs(id: string) {
@@ -34,7 +38,8 @@ export function usePlaylistMutations() {
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['music', 'playlists'] });
 
   const create = useMutation({
-    mutationFn: async ({ name, colorToken }: { name: string; colorToken: string | null }) => createPlaylist(name, colorToken),
+    mutationFn: async ({ name, colorToken }: { name: string; colorToken: string | null }) =>
+      createPlaylist(name, colorToken),
     onSuccess: invalidate,
   });
 
@@ -49,18 +54,25 @@ export function usePlaylistMutations() {
   });
 
   const addSong = useMutation({
-    mutationFn: async ({ playlistId, songId }: { playlistId: string; songId: string }) => addSongToPlaylist(playlistId, songId),
+    mutationFn: async ({ playlistId, songId }: { playlistId: string; songId: string }) =>
+      addSongToPlaylist(playlistId, songId),
     onSuccess: invalidate,
   });
 
   const removeSong = useMutation({
-    mutationFn: async ({ playlistId, songId }: { playlistId: string; songId: string }) => removeSongFromPlaylist(playlistId, songId),
+    mutationFn: async ({ playlistId, songId }: { playlistId: string; songId: string }) =>
+      removeSongFromPlaylist(playlistId, songId),
     onSuccess: invalidate,
   });
 
   const reorderSongs = useMutation({
-    mutationFn: async ({ playlistId, orderedSongIds }: { playlistId: string; orderedSongIds: string[] }) =>
-      reorderPlaylistSongs(playlistId, orderedSongIds),
+    mutationFn: async ({
+      playlistId,
+      orderedSongIds,
+    }: {
+      playlistId: string;
+      orderedSongIds: string[];
+    }) => reorderPlaylistSongs(playlistId, orderedSongIds),
     onSuccess: invalidate,
   });
 

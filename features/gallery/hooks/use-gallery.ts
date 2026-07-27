@@ -34,7 +34,10 @@ export function usePhotosByAlbum(albumId: string | undefined) {
 }
 
 export function useFavoritePhotos() {
-  return useQuery({ queryKey: ['gallery', 'photos', 'favorites'], queryFn: async () => listFavorites() });
+  return useQuery({
+    queryKey: ['gallery', 'photos', 'favorites'],
+    queryFn: async () => listFavorites(),
+  });
 }
 
 export function usePhoto(id: string | undefined) {

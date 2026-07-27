@@ -20,12 +20,26 @@ function seededHeights(seed: string): number[] {
   for (let i = 0; i < BAR_COUNT; i++) {
     h ^= seed.charCodeAt(i % Math.max(1, seed.length)) + i * 31;
     h = Math.imul(h, 16777619) >>> 0;
-    out.push(0.35 + (h % 1000) / 1000 * 0.65);
+    out.push(0.35 + ((h % 1000) / 1000) * 0.65);
   }
   return out;
 }
 
-function Bar({ maxH, ratio, filled, color, playing, index }: { maxH: number; ratio: number; filled: boolean; color: string; playing: boolean; index: number }) {
+function Bar({
+  maxH,
+  ratio,
+  filled,
+  color,
+  playing,
+  index,
+}: {
+  maxH: number;
+  ratio: number;
+  filled: boolean;
+  color: string;
+  playing: boolean;
+  index: number;
+}) {
   const base = Math.max(3, maxH * ratio);
   const h = useSharedValue(base);
 
@@ -47,7 +61,10 @@ function Bar({ maxH, ratio, filled, color, playing, index }: { maxH: number; rat
 
   return (
     <Animated.View
-      style={[{ width: barW, borderRadius: barW, backgroundColor: color, opacity: filled ? 1 : 0.28 }, style]}
+      style={[
+        { width: barW, borderRadius: barW, backgroundColor: color, opacity: filled ? 1 : 0.28 },
+        style,
+      ]}
     />
   );
 }
@@ -103,17 +120,45 @@ export function WaveformScrubber({ seed, progress, playing, color, height = 56, 
 
   return (
     <GestureDetector gesture={pan}>
-      <View style={{ height, justifyContent: 'center' }} onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', height }}>
+      <View
+        style={{ height, justifyContent: 'center' }}
+        onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
+      >
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            height,
+          }}
+        >
           {width > 0 &&
             heights.map((ratio, i) => (
-              <Bar key={i} maxH={height} ratio={ratio} filled={i <= filledCount} color={color} playing={playing} index={i} />
+              <Bar
+                key={i}
+                maxH={height}
+                ratio={ratio}
+                filled={i <= filledCount}
+                color={color}
+                playing={playing}
+                index={i}
+              />
             ))}
         </View>
         {/* Drag playhead */}
         <Animated.View
           pointerEvents="none"
-          style={[{ position: 'absolute', top: 0, bottom: 0, width: 2, borderRadius: 1, backgroundColor: '#ffffff' }, headStyle]}
+          style={[
+            {
+              position: 'absolute',
+              top: 0,
+              bottom: 0,
+              width: 2,
+              borderRadius: 1,
+              backgroundColor: '#ffffff',
+            },
+            headStyle,
+          ]}
         />
       </View>
     </GestureDetector>

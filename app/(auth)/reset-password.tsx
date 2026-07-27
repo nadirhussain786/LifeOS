@@ -13,7 +13,9 @@ import { supabase } from '@/lib/supabase';
 /** Pulls the recovery tokens out of a Supabase reset link (they arrive in the
  * URL hash fragment, e.g. lifeos://reset-password#access_token=...&type=recovery). */
 function parseRecoveryTokens(url: string): { accessToken: string; refreshToken: string } | null {
-  const fragment = url.includes('#') ? url.slice(url.indexOf('#') + 1) : url.slice(url.indexOf('?') + 1);
+  const fragment = url.includes('#')
+    ? url.slice(url.indexOf('#') + 1)
+    : url.slice(url.indexOf('?') + 1);
   const params = new URLSearchParams(fragment);
   const accessToken = params.get('access_token');
   const refreshToken = params.get('refresh_token');
@@ -79,12 +81,20 @@ export default function ResetPasswordScreen() {
       setError(result.error);
       return;
     }
-    Alert.alert('Password updated', 'You’re all set.', [{ text: 'Continue', onPress: () => router.replace('/(tabs)') }]);
+    Alert.alert('Password updated', 'You’re all set.', [
+      { text: 'Continue', onPress: () => router.replace('/(tabs)') },
+    ]);
   };
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1 bg-background">
-      <ScrollView contentContainerClassName="flex-grow justify-center gap-6 px-6 py-10" keyboardShouldPersistTaps="handled">
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      className="flex-1 bg-background"
+    >
+      <ScrollView
+        contentContainerClassName="flex-grow justify-center gap-6 px-6 py-10"
+        keyboardShouldPersistTaps="handled"
+      >
         <View className="gap-2">
           <Text variant="heading">Set a new password</Text>
           <Text variant="muted">Choose a new password for your account.</Text>
@@ -97,18 +107,44 @@ export default function ResetPasswordScreen() {
             <Text>
               This reset link is invalid or has expired. Request a new one from the sign-in screen.
             </Text>
-            <Button label="Back to sign in" variant="accent" size="lg" onPress={() => router.replace('/(auth)/login')} />
+            <Button
+              label="Back to sign in"
+              variant="accent"
+              size="lg"
+              onPress={() => router.replace('/(auth)/login')}
+            />
           </View>
         ) : (
           <View className="gap-4">
-            <AuthField label="New password" value={password} onChangeText={setPassword} placeholder="At least 6 characters" secure autoComplete="new-password" autoFocus={splashComplete} />
-            <AuthField label="Confirm password" value={confirm} onChangeText={setConfirm} placeholder="Re-enter your password" secure autoComplete="new-password" />
+            <AuthField
+              label="New password"
+              value={password}
+              onChangeText={setPassword}
+              placeholder="At least 6 characters"
+              secure
+              autoComplete="new-password"
+              autoFocus={splashComplete}
+            />
+            <AuthField
+              label="Confirm password"
+              value={confirm}
+              onChangeText={setConfirm}
+              placeholder="Re-enter your password"
+              secure
+              autoComplete="new-password"
+            />
             {error && (
               <Text variant="caption" className="text-destructive">
                 {error}
               </Text>
             )}
-            <Button label={busy ? 'Updating…' : 'Update password'} variant="accent" size="lg" disabled={busy} onPress={handleUpdate} />
+            <Button
+              label={busy ? 'Updating…' : 'Update password'}
+              variant="accent"
+              size="lg"
+              disabled={busy}
+              onPress={handleUpdate}
+            />
           </View>
         )}
       </ScrollView>

@@ -16,7 +16,13 @@ const OPTIONS: { value: HabitType; label: string; icon: typeof Hash }[] = [
   { value: 'negative', label: 'Avoid', icon: Ban },
 ];
 
-export function HabitTypePicker({ value, onChange }: { value: HabitType; onChange: (value: HabitType) => void }) {
+export function HabitTypePicker({
+  value,
+  onChange,
+}: {
+  value: HabitType;
+  onChange: (value: HabitType) => void;
+}) {
   const scheme = useColorScheme() ?? 'light';
 
   return (
@@ -37,11 +43,16 @@ export function HabitTypePicker({ value, onChange }: { value: HabitType; onChang
               backgroundColor: selected ? colors[scheme].accent : 'transparent',
             }}
           >
-            <Icon size={14} color={selected ? colors[scheme].accentForeground : colors[scheme].mutedForeground} />
+            <Icon
+              size={14}
+              color={selected ? colors[scheme].accentForeground : colors[scheme].mutedForeground}
+            />
             <Text
               variant="caption"
               className="font-sora-medium"
-              style={{ color: selected ? colors[scheme].accentForeground : colors[scheme].mutedForeground }}
+              style={{
+                color: selected ? colors[scheme].accentForeground : colors[scheme].mutedForeground,
+              }}
             >
               {option.label}
             </Text>

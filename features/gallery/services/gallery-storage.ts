@@ -52,7 +52,10 @@ function extensionOf(uri: string, fallback: string): string {
 async function makeVideoThumbnail(videoUri: string, directory: Directory): Promise<string | null> {
   try {
     const { uri } = await VideoThumbnails.getThumbnailAsync(videoUri, { time: 0, quality: 0.7 });
-    const destination = new File(directory, `thumb-${Date.now()}-${Math.round(Math.random() * 1e6)}.jpg`);
+    const destination = new File(
+      directory,
+      `thumb-${Date.now()}-${Math.round(Math.random() * 1e6)}.jpg`,
+    );
     new File(uri).copy(destination);
     return destination.uri;
   } catch {
@@ -60,14 +63,20 @@ async function makeVideoThumbnail(videoUri: string, directory: Directory): Promi
   }
 }
 
-async function persistAsset(asset: ImagePicker.ImagePickerAsset, directory: Directory): Promise<PickedMedia | 'oversize' | null> {
+async function persistAsset(
+  asset: ImagePicker.ImagePickerAsset,
+  directory: Directory,
+): Promise<PickedMedia | 'oversize' | null> {
   const isVideo = asset.type === 'video';
 
   // Reject oversized videos before doing the (potentially large) copy.
   if (isVideo && asset.fileSize != null && asset.fileSize > MAX_VIDEO_BYTES) return 'oversize';
 
   const extension = extensionOf(asset.uri, isVideo ? 'mp4' : 'jpg');
-  const destination = new File(directory, `${Date.now()}-${Math.round(Math.random() * 1e6)}.${extension}`);
+  const destination = new File(
+    directory,
+    `${Date.now()}-${Math.round(Math.random() * 1e6)}.${extension}`,
+  );
   try {
     new File(asset.uri).copy(destination);
   } catch {
@@ -106,7 +115,10 @@ async function persistAsset(asset: ImagePicker.ImagePickerAsset, directory: Dire
  * exceeding {@link MAX_VIDEO_BYTES}. Returns null when permission is denied so
  * callers can surface a prompt.
  */
-export async function pickMedia(opts: { source: MediaSource; mediaTypes: MediaKind[] }): Promise<PickResult | null> {
+export async function pickMedia(opts: {
+  source: MediaSource;
+  mediaTypes: MediaKind[];
+}): Promise<PickResult | null> {
   const { source, mediaTypes } = opts;
 
   if (source === 'camera') {
@@ -139,9 +151,14 @@ export async function pickMedia(opts: { source: MediaSource; mediaTypes: MediaKi
 /** Copies an in-app captured image (e.g. a rendered before/after card from
  * react-native-view-shot) into permanent gallery storage and returns its size.
  * Used by "Save to feed" so a comparison becomes a real, shareable feed post. */
-export async function saveCapturedImage(tempUri: string): Promise<{ uri: string; width: number | null; height: number | null }> {
+export async function saveCapturedImage(
+  tempUri: string,
+): Promise<{ uri: string; width: number | null; height: number | null }> {
   const directory = getGalleryDirectory();
-  const destination = new File(directory, `compare-${Date.now()}-${Math.round(Math.random() * 1e6)}.png`);
+  const destination = new File(
+    directory,
+    `compare-${Date.now()}-${Math.round(Math.random() * 1e6)}.png`,
+  );
   new File(tempUri).copy(destination);
   const size = await imageSize(destination.uri);
   return { uri: destination.uri, ...size };

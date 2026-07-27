@@ -24,15 +24,27 @@ export function GoalsStatsHeader({ activeCount, completedCount, avgProgress, nex
   const rows = [
     { icon: Target, text: `${activeCount} active ${activeCount === 1 ? 'goal' : 'goals'}` },
     { icon: CheckCircle2, text: `${completedCount} completed` },
-    { icon: CalendarClock, text: nextDue ? `Next due ${format(nextDue, 'MMM d')}` : 'No deadlines set' },
+    {
+      icon: CalendarClock,
+      text: nextDue ? `Next due ${format(nextDue, 'MMM d')}` : 'No deadlines set',
+    },
   ];
 
   return (
     <HeroCard tint={moduleTint('goals', scheme)}>
       <View className="flex-row items-center gap-5">
-        <ProgressRing progress={avgProgress} size={104} strokeWidth={10} color={WHITE} trackColor={alpha(WHITE, 0.25)}>
+        <ProgressRing
+          progress={avgProgress}
+          size={104}
+          strokeWidth={10}
+          color={WHITE}
+          trackColor={alpha(WHITE, 0.25)}
+        >
           <View className="items-center">
-            <Text className="font-sora-extrabold text-xl" style={{ color: WHITE, fontVariant: ['tabular-nums'] }}>
+            <Text
+              className="font-sora-extrabold text-xl"
+              style={{ color: WHITE, fontVariant: ['tabular-nums'] }}
+            >
               {formatProgressPercent(avgProgress)}
             </Text>
             <Text style={{ color: alpha(WHITE, 0.8), fontSize: 11 }}>avg</Text>

@@ -1,12 +1,15 @@
+import { FlashList } from '@shopify/flash-list';
 import { format, isToday, isYesterday, parseISO } from 'date-fns';
 import { useRouter } from 'expo-router';
 import { Receipt, Search } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
-import { ScrollView, TextInput, View } from 'react-native';
+import { TextInput, View } from 'react-native';
 
 import { EmptyState } from '@/components/ui/empty-state';
+import { QueryError } from '@/components/ui/query-error';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Segmented } from '@/components/ui/segmented';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
 import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
@@ -38,7 +41,7 @@ export default function TransactionsScreen() {
   const [query, setQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
 
-  const { data: transactions = [] } = useTransactions();
+  const { data: transactions = [], isLoading, isError, refetch } = useTransactions();
   const { data: settings } = useBudgetSettings();
   const currency = settings?.currency ?? '$';
 
@@ -61,6 +64,24 @@ export default function TransactionsScreen() {
     return [...byDay.entries()].sort((a, b) => b[0].localeCompare(a[0]));
   }, [transactions, filter, query]);
 
+  // Flatten day groups into a single list of header/row items so the whole
+  // (unbounded) history can render in a virtualized FlashList instead of a
+  // ScrollView that mounts every row at once.
+  const items = useMemo(() => {
+    const out: (
+      { type: 'header'; logDate: string; dayNet: number } | { type: 'row'; tx: BudgetTransaction }
+    )[] = [];
+    for (const [logDate, dayTx] of groups) {
+      const dayNet = dayTx.reduce(
+        (sum, t) => sum + (t.type === 'income' ? t.amountCents : -t.amountCents),
+        0,
+      );
+      out.push({ type: 'header', logDate, dayNet });
+      for (const t of dayTx) out.push({ type: 'row', tx: t });
+    }
+    return out;
+  }, [groups]);
+
   return (
     <View className="flex-1 bg-background">
       <ScreenHeader
@@ -80,6 +101,7 @@ export default function TransactionsScreen() {
               onChangeText={setQuery}
               placeholder="Search notes & categories"
               placeholderTextColor={colors[scheme].mutedForeground}
+              accessibilityLabel="Search transactions"
               autoFocus
               className="flex-1 text-foreground"
             />
@@ -87,37 +109,60 @@ export default function TransactionsScreen() {
         )}
       </View>
 
-      {groups.length === 0 ? (
+      {isError ? (
+        <QueryError onRetry={() => refetch()} message="Couldn't load your transactions." />
+      ) : isLoading ? (
+        <View className="gap-2 px-4 pt-1">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className="h-16 rounded-2xl" />
+          ))}
+        </View>
+      ) : groups.length === 0 ? (
         <EmptyState
           icon={Receipt}
           title="Nothing here"
-          description={query || filter !== 'all' ? 'No transactions match this filter.' : 'Your transactions will appear here.'}
+          description={
+            query || filter !== 'all'
+              ? 'No transactions match this filter.'
+              : 'Your transactions will appear here.'
+          }
           tint="#22c55e"
         />
       ) : (
-        <ScrollView contentContainerClassName="gap-4 px-4 pb-10" showsVerticalScrollIndicator={false}>
-          {groups.map(([logDate, dayTx]) => {
-            const dayNet = dayTx.reduce((sum, t) => sum + (t.type === 'income' ? t.amountCents : -t.amountCents), 0);
-            return (
-              <View key={logDate} className="gap-2">
-                <View className="flex-row items-center justify-between px-1">
-                  <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-                    {dayLabel(logDate)}
-                  </Text>
-                  <Text variant="caption" style={{ color: dayNet >= 0 ? '#16a34a' : '#dc2626' }} className="font-sora-semibold">
-                    {dayNet >= 0 ? '+' : ''}
-                    {formatMoney(dayNet, currency)}
-                  </Text>
-                </View>
-                <View className="gap-2.5">
-                  {dayTx.map((t) => (
-                    <TransactionRow key={t.id} transaction={t} currency={currency} onPress={(tx) => router.push(`/budget/transaction?id=${tx.id}`)} />
-                  ))}
-                </View>
+        <FlashList
+          data={items}
+          keyExtractor={(item) => (item.type === 'header' ? `h-${item.logDate}` : item.tx.id)}
+          getItemType={(item) => item.type}
+          renderItem={({ item }) =>
+            item.type === 'header' ? (
+              <View className="flex-row items-center justify-between px-5 pb-1 pt-3">
+                <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
+                  {dayLabel(item.logDate)}
+                </Text>
+                <Text
+                  variant="caption"
+                  style={{
+                    color: item.dayNet >= 0 ? colors[scheme].success : colors[scheme].destructive,
+                  }}
+                  className="font-sora-semibold"
+                >
+                  {item.dayNet >= 0 ? '+' : ''}
+                  {formatMoney(item.dayNet, currency)}
+                </Text>
               </View>
-            );
-          })}
-        </ScrollView>
+            ) : (
+              <View className="px-4 pb-2.5">
+                <TransactionRow
+                  transaction={item.tx}
+                  currency={currency}
+                  onPress={(tx) => router.push(`/budget/transaction?id=${tx.id}`)}
+                />
+              </View>
+            )
+          }
+          contentContainerStyle={{ paddingBottom: 40 }}
+          showsVerticalScrollIndicator={false}
+        />
       )}
     </View>
   );

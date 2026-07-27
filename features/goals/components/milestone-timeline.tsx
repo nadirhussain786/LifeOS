@@ -58,7 +58,12 @@ export function MilestoneTimeline({ milestones, tint, onToggle, onAdd, onRemove 
               >
                 {milestone.isCompleted && <Check size={14} color="#ffffff" strokeWidth={3} />}
               </Pressable>
-              {!isLast && <View className="my-0.5 w-0.5 flex-1" style={{ backgroundColor: colors[scheme].border }} />}
+              {!isLast && (
+                <View
+                  className="my-0.5 w-0.5 flex-1"
+                  style={{ backgroundColor: colors[scheme].border }}
+                />
+              )}
             </View>
 
             <Pressable
@@ -66,7 +71,13 @@ export function MilestoneTimeline({ milestones, tint, onToggle, onAdd, onRemove 
               className="flex-1 pb-4"
               accessibilityHint="Long-press to delete"
             >
-              <Text className={milestone.isCompleted ? 'font-sora-medium text-muted-foreground line-through' : 'font-sora-medium'}>
+              <Text
+                className={
+                  milestone.isCompleted
+                    ? 'font-sora-medium text-muted-foreground line-through'
+                    : 'font-sora-medium'
+                }
+              >
                 {milestone.title}
               </Text>
               {milestone.isCompleted && milestone.completedAt && (
@@ -78,7 +89,10 @@ export function MilestoneTimeline({ milestones, tint, onToggle, onAdd, onRemove 
       })}
 
       <View className="flex-row items-center gap-3">
-        <View className="h-6 w-6 items-center justify-center rounded-full border-2 border-dashed" style={{ borderColor: colors[scheme].border }}>
+        <View
+          className="h-6 w-6 items-center justify-center rounded-full border-2 border-dashed"
+          style={{ borderColor: colors[scheme].border }}
+        >
           <Plus size={13} color={colors[scheme].mutedForeground} />
         </View>
         <TextInput

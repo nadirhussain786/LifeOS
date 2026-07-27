@@ -36,23 +36,38 @@ export default function SignUpScreen() {
     }
     // If the project requires email confirmation, there's no session yet.
     if (!useAuthStore.getState().session) {
-      Alert.alert('Check your inbox', 'We sent you a confirmation link. Confirm your email, then sign in.', [
-        { text: 'OK', onPress: () => router.replace('/(auth)/login') },
-      ]);
+      Alert.alert(
+        'Check your inbox',
+        'We sent you a confirmation link. Confirm your email, then sign in.',
+        [{ text: 'OK', onPress: () => router.replace('/(auth)/login') }],
+      );
     }
     // Otherwise the auth gate redirects into the app automatically.
   };
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1 bg-background">
-      <ScrollView contentContainerClassName="flex-grow justify-center gap-6 px-6 py-10" keyboardShouldPersistTaps="handled">
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      className="flex-1 bg-background"
+    >
+      <ScrollView
+        contentContainerClassName="flex-grow justify-center gap-6 px-6 py-10"
+        keyboardShouldPersistTaps="handled"
+      >
         <View className="gap-2">
           <Text variant="heading">Create your account</Text>
           <Text variant="muted">Back up and sync your LifeOS across devices.</Text>
         </View>
 
         <View className="gap-4">
-          <AuthField label="Name" value={name} onChangeText={setName} placeholder="What should we call you?" autoCapitalize="words" autoComplete="name" />
+          <AuthField
+            label="Name"
+            value={name}
+            onChangeText={setName}
+            placeholder="What should we call you?"
+            autoCapitalize="words"
+            autoComplete="name"
+          />
           <AuthField
             label="Email"
             value={email}
@@ -61,7 +76,14 @@ export default function SignUpScreen() {
             keyboardType="email-address"
             autoComplete="email"
           />
-          <AuthField label="Password" value={password} onChangeText={setPassword} placeholder="At least 6 characters" secure autoComplete="new-password" />
+          <AuthField
+            label="Password"
+            value={password}
+            onChangeText={setPassword}
+            placeholder="At least 6 characters"
+            secure
+            autoComplete="new-password"
+          />
 
           {error && (
             <Text variant="caption" className="text-destructive">
@@ -69,7 +91,13 @@ export default function SignUpScreen() {
             </Text>
           )}
 
-          <Button label={busy ? 'Creating account…' : 'Create account'} variant="accent" size="lg" disabled={busy} onPress={handleSignUp} />
+          <Button
+            label={busy ? 'Creating account…' : 'Create account'}
+            variant="accent"
+            size="lg"
+            disabled={busy}
+            onPress={handleSignUp}
+          />
         </View>
 
         <View className="flex-row items-center justify-center gap-1">

@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { EmptyState } from '@/components/ui/empty-state';
+import { QueryError } from '@/components/ui/query-error';
 import { Fab } from '@/components/ui/fab';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Segmented } from '@/components/ui/segmented';
@@ -41,7 +42,7 @@ export default function GoalsScreen() {
   const scheme = useColorScheme() ?? 'light';
   const [showSearch, setShowSearch] = useState(false);
 
-  const { data: goals = [], isLoading } = useGoals();
+  const { data: goals = [], isLoading, isError, refetch } = useGoals();
   const { data: stats } = useGoalStats();
   const {
     searchQuery,
@@ -102,7 +103,9 @@ export default function GoalsScreen() {
         ]}
       />
 
-      {isLoading ? (
+      {isError ? (
+        <QueryError onRetry={() => refetch()} />
+      ) : isLoading ? (
         <View className="gap-3 px-5 pt-2">
           <Skeleton className="h-28 w-full rounded-2xl" />
           <Skeleton className="h-24 w-full rounded-2xl" />
@@ -131,7 +134,9 @@ export default function GoalsScreen() {
               />
             </View>
           }
-          renderItem={({ item }) => <GoalCard goal={item} onPress={(goal) => router.push(`/goals/${goal.id}`)} />}
+          renderItem={({ item }) => (
+            <GoalCard goal={item} onPress={(goal) => router.push(`/goals/${goal.id}`)} />
+          )}
         />
       )}
 
@@ -150,7 +155,11 @@ function CategoryChips({
 }) {
   const items = [{ id: 'all', label: 'All', tint: '#737373' }, ...GOAL_CATEGORIES];
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="items-center gap-2">
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerClassName="items-center gap-2"
+    >
       {items.map((item) => {
         const selected = categoryFilter === item.id;
         return (
@@ -160,7 +169,9 @@ function CategoryChips({
             style={selected ? { backgroundColor: item.tint, borderColor: item.tint } : undefined}
             className={cn('rounded-full border px-3 py-1.5', !selected && 'border-border')}
           >
-            <Text className={selected ? 'font-sora-medium text-white' : 'text-muted-foreground'}>{item.label}</Text>
+            <Text className={selected ? 'font-sora-medium text-white' : 'text-muted-foreground'}>
+              {item.label}
+            </Text>
           </Pressable>
         );
       })}

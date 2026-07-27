@@ -36,8 +36,14 @@ export default function LoginScreen() {
   };
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1 bg-background">
-      <ScrollView contentContainerClassName="flex-grow justify-center gap-6 px-6 py-10" keyboardShouldPersistTaps="handled">
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      className="flex-1 bg-background"
+    >
+      <ScrollView
+        contentContainerClassName="flex-grow justify-center gap-6 px-6 py-10"
+        keyboardShouldPersistTaps="handled"
+      >
         <View className="gap-2">
           <Text variant="heading">Welcome back</Text>
           <Text variant="muted">Sign in to sync your LifeOS across devices.</Text>
@@ -45,7 +51,8 @@ export default function LoginScreen() {
 
         {!isSupabaseConfigured && (
           <Text variant="caption" className="text-warning">
-            Cloud sync isn&apos;t set up on this build yet. You can continue without an account — everything works offline.
+            Cloud sync isn&apos;t set up on this build yet. You can continue without an account —
+            everything works offline.
           </Text>
         )}
 
@@ -59,7 +66,14 @@ export default function LoginScreen() {
             autoComplete="email"
             autoFocus={splashComplete}
           />
-          <AuthField label="Password" value={password} onChangeText={setPassword} placeholder="Your password" secure autoComplete="password" />
+          <AuthField
+            label="Password"
+            value={password}
+            onChangeText={setPassword}
+            placeholder="Your password"
+            secure
+            autoComplete="password"
+          />
 
           <Link href="/(auth)/forgot-password" asChild>
             <Pressable hitSlop={8} className="self-end">
@@ -75,7 +89,13 @@ export default function LoginScreen() {
             </Text>
           )}
 
-          <Button label={busy ? 'Signing in…' : 'Sign in'} variant="accent" size="lg" disabled={busy} onPress={handleSignIn} />
+          <Button
+            label={busy ? 'Signing in…' : 'Sign in'}
+            variant="accent"
+            size="lg"
+            disabled={busy}
+            onPress={handleSignIn}
+          />
         </View>
 
         <View className="flex-row items-center justify-center gap-1">

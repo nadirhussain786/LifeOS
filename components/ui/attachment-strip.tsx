@@ -69,7 +69,10 @@ export function AttachmentStrip({ attachments, onAddImage, onRemove }: Props) {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) return;
 
-    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.7 });
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      quality: 0.7,
+    });
     if (!result.canceled && result.assets[0]) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       onAddImage(result.assets[0].uri);
@@ -78,11 +81,18 @@ export function AttachmentStrip({ attachments, onAddImage, onRemove }: Props) {
 
   return (
     <>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="items-center gap-3">
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerClassName="items-center gap-3"
+      >
         {attachments.map((attachment) => (
           <View key={attachment.id} className="relative">
             {attachment.kind === 'image' ? (
-              <Pressable onPress={() => setViewerUri(attachment.uri)} accessibilityLabel="View photo">
+              <Pressable
+                onPress={() => setViewerUri(attachment.uri)}
+                accessibilityLabel="View photo"
+              >
                 <Image source={{ uri: attachment.uri }} className="h-20 w-20 rounded-xl" />
               </Pressable>
             ) : (
@@ -108,7 +118,12 @@ export function AttachmentStrip({ attachments, onAddImage, onRemove }: Props) {
         </Pressable>
       </ScrollView>
 
-      <Modal visible={!!viewerUri} transparent animationType="fade" onRequestClose={() => setViewerUri(null)}>
+      <Modal
+        visible={!!viewerUri}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setViewerUri(null)}
+      >
         <View className="flex-1 bg-black/95">
           <Pressable
             onPress={() => setViewerUri(null)}
@@ -119,8 +134,13 @@ export function AttachmentStrip({ attachments, onAddImage, onRemove }: Props) {
           >
             <X size={20} color="#ffffff" />
           </Pressable>
-          <Pressable className="flex-1 items-center justify-center" onPress={() => setViewerUri(null)}>
-            {viewerUri && <Image source={{ uri: viewerUri }} className="h-full w-full" resizeMode="contain" />}
+          <Pressable
+            className="flex-1 items-center justify-center"
+            onPress={() => setViewerUri(null)}
+          >
+            {viewerUri && (
+              <Image source={{ uri: viewerUri }} className="h-full w-full" resizeMode="contain" />
+            )}
           </Pressable>
         </View>
       </Modal>

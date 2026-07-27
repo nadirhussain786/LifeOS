@@ -8,7 +8,11 @@ import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
 import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
-import { DEFAULT_CURRENCY_CODE, currencySymbol, findCurrency } from '@/features/budget/config/currencies';
+import {
+  DEFAULT_CURRENCY_CODE,
+  currencySymbol,
+  findCurrency,
+} from '@/features/budget/config/currencies';
 import { parseAmountToCents } from '@/features/budget/services/money';
 import { useBudgetMutations } from '@/features/budget/hooks/use-budget-mutations';
 import { useBudgetSettings } from '@/features/budget/hooks/use-budget';
@@ -29,7 +33,9 @@ export default function BudgetSettingsScreen() {
   const [seeded, setSeeded] = useState(false);
 
   if (settings && !seeded) {
-    setMonthlyBudget(settings.monthlyBudgetCents ? (settings.monthlyBudgetCents / 100).toString() : '');
+    setMonthlyBudget(
+      settings.monthlyBudgetCents ? (settings.monthlyBudgetCents / 100).toString() : '',
+    );
     setSeeded(true);
   }
 
@@ -43,7 +49,10 @@ export default function BudgetSettingsScreen() {
     <View className="flex-1 bg-background">
       <ScreenHeader title="Budget Settings" eyebrow="Budget" tint={moduleTint('budget', scheme)} />
 
-      <ScrollView contentContainerClassName="gap-5 px-5 pt-3 pb-10" keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerClassName="gap-5 px-5 pt-3 pb-10"
+        keyboardShouldPersistTaps="handled"
+      >
         <View className="gap-2.5">
           <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
             Currency
@@ -72,6 +81,7 @@ export default function BudgetSettingsScreen() {
             <TextInput
               value={monthlyBudget}
               onChangeText={setMonthlyBudget}
+              accessibilityLabel="Monthly budget"
               placeholder="0"
               keyboardType="decimal-pad"
               placeholderTextColor={colors[scheme].mutedForeground}

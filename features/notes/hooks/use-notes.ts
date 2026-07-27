@@ -1,6 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { getNoteCategoryById, listArchivedNotes, listNoteCategories, listNotes, listTags } from '@/features/notes/services/notes-repository';
+import {
+  getNoteCategoryById,
+  listArchivedNotes,
+  listNoteCategories,
+  listNotes,
+  listTags,
+} from '@/features/notes/services/notes-repository';
 import { useNotesFilterStore } from '@/features/notes/store/notes-filter-store';
 
 export function useNotes() {
@@ -11,7 +17,9 @@ export function useNotes() {
     queryFn: async () => listNotes(),
     select: (notes) =>
       searchQuery.trim()
-        ? notes.filter((note) => note.title.toLowerCase().includes(searchQuery.trim().toLowerCase()))
+        ? notes.filter((note) =>
+            note.title.toLowerCase().includes(searchQuery.trim().toLowerCase()),
+          )
         : notes,
   });
 }

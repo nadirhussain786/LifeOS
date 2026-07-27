@@ -9,7 +9,10 @@ import {
   upsertEntry,
   upsertReflection,
 } from '@/features/journal/services/journal-repository';
-import type { JournalAttachmentKind, UpsertJournalEntryInput } from '@/features/journal/types/journal.types';
+import type {
+  JournalAttachmentKind,
+  UpsertJournalEntryInput,
+} from '@/features/journal/types/journal.types';
 
 export function useJournalMutations() {
   const queryClient = useQueryClient();
@@ -37,8 +40,15 @@ export function useJournalMutations() {
   });
 
   const answerPrompt = useMutation({
-    mutationFn: async ({ entryId, promptId, answerText }: { entryId: string; promptId: string; answerText: string }) =>
-      upsertReflection(entryId, promptId, answerText),
+    mutationFn: async ({
+      entryId,
+      promptId,
+      answerText,
+    }: {
+      entryId: string;
+      promptId: string;
+      answerText: string;
+    }) => upsertReflection(entryId, promptId, answerText),
     onSuccess: (_data, variables) =>
       queryClient.invalidateQueries({ queryKey: ['journal', 'reflections', variables.entryId] }),
   });

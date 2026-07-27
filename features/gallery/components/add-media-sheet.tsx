@@ -4,8 +4,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
-import { PermissionDeniedError, useGalleryMutations } from '@/features/gallery/hooks/use-gallery-mutations';
-import { MAX_VIDEO_MB, type MediaKind, type MediaSource } from '@/features/gallery/services/gallery-storage';
+import {
+  PermissionDeniedError,
+  useGalleryMutations,
+} from '@/features/gallery/hooks/use-gallery-mutations';
+import {
+  MAX_VIDEO_MB,
+  type MediaKind,
+  type MediaSource,
+} from '@/features/gallery/services/gallery-storage';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { alpha } from '@/lib/color';
 
@@ -16,12 +23,44 @@ type Props = {
   albumId: string | null;
 };
 
-type Option = { key: string; label: string; hint: string; icon: LucideIcon; tint: string; source: MediaSource; mediaTypes: MediaKind[] };
+type Option = {
+  key: string;
+  label: string;
+  hint: string;
+  icon: LucideIcon;
+  tint: string;
+  source: MediaSource;
+  mediaTypes: MediaKind[];
+};
 
 const OPTIONS: Option[] = [
-  { key: 'photo', label: 'Take Photo', hint: 'Capture a new progress shot', icon: Camera, tint: '#0ea5e9', source: 'camera', mediaTypes: ['images'] },
-  { key: 'video', label: 'Record Video', hint: `Up to 60s · ${MAX_VIDEO_MB}MB`, icon: Video, tint: '#8b5cf6', source: 'camera', mediaTypes: ['videos'] },
-  { key: 'library', label: 'Choose from Library', hint: 'Photos & videos', icon: ImagePlus, tint: '#ec4899', source: 'library', mediaTypes: ['images', 'videos'] },
+  {
+    key: 'photo',
+    label: 'Take Photo',
+    hint: 'Capture a new progress shot',
+    icon: Camera,
+    tint: '#0ea5e9',
+    source: 'camera',
+    mediaTypes: ['images'],
+  },
+  {
+    key: 'video',
+    label: 'Record Video',
+    hint: `Up to 60s · ${MAX_VIDEO_MB}MB`,
+    icon: Video,
+    tint: '#8b5cf6',
+    source: 'camera',
+    mediaTypes: ['videos'],
+  },
+  {
+    key: 'library',
+    label: 'Choose from Library',
+    hint: 'Photos & videos',
+    icon: ImagePlus,
+    tint: '#ec4899',
+    source: 'library',
+    mediaTypes: ['images', 'videos'],
+  },
 ];
 
 /** Bottom-sheet menu for adding progress media — three big source options
@@ -59,18 +98,35 @@ export function AddMediaSheet({ visible, onClose, albumId }: Props) {
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
-      <Pressable className="flex-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} onPress={onClose}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}
+      statusBarTranslucent
+    >
+      <Pressable
+        className="flex-1"
+        style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+        onPress={onClose}
+      >
         <View className="flex-1 justify-end">
           <Pressable
             onPress={(e) => e.stopPropagation()}
             style={{ paddingBottom: insets.bottom + 12 }}
             className="gap-2 rounded-t-3xl bg-card px-5 pt-3"
           >
-            <View className="mb-1 h-1 w-10 self-center rounded-full" style={{ backgroundColor: colors[scheme].border }} />
+            <View
+              className="mb-1 h-1 w-10 self-center rounded-full"
+              style={{ backgroundColor: colors[scheme].border }}
+            />
             <View className="flex-row items-center justify-between pb-1">
               <Text variant="subheading">Add to your progress</Text>
-              <Pressable onPress={onClose} hitSlop={8} className="h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
+              <Pressable
+                onPress={onClose}
+                hitSlop={8}
+                className="h-8 w-8 items-center justify-center rounded-full border border-border bg-surface"
+              >
                 <X size={16} color={colors[scheme].foreground} />
               </Pressable>
             </View>
@@ -83,7 +139,10 @@ export function AddMediaSheet({ visible, onClose, albumId }: Props) {
                   onPress={() => run(option)}
                   className="flex-row items-center gap-3.5 rounded-2xl border border-border p-3.5"
                 >
-                  <View className="h-11 w-11 items-center justify-center rounded-xl" style={{ backgroundColor: alpha(option.tint, 0.14) }}>
+                  <View
+                    className="h-11 w-11 items-center justify-center rounded-xl"
+                    style={{ backgroundColor: alpha(option.tint, 0.14) }}
+                  >
                     <Icon size={21} color={option.tint} />
                   </View>
                   <View className="flex-1">

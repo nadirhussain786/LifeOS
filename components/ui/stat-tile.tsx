@@ -25,7 +25,10 @@ export function StatTile({ icon: Icon, value, label, tint, index = 0 }: Props) {
       entering={FadeInDown.delay(index * 60).duration(320)}
       className="flex-1 items-center gap-2 rounded-3xl border border-border bg-card py-4"
     >
-      <View className="h-9 w-9 items-center justify-center rounded-full" style={{ backgroundColor: alpha(tint, 0.15) }}>
+      <View
+        className="h-9 w-9 items-center justify-center rounded-full"
+        style={{ backgroundColor: alpha(tint, 0.15) }}
+      >
         <Icon size={17} color={tint} strokeWidth={2.2} />
       </View>
       <Text className="font-sora-extrabold text-lg text-foreground">{value}</Text>

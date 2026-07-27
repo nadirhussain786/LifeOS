@@ -1,13 +1,22 @@
 import { addDays, differenceInCalendarDays, getDay, parseISO, subDays } from 'date-fns';
 
 import { toDateKey } from '@/lib/date';
-import type { Habit, HabitLog, HabitSkip, HabitStreakSummary, HabitTodayStatus } from '@/features/habits/types/habit.types';
+import type {
+  Habit,
+  HabitLog,
+  HabitSkip,
+  HabitStreakSummary,
+  HabitTodayStatus,
+} from '@/features/habits/types/habit.types';
 
 export { toDateKey } from '@/lib/date';
 
 const MAX_STREAK_LOOKBACK_DAYS = 3650;
 
-type ScheduleHabit = Pick<Habit, 'scheduleType' | 'scheduleDays' | 'scheduleIntervalDays' | 'createdAt'>;
+type ScheduleHabit = Pick<
+  Habit,
+  'scheduleType' | 'scheduleDays' | 'scheduleIntervalDays' | 'createdAt'
+>;
 
 /**
  * Whether a habit is expected on a given day. 'weekly' | 'monthly' | 'flexible'
@@ -63,37 +72,57 @@ export function calculateHabitStreaks(
   const logsByDate = indexByDate(logs);
   const skipsByDate = indexByDate(skips);
 
+  // Current streak: walk back from today, stop at the first real miss. Today
+  // hasn't-happened-yet and excused skips are transparent (neither break nor
+  // extend). Counts logged days in the run ending at/just-before today.
   let currentStreak = 0;
-  let bestStreak = 0;
-  let runningStreak = 0;
-  let cursor = asOf;
-  let isToday = true;
-
-  for (let i = 0; i < MAX_STREAK_LOOKBACK_DAYS; i += 1) {
-    const dateKey = toDateKey(cursor);
-    const scheduled = isHabitScheduledOn(habit, dateKey);
-
-    if (scheduled) {
-      if (logsByDate.has(dateKey)) {
-        runningStreak += 1;
-        bestStreak = Math.max(bestStreak, runningStreak);
-      } else if (skipsByDate.has(dateKey)) {
-        // excused — doesn't break the streak, doesn't extend it either
-      } else if (isToday) {
-        // today just hasn't happened yet; don't treat as a miss
-      } else {
-        runningStreak = 0;
-        break;
+  {
+    let run = 0;
+    let cursor = asOf;
+    let isToday = true;
+    for (let i = 0; i < MAX_STREAK_LOOKBACK_DAYS; i += 1) {
+      const dateKey = toDateKey(cursor);
+      if (isHabitScheduledOn(habit, dateKey)) {
+        if (logsByDate.has(dateKey)) run += 1;
+        else if (skipsByDate.has(dateKey)) {
+          // excused
+        } else if (isToday) {
+          // pending — not a miss
+        } else break;
       }
+      isToday = false;
+      cursor = subDays(cursor, 1);
     }
+    currentStreak = run;
+  }
 
-    if (isToday) currentStreak = runningStreak;
-    isToday = false;
-    cursor = subDays(cursor, 1);
-
-    // Stop scanning once we're clearly past anything that could still matter:
-    // a run of 60 unscheduled/empty days beyond the habit's own history.
-    if (i > 60 && runningStreak === 0 && logs.length === 0) break;
+  // Best streak: full-history scan (no early break) from today back to the
+  // earliest log, so an older longer run is found even after a recent lapse.
+  let bestStreak = currentStreak;
+  {
+    let run = 0;
+    let cursor = asOf;
+    let isToday = true;
+    const earliestLog = logs.reduce(
+      (min, l) => Math.min(min, parseISO(l.logDate).getTime()),
+      asOf.getTime(),
+    );
+    for (let i = 0; i < MAX_STREAK_LOOKBACK_DAYS; i += 1) {
+      if (cursor.getTime() < earliestLog) break;
+      const dateKey = toDateKey(cursor);
+      if (isHabitScheduledOn(habit, dateKey)) {
+        if (logsByDate.has(dateKey)) {
+          run += 1;
+          bestStreak = Math.max(bestStreak, run);
+        } else if (skipsByDate.has(dateKey)) {
+          // excused
+        } else if (isToday) {
+          // pending
+        } else run = 0;
+      }
+      isToday = false;
+      cursor = subDays(cursor, 1);
+    }
   }
 
   const windowStart = subDays(asOf, 29);

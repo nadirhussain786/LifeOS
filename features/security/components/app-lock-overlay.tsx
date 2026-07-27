@@ -59,7 +59,13 @@ export function AppLockOverlay() {
             {tried ? 'Authentication needed to continue.' : `Unlock with ${label} to continue.`}
           </Text>
         </View>
-        <Button variant="accent" size="lg" label={`Unlock with ${label}`} onPress={tryUnlock} className="mt-2 px-8" />
+        <Button
+          variant="accent"
+          size="lg"
+          label={`Unlock with ${label}`}
+          onPress={tryUnlock}
+          className="mt-2 px-8"
+        />
       </View>
     </View>
   );

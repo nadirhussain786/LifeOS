@@ -52,13 +52,24 @@ export function AnimatedSplash({ onFinish }: { onFinish: () => void }) {
   }, [container, markOpacity, markScale, onFinish, wordOpacity, wordShift]);
 
   const containerStyle = useAnimatedStyle(() => ({ opacity: container.value }));
-  const markStyle = useAnimatedStyle(() => ({ opacity: markOpacity.value, transform: [{ scale: markScale.value }] }));
-  const wordStyle = useAnimatedStyle(() => ({ opacity: wordOpacity.value, transform: [{ translateY: wordShift.value }] }));
+  const markStyle = useAnimatedStyle(() => ({
+    opacity: markOpacity.value,
+    transform: [{ scale: markScale.value }],
+  }));
+  const wordStyle = useAnimatedStyle(() => ({
+    opacity: wordOpacity.value,
+    transform: [{ translateY: wordShift.value }],
+  }));
 
   return (
     <Animated.View
       pointerEvents="none"
-      style={[StyleSheet.absoluteFillObject, styles.fill, { backgroundColor: c.bg }, containerStyle]}
+      style={[
+        StyleSheet.absoluteFillObject,
+        styles.fill,
+        { backgroundColor: c.bg },
+        containerStyle,
+      ]}
     >
       <Animated.View style={markStyle}>
         <View style={[styles.mark, { backgroundColor: c.mark, shadowColor: c.mark }]}>

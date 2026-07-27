@@ -28,7 +28,10 @@ export default function CurrencyPickerScreen() {
     const q = query.trim().toLowerCase();
     if (!q) return CURRENCIES;
     return CURRENCIES.filter(
-      (c) => c.code.toLowerCase().includes(q) || c.name.toLowerCase().includes(q) || c.symbol.toLowerCase().includes(q),
+      (c) =>
+        c.code.toLowerCase().includes(q) ||
+        c.name.toLowerCase().includes(q) ||
+        c.symbol.toLowerCase().includes(q),
     );
   }, [query]);
 
@@ -46,6 +49,7 @@ export default function CurrencyPickerScreen() {
         <TextInput
           value={query}
           onChangeText={setQuery}
+          accessibilityLabel="Search currencies"
           placeholder="Search 80+ currencies"
           placeholderTextColor={colors[scheme].mutedForeground}
           autoCapitalize="characters"

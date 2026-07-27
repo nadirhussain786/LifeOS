@@ -9,8 +9,17 @@ import {
   updateAlbum,
   updatePhoto,
 } from '@/features/gallery/services/gallery-repository';
-import { pickMedia, saveCapturedImage, type MediaKind, type MediaSource } from '@/features/gallery/services/gallery-storage';
-import type { AlbumCategory, GalleryAlbum, UpdatePhotoInput } from '@/features/gallery/types/gallery.types';
+import {
+  pickMedia,
+  saveCapturedImage,
+  type MediaKind,
+  type MediaSource,
+} from '@/features/gallery/services/gallery-storage';
+import type {
+  AlbumCategory,
+  GalleryAlbum,
+  UpdatePhotoInput,
+} from '@/features/gallery/types/gallery.types';
 
 export class PermissionDeniedError extends Error {
   constructor() {
@@ -28,7 +37,11 @@ export function useGalleryMutations() {
    * how many videos were rejected for exceeding the size cap. Throws
    * PermissionDeniedError if the user declined library/camera access. */
   const importMedia = useMutation({
-    mutationFn: async (opts: { albumId: string | null; source: MediaSource; mediaTypes: MediaKind[] }) => {
+    mutationFn: async (opts: {
+      albumId: string | null;
+      source: MediaSource;
+      mediaTypes: MediaKind[];
+    }) => {
       const result = await pickMedia({ source: opts.source, mediaTypes: opts.mediaTypes });
       if (result === null) throw new PermissionDeniedError();
       for (const media of result.items) {
@@ -50,7 +63,15 @@ export function useGalleryMutations() {
   /** Persists a rendered before/after card (temp uri from view-shot) as a
    * real photo in the feed, tagged so it's recognizable as a comparison. */
   const saveComparison = useMutation({
-    mutationFn: async ({ tempUri, caption, takenAt }: { tempUri: string; caption?: string | null; takenAt?: number }) => {
+    mutationFn: async ({
+      tempUri,
+      caption,
+      takenAt,
+    }: {
+      tempUri: string;
+      caption?: string | null;
+      takenAt?: number;
+    }) => {
       const saved = await saveCapturedImage(tempUri);
       createPhoto({
         albumId: null,
@@ -67,13 +88,19 @@ export function useGalleryMutations() {
   });
 
   const addAlbum = useMutation({
-    mutationFn: async ({ name, category }: { name: string; category: AlbumCategory }) => createAlbum(name, category),
+    mutationFn: async ({ name, category }: { name: string; category: AlbumCategory }) =>
+      createAlbum(name, category),
     onSuccess: invalidate,
   });
 
   const editAlbum = useMutation({
-    mutationFn: async ({ id, patch }: { id: string; patch: Partial<Pick<GalleryAlbum, 'name' | 'category' | 'coverPhotoId'>> }) =>
-      updateAlbum(id, patch),
+    mutationFn: async ({
+      id,
+      patch,
+    }: {
+      id: string;
+      patch: Partial<Pick<GalleryAlbum, 'name' | 'category' | 'coverPhotoId'>>;
+    }) => updateAlbum(id, patch),
     onSuccess: invalidate,
   });
 
@@ -83,12 +110,14 @@ export function useGalleryMutations() {
   });
 
   const editPhoto = useMutation({
-    mutationFn: async ({ id, input }: { id: string; input: UpdatePhotoInput }) => updatePhoto(id, input),
+    mutationFn: async ({ id, input }: { id: string; input: UpdatePhotoInput }) =>
+      updatePhoto(id, input),
     onSuccess: invalidate,
   });
 
   const toggleFavorite = useMutation({
-    mutationFn: async ({ id, isFavorite }: { id: string; isFavorite: boolean }) => togglePhotoFavorite(id, isFavorite),
+    mutationFn: async ({ id, isFavorite }: { id: string; isFavorite: boolean }) =>
+      togglePhotoFavorite(id, isFavorite),
     onSuccess: invalidate,
   });
 
@@ -97,5 +126,14 @@ export function useGalleryMutations() {
     onSuccess: invalidate,
   });
 
-  return { importMedia, saveComparison, addAlbum, editAlbum, removeAlbum, editPhoto, toggleFavorite, removePhoto };
+  return {
+    importMedia,
+    saveComparison,
+    addAlbum,
+    editAlbum,
+    removeAlbum,
+    editPhoto,
+    toggleFavorite,
+    removePhoto,
+  };
 }

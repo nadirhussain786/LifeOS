@@ -59,9 +59,19 @@ export default function BudgetReportsScreen() {
           {summaryRows.map((row, index) => (
             <View
               key={row.label}
-              className={index === summaryRows.length - 1 ? 'flex-row items-center justify-between border-t border-border pt-2.5' : 'flex-row items-center justify-between'}
+              className={
+                index === summaryRows.length - 1
+                  ? 'flex-row items-center justify-between border-t border-border pt-2.5'
+                  : 'flex-row items-center justify-between'
+              }
             >
-              <Text className={index === summaryRows.length - 1 ? 'font-sora-semibold text-foreground' : 'text-muted-foreground'}>
+              <Text
+                className={
+                  index === summaryRows.length - 1
+                    ? 'font-sora-semibold text-foreground'
+                    : 'text-muted-foreground'
+                }
+              >
                 {row.label}
               </Text>
               <Text className="font-sora-bold" style={{ color: row.color }}>
@@ -84,7 +94,11 @@ export default function BudgetReportsScreen() {
         {categories.length > 0 && (
           <View className="gap-3 rounded-2xl border border-border bg-card p-4">
             <Text variant="subheading">By category</Text>
-            <ExpenseDonut categories={categories} totalCents={summary.expenseCents} currency={currency} />
+            <ExpenseDonut
+              categories={categories}
+              totalCents={summary.expenseCents}
+              currency={currency}
+            />
           </View>
         )}
       </ScrollView>

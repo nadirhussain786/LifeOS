@@ -10,7 +10,9 @@ const REMINDER_HOUR = 9;
 
 /** The moment a debt's reminder should fire: `reminderDaysBefore` days before
  * the deadline, at 09:00 local. Returns null when it can't/shouldn't fire. */
-export function debtReminderDate(debt: Pick<Debt, 'dueDate' | 'reminderDaysBefore'>): number | null {
+export function debtReminderDate(
+  debt: Pick<Debt, 'dueDate' | 'reminderDaysBefore'>,
+): number | null {
   if (debt.dueDate == null || debt.reminderDaysBefore == null) return null;
   const day = subDays(startOfDay(new Date(debt.dueDate)), debt.reminderDaysBefore);
   return setSeconds(setMinutes(setHours(day, REMINDER_HOUR), 0), 0).getTime();
@@ -31,7 +33,10 @@ export async function syncDebtReminder(debt: Debt): Promise<void> {
 
   const amount = formatMoney(remaining, debt.currency);
   const dueLabel = debt.dueDate ? format(debt.dueDate, 'MMM d') : '';
-  const title = debt.direction === 'borrowed' ? `You owe ${debt.counterparty}` : `${debt.counterparty} owes you`;
+  const title =
+    debt.direction === 'borrowed'
+      ? `You owe ${debt.counterparty}`
+      : `${debt.counterparty} owes you`;
   const body =
     debt.direction === 'borrowed'
       ? `${amount} due ${dueLabel} — time to pay it back.`
@@ -46,7 +51,9 @@ export async function syncDebtReminder(debt: Debt): Promise<void> {
   setDebtReminderNotificationId(debt.id, id);
 }
 
-export async function cancelDebtReminder(debt: Pick<Debt, 'id' | 'reminderNotificationId'>): Promise<void> {
+export async function cancelDebtReminder(
+  debt: Pick<Debt, 'id' | 'reminderNotificationId'>,
+): Promise<void> {
   await cancelNotification(debt.reminderNotificationId);
   setDebtReminderNotificationId(debt.id, null);
 }

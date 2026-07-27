@@ -6,7 +6,10 @@ import { waterIntakeLogs } from '@/database/schema';
 import { generateId } from '@/lib/id';
 import { toDateKey } from '@/lib/date';
 import { LOCAL_USER_ID } from '@/lib/local-user';
-import type { DailyWaterTotal, WaterIntakeLog } from '@/features/water-intake/types/water-intake.types';
+import type {
+  DailyWaterTotal,
+  WaterIntakeLog,
+} from '@/features/water-intake/types/water-intake.types';
 
 function toLog(row: typeof waterIntakeLogs.$inferSelect): WaterIntakeLog {
   return { id: row.id, logDate: row.logDate, amountMl: row.amountMl, loggedAt: row.loggedAt };
@@ -14,7 +17,10 @@ function toLog(row: typeof waterIntakeLogs.$inferSelect): WaterIntakeLog {
 
 /** Appends one "add water" action — never an upsert, so undo/history/Timeline
  * all read from the same real rows instead of a single mutable counter. */
-export function logWater(amountMl: number, logDate: string = toDateKey(new Date())): WaterIntakeLog {
+export function logWater(
+  amountMl: number,
+  logDate: string = toDateKey(new Date()),
+): WaterIntakeLog {
   const now = Date.now();
   const log: WaterIntakeLog = { id: generateId(), logDate, amountMl, loggedAt: now };
   getDb()
@@ -53,11 +59,18 @@ export function listDailyTotals(startDate: string, endDate: string): DailyWaterT
   const rows = getDb()
     .select()
     .from(waterIntakeLogs)
-    .where(and(eq(waterIntakeLogs.userId, LOCAL_USER_ID), gte(waterIntakeLogs.logDate, startDate), lte(waterIntakeLogs.logDate, endDate)))
+    .where(
+      and(
+        eq(waterIntakeLogs.userId, LOCAL_USER_ID),
+        gte(waterIntakeLogs.logDate, startDate),
+        lte(waterIntakeLogs.logDate, endDate),
+      ),
+    )
     .all();
 
   const totalsByDate = new Map<string, number>();
-  for (const row of rows) totalsByDate.set(row.logDate, (totalsByDate.get(row.logDate) ?? 0) + row.amountMl);
+  for (const row of rows)
+    totalsByDate.set(row.logDate, (totalsByDate.get(row.logDate) ?? 0) + row.amountMl);
 
   const result: DailyWaterTotal[] = [];
   let cursor = parseISO(startDate);

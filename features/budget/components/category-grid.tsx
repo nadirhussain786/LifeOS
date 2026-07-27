@@ -33,7 +33,9 @@ export function CategoryGrid({ items, value, onChange }: Props) {
             accessibilityState={{ selected }}
           >
             <Icon size={15} color={selected ? '#ffffff' : item.tint} strokeWidth={2.2} />
-            <Text className={selected ? 'font-sora-medium text-white' : 'text-muted-foreground'}>{item.label}</Text>
+            <Text className={selected ? 'font-sora-medium text-white' : 'text-muted-foreground'}>
+              {item.label}
+            </Text>
           </Pressable>
         );
       })}

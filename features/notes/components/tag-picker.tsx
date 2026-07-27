@@ -40,7 +40,11 @@ export function TagPicker({ tags, selectedTagIds, onToggle, onCreateTag, onDelet
   };
 
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="items-center gap-2">
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerClassName="items-center gap-2"
+    >
       {tags.map((tag) => {
         const isSelected = selected.has(tag.id);
         return (
@@ -51,9 +55,16 @@ export function TagPicker({ tags, selectedTagIds, onToggle, onCreateTag, onDelet
               onToggle(tag.id);
             }}
             onLongPress={() => confirmDelete(tag)}
-            className={cn('rounded-full border px-3 py-1.5', isSelected ? 'border-accent bg-accent' : 'border-border')}
+            className={cn(
+              'rounded-full border px-3 py-1.5',
+              isSelected ? 'border-accent bg-accent' : 'border-border',
+            )}
           >
-            <Text className={isSelected ? 'font-sora-medium text-accent-foreground' : 'text-muted-foreground'}>
+            <Text
+              className={
+                isSelected ? 'font-sora-medium text-accent-foreground' : 'text-muted-foreground'
+              }
+            >
               #{tag.name}
             </Text>
           </Pressable>
@@ -65,6 +76,7 @@ export function TagPicker({ tags, selectedTagIds, onToggle, onCreateTag, onDelet
           <TextInput
             value={name}
             onChangeText={setName}
+            accessibilityLabel="Tag name"
             placeholder="Tag name"
             placeholderTextColor={colors[scheme].mutedForeground}
             autoFocus
@@ -74,7 +86,10 @@ export function TagPicker({ tags, selectedTagIds, onToggle, onCreateTag, onDelet
           />
         </View>
       ) : (
-        <Pressable onPress={() => setIsAdding(true)} className="flex-row items-center gap-1 rounded-full border border-dashed border-border px-3 py-1.5">
+        <Pressable
+          onPress={() => setIsAdding(true)}
+          className="flex-row items-center gap-1 rounded-full border border-dashed border-border px-3 py-1.5"
+        >
           <Plus size={14} color={colors[scheme].mutedForeground} />
           <Text variant="muted">Tag</Text>
         </Pressable>

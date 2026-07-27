@@ -14,6 +14,7 @@ import { useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 
 import { EmptyState } from '@/components/ui/empty-state';
+import { QueryError } from '@/components/ui/query-error';
 import { Fab } from '@/components/ui/fab';
 import { HeroCard } from '@/components/ui/hero-card';
 import { ProgressBar } from '@/components/ui/progress-bar';
@@ -44,9 +45,21 @@ export default function BudgetScreen() {
   const overview = useBudgetOverview('month', anchorTime);
   const { data: savingsGoals = [] } = useSavingsGoals();
   const { totals: debtTotals } = useDebts();
-  const { currency, summary, categories, accounts, periodTransactions, hasAny, isLoading, monthlyBudgetCents } = overview;
+  const {
+    currency,
+    summary,
+    categories,
+    accounts,
+    periodTransactions,
+    hasAny,
+    isLoading,
+    isError,
+    refetch,
+    monthlyBudgetCents,
+  } = overview;
 
-  const budgetRatio = monthlyBudgetCents && monthlyBudgetCents > 0 ? summary.expenseCents / monthlyBudgetCents : 0;
+  const budgetRatio =
+    monthlyBudgetCents && monthlyBudgetCents > 0 ? summary.expenseCents / monthlyBudgetCents : 0;
   const overBudget = monthlyBudgetCents != null && summary.expenseCents > monthlyBudgetCents;
 
   const anchor = new Date(anchorTime);
@@ -62,11 +75,17 @@ export default function BudgetScreen() {
         tint={budgetTint}
         actions={[
           { icon: BarChart3, label: 'Reports', onPress: () => router.push('/budget/reports') },
-          { icon: Settings2, label: 'Budget settings', onPress: () => router.push('/budget/settings') },
+          {
+            icon: Settings2,
+            label: 'Budget settings',
+            onPress: () => router.push('/budget/settings'),
+          },
         ]}
       />
 
-      {isLoading ? (
+      {isError ? (
+        <QueryError onRetry={() => refetch()} />
+      ) : isLoading ? (
         <View className="gap-3 px-5 pt-2">
           <Skeleton className="h-40 w-full rounded-2xl" />
           <Skeleton className="h-24 w-full rounded-2xl" />
@@ -81,13 +100,22 @@ export default function BudgetScreen() {
           onAction={() => router.push('/budget/transaction')}
         />
       ) : (
-        <ScrollView contentContainerClassName="gap-5 px-5 pb-28" showsVerticalScrollIndicator={false}>
+        <ScrollView
+          contentContainerClassName="gap-5 px-5 pb-28"
+          showsVerticalScrollIndicator={false}
+        >
           {/* Month selector */}
           <View className="flex-row items-center justify-between">
-            <Pressable onPress={() => setAnchorTime(subMonths(anchor, 1).getTime())} hitSlop={8} className="h-9 w-9 items-center justify-center rounded-full bg-muted">
+            <Pressable
+              onPress={() => setAnchorTime(subMonths(anchor, 1).getTime())}
+              hitSlop={8}
+              className="h-9 w-9 items-center justify-center rounded-full bg-muted"
+            >
               <ChevronLeft size={18} color={colors[scheme].foreground} />
             </Pressable>
-            <Text className="font-sora-semibold text-foreground">{format(anchor, 'MMMM yyyy')}</Text>
+            <Text className="font-sora-semibold text-foreground">
+              {format(anchor, 'MMMM yyyy')}
+            </Text>
             <Pressable
               onPress={() => !isCurrentMonth && setAnchorTime(addMonths(anchor, 1).getTime())}
               hitSlop={8}
@@ -102,14 +130,20 @@ export default function BudgetScreen() {
           <HeroCard tint={budgetTint}>
             <View className="gap-4">
               <View className="items-center gap-1">
-                <Text className="font-sora-semibold uppercase tracking-wide" style={{ color: alpha('#ffffff', 0.85), fontSize: 12 }}>
+                <Text
+                  className="font-sora-semibold uppercase tracking-wide"
+                  style={{ color: alpha('#ffffff', 0.85), fontSize: 12 }}
+                >
                   Remaining balance
                 </Text>
                 <Text className="font-sora-extrabold text-4xl" style={{ color: '#ffffff' }}>
                   {formatMoney(summary.balanceCents, currency)}
                 </Text>
               </View>
-              <View className="flex-row rounded-2xl p-3" style={{ backgroundColor: alpha('#ffffff', 0.15) }}>
+              <View
+                className="flex-row rounded-2xl p-3"
+                style={{ backgroundColor: alpha('#ffffff', 0.15) }}
+              >
                 {[
                   { label: 'Income', value: summary.incomeCents, dot: '#dcfce7' },
                   { label: 'Expenses', value: summary.expenseCents, dot: '#fee2e2' },
@@ -120,8 +154,13 @@ export default function BudgetScreen() {
                       {formatMoney(item.value, currency)}
                     </Text>
                     <View className="flex-row items-center gap-1">
-                      <View className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: item.dot }} />
-                      <Text style={{ color: alpha('#ffffff', 0.85), fontSize: 11 }}>{item.label}</Text>
+                      <View
+                        className="h-1.5 w-1.5 rounded-full"
+                        style={{ backgroundColor: item.dot }}
+                      />
+                      <Text style={{ color: alpha('#ffffff', 0.85), fontSize: 11 }}>
+                        {item.label}
+                      </Text>
                     </View>
                   </View>
                 ))}
@@ -135,9 +174,14 @@ export default function BudgetScreen() {
               const meta = accountMeta.get(entry.account);
               const Icon = meta?.icon ?? Wallet;
               return (
-                <View key={entry.account} className="flex-1 items-center gap-1.5 rounded-2xl border border-border bg-card py-3.5">
+                <View
+                  key={entry.account}
+                  className="flex-1 items-center gap-1.5 rounded-2xl border border-border bg-card py-3.5"
+                >
                   <Icon size={16} color={colors[scheme].mutedForeground} />
-                  <Text className="font-sora-bold text-foreground">{formatMoney(entry.balanceCents, currency)}</Text>
+                  <Text className="font-sora-bold text-foreground">
+                    {formatMoney(entry.balanceCents, currency)}
+                  </Text>
                   <Text variant="caption">{meta?.label}</Text>
                 </View>
               );
@@ -149,7 +193,10 @@ export default function BudgetScreen() {
             onPress={() => router.push('/budget/debts')}
             className="flex-row items-center gap-3 rounded-2xl border border-border bg-card p-4"
           >
-            <View className="h-11 w-11 items-center justify-center rounded-xl" style={{ backgroundColor: alpha(DEBT_TINT, 0.14) }}>
+            <View
+              className="h-11 w-11 items-center justify-center rounded-xl"
+              style={{ backgroundColor: alpha(DEBT_TINT, 0.14) }}
+            >
               <HandCoins size={20} color={DEBT_TINT} />
             </View>
             <View className="flex-1">
@@ -169,11 +216,20 @@ export default function BudgetScreen() {
               <View className="flex-row items-center justify-between">
                 <Text variant="subheading">Monthly budget</Text>
                 <Text variant="caption">
-                  {formatMoney(summary.expenseCents, currency)} of {formatMoney(monthlyBudgetCents, currency)}
+                  {formatMoney(summary.expenseCents, currency)} of{' '}
+                  {formatMoney(monthlyBudgetCents, currency)}
                 </Text>
               </View>
-              <ProgressBar progress={Math.min(1, budgetRatio)} color={overBudget ? '#ef4444' : '#22c55e'} height={8} />
-              <Text variant="caption" style={{ color: overBudget ? '#dc2626' : '#16a34a' }} className="font-sora-medium">
+              <ProgressBar
+                progress={Math.min(1, budgetRatio)}
+                color={overBudget ? '#ef4444' : '#22c55e'}
+                height={8}
+              />
+              <Text
+                variant="caption"
+                style={{ color: overBudget ? colors[scheme].destructive : colors[scheme].success }}
+                className="font-sora-medium"
+              >
                 {overBudget
                   ? `Over budget by ${formatMoney(summary.expenseCents - monthlyBudgetCents, currency)}`
                   : `${formatMoney(monthlyBudgetCents - summary.expenseCents, currency)} left this month`}
@@ -185,7 +241,11 @@ export default function BudgetScreen() {
           {categories.length > 0 && (
             <View className="gap-3 rounded-2xl border border-border bg-card p-4">
               <Text variant="subheading">Where it went</Text>
-              <ExpenseDonut categories={categories} totalCents={summary.expenseCents} currency={currency} />
+              <ExpenseDonut
+                categories={categories}
+                totalCents={summary.expenseCents}
+                currency={currency}
+              />
             </View>
           )}
 
@@ -193,9 +253,17 @@ export default function BudgetScreen() {
           <View className="gap-3">
             <View className="flex-row items-center justify-between">
               <Text variant="subheading">Savings goals</Text>
-              <Pressable onPress={() => router.push('/budget/savings/new')} hitSlop={8} className="flex-row items-center gap-1">
+              <Pressable
+                onPress={() => router.push('/budget/savings/new')}
+                hitSlop={8}
+                className="flex-row items-center gap-1"
+              >
                 <Plus size={15} color={budgetTint} />
-                <Text variant="caption" style={{ color: budgetTint }} className="font-sora-semibold">
+                <Text
+                  variant="caption"
+                  style={{ color: budgetTint }}
+                  className="font-sora-semibold"
+                >
                   New
                 </Text>
               </Pressable>
@@ -228,7 +296,11 @@ export default function BudgetScreen() {
             <SectionHeader
               title="Transactions"
               actionLabel={periodTransactions.length > 0 ? 'View all' : undefined}
-              onAction={periodTransactions.length > 0 ? () => router.push('/budget/transactions') : undefined}
+              onAction={
+                periodTransactions.length > 0
+                  ? () => router.push('/budget/transactions')
+                  : undefined
+              }
               actionTint={budgetTint}
             />
             {periodTransactions.length === 0 ? (
@@ -249,7 +321,10 @@ export default function BudgetScreen() {
         </ScrollView>
       )}
 
-      <Fab onPress={() => router.push('/budget/transaction')} accessibilityLabel="Add transaction" />
+      <Fab
+        onPress={() => router.push('/budget/transaction')}
+        accessibilityLabel="Add transaction"
+      />
     </View>
   );
 }

@@ -1,11 +1,5 @@
 export type AlbumCategory =
-  | 'gym'
-  | 'body'
-  | 'weight_loss'
-  | 'certificates'
-  | 'achievements'
-  | 'memories'
-  | 'custom';
+  'gym' | 'body' | 'weight_loss' | 'certificates' | 'achievements' | 'memories' | 'custom';
 
 export type GalleryAlbum = {
   id: string;
@@ -68,4 +62,6 @@ export type CreatePhotoInput = {
   tags?: string[];
 };
 
-export type UpdatePhotoInput = Partial<Pick<GalleryPhoto, 'caption' | 'tags' | 'albumId' | 'takenAt' | 'isFavorite'>>;
+export type UpdatePhotoInput = Partial<
+  Pick<GalleryPhoto, 'caption' | 'tags' | 'albumId' | 'takenAt' | 'isFavorite'>
+>;

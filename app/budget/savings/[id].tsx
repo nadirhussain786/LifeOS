@@ -12,7 +12,11 @@ import { colors } from '@/constants/theme';
 import { TransactionRow } from '@/features/budget/components/transaction-row';
 import { formatMoney } from '@/features/budget/services/money';
 import { useBudgetMutations } from '@/features/budget/hooks/use-budget-mutations';
-import { useBudgetSettings, useSavingsGoals, useTransactions } from '@/features/budget/hooks/use-budget';
+import {
+  useBudgetSettings,
+  useSavingsGoals,
+  useTransactions,
+} from '@/features/budget/hooks/use-budget';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function SavingsGoalDetailScreen() {
@@ -32,10 +36,18 @@ export default function SavingsGoalDetailScreen() {
   const remaining = Math.max(0, goal.targetCents - goal.savedCents);
 
   const confirmDelete = () => {
-    Alert.alert('Delete savings goal?', `"${goal.name}" will be removed. Your savings transactions are kept.`, [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => (removeSavingsGoal.mutate(goal.id), router.back()) },
-    ]);
+    Alert.alert(
+      'Delete savings goal?',
+      `"${goal.name}" will be removed. Your savings transactions are kept.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => (removeSavingsGoal.mutate(goal.id), router.back()),
+        },
+      ],
+    );
   };
 
   return (
@@ -43,14 +55,32 @@ export default function SavingsGoalDetailScreen() {
       <ScreenHeader
         eyebrow="Savings"
         tint={moduleTint('budget', scheme)}
-        actions={[{ icon: Trash2, label: 'Delete goal', onPress: confirmDelete, tint: colors[scheme].destructive }]}
+        actions={[
+          {
+            icon: Trash2,
+            label: 'Delete goal',
+            onPress: confirmDelete,
+            tint: colors[scheme].destructive,
+          },
+        ]}
       />
 
-      <ScrollView contentContainerClassName="gap-6 px-5 pt-2 pb-10" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerClassName="gap-6 px-5 pt-2 pb-10"
+        showsVerticalScrollIndicator={false}
+      >
         <View className="items-center gap-4">
-          <ProgressRing progress={goal.progress} size={180} strokeWidth={14} color={goal.colorToken} gradient>
+          <ProgressRing
+            progress={goal.progress}
+            size={180}
+            strokeWidth={14}
+            color={goal.colorToken}
+            gradient
+          >
             <View className="items-center">
-              <Text className="font-sora-extrabold text-2xl text-foreground">{formatMoney(goal.savedCents, currency)}</Text>
+              <Text className="font-sora-extrabold text-2xl text-foreground">
+                {formatMoney(goal.savedCents, currency)}
+              </Text>
               <Text variant="caption">of {formatMoney(goal.targetCents, currency)}</Text>
             </View>
           </ProgressRing>

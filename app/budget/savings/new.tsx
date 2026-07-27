@@ -47,10 +47,14 @@ export default function NewSavingsGoalScreen() {
     <View className="flex-1 bg-background">
       <SheetHeader title="New Savings Goal" />
 
-      <ScrollView contentContainerClassName="gap-5 px-5 pt-3 pb-10" keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerClassName="gap-5 px-5 pt-3 pb-10"
+        keyboardShouldPersistTaps="handled"
+      >
         <TextInput
           value={name}
           onChangeText={setName}
+          accessibilityLabel="Goal name"
           placeholder="Goal name (e.g. Emergency fund)"
           placeholderTextColor={colors[scheme].mutedForeground}
           autoFocus
@@ -68,6 +72,7 @@ export default function NewSavingsGoalScreen() {
             <TextInput
               value={target}
               onChangeText={setTarget}
+              accessibilityLabel="Target amount"
               placeholder="0"
               keyboardType="decimal-pad"
               placeholderTextColor={colors[scheme].mutedForeground}
@@ -84,15 +89,30 @@ export default function NewSavingsGoalScreen() {
             <Text className="font-sora-medium text-foreground">Deadline (optional)</Text>
           </View>
           {Platform.OS === 'ios' ? (
-            <DateTimePicker value={deadline ? new Date(deadline) : new Date()} mode="date" display="compact" onChange={handleDate} />
+            <DateTimePicker
+              value={deadline ? new Date(deadline) : new Date()}
+              mode="date"
+              display="compact"
+              onChange={handleDate}
+            />
           ) : (
-            <Pressable onPress={() => setShowDate(true)} className="rounded-lg bg-muted px-3 py-1.5">
-              <Text className="font-sora-semibold text-foreground">{deadline ? format(deadline, 'MMM yyyy') : 'None'}</Text>
+            <Pressable
+              onPress={() => setShowDate(true)}
+              className="rounded-lg bg-muted px-3 py-1.5"
+            >
+              <Text className="font-sora-semibold text-foreground">
+                {deadline ? format(deadline, 'MMM yyyy') : 'None'}
+              </Text>
             </Pressable>
           )}
         </View>
         {Platform.OS === 'android' && showDate && (
-          <DateTimePicker value={deadline ? new Date(deadline) : new Date()} mode="date" display="default" onChange={handleDate} />
+          <DateTimePicker
+            value={deadline ? new Date(deadline) : new Date()}
+            mode="date"
+            display="default"
+            onChange={handleDate}
+          />
         )}
 
         <Button label="Create goal" onPress={save} disabled={!canSave} size="lg" variant="accent" />

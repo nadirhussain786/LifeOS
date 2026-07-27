@@ -98,7 +98,10 @@ export function updateDebt(id: string, input: UpdateDebtInput) {
 export function recordDebtPayment(id: string, amountCents: number): Debt | null {
   const debt = getDebt(id);
   if (!debt) return null;
-  const paidCents = Math.min(debt.principalCents, debt.paidCents + Math.max(0, Math.round(amountCents)));
+  const paidCents = Math.min(
+    debt.principalCents,
+    debt.paidCents + Math.max(0, Math.round(amountCents)),
+  );
   const settledAt = paidCents >= debt.principalCents ? Date.now() : null;
   updateDebt(id, { paidCents, settledAt });
   return getDebt(id);
@@ -132,7 +135,7 @@ export function setDebtReminderNotificationId(id: string, notificationId: string
 export function deleteDebt(id: string) {
   getDb()
     .update(budgetDebts)
-    .set({ deletedAt: Date.now(), syncStatus: 'pending' })
+    .set({ deletedAt: Date.now(), updatedAt: Date.now(), syncStatus: 'pending' })
     .where(eq(budgetDebts.id, id))
     .run();
 }

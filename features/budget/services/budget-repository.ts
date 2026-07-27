@@ -84,7 +84,8 @@ export function createTransaction(input: CreateTransactionInput): BudgetTransact
 
 export function updateTransaction(id: string, input: UpdateTransactionInput) {
   const patch: Record<string, unknown> = { ...input, updatedAt: Date.now(), syncStatus: 'pending' };
-  if (input.occurredAt !== undefined) patch.logDate = format(new Date(input.occurredAt), 'yyyy-MM-dd');
+  if (input.occurredAt !== undefined)
+    patch.logDate = format(new Date(input.occurredAt), 'yyyy-MM-dd');
   if (input.amountCents !== undefined) patch.amountCents = Math.round(input.amountCents);
   getDb().update(budgetTransactions).set(patch).where(eq(budgetTransactions.id, id)).run();
 }
@@ -92,7 +93,7 @@ export function updateTransaction(id: string, input: UpdateTransactionInput) {
 export function deleteTransaction(id: string) {
   getDb()
     .update(budgetTransactions)
-    .set({ deletedAt: Date.now(), syncStatus: 'pending' })
+    .set({ deletedAt: Date.now(), updatedAt: Date.now(), syncStatus: 'pending' })
     .where(eq(budgetTransactions.id, id))
     .run();
 }
@@ -133,13 +134,29 @@ export function listSavingsGoalsWithProgress(): SavingsGoalWithProgress[] {
 
   return goals.map((goal) => {
     const savedCents = savedByGoal.get(goal.id) ?? 0;
-    return { ...goal, savedCents, progress: goal.targetCents > 0 ? Math.min(1, savedCents / goal.targetCents) : 0 };
+    return {
+      ...goal,
+      savedCents,
+      progress: goal.targetCents > 0 ? Math.min(1, savedCents / goal.targetCents) : 0,
+    };
   });
 }
 
-export function createSavingsGoal(name: string, targetCents: number, colorToken: string, deadline: number | null): SavingsGoal {
+export function createSavingsGoal(
+  name: string,
+  targetCents: number,
+  colorToken: string,
+  deadline: number | null,
+): SavingsGoal {
   const now = Date.now();
-  const goal: SavingsGoal = { id: generateId(), name: name.trim(), targetCents, colorToken, deadline, createdAt: now };
+  const goal: SavingsGoal = {
+    id: generateId(),
+    name: name.trim(),
+    targetCents,
+    colorToken,
+    deadline,
+    createdAt: now,
+  };
   getDb()
     .insert(savingsGoals)
     .values({ ...goal, userId: LOCAL_USER_ID, updatedAt: now })
@@ -147,25 +164,44 @@ export function createSavingsGoal(name: string, targetCents: number, colorToken:
   return goal;
 }
 
-export function updateSavingsGoal(id: string, patch: Partial<Pick<SavingsGoal, 'name' | 'targetCents' | 'deadline'>>) {
-  getDb().update(savingsGoals).set({ ...patch, updatedAt: Date.now() }).where(eq(savingsGoals.id, id)).run();
+export function updateSavingsGoal(
+  id: string,
+  patch: Partial<Pick<SavingsGoal, 'name' | 'targetCents' | 'deadline'>>,
+) {
+  getDb()
+    .update(savingsGoals)
+    .set({ ...patch, updatedAt: Date.now() })
+    .where(eq(savingsGoals.id, id))
+    .run();
 }
 
 export function deleteSavingsGoal(id: string) {
-  getDb().update(savingsGoals).set({ deletedAt: Date.now() }).where(eq(savingsGoals.id, id)).run();
+  getDb()
+    .update(savingsGoals)
+    .set({ deletedAt: Date.now(), updatedAt: Date.now() })
+    .where(eq(savingsGoals.id, id))
+    .run();
 }
 
 // ---- Settings ----
 
 export function getBudgetSettings(): BudgetSettings {
-  const row = getDb().select().from(budgetSettings).where(eq(budgetSettings.userId, LOCAL_USER_ID)).get();
+  const row = getDb()
+    .select()
+    .from(budgetSettings)
+    .where(eq(budgetSettings.userId, LOCAL_USER_ID))
+    .get();
   if (!row) return { ...DEFAULT_SETTINGS };
   return { currency: row.currency, monthlyBudgetCents: row.monthlyBudgetCents };
 }
 
 export function updateBudgetSettings(input: Partial<BudgetSettings>) {
   const db = getDb();
-  const existing = db.select().from(budgetSettings).where(eq(budgetSettings.userId, LOCAL_USER_ID)).get();
+  const existing = db
+    .select()
+    .from(budgetSettings)
+    .where(eq(budgetSettings.userId, LOCAL_USER_ID))
+    .get();
   const now = Date.now();
   if (!existing) {
     db.insert(budgetSettings)

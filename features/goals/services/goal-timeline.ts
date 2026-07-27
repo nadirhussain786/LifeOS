@@ -1,6 +1,12 @@
 import { differenceInCalendarDays } from 'date-fns';
 
-import type { Goal, GoalMilestone, GoalProgressLog, GoalTimeline, ProgressPoint } from '@/features/goals/types/goal.types';
+import type {
+  Goal,
+  GoalMilestone,
+  GoalProgressLog,
+  GoalTimeline,
+  ProgressPoint,
+} from '@/features/goals/types/goal.types';
 
 const PACE_TOLERANCE = 0.05;
 

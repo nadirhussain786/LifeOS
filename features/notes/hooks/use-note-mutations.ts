@@ -12,7 +12,11 @@ import {
   unarchiveNote,
   updateNote,
 } from '@/features/notes/services/notes-repository';
-import type { CreateNoteInput, NoteAttachment, UpdateNoteInput } from '@/features/notes/types/note.types';
+import type {
+  CreateNoteInput,
+  NoteAttachment,
+  UpdateNoteInput,
+} from '@/features/notes/types/note.types';
 
 export function useNoteMutations() {
   const queryClient = useQueryClient();
@@ -63,13 +67,24 @@ export function useNoteMutations() {
   });
 
   const setTags = useMutation({
-    mutationFn: async ({ id, tagIds }: { id: string; tagIds: string[] }) => setTagsForNote(id, tagIds),
-    onSuccess: (_data, variables) => queryClient.invalidateQueries({ queryKey: ['notes', 'detail', variables.id, 'tags'] }),
+    mutationFn: async ({ id, tagIds }: { id: string; tagIds: string[] }) =>
+      setTagsForNote(id, tagIds),
+    onSuccess: (_data, variables) =>
+      queryClient.invalidateQueries({ queryKey: ['notes', 'detail', variables.id, 'tags'] }),
   });
 
   const attach = useMutation({
-    mutationFn: async ({ id, kind, uri, durationMs }: { id: string; kind: NoteAttachment['kind']; uri: string; durationMs?: number | null }) =>
-      addNoteAttachment(id, kind, uri, durationMs),
+    mutationFn: async ({
+      id,
+      kind,
+      uri,
+      durationMs,
+    }: {
+      id: string;
+      kind: NoteAttachment['kind'];
+      uri: string;
+      durationMs?: number | null;
+    }) => addNoteAttachment(id, kind, uri, durationMs),
     onSuccess: (_data, variables) =>
       queryClient.invalidateQueries({ queryKey: ['notes', 'detail', variables.id, 'attachments'] }),
   });
@@ -77,7 +92,9 @@ export function useNoteMutations() {
   const removeAttachment = useMutation({
     mutationFn: async ({ id }: { id: string; noteId: string }) => deleteNoteAttachment(id),
     onSuccess: (_data, variables) =>
-      queryClient.invalidateQueries({ queryKey: ['notes', 'detail', variables.noteId, 'attachments'] }),
+      queryClient.invalidateQueries({
+        queryKey: ['notes', 'detail', variables.noteId, 'attachments'],
+      }),
   });
 
   return { create, update, remove, archive, unarchive, setTags, attach, removeAttachment };

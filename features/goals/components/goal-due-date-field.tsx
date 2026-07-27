@@ -28,7 +28,12 @@ export function GoalDueDateField({ value, onChange }: Props) {
   return (
     <View className="flex-row flex-wrap items-center gap-2">
       {Platform.OS === 'ios' ? (
-        <DateTimePicker value={value ? new Date(value) : new Date()} mode="date" display="compact" onChange={handleChange} />
+        <DateTimePicker
+          value={value ? new Date(value) : new Date()}
+          mode="date"
+          display="compact"
+          onChange={handleChange}
+        />
       ) : (
         <Pressable
           onPress={() => setShowPicker(true)}
@@ -46,7 +51,12 @@ export function GoalDueDateField({ value, onChange }: Props) {
       ) : null}
 
       {Platform.OS === 'android' && showPicker ? (
-        <DateTimePicker value={value ? new Date(value) : new Date()} mode="date" display="default" onChange={handleChange} />
+        <DateTimePicker
+          value={value ? new Date(value) : new Date()}
+          mode="date"
+          display="default"
+          onChange={handleChange}
+        />
       ) : null}
     </View>
   );

@@ -46,8 +46,16 @@ export default function NewNoteScreen() {
       <SheetHeader
         title="New Note"
         right={
-          <Pressable onPress={() => setIsPinned((pinned) => !pinned)} hitSlop={10} className="h-9 w-9 items-center justify-center">
-            <Star size={18} color={colors[scheme].accent} fill={isPinned ? colors[scheme].accent : 'transparent'} />
+          <Pressable
+            onPress={() => setIsPinned((pinned) => !pinned)}
+            hitSlop={10}
+            className="h-9 w-9 items-center justify-center"
+          >
+            <Star
+              size={18}
+              color={colors[scheme].accent}
+              fill={isPinned ? colors[scheme].accent : 'transparent'}
+            />
           </Pressable>
         }
       />
@@ -62,6 +70,7 @@ export default function NewNoteScreen() {
           <TextInput
             value={title}
             onChangeText={setTitle}
+            accessibilityLabel="Note title"
             placeholder="Note title"
             placeholderTextColor={colors[scheme].mutedForeground}
             autoFocus
@@ -72,7 +81,12 @@ export default function NewNoteScreen() {
             onBlur={() => {
               focusProgress.value = withTiming(0, { duration: 220 });
             }}
-            style={{ fontSize: 26, fontFamily: 'Sora_700Bold', lineHeight: 32, color: colors[scheme].foreground }}
+            style={{
+              fontSize: 26,
+              fontFamily: 'Sora_700Bold',
+              lineHeight: 32,
+              color: colors[scheme].foreground,
+            }}
           />
           <Animated.View className="h-[3px] w-16 rounded-full bg-accent" style={underlineStyle} />
         </View>
@@ -90,13 +104,20 @@ export default function NewNoteScreen() {
           value={body}
           onChangeText={setBody}
           multiline
+          accessibilityLabel="Note body"
           placeholder="Write something…"
           placeholderTextColor={colors[scheme].mutedForeground}
           className="min-h-32 rounded-2xl border border-border bg-card p-4 text-base text-foreground"
           textAlignVertical="top"
         />
 
-        <Button label="Add note" onPress={handleAdd} disabled={!title.trim()} size="lg" variant="accent" />
+        <Button
+          label="Add note"
+          onPress={handleAdd}
+          disabled={!title.trim()}
+          size="lg"
+          variant="accent"
+        />
       </ScrollView>
     </View>
   );

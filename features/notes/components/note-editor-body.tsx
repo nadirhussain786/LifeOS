@@ -52,6 +52,7 @@ export function NoteEditorBody({ value, onChangeText, placeholder }: Props) {
             onChangeText={onChangeText}
             onSelectionChange={(event) => setSelection(event.nativeEvent.selection)}
             multiline
+            accessibilityLabel="Note body"
             placeholder={placeholder}
             placeholderTextColor={colors[scheme].mutedForeground}
             className="min-h-32 p-4 text-base text-foreground"
@@ -68,7 +69,10 @@ export function NoteEditorBody({ value, onChangeText, placeholder }: Props) {
         </View>
       ) : (
         <View className="rounded-2xl border border-border bg-card p-4">
-          <NoteBodyView body={value} onToggleChecklist={(index) => onChangeText(toggleChecklistAt(value, index))} />
+          <NoteBodyView
+            body={value}
+            onToggleChecklist={(index) => onChangeText(toggleChecklistAt(value, index))}
+          />
         </View>
       )}
     </View>

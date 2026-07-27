@@ -80,6 +80,7 @@ export default function NewTaskScreen() {
           <TextInput
             value={title}
             onChangeText={setTitle}
+            accessibilityLabel="Task title"
             placeholder="What needs to get done?"
             placeholderTextColor={colors[scheme].mutedForeground}
             autoFocus
@@ -91,7 +92,12 @@ export default function NewTaskScreen() {
               focusProgress.value = withTiming(0, { duration: 220 });
             }}
             onSubmitEditing={handleAdd}
-            style={{ fontSize: 26, fontFamily: 'Sora_700Bold', lineHeight: 32, color: colors[scheme].foreground }}
+            style={{
+              fontSize: 26,
+              fontFamily: 'Sora_700Bold',
+              lineHeight: 32,
+              color: colors[scheme].foreground,
+            }}
           />
           <Animated.View className="h-[3px] w-16 rounded-full bg-accent" style={underlineStyle} />
         </View>
@@ -115,7 +121,9 @@ export default function NewTaskScreen() {
           {dueDate !== null && (
             <AttributeRow icon={Bell} label="Reminder">
               <View className="flex-row items-center justify-between">
-                <Text variant="muted">Notify me {hasDueTime ? 'at the due time' : 'at 9:00 AM that day'}</Text>
+                <Text variant="muted">
+                  Notify me {hasDueTime ? 'at the due time' : 'at 9:00 AM that day'}
+                </Text>
                 <Switch value={reminderEnabled} onValueChange={setReminderEnabled} />
               </View>
             </AttributeRow>
@@ -141,6 +149,7 @@ export default function NewTaskScreen() {
             value={notes}
             onChangeText={setNotes}
             multiline
+            accessibilityLabel="Task notes"
             placeholder="Add notes…"
             placeholderTextColor={colors[scheme].mutedForeground}
             className="min-h-24 rounded-2xl border border-border bg-card p-4 text-base text-foreground shadow-e1"
@@ -148,7 +157,13 @@ export default function NewTaskScreen() {
           />
         </View>
 
-        <Button label="Add task" onPress={handleAdd} disabled={!title.trim()} size="lg" variant="accent" />
+        <Button
+          label="Add task"
+          onPress={handleAdd}
+          disabled={!title.trim()}
+          size="lg"
+          variant="accent"
+        />
       </ScrollView>
     </View>
   );

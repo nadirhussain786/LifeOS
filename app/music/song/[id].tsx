@@ -34,13 +34,19 @@ export default function SongDetailScreen() {
 
   useEffect(() => {
     if (!song || title === song.title || !title.trim()) return;
-    const timeout = setTimeout(() => update.mutate({ id: song.id, input: { title: title.trim() } }), AUTOSAVE_DELAY_MS);
+    const timeout = setTimeout(
+      () => update.mutate({ id: song.id, input: { title: title.trim() } }),
+      AUTOSAVE_DELAY_MS,
+    );
     return () => clearTimeout(timeout);
   }, [title]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!song || artist === (song.artist ?? '')) return;
-    const timeout = setTimeout(() => update.mutate({ id: song.id, input: { artist: artist.trim() || null } }), AUTOSAVE_DELAY_MS);
+    const timeout = setTimeout(
+      () => update.mutate({ id: song.id, input: { artist: artist.trim() || null } }),
+      AUTOSAVE_DELAY_MS,
+    );
     return () => clearTimeout(timeout);
   }, [artist]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -86,6 +92,7 @@ export default function SongDetailScreen() {
           <TextInput
             value={artist}
             onChangeText={setArtist}
+            accessibilityLabel="Artist"
             placeholder="Unknown artist"
             placeholderTextColor={colors[scheme].mutedForeground}
             className="text-lg text-foreground"

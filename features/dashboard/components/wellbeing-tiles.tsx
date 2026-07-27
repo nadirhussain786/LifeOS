@@ -1,6 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { BookHeart, Droplet } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
 import { Text } from '@/components/ui/text';
@@ -8,7 +9,10 @@ import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { useReflect } from '@/features/dashboard/hooks/use-widget-data';
 import { useJournalMutations } from '@/features/journal/hooks/use-journal-mutations';
-import { useTodayWaterTotal, useWaterIntakeMutations } from '@/features/water-intake/hooks/use-water-intake';
+import {
+  useTodayWaterTotal,
+  useWaterIntakeMutations,
+} from '@/features/water-intake/hooks/use-water-intake';
 import { useWaterSettingsStore } from '@/features/water-intake/store/water-settings-store';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { alpha } from '@/lib/color';
@@ -32,6 +36,7 @@ function tileClass() {
 
 export function WaterTile() {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const tint = moduleTint('water', scheme);
   const goalMl = useWaterSettingsStore((state) => state.goalMl);
   const { data: currentMl } = useTodayWaterTotal();
@@ -48,8 +53,15 @@ export function WaterTile() {
   };
 
   return (
-    <Pressable onPress={addGlass} className={tileClass()} accessibilityLabel="Add a glass of water">
-      <View className="h-8 w-8 items-center justify-center rounded-xl" style={{ backgroundColor: alpha(tint, 0.14) }}>
+    <Pressable
+      onPress={addGlass}
+      className={tileClass()}
+      accessibilityLabel={t('dashboard.addGlassOfWater')}
+    >
+      <View
+        className="h-8 w-8 items-center justify-center rounded-xl"
+        style={{ backgroundColor: alpha(tint, 0.14) }}
+      >
         <Droplet size={17} color={tint} />
       </View>
       <View>
@@ -57,7 +69,7 @@ export function WaterTile() {
           {(current / 1000).toFixed(1)}
           <Text variant="caption"> / {(goalMl / 1000).toFixed(1)} L</Text>
         </Text>
-        <Text variant="caption">Tap to add a glass</Text>
+        <Text variant="caption">{t('dashboard.tapToAddGlass')}</Text>
       </View>
       <View className="flex-row gap-1">
         {Array.from({ length: segments }).map((_, i) => (
@@ -82,6 +94,7 @@ const MOODS: { value: MoodOption; emoji: string }[] = [
 
 export function MoodTile() {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const tint = moduleTint('journal', scheme);
   const queryClient = useQueryClient();
   const { data } = useReflect();
@@ -96,12 +109,17 @@ export function MoodTile() {
 
   return (
     <View className={tileClass()}>
-      <View className="h-8 w-8 items-center justify-center rounded-xl" style={{ backgroundColor: alpha(tint, 0.14) }}>
+      <View
+        className="h-8 w-8 items-center justify-center rounded-xl"
+        style={{ backgroundColor: alpha(tint, 0.14) }}
+      >
         <BookHeart size={17} color={tint} />
       </View>
       <View>
-        <Text className="font-sora-semibold text-foreground">How are you?</Text>
-        <Text variant="caption">🔥 {data?.journalStreak ?? 0}-day streak</Text>
+        <Text className="font-sora-semibold text-foreground">{t('dashboard.howAreYou')}</Text>
+        <Text variant="caption">
+          🔥 {t('dashboard.dayStreak', { count: data?.journalStreak ?? 0 })}
+        </Text>
       </View>
       <View className="flex-row">
         {MOODS.map((mood) => (
@@ -110,7 +128,9 @@ export function MoodTile() {
             onPress={() => selectMood(mood.value)}
             hitSlop={6}
             className="flex-1 items-center justify-center rounded-full py-1.5"
-            style={data?.todaysMood === mood.value ? { backgroundColor: alpha(tint, 0.16) } : undefined}
+            style={
+              data?.todaysMood === mood.value ? { backgroundColor: alpha(tint, 0.16) } : undefined
+            }
           >
             <Text className="text-lg">{mood.emoji}</Text>
           </Pressable>

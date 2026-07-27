@@ -29,7 +29,14 @@ const PAD = 6;
  * actual trajectory reads against where it should be. Width is measured via
  * onLayout so it fits any container.
  */
-export function LineChart({ series, color, height = 160, rangeStart, rangeEnd, showExpected }: Props) {
+export function LineChart({
+  series,
+  color,
+  height = 160,
+  rangeStart,
+  rangeEnd,
+  showExpected,
+}: Props) {
   const scheme = useColorScheme() ?? 'light';
   const fillId = `lc${useId().replace(/:/g, '')}`;
   const [width, setWidth] = useState(0);
@@ -40,11 +47,14 @@ export function LineChart({ series, color, height = 160, rangeStart, rangeEnd, s
   const plotH = height - PAD * 2;
   const span = Math.max(1, rangeEnd - rangeStart);
 
-  const xFor = (t: number) => PAD + (Math.max(rangeStart, Math.min(rangeEnd, t)) - rangeStart) / span * plotW;
+  const xFor = (t: number) =>
+    PAD + ((Math.max(rangeStart, Math.min(rangeEnd, t)) - rangeStart) / span) * plotW;
   const yFor = (v: number) => PAD + (1 - Math.max(0, Math.min(1, v))) * plotH;
 
   const sorted = [...series].sort((a, b) => a.t - b.t);
-  const linePath = sorted.map((p, i) => `${i === 0 ? 'M' : 'L'} ${xFor(p.t).toFixed(1)} ${yFor(p.v).toFixed(1)}`).join(' ');
+  const linePath = sorted
+    .map((p, i) => `${i === 0 ? 'M' : 'L'} ${xFor(p.t).toFixed(1)} ${yFor(p.v).toFixed(1)}`)
+    .join(' ');
   const areaPath =
     sorted.length > 0
       ? `${linePath} L ${xFor(sorted[sorted.length - 1].t).toFixed(1)} ${(PAD + plotH).toFixed(1)} L ${xFor(sorted[0].t).toFixed(1)} ${(PAD + plotH).toFixed(1)} Z`
@@ -63,7 +73,17 @@ export function LineChart({ series, color, height = 160, rangeStart, rangeEnd, s
 
           {/* 50% & 100% guide lines */}
           {[0, 0.5, 1].map((g) => (
-            <Line key={g} x1={PAD} y1={yFor(g)} x2={PAD + plotW} y2={yFor(g)} stroke={colors[scheme].border} strokeWidth={1} strokeDasharray="2 4" opacity={0.5} />
+            <Line
+              key={g}
+              x1={PAD}
+              y1={yFor(g)}
+              x2={PAD + plotW}
+              y2={yFor(g)}
+              stroke={colors[scheme].border}
+              strokeWidth={1}
+              strokeDasharray="2 4"
+              opacity={0.5}
+            />
           ))}
 
           {showExpected && (
@@ -80,7 +100,16 @@ export function LineChart({ series, color, height = 160, rangeStart, rangeEnd, s
           )}
 
           {areaPath ? <Path d={areaPath} fill={`url(#${fillId})`} /> : null}
-          {linePath ? <Path d={linePath} stroke={color} strokeWidth={3} fill="none" strokeLinejoin="round" strokeLinecap="round" /> : null}
+          {linePath ? (
+            <Path
+              d={linePath}
+              stroke={color}
+              strokeWidth={3}
+              fill="none"
+              strokeLinejoin="round"
+              strokeLinecap="round"
+            />
+          ) : null}
         </Svg>
       )}
     </View>

@@ -20,7 +20,9 @@ export function DailyQuoteWidget() {
         // A calm editorial moment: the quote itself is set in Literata (the
         // journal serif) so it reads as something to sit with, not chrome.
         <View className="gap-1.5">
-          <Text className="font-journal-italic text-lg leading-7 text-foreground">&ldquo;{data.quote}&rdquo;</Text>
+          <Text className="font-journal-italic text-lg leading-7 text-foreground">
+            &ldquo;{data.quote}&rdquo;
+          </Text>
           <Text variant="caption">— {data.author}</Text>
         </View>
       )}

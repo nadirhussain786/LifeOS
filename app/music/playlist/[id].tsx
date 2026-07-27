@@ -11,7 +11,11 @@ import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import { MUSIC_TINT, SongRow } from '@/features/music/components/song-row';
 import { useNowPlaying } from '@/features/music/hooks/use-player';
-import { usePlaylist, usePlaylistMutations, usePlaylistSongs } from '@/features/music/hooks/use-playlists';
+import {
+  usePlaylist,
+  usePlaylistMutations,
+  usePlaylistSongs,
+} from '@/features/music/hooks/use-playlists';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 const AUTOSAVE_DELAY_MS = 500;
@@ -34,24 +38,31 @@ export default function PlaylistDetailScreen() {
 
   useEffect(() => {
     if (!playlist || name === playlist.name || !name.trim()) return;
-    const timeout = setTimeout(() => rename.mutate({ id: playlist.id, name: name.trim() }), AUTOSAVE_DELAY_MS);
+    const timeout = setTimeout(
+      () => rename.mutate({ id: playlist.id, name: name.trim() }),
+      AUTOSAVE_DELAY_MS,
+    );
     return () => clearTimeout(timeout);
   }, [name]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!playlist) return null;
 
   const handleDeletePlaylist = () => {
-    Alert.alert('Delete playlist?', `"${playlist.name}" will be deleted. Your songs stay in your library.`, [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () => {
-          remove.mutate(playlist.id);
-          router.back();
+    Alert.alert(
+      'Delete playlist?',
+      `"${playlist.name}" will be deleted. Your songs stay in your library.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            remove.mutate(playlist.id);
+            router.back();
+          },
         },
-      },
-    ]);
+      ],
+    );
   };
 
   return (
@@ -61,13 +72,21 @@ export default function PlaylistDetailScreen() {
       <ScreenHeader
         eyebrow="Playlist"
         tint={MUSIC_TINT}
-        actions={[{ icon: Trash2, label: 'Delete playlist', onPress: handleDeletePlaylist, tint: colors[scheme].destructive }]}
+        actions={[
+          {
+            icon: Trash2,
+            label: 'Delete playlist',
+            onPress: handleDeletePlaylist,
+            tint: colors[scheme].destructive,
+          },
+        ]}
       />
 
       <View className="gap-3 px-5 pt-1">
         <TextInput
           value={name}
           onChangeText={setName}
+          accessibilityLabel="Playlist name"
           placeholder="Playlist name"
           placeholderTextColor={colors[scheme].mutedForeground}
           style={{ fontSize: 26, fontFamily: 'Sora_700Bold', color: colors[scheme].foreground }}

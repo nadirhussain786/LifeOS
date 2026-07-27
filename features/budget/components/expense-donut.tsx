@@ -25,7 +25,15 @@ export function ExpenseDonut({ categories, totalCents, currency }: Props) {
   const legend = [
     ...top,
     ...(restCents > 0
-      ? [{ categoryId: 'rest', label: 'Other', tint: '#94a3b8', amountCents: restCents, share: restCents / totalCents }]
+      ? [
+          {
+            categoryId: 'rest',
+            label: 'Other',
+            tint: '#94a3b8',
+            amountCents: restCents,
+            share: restCents / totalCents,
+          },
+        ]
       : []),
   ];
 
@@ -34,7 +42,10 @@ export function ExpenseDonut({ categories, totalCents, currency }: Props) {
       <DonutChart data={slices} size={180} strokeWidth={26}>
         <View className="items-center">
           <Text variant="caption">Spent</Text>
-          <Text className="font-sora-extrabold text-xl text-foreground" style={{ fontVariant: ['tabular-nums'] }}>
+          <Text
+            className="font-sora-extrabold text-xl text-foreground"
+            style={{ fontVariant: ['tabular-nums'] }}
+          >
             {formatMoney(totalCents, currency)}
           </Text>
         </View>

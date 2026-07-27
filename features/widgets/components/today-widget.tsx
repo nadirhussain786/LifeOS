@@ -33,10 +33,20 @@ function Row({ color, text, uri }: { color: HexColor; text: string; uri: string 
     <FlexWidget
       clickAction="OPEN_URI"
       clickActionData={{ uri }}
-      style={{ flexDirection: 'row', alignItems: 'center', width: 'match_parent', paddingVertical: 4 }}
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        width: 'match_parent',
+        paddingVertical: 4,
+      }}
     >
-      <FlexWidget style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: color, marginRight: 10 }} />
-      <TextWidget text={text} style={{ fontSize: 15, color: C.text, fontFamily: 'sans-serif-medium' }} />
+      <FlexWidget
+        style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: color, marginRight: 10 }}
+      />
+      <TextWidget
+        text={text}
+        style={{ fontSize: 15, color: C.text, fontFamily: 'sans-serif-medium' }}
+      />
     </FlexWidget>
   );
 }
@@ -59,10 +69,25 @@ export function TodayWidget({ snapshot }: { snapshot: TodaySnapshot }) {
         paddingVertical: 16,
       }}
     >
-      <TextWidget text="TODAY" style={{ fontSize: 12, color: C.muted, fontFamily: 'sans-serif-medium', letterSpacing: 1 }} />
-      <Row color={C.tasks} uri={WIDGET_LINKS.tasks} text={`${tasksDue} ${tasksDue === 1 ? 'task' : 'tasks'} due`} />
-      <Row color={C.habits} uri={WIDGET_LINKS.habits} text={`${habitsLeft} ${habitsLeft === 1 ? 'habit' : 'habits'} left`} />
-      <Row color={C.water} uri={WIDGET_LINKS.water} text={`${liters(waterMl)} / ${liters(waterGoalMl)} L water`} />
+      <TextWidget
+        text="TODAY"
+        style={{ fontSize: 12, color: C.muted, fontFamily: 'sans-serif-medium', letterSpacing: 1 }}
+      />
+      <Row
+        color={C.tasks}
+        uri={WIDGET_LINKS.tasks}
+        text={`${tasksDue} ${tasksDue === 1 ? 'task' : 'tasks'} due`}
+      />
+      <Row
+        color={C.habits}
+        uri={WIDGET_LINKS.habits}
+        text={`${habitsLeft} ${habitsLeft === 1 ? 'habit' : 'habits'} left`}
+      />
+      <Row
+        color={C.water}
+        uri={WIDGET_LINKS.water}
+        text={`${liters(waterMl)} / ${liters(waterGoalMl)} L water`}
+      />
     </FlexWidget>
   );
 }

@@ -27,7 +27,8 @@ export const useJournalReminderStore = create<JournalReminderState>()(
     (set) => ({
       settings: DEFAULT_JOURNAL_REMINDER,
       scheduledNotificationId: null,
-      setReminder: (settings, scheduledNotificationId) => set({ settings, scheduledNotificationId }),
+      setReminder: (settings, scheduledNotificationId) =>
+        set({ settings, scheduledNotificationId }),
     }),
     {
       name: 'journal-reminder-store',

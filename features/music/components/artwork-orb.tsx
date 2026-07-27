@@ -33,7 +33,11 @@ export function ArtworkOrb({ seed, size, playing }: Props) {
 
   useEffect(() => {
     if (playing) {
-      breathe.value = withRepeat(withTiming(1.045, { duration: 2600, easing: Easing.inOut(Easing.sin) }), -1, true);
+      breathe.value = withRepeat(
+        withTiming(1.045, { duration: 2600, easing: Easing.inOut(Easing.sin) }),
+        -1,
+        true,
+      );
       spin.value = withRepeat(withTiming(1, { duration: 16000, easing: Easing.linear }), -1, false);
     } else {
       cancelAnimation(breathe);
@@ -47,12 +51,25 @@ export function ArtworkOrb({ seed, size, playing }: Props) {
   }, [playing, breathe, spin]);
 
   const orbStyle = useAnimatedStyle(() => ({ transform: [{ scale: breathe.value }] }));
-  const sheenStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${spin.value * 360}deg` }] }));
+  const sheenStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${spin.value * 360}deg` }],
+  }));
 
   return (
-    <Animated.View style={[{ width: size, height: size, borderRadius: size / 2 }, glowShadow(glowColor, 0.55), orbStyle]}>
+    <Animated.View
+      style={[
+        { width: size, height: size, borderRadius: size / 2 },
+        glowShadow(glowColor, 0.55),
+        orbStyle,
+      ]}
+    >
       <View style={{ width: size, height: size, borderRadius: size / 2, overflow: 'hidden' }}>
-        <LinearGradient colors={[c1, c2, c3]} start={{ x: 0.1, y: 0.1 }} end={{ x: 0.9, y: 0.9 }} style={{ flex: 1 }} />
+        <LinearGradient
+          colors={[c1, c2, c3]}
+          start={{ x: 0.1, y: 0.1 }}
+          end={{ x: 0.9, y: 0.9 }}
+          style={{ flex: 1 }}
+        />
 
         {/* Rotating diagonal sheen */}
         <Animated.View style={[{ position: 'absolute', width: size, height: size }, sheenStyle]}>

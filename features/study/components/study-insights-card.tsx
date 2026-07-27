@@ -34,7 +34,10 @@ export function StudyInsightsCard({ insights }: { insights: StudyInsights }) {
       icon: Star,
       tint: '#eab308',
       label: 'Avg focus',
-      value: insights.avgFocusRating != null ? `${insights.avgFocusRating.toFixed(1)}★` : 'Rate sessions',
+      value:
+        insights.avgFocusRating != null
+          ? `${insights.avgFocusRating.toFixed(1)}★`
+          : 'Rate sessions',
     },
     {
       key: 'wow',
@@ -52,8 +55,15 @@ export function StudyInsightsCard({ insights }: { insights: StudyInsights }) {
         {tiles.map((tile) => {
           const Icon = tile.icon;
           return (
-            <View key={tile.key} className="gap-1.5 rounded-2xl bg-muted p-3" style={{ width: '48%' }}>
-              <View className="h-8 w-8 items-center justify-center rounded-lg" style={{ backgroundColor: alpha(tile.tint, 0.16) }}>
+            <View
+              key={tile.key}
+              className="gap-1.5 rounded-2xl bg-muted p-3"
+              style={{ width: '48%' }}
+            >
+              <View
+                className="h-8 w-8 items-center justify-center rounded-lg"
+                style={{ backgroundColor: alpha(tile.tint, 0.16) }}
+              >
                 <Icon size={16} color={tile.tint} />
               </View>
               <Text className="font-sora-bold text-foreground" numberOfLines={1}>

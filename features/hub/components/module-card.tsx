@@ -34,13 +34,21 @@ export function ModuleCard({ module, onPress }: Props) {
 
   if (!isReady) {
     return (
-      <View className="flex-1 gap-3 rounded-3xl border border-border bg-card p-4" style={{ opacity: 0.6, minHeight: 130 }}>
+      <View
+        className="flex-1 gap-3 rounded-3xl border border-border bg-card p-4"
+        style={{ opacity: 0.6, minHeight: 130 }}
+      >
         <View className="flex-row items-start justify-between">
-          <View className="h-11 w-11 items-center justify-center rounded-2xl" style={{ backgroundColor: alpha(tint, 0.14) }}>
+          <View
+            className="h-11 w-11 items-center justify-center rounded-2xl"
+            style={{ backgroundColor: alpha(tint, 0.14) }}
+          >
             <Icon color={tint} size={22} strokeWidth={2} />
           </View>
           <View className="rounded-full bg-muted px-2 py-0.5">
-            <Text className="text-[10px] font-sora-semibold uppercase tracking-wide text-muted-foreground">Soon</Text>
+            <Text className="font-sora-semibold text-[10px] uppercase tracking-wide text-muted-foreground">
+              Soon
+            </Text>
           </View>
         </View>
         <View className="mt-auto gap-0.5">
@@ -66,11 +74,41 @@ export function ModuleCard({ module, onPress }: Props) {
       style={[animatedStyle, { flex: 1, borderRadius: 24, minHeight: 130 }, glowShadow(tint, 0.28)]}
     >
       <View style={{ flex: 1, borderRadius: 24, overflow: 'hidden' }}>
-        <LinearGradient colors={[c1, c2, c3]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1, padding: 16 }}>
-          <View pointerEvents="none" style={{ position: 'absolute', top: -30, right: -20, width: 100, height: 100, borderRadius: 50, backgroundColor: alpha('#ffffff', 0.13) }} />
-          <View pointerEvents="none" style={{ position: 'absolute', bottom: -34, left: -14, width: 90, height: 90, borderRadius: 45, backgroundColor: alpha('#ffffff', 0.08) }} />
+        <LinearGradient
+          colors={[c1, c2, c3]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{ flex: 1, padding: 16 }}
+        >
+          <View
+            pointerEvents="none"
+            style={{
+              position: 'absolute',
+              top: -30,
+              right: -20,
+              width: 100,
+              height: 100,
+              borderRadius: 50,
+              backgroundColor: alpha('#ffffff', 0.13),
+            }}
+          />
+          <View
+            pointerEvents="none"
+            style={{
+              position: 'absolute',
+              bottom: -34,
+              left: -14,
+              width: 90,
+              height: 90,
+              borderRadius: 45,
+              backgroundColor: alpha('#ffffff', 0.08),
+            }}
+          />
 
-          <View className="h-11 w-11 items-center justify-center rounded-2xl" style={{ backgroundColor: alpha('#ffffff', 0.22) }}>
+          <View
+            className="h-11 w-11 items-center justify-center rounded-2xl"
+            style={{ backgroundColor: alpha('#ffffff', 0.22) }}
+          >
             <Icon color="#ffffff" size={22} strokeWidth={2.2} />
           </View>
           <View className="mt-auto gap-0.5">

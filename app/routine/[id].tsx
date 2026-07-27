@@ -33,7 +33,10 @@ export default function RoutineDetailScreen() {
 
   useEffect(() => {
     if (!routine || name === routine.name || !name.trim()) return;
-    const timeout = setTimeout(() => rename.mutate({ id: routine.id, name: name.trim() }), AUTOSAVE_DELAY_MS);
+    const timeout = setTimeout(
+      () => rename.mutate({ id: routine.id, name: name.trim() }),
+      AUTOSAVE_DELAY_MS,
+    );
     return () => clearTimeout(timeout);
   }, [name]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -71,10 +74,14 @@ export default function RoutineDetailScreen() {
         ]}
       />
 
-      <ScrollView contentContainerClassName="gap-6 px-5 pt-3 pb-10" keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerClassName="gap-6 px-5 pt-3 pb-10"
+        keyboardShouldPersistTaps="handled"
+      >
         <TextInput
           value={name}
           onChangeText={setName}
+          accessibilityLabel="Routine name"
           placeholder="Routine name"
           placeholderTextColor={colors[scheme].mutedForeground}
           style={{ fontSize: 24, fontFamily: 'Sora_700Bold', color: colors[scheme].foreground }}
@@ -91,13 +98,22 @@ export default function RoutineDetailScreen() {
               {routine.habits.map((habit, index) => (
                 <View
                   key={habit.id}
-                  className={index === 0 ? 'flex-row items-center gap-3 py-3' : 'flex-row items-center gap-3 border-t border-border py-3'}
+                  className={
+                    index === 0
+                      ? 'flex-row items-center gap-3 py-3'
+                      : 'flex-row items-center gap-3 border-t border-border py-3'
+                  }
                 >
                   <Text className="text-lg">{habit.emoji ?? '🔥'}</Text>
                   <Text className="flex-1 font-sora-medium" numberOfLines={1}>
                     {habit.name}
                   </Text>
-                  <Pressable onPress={() => move(index, -1)} disabled={index === 0} hitSlop={8} className={index === 0 ? 'opacity-30' : ''}>
+                  <Pressable
+                    onPress={() => move(index, -1)}
+                    disabled={index === 0}
+                    hitSlop={8}
+                    className={index === 0 ? 'opacity-30' : ''}
+                  >
                     <ChevronUp size={18} color={colors[scheme].mutedForeground} />
                   </Pressable>
                   <Pressable
@@ -108,7 +124,10 @@ export default function RoutineDetailScreen() {
                   >
                     <ChevronDown size={18} color={colors[scheme].mutedForeground} />
                   </Pressable>
-                  <Pressable onPress={() => removeHabit.mutate({ routineId: routine.id, habitId: habit.id })} hitSlop={8}>
+                  <Pressable
+                    onPress={() => removeHabit.mutate({ routineId: routine.id, habitId: habit.id })}
+                    hitSlop={8}
+                  >
                     <X size={18} color={colors[scheme].destructive} />
                   </Pressable>
                 </View>

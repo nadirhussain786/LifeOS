@@ -7,6 +7,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/ui/empty-state';
+import { QueryError } from '@/components/ui/query-error';
 import { Fab } from '@/components/ui/fab';
 import { ListSectionHeader } from '@/components/ui/list-section-header';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -35,7 +36,7 @@ export default function TasksScreen() {
   const insets = useSafeAreaInsets();
 
   const { filter, setFilter, searchQuery, setSearchQuery } = useTasksFilterStore();
-  const { data: tasks = [], isLoading } = useTasks();
+  const { data: tasks = [], isLoading, isError, refetch } = useTasks();
   const { complete, reopen, archive, remove } = useTaskMutations();
 
   const bucketDotColor: Record<TaskDueBucket, string | undefined> = {
@@ -50,7 +51,12 @@ export default function TasksScreen() {
       return tasks.map((task) => ({ type: 'task', task }) as const);
     }
     return groupTasksByDueDate(tasks).flatMap((section) => [
-      { type: 'header', bucket: section.bucket, label: section.label, count: section.tasks.length } as const,
+      {
+        type: 'header',
+        bucket: section.bucket,
+        label: section.label,
+        count: section.tasks.length,
+      } as const,
       ...section.tasks.map((task) => ({ type: 'task', task }) as const),
     ]);
   }, [tasks, filter]);
@@ -78,16 +84,30 @@ export default function TasksScreen() {
               <Pressable
                 key={tab.value}
                 onPress={() => setFilter(tab.value)}
-                className={selected ? 'flex-1 items-center rounded-full bg-primary py-2' : 'flex-1 items-center rounded-full py-2'}
+                className={
+                  selected
+                    ? 'flex-1 items-center rounded-full bg-primary py-2'
+                    : 'flex-1 items-center rounded-full py-2'
+                }
               >
-                <Text className={selected ? 'font-sora-semibold text-primary-foreground' : 'text-muted-foreground'}>{tab.label}</Text>
+                <Text
+                  className={
+                    selected
+                      ? 'font-sora-semibold text-primary-foreground'
+                      : 'text-muted-foreground'
+                  }
+                >
+                  {tab.label}
+                </Text>
               </Pressable>
             );
           })}
         </View>
       </View>
 
-      {isLoading ? (
+      {isError ? (
+        <QueryError onRetry={() => refetch()} message="Couldn't load your tasks." />
+      ) : isLoading ? (
         <View className="gap-2.5 px-5">
           <Skeleton className="h-16 w-full rounded-2xl" />
           <Skeleton className="h-16 w-full rounded-2xl" />
@@ -97,7 +117,11 @@ export default function TasksScreen() {
         <EmptyState
           icon={CheckCircle2}
           title={filter === 'active' ? 'Nothing to do' : `No ${filter} tasks`}
-          description={filter === 'active' ? 'Enjoy the calm, or add something new.' : 'Tasks will show up here.'}
+          description={
+            filter === 'active'
+              ? 'Enjoy the calm, or add something new.'
+              : 'Tasks will show up here.'
+          }
         />
       ) : (
         <FlashList
@@ -106,12 +130,20 @@ export default function TasksScreen() {
           contentContainerStyle={{ paddingTop: 4, paddingBottom: 120 }}
           renderItem={({ item }) =>
             item.type === 'header' ? (
-              <ListSectionHeader label={item.label} count={item.count} dotColor={bucketDotColor[item.bucket]} />
+              <ListSectionHeader
+                label={item.label}
+                count={item.count}
+                dotColor={bucketDotColor[item.bucket]}
+              />
             ) : (
               <TaskRow
                 task={item.task}
                 onPress={() => router.push(`/task/${item.task.id}`)}
-                onToggleComplete={() => (item.task.status === 'completed' ? reopen.mutate(item.task.id) : complete.mutate(item.task.id))}
+                onToggleComplete={() =>
+                  item.task.status === 'completed'
+                    ? reopen.mutate(item.task.id)
+                    : complete.mutate(item.task.id)
+                }
                 onArchive={() => archive.mutate(item.task.id)}
                 onDelete={() => remove.mutate(item.task.id)}
               />

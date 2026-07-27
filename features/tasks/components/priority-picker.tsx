@@ -21,7 +21,13 @@ function isColored(value: TaskPriority): value is ColoredPriority {
   return value !== 'none';
 }
 
-export function PriorityPicker({ value, onChange }: { value: TaskPriority; onChange: (value: TaskPriority) => void }) {
+export function PriorityPicker({
+  value,
+  onChange,
+}: {
+  value: TaskPriority;
+  onChange: (value: TaskPriority) => void;
+}) {
   return (
     <View className="flex-row gap-2">
       {OPTIONS.map((option) => {
@@ -40,9 +46,15 @@ export function PriorityPicker({ value, onChange }: { value: TaskPriority; onCha
               'flex-1 flex-row items-center justify-center gap-1.5 rounded-full border py-2',
               !color && (selected ? 'border-border bg-surface' : 'border-border bg-transparent'),
             )}
-            style={color ? { borderColor: color, backgroundColor: selected ? color : 'transparent' } : undefined}
+            style={
+              color
+                ? { borderColor: color, backgroundColor: selected ? color : 'transparent' }
+                : undefined
+            }
           >
-            {color && !selected && <View className="h-2 w-2 rounded-full" style={{ backgroundColor: color }} />}
+            {color && !selected && (
+              <View className="h-2 w-2 rounded-full" style={{ backgroundColor: color }} />
+            )}
             <Text
               variant="caption"
               className={cn('font-sora-medium', !textIsWhite && 'text-muted-foreground')}
