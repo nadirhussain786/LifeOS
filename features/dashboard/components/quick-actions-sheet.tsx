@@ -15,6 +15,7 @@ import {
   type LucideIcon,
 } from 'lucide-react-native';
 import { forwardRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -23,7 +24,7 @@ import { colors } from '@/constants/theme';
 import { toDateKey } from '@/lib/date';
 
 type Action = {
-  label: string;
+  labelKey: string;
   icon: LucideIcon;
   getHref: () =>
     | '/task/new'
@@ -34,16 +35,16 @@ type Action = {
 };
 
 const ACTIONS: Action[] = [
-  { label: 'New task', icon: CheckSquare, getHref: () => '/task/new' },
-  { label: 'New note', icon: StickyNote, getHref: () => '/note/new' },
+  { labelKey: 'dashboard.newTask', icon: CheckSquare, getHref: () => '/task/new' },
+  { labelKey: 'dashboard.newNote', icon: StickyNote, getHref: () => '/note/new' },
   {
-    label: 'New journal entry',
+    labelKey: 'dashboard.newJournalEntry',
     icon: BookOpen,
     getHref: () => `/journal/${toDateKey(new Date())}`,
   },
-  { label: 'New habit', icon: Repeat, getHref: () => '/habit/new' },
+  { labelKey: 'dashboard.newHabit', icon: Repeat, getHref: () => '/habit/new' },
   {
-    label: 'New event',
+    labelKey: 'dashboard.newEvent',
     icon: Clock3,
     getHref: () => ({ pathname: '/timeline/event/new', params: { date: toDateKey(new Date()) } }),
   },
@@ -53,6 +54,7 @@ export const QuickActionsSheet = forwardRef<BottomSheetModal>(
   function QuickActionsSheet(_props, ref) {
     const router = useRouter();
     const scheme = useColorScheme() ?? 'light';
+    const { t } = useTranslation();
 
     const renderBackdrop = useCallback(
       (props: BottomSheetBackdropProps) => (
@@ -79,16 +81,16 @@ export const QuickActionsSheet = forwardRef<BottomSheetModal>(
       >
         <BottomSheetView className="gap-1 px-4 pb-8 pt-2">
           <Text variant="subheading" className="px-2 pb-2">
-            Quick actions
+            {t('dashboard.quickActions')}
           </Text>
           {ACTIONS.map((action) => (
             <Pressable
-              key={action.label}
+              key={action.labelKey}
               onPress={() => handleActionPress(action)}
               className="flex-row items-center gap-3 rounded-md px-2 py-3 active:bg-muted"
             >
               <action.icon color={colors[scheme].foreground} size={20} />
-              <Text>{action.label}</Text>
+              <Text>{t(action.labelKey)}</Text>
             </Pressable>
           ))}
         </BottomSheetView>
