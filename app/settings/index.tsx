@@ -34,16 +34,13 @@ import {
   getBiometricLabel,
   isBiometricAvailable,
 } from '@/features/security/lib/biometrics';
+import { LanguageSheet } from '@/features/settings/components/language-sheet';
 import { reloadForDirectionChange } from '@/features/settings/lib/layout-direction';
 import {
   useAppearanceStore,
   type ThemePreference,
 } from '@/features/settings/store/appearance-store';
-import {
-  LANGUAGES,
-  useLanguageStore,
-  type Language,
-} from '@/features/settings/store/language-store';
+import { useLanguageStore, type Language } from '@/features/settings/store/language-store';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 /** Public privacy-policy URL (PRIVACY.md in the repo). Replace with your hosted
@@ -79,6 +76,7 @@ export default function SettingsScreen() {
   const [bioLabel, setBioLabel] = useState('Biometrics');
 
   const [isExporting, setIsExporting] = useState(false);
+  const [languageSheetOpen, setLanguageSheetOpen] = useState(false);
 
   useEffect(() => {
     isBiometricAvailable().then(setBioAvailable);
@@ -88,10 +86,7 @@ export default function SettingsScreen() {
   const toggleAppLock = async (next: boolean) => {
     if (next) {
       if (!bioAvailable) {
-        Alert.alert(
-          'Set up biometrics first',
-          'Add Face ID or a fingerprint in your device settings, then turn on App lock here.',
-        );
+        Alert.alert(t('settings.setUpBiometricsTitle'), t('settings.setUpBiometricsBody'));
         return;
       }
       // Confirm the person can actually authenticate before arming the lock.
@@ -136,20 +131,11 @@ export default function SettingsScreen() {
    * need no restart and stay instant.
    */
   const chooseLanguage = async (language: Language) => {
+    setLanguageSheetOpen(false);
     const directionChanged = await setLanguage(language);
     if (!directionChanged) return;
     if (await reloadForDirectionChange()) return;
     Alert.alert(t('settings.restartTitle'), t('settings.restartBody'));
-  };
-
-  const pickLanguage = () => {
-    Alert.alert(t('settings.language'), undefined, [
-      ...LANGUAGES.map((lng) => ({
-        text: t(`language.${lng}`),
-        onPress: () => void chooseLanguage(lng),
-      })),
-      { text: t('common.cancel'), style: 'cancel' as const },
-    ]);
   };
 
   return (
@@ -202,7 +188,7 @@ export default function SettingsScreen() {
               label={t('settings.language')}
               value={t(`language.${language}`)}
               isFirst
-              onPress={pickLanguage}
+              onPress={() => setLanguageSheetOpen(true)}
             />
           </View>
         </View>
@@ -311,6 +297,13 @@ export default function SettingsScreen() {
           </View>
         </View>
       </ScrollView>
+
+      <LanguageSheet
+        visible={languageSheetOpen}
+        current={language}
+        onClose={() => setLanguageSheetOpen(false)}
+        onSelect={(next) => void chooseLanguage(next)}
+      />
     </View>
   );
 }

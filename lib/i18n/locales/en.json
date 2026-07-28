@@ -531,7 +531,10 @@
     "clearedTitle": "Data cleared",
     "clearedBody": "LifeOS is back to a clean slate.",
     "restartTitle": "Restart to finish switching",
-    "restartBody": "Close and reopen LifeOS to apply the new layout direction."
+    "restartBody": "Close and reopen LifeOS to apply the new layout direction.",
+    "rtlRestartNote": "Choosing اردو or العربية switches LifeOS to a right-to-left layout and restarts the app.",
+    "setUpBiometricsTitle": "Set up biometrics first",
+    "setUpBiometricsBody": "Add Face ID or a fingerprint in your device settings, then turn on App lock here."
   },
   "auth": {
     "welcomeBack": "Welcome back",

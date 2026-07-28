@@ -547,7 +547,10 @@
     "clearedTitle": "تم مسح البيانات",
     "clearedBody": "عاد LifeOS إلى بداية نظيفة.",
     "restartTitle": "أعد التشغيل لإكمال التبديل",
-    "restartBody": "أغلق LifeOS وأعد فتحه لتطبيق اتجاه التخطيط الجديد."
+    "restartBody": "أغلق LifeOS وأعد فتحه لتطبيق اتجاه التخطيط الجديد.",
+    "rtlRestartNote": "اختيار اردو أو العربية يحوّل LifeOS إلى تخطيط من اليمين إلى اليسار ويعيد تشغيل التطبيق.",
+    "setUpBiometricsTitle": "أعدّ القياسات الحيوية أولًا",
+    "setUpBiometricsBody": "أضف Face ID أو بصمة إصبع في إعدادات جهازك، ثم فعّل قفل التطبيق هنا."
   },
   "auth": {
     "welcomeBack": "مرحبًا بعودتك",
