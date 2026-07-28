@@ -1,4 +1,5 @@
 import { addDays, subDays } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -23,6 +24,7 @@ type Props = {
  */
 export function StreakHeatmap({ habit, logs, skips }: Props) {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const logDates = new Set(logs.map((log) => log.logDate));
   const skipDates = new Set(skips.map((skip) => skip.logDate));
 
@@ -84,14 +86,14 @@ export function StreakHeatmap({ habit, logs, skips }: Props) {
       <View className="flex-row items-center gap-3">
         <View className="flex-row items-center gap-1">
           <View className="h-2.5 w-2.5 rounded-sm bg-success" />
-          <Text variant="caption">Done</Text>
+          <Text variant="caption">{t('habits.done')}</Text>
         </View>
         <View className="flex-row items-center gap-1">
           <View
             className="h-2.5 w-2.5 rounded-sm"
             style={{ backgroundColor: colors[scheme].muted }}
           />
-          <Text variant="caption">Skipped</Text>
+          <Text variant="caption">{t('habits.skipped')}</Text>
         </View>
       </View>
     </View>

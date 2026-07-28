@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import { HandCoins } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 
 import { EmptyState } from '@/components/ui/empty-state';
@@ -21,11 +22,6 @@ import type { DebtDirection, DebtWithStatus } from '@/features/budget/types/budg
 
 const DEBT_TINT = '#6366f1';
 
-const FILTER_OPTIONS = [
-  { value: 'borrowed' as const, label: 'You owe' },
-  { value: 'lent' as const, label: 'Owes you' },
-];
-
 /** Urgency ordering for the active list: overdue → due soon → upcoming → no date. */
 const STATUS_ORDER: Record<string, number> = { overdue: 0, due_soon: 1, upcoming: 2, no_date: 3 };
 
@@ -39,9 +35,15 @@ function sortByUrgency(a: DebtWithStatus, b: DebtWithStatus): number {
 export default function DebtsScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const { data: settings } = useBudgetSettings();
   const { debts, totals, isLoading } = useDebts();
   const currency = settings?.currency ?? '$';
+
+  const filterOptions = [
+    { value: 'borrowed' as const, label: t('budget.youOwe') },
+    { value: 'lent' as const, label: t('budget.owesYou') },
+  ];
 
   const [filter, setFilter] = useState<DebtDirection>('borrowed');
 
@@ -57,7 +59,11 @@ export default function DebtsScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <ScreenHeader title="Borrow & Lend" eyebrow="Budget" tint={moduleTint('budget', scheme)} />
+      <ScreenHeader
+        title={t('budget.borrowLend')}
+        eyebrow={t('budget.title')}
+        tint={moduleTint('budget', scheme)}
+      />
 
       {isLoading ? (
         <View className="gap-3 px-4 pt-2">
@@ -67,10 +73,10 @@ export default function DebtsScreen() {
       ) : debts.length === 0 ? (
         <EmptyState
           icon={HandCoins}
-          title="Track who owes who"
-          description="Log money you've borrowed or lent, set a payback deadline, and get reminded before it's due."
+          title={t('budget.trackWhoOwes')}
+          description={t('budget.debtsEmptyBody')}
           tint={DEBT_TINT}
-          actionLabel="Add an IOU"
+          actionLabel={t('budget.addAnIou')}
           onAction={() => router.push('/budget/debts/new')}
         />
       ) : (
@@ -86,16 +92,14 @@ export default function DebtsScreen() {
                   className="font-sora-semibold uppercase tracking-wide"
                   style={{ color: alpha('#ffffff', 0.85), fontSize: 12 }}
                 >
-                  Net position
+                  {t('budget.netPosition')}
                 </Text>
                 <Text className="font-sora-extrabold text-4xl" style={{ color: '#ffffff' }}>
                   {totals.netCents >= 0 ? '+' : '-'}
                   {formatMoney(Math.abs(totals.netCents), currency)}
                 </Text>
                 <Text style={{ color: alpha('#ffffff', 0.85), fontSize: 12 }}>
-                  {totals.netCents >= 0
-                    ? "you're owed more than you owe"
-                    : 'you owe more than you’re owed'}
+                  {totals.netCents >= 0 ? t('budget.owedMore') : t('budget.oweMore')}
                 </Text>
               </View>
               <View
@@ -103,8 +107,8 @@ export default function DebtsScreen() {
                 style={{ backgroundColor: alpha('#ffffff', 0.15) }}
               >
                 {[
-                  { label: 'You owe', value: totals.oweCents },
-                  { label: 'Owes you', value: totals.owedCents },
+                  { label: t('budget.youOwe'), value: totals.oweCents },
+                  { label: t('budget.owesYou'), value: totals.owedCents },
                 ].map((item) => (
                   <View key={item.label} className="flex-1 items-center gap-1">
                     <Text className="font-sora-bold" style={{ color: '#ffffff' }}>
@@ -120,7 +124,7 @@ export default function DebtsScreen() {
           </HeroCard>
 
           <Segmented
-            options={FILTER_OPTIONS}
+            options={filterOptions}
             value={filter}
             onChange={setFilter}
             activeColor={DEBT_TINT}
@@ -128,9 +132,7 @@ export default function DebtsScreen() {
 
           {active.length === 0 ? (
             <Text variant="muted" className="px-1">
-              {filter === 'borrowed'
-                ? 'Nothing outstanding — you owe no one right now.'
-                : 'No one owes you right now.'}
+              {filter === 'borrowed' ? t('budget.nothingOwed') : t('budget.noOneOwesYou')}
             </Text>
           ) : (
             <View className="gap-2.5">
@@ -147,7 +149,7 @@ export default function DebtsScreen() {
           {settled.length > 0 && (
             <View className="gap-2.5">
               <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-                Settled
+                {t('debtStatus.settled')}
               </Text>
               {settled.map((debt) => (
                 <DebtCard
@@ -161,7 +163,10 @@ export default function DebtsScreen() {
         </ScrollView>
       )}
 
-      <Fab onPress={() => router.push('/budget/debts/new')} accessibilityLabel="Add IOU" />
+      <Fab
+        onPress={() => router.push('/budget/debts/new')}
+        accessibilityLabel={t('budget.addIou')}
+      />
     </View>
   );
 }

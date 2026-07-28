@@ -1,4 +1,5 @@
 import { ArrowDownLeft, ArrowUpRight, BellRing } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
 import { ProgressBar } from '@/components/ui/progress-bar';
@@ -19,6 +20,7 @@ type Props = {
  * partially-paid debt also shows a slim progress bar. */
 export function DebtCard({ debt, onPress }: Props) {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const borrowed = debt.direction === 'borrowed';
   const Icon = borrowed ? ArrowUpRight : ArrowDownLeft;
   const tint = debt.isSettled ? colors[scheme].success : statusTint(debt.status);
@@ -41,7 +43,7 @@ export function DebtCard({ debt, onPress }: Props) {
           <Text className="font-sora-semibold text-foreground" numberOfLines={1}>
             {debt.counterparty}
           </Text>
-          <Text variant="caption">{borrowed ? 'You owe' : 'Owes you'}</Text>
+          <Text variant="caption">{borrowed ? t('budget.youOwe') : t('budget.owesYou')}</Text>
         </View>
         <View className="items-end">
           <Text
@@ -55,7 +57,7 @@ export function DebtCard({ debt, onPress }: Props) {
               <BellRing size={11} color={tint} />
             )}
             <Text className="font-sora-medium" style={{ color: tint, fontSize: 11 }}>
-              {statusLabel(debt)}
+              {statusLabel(debt, t)}
             </Text>
           </View>
         </View>

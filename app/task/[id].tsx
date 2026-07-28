@@ -11,6 +11,7 @@ import {
   Trash2,
 } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, Switch, TextInput, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -39,6 +40,7 @@ export default function TaskDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const keyboardHeight = useKeyboardHeight();
   const { data: task } = useTask(id);
   const { update, archive, remove } = useTaskMutations();
@@ -78,7 +80,7 @@ export default function TaskDetailScreen() {
       <Stack.Screen options={{ headerShown: false }} />
 
       <ScreenHeader
-        eyebrow="Task"
+        eyebrow={t('tasks.detailTitle')}
         right={
           <View className="flex-row gap-4">
             {task.dueDate && (
@@ -120,8 +122,8 @@ export default function TaskDetailScreen() {
           value={title}
           onChangeText={setTitle}
           multiline
-          accessibilityLabel="Task title"
-          placeholder="Task title"
+          accessibilityLabel={t('tasks.taskTitle')}
+          placeholder={t('tasks.taskTitle')}
           placeholderTextColor={colors[scheme].mutedForeground}
           style={{
             fontSize: 26,
@@ -132,14 +134,14 @@ export default function TaskDetailScreen() {
         />
 
         <View className="rounded-2xl border border-border bg-card px-4 shadow-e1">
-          <AttributeRow icon={Flag} label="Priority" isFirst>
+          <AttributeRow icon={Flag} label={t('fields.priority')} isFirst>
             <PriorityPicker
               value={task.priority}
               onChange={(priority) => update.mutate({ id: task.id, input: { priority } })}
             />
           </AttributeRow>
 
-          <AttributeRow icon={CalendarDays} label="Due date">
+          <AttributeRow icon={CalendarDays} label={t('fields.dueDate')}>
             <DueDateField
               value={task.dueDate}
               hasTime={task.hasDueTime}
@@ -150,10 +152,10 @@ export default function TaskDetailScreen() {
           </AttributeRow>
 
           {task.dueDate !== null && (
-            <AttributeRow icon={Bell} label="Reminder">
+            <AttributeRow icon={Bell} label={t('fields.reminder')}>
               <View className="flex-row items-center justify-between">
                 <Text variant="muted">
-                  Notify me {task.hasDueTime ? 'at the due time' : 'at 9:00 AM that day'}
+                  {task.hasDueTime ? t('tasks.notifyAtDueTime') : t('tasks.notifyAtNineAm')}
                 </Text>
                 <Switch
                   value={task.reminderEnabled}
@@ -165,7 +167,7 @@ export default function TaskDetailScreen() {
             </AttributeRow>
           )}
 
-          <AttributeRow icon={Repeat} label="Repeat">
+          <AttributeRow icon={Repeat} label={t('fields.repeat')}>
             <RecurrencePicker
               value={task.recurrenceFrequency}
               onChange={(recurrenceFrequency) =>
@@ -174,7 +176,7 @@ export default function TaskDetailScreen() {
             />
           </AttributeRow>
 
-          <AttributeRow icon={Tag} label="Category">
+          <AttributeRow icon={Tag} label={t('fields.category')}>
             <CategoryPicker
               value={task.categoryId}
               onChange={(categoryId) => update.mutate({ id: task.id, input: { categoryId } })}
@@ -186,15 +188,15 @@ export default function TaskDetailScreen() {
           <View className="flex-row items-center gap-1.5">
             <StickyNote size={13} color={colors[scheme].mutedForeground} />
             <Text variant="micro" className="font-sora-semibold">
-              Notes
+              {t('fields.notes')}
             </Text>
           </View>
           <TextInput
             value={notes}
             onChangeText={setNotes}
             multiline
-            accessibilityLabel="Task notes"
-            placeholder="Add notes…"
+            accessibilityLabel={t('tasks.taskNotes')}
+            placeholder={t('tasks.addNotes')}
             placeholderTextColor={colors[scheme].mutedForeground}
             className="min-h-24 rounded-2xl border border-border bg-card p-4 text-base text-foreground shadow-e1"
             textAlignVertical="top"

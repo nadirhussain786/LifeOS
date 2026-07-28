@@ -1,4 +1,5 @@
 import { Quote } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { Skeleton } from '@/components/ui/skeleton';
@@ -10,10 +11,11 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export function DailyQuoteWidget() {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const { data, isLoading } = useDailyQuote();
 
   return (
-    <WidgetCard icon={Quote} title="Daily quote" tint={moduleTint('journal', scheme)}>
+    <WidgetCard icon={Quote} title={t('dashboard.dailyQuote')} tint={moduleTint('journal', scheme)}>
       {isLoading || !data ? (
         <Skeleton className="h-10 w-full" />
       ) : (

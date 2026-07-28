@@ -1,5 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { Ban, Clock, Gauge, Hash, MapPin, ToggleLeft } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -7,13 +8,13 @@ import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import type { HabitType } from '@/features/habits/types/habit.types';
 
-const OPTIONS: { value: HabitType; label: string; icon: typeof Hash }[] = [
-  { value: 'boolean', label: 'Yes / No', icon: ToggleLeft },
-  { value: 'count', label: 'Count', icon: Hash },
-  { value: 'duration', label: 'Duration', icon: Clock },
-  { value: 'distance', label: 'Distance', icon: MapPin },
-  { value: 'time', label: 'Time of day', icon: Gauge },
-  { value: 'negative', label: 'Avoid', icon: Ban },
+const OPTIONS: { value: HabitType; labelKey: string; icon: typeof Hash }[] = [
+  { value: 'boolean', labelKey: 'habitType.boolean', icon: ToggleLeft },
+  { value: 'count', labelKey: 'habitType.count', icon: Hash },
+  { value: 'duration', labelKey: 'habitType.duration', icon: Clock },
+  { value: 'distance', labelKey: 'habitType.distance', icon: MapPin },
+  { value: 'time', labelKey: 'habitType.time', icon: Gauge },
+  { value: 'negative', labelKey: 'habitType.avoid', icon: Ban },
 ];
 
 export function HabitTypePicker({
@@ -24,6 +25,7 @@ export function HabitTypePicker({
   onChange: (value: HabitType) => void;
 }) {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
 
   return (
     <View className="flex-row flex-wrap gap-2">
@@ -54,7 +56,7 @@ export function HabitTypePicker({
                 color: selected ? colors[scheme].accentForeground : colors[scheme].mutedForeground,
               }}
             >
-              {option.label}
+              {t(option.labelKey)}
             </Text>
           </Pressable>
         );

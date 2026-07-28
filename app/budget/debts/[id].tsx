@@ -2,6 +2,7 @@ import { format } from 'date-fns';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { CheckCircle2, Pencil, RotateCcw, Trash2 } from 'lucide-react-native';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,7 @@ export default function DebtDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const { debts } = useDebts();
   const { addPayment, markSettled, markReopened, removeDebt } = useDebtMutations();
 
@@ -39,30 +41,34 @@ export default function DebtDetailScreen() {
   };
 
   const confirmDelete = () => {
-    Alert.alert('Delete this IOU?', `The record for "${debt.counterparty}" will be removed.`, [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () => (removeDebt.mutate(debt.id), router.back()),
-      },
-    ]);
+    Alert.alert(
+      t('budget.deleteIouTitle'),
+      t('budget.deleteIouBody', { name: debt.counterparty }),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: () => (removeDebt.mutate(debt.id), router.back()),
+        },
+      ],
+    );
   };
 
   return (
     <View className="flex-1 bg-background">
       <ScreenHeader
-        eyebrow="Borrow & Lend"
+        eyebrow={t('budget.borrowLend')}
         tint={moduleTint('budget', scheme)}
         actions={[
           {
             icon: Pencil,
-            label: 'Edit IOU',
+            label: t('budget.editIou'),
             onPress: () => router.push(`/budget/debts/new?id=${debt.id}`),
           },
           {
             icon: Trash2,
-            label: 'Delete IOU',
+            label: t('budget.deleteIou'),
             onPress: confirmDelete,
             tint: colors[scheme].destructive,
           },
@@ -83,17 +89,22 @@ export default function DebtDetailScreen() {
                   debt.currency,
                 )}
               </Text>
-              <Text variant="caption">{debt.isSettled ? 'settled' : 'remaining'}</Text>
+              <Text variant="caption">
+                {debt.isSettled ? t('budget.settledLower') : t('budget.remaining')}
+              </Text>
             </View>
           </ProgressRing>
           <View className="items-center gap-1">
             <Text className="font-sora-bold text-2xl text-foreground">{debt.counterparty}</Text>
             <Text variant="muted">
-              {borrowed ? 'You owe' : 'Owes you'} {formatMoney(debt.principalCents, debt.currency)}
-              {debt.dueDate ? ` · due ${format(debt.dueDate, 'MMM d, yyyy')}` : ''}
+              {borrowed ? t('budget.youOwe') : t('budget.owesYou')}{' '}
+              {formatMoney(debt.principalCents, debt.currency)}
+              {debt.dueDate
+                ? ` · ${t('budget.dueOn', { date: format(debt.dueDate, 'MMM d, yyyy') })}`
+                : ''}
             </Text>
             <Text className="font-sora-semibold" style={{ color: tint }}>
-              {statusLabel(debt)}
+              {statusLabel(debt, t)}
             </Text>
           </View>
         </View>
@@ -109,7 +120,9 @@ export default function DebtDetailScreen() {
             <View className="flex-row items-center justify-center gap-2">
               <CheckCircle2 size={18} color="#22c55e" />
               <Text className="font-sora-medium text-foreground">
-                Settled{debt.settledAt ? ` on ${format(debt.settledAt, 'MMM d, yyyy')}` : ''}
+                {debt.settledAt
+                  ? t('budget.settledOn', { date: format(debt.settledAt, 'MMM d, yyyy') })
+                  : t('debtStatus.settled')}
               </Text>
             </View>
             <Pressable
@@ -117,14 +130,16 @@ export default function DebtDetailScreen() {
               className="flex-row items-center justify-center gap-2 rounded-2xl border border-border py-3"
             >
               <RotateCcw size={15} color={colors[scheme].mutedForeground} />
-              <Text className="font-sora-medium text-muted-foreground">Reopen this IOU</Text>
+              <Text className="font-sora-medium text-muted-foreground">
+                {t('budget.reopenIou')}
+              </Text>
             </Pressable>
           </View>
         ) : (
           <View className="gap-3">
             <View className="gap-2.5">
               <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-                Record a payment
+                {t('budget.recordPayment')}
               </Text>
               <View className="flex-row items-center gap-2">
                 <View className="flex-1 flex-row items-center gap-2 rounded-2xl border border-border bg-card px-4 py-3">
@@ -134,7 +149,7 @@ export default function DebtDetailScreen() {
                   <TextInput
                     value={payText}
                     onChangeText={setPayText}
-                    accessibilityLabel="Payment amount"
+                    accessibilityLabel={t('budget.paymentAmount')}
                     placeholder="0"
                     keyboardType="decimal-pad"
                     placeholderTextColor={colors[scheme].mutedForeground}
@@ -143,7 +158,7 @@ export default function DebtDetailScreen() {
                   />
                 </View>
                 <Button
-                  label="Add"
+                  label={t('common.add')}
                   onPress={recordPayment}
                   disabled={payCents <= 0}
                   size="md"
@@ -151,13 +166,15 @@ export default function DebtDetailScreen() {
                 />
               </View>
               <Text variant="caption">
-                {borrowed ? 'Log what you paid back' : 'Log what they paid you'} —{' '}
-                {formatMoney(debt.remainingCents, debt.currency)} left.
+                {borrowed ? t('budget.logYouPaid') : t('budget.logTheyPaid')} —{' '}
+                {t('budget.amountLeft', {
+                  amount: formatMoney(debt.remainingCents, debt.currency),
+                })}
               </Text>
             </View>
 
             <GradientButton
-              label="Mark fully settled"
+              label={t('budget.markSettled')}
               tint="#22c55e"
               icon={CheckCircle2}
               onPress={() => markSettled.mutate(debt.id)}

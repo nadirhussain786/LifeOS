@@ -1,6 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { Plus } from 'lucide-react-native';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, ScrollView, TextInput, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -39,6 +40,7 @@ export function CategoryPicker({
   onDeleteCategory,
 }: Props) {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const [isAdding, setIsAdding] = useState(false);
   const [name, setName] = useState('');
 
@@ -55,14 +57,14 @@ export function CategoryPicker({
   };
 
   const confirmDelete = (category: CategoryOption) => {
-    Alert.alert(
-      'Delete category?',
-      `"${category.name}" will no longer be selectable. Tasks or notes already using it keep it.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: () => onDeleteCategory(category.id) },
-      ],
-    );
+    Alert.alert(t('category.deleteTitle'), t('category.deleteBody', { name: category.name }), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('common.delete'),
+        style: 'destructive',
+        onPress: () => onDeleteCategory(category.id),
+      },
+    ]);
   };
 
   // The assigned category may have been soft-deleted elsewhere and dropped
@@ -85,7 +87,9 @@ export function CategoryPicker({
           value === null ? 'border-foreground bg-foreground' : 'border-border',
         )}
       >
-        <Text className={value === null ? 'text-background' : 'text-muted-foreground'}>None</Text>
+        <Text className={value === null ? 'text-background' : 'text-muted-foreground'}>
+          {t('fields.none')}
+        </Text>
       </Pressable>
 
       {displayedCategories.map((category) => {
@@ -125,8 +129,8 @@ export function CategoryPicker({
           <TextInput
             value={name}
             onChangeText={setName}
-            accessibilityLabel="Category name"
-            placeholder="Category name"
+            accessibilityLabel={t('category.name')}
+            placeholder={t('category.name')}
             placeholderTextColor={colors[scheme].mutedForeground}
             autoFocus
             onSubmitEditing={confirmNewCategory}
@@ -140,7 +144,7 @@ export function CategoryPicker({
           className="flex-row items-center gap-1 rounded-full border border-dashed border-border px-3 py-1.5"
         >
           <Plus size={14} color={colors[scheme].mutedForeground} />
-          <Text variant="muted">New</Text>
+          <Text variant="muted">{t('category.new')}</Text>
         </Pressable>
       )}
     </ScrollView>

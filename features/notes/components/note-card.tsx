@@ -1,4 +1,5 @@
 import { Archive, ArchiveRestore, Star, Trash2 } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -19,6 +20,7 @@ type Props = {
 
 export function NoteCard({ note, categoryColor, onPress, onDelete, onToggleArchive }: Props) {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const relativeTime = useRelativeTime(new Date(note.updatedAt));
 
   return (
@@ -57,7 +59,7 @@ export function NoteCard({ note, categoryColor, onPress, onDelete, onToggleArchi
         )}
         <View className="flex-row items-center justify-between gap-2">
           <Text className="flex-1 font-sora-semibold" numberOfLines={1}>
-            {note.title || 'Untitled note'}
+            {note.title || t('notes.untitled')}
           </Text>
           {note.isPinned ? (
             <Star size={14} color={colors[scheme].accent} fill={colors[scheme].accent} />

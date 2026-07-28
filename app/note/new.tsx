@@ -2,6 +2,7 @@ import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { Bell, Star, Tag } from 'lucide-react-native';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
@@ -18,6 +19,7 @@ import { useKeyboardHeight } from '@/hooks/use-keyboard-height';
 export default function NewNoteScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const keyboardHeight = useKeyboardHeight();
   const { create } = useNoteMutations();
 
@@ -44,7 +46,7 @@ export default function NewNoteScreen() {
   return (
     <View className="flex-1 bg-background">
       <SheetHeader
-        title="New Note"
+        title={t('notes.newNote')}
         right={
           <Pressable
             onPress={() => setIsPinned((pinned) => !pinned)}
@@ -70,8 +72,8 @@ export default function NewNoteScreen() {
           <TextInput
             value={title}
             onChangeText={setTitle}
-            accessibilityLabel="Note title"
-            placeholder="Note title"
+            accessibilityLabel={t('notes.noteTitle')}
+            placeholder={t('notes.noteTitle')}
             placeholderTextColor={colors[scheme].mutedForeground}
             autoFocus
             multiline
@@ -92,10 +94,10 @@ export default function NewNoteScreen() {
         </View>
 
         <View className="rounded-2xl border border-border bg-card px-4">
-          <AttributeRow icon={Tag} label="Category" isFirst>
+          <AttributeRow icon={Tag} label={t('fields.category')} isFirst>
             <NoteCategoryPicker value={categoryId} onChange={setCategoryId} />
           </AttributeRow>
-          <AttributeRow icon={Bell} label="Reminder">
+          <AttributeRow icon={Bell} label={t('fields.reminder')}>
             <ReminderPicker value={reminderAt} onChange={setReminderAt} />
           </AttributeRow>
         </View>
@@ -104,15 +106,15 @@ export default function NewNoteScreen() {
           value={body}
           onChangeText={setBody}
           multiline
-          accessibilityLabel="Note body"
-          placeholder="Write something…"
+          accessibilityLabel={t('notes.noteBody')}
+          placeholder={t('notes.writeSomething')}
           placeholderTextColor={colors[scheme].mutedForeground}
           className="min-h-32 rounded-2xl border border-border bg-card p-4 text-base text-foreground"
           textAlignVertical="top"
         />
 
         <Button
-          label="Add note"
+          label={t('notes.addNote')}
           onPress={handleAdd}
           disabled={!title.trim()}
           size="lg"

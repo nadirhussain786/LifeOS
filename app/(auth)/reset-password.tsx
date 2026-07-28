@@ -1,6 +1,7 @@
 import { useURL } from 'expo-linking';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
@@ -26,6 +27,7 @@ function parseRecoveryTokens(url: string): { accessToken: string; refreshToken: 
 export default function ResetPasswordScreen() {
   const router = useRouter();
   const url = useURL();
+  const { t } = useTranslation();
   const updatePassword = useAuthStore((s) => s.updatePassword);
   const splashComplete = useSplashStore((s) => s.complete);
 
@@ -66,11 +68,11 @@ export default function ResetPasswordScreen() {
 
   const handleUpdate = async () => {
     if (password.length < 6) {
-      setError('Password must be at least 6 characters.');
+      setError(t('auth.passwordMin'));
       return;
     }
     if (password !== confirm) {
-      setError('Passwords don’t match.');
+      setError(t('auth.passwordsDontMatch'));
       return;
     }
     setBusy(true);
@@ -81,8 +83,8 @@ export default function ResetPasswordScreen() {
       setError(result.error);
       return;
     }
-    Alert.alert('Password updated', 'You’re all set.', [
-      { text: 'Continue', onPress: () => router.replace('/(tabs)') },
+    Alert.alert(t('auth.passwordUpdated'), t('auth.allSet'), [
+      { text: t('common.continue'), onPress: () => router.replace('/(tabs)') },
     ]);
   };
 
@@ -96,19 +98,17 @@ export default function ResetPasswordScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View className="gap-2">
-          <Text variant="heading">Set a new password</Text>
-          <Text variant="muted">Choose a new password for your account.</Text>
+          <Text variant="heading">{t('auth.setNewPassword')}</Text>
+          <Text variant="muted">{t('auth.chooseNewPassword')}</Text>
         </View>
 
         {checking ? (
-          <Text variant="muted">Verifying your reset link…</Text>
+          <Text variant="muted">{t('auth.verifyingLink')}</Text>
         ) : !ready ? (
           <View className="gap-4">
-            <Text>
-              This reset link is invalid or has expired. Request a new one from the sign-in screen.
-            </Text>
+            <Text>{t('auth.linkInvalid')}</Text>
             <Button
-              label="Back to sign in"
+              label={t('auth.backToSignIn')}
               variant="accent"
               size="lg"
               onPress={() => router.replace('/(auth)/login')}
@@ -117,19 +117,19 @@ export default function ResetPasswordScreen() {
         ) : (
           <View className="gap-4">
             <AuthField
-              label="New password"
+              label={t('auth.newPassword')}
               value={password}
               onChangeText={setPassword}
-              placeholder="At least 6 characters"
+              placeholder={t('auth.atLeast6')}
               secure
               autoComplete="new-password"
               autoFocus={splashComplete}
             />
             <AuthField
-              label="Confirm password"
+              label={t('auth.confirmPassword')}
               value={confirm}
               onChangeText={setConfirm}
-              placeholder="Re-enter your password"
+              placeholder={t('auth.reenterPassword')}
               secure
               autoComplete="new-password"
             />
@@ -139,7 +139,7 @@ export default function ResetPasswordScreen() {
               </Text>
             )}
             <Button
-              label={busy ? 'Updating…' : 'Update password'}
+              label={busy ? t('auth.updating') : t('auth.updatePassword')}
               variant="accent"
               size="lg"
               disabled={busy}

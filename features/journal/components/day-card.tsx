@@ -1,4 +1,5 @@
 import { format, isToday, parseISO } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -14,6 +15,7 @@ type Props = {
 
 export function DayCard({ entry, onPress }: Props) {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const date = parseISO(entry.entryDate);
   const snippet = entry.body.trim().slice(0, 90);
   const tint = entry.mood ? MOOD_TINT[entry.mood] : colors[scheme].mutedForeground;
@@ -49,9 +51,9 @@ export function DayCard({ entry, onPress }: Props) {
                 : 'font-journal-italic text-[15px] text-muted-foreground'
             }
           >
-            {snippet || 'No reflection written'}
+            {snippet || t('journal.noReflection')}
           </Text>
-          {isToday(date) && <Text variant="caption">Today</Text>}
+          {isToday(date) && <Text variant="caption">{t('common.today')}</Text>}
         </View>
       </Pressable>
     </View>

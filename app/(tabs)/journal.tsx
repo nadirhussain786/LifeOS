@@ -1,6 +1,7 @@
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import { Bell, BookOpen, Flame } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -23,6 +24,7 @@ export default function JournalScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const todayKey = toDateKey(new Date());
 
   const { data: entries = [], isLoading, isError, refetch } = useJournalMonth();
@@ -33,13 +35,13 @@ export default function JournalScreen() {
     <View className="flex-1 bg-background">
       <View style={{ paddingTop: insets.top + 8 }} className="gap-5 px-5 pb-2">
         <View className="flex-row items-center justify-between">
-          <Text variant="heading">Journal</Text>
+          <Text variant="heading">{t('tabs.journal')}</Text>
           <View className="flex-row items-center gap-3">
             {streak > 0 && (
               <View className="flex-row items-center gap-1">
                 <Flame size={14} color={STREAK_COLOR} fill={STREAK_COLOR} />
                 <Text variant="muted" className="font-sora-medium" style={{ color: STREAK_COLOR }}>
-                  {streak}-day streak
+                  {t('dashboard.dayStreak', { count: streak })}
                 </Text>
               </View>
             )}
@@ -50,7 +52,7 @@ export default function JournalScreen() {
         </View>
 
         <Button
-          label={todayEntry ? "Continue today's entry" : "Write today's entry"}
+          label={todayEntry ? t('journal.continueEntry') : t('journal.writeEntry')}
           variant="accent"
           onPress={() => router.push(`/journal/${todayKey}`)}
         />
@@ -81,8 +83,8 @@ export default function JournalScreen() {
           ListEmptyComponent={
             <EmptyState
               icon={BookOpen}
-              title="Start your timeline"
-              description="Every entry becomes part of your life's story — start with today."
+              title={t('journal.startTimeline')}
+              description={t('journal.emptyBody')}
             />
           }
           renderItem={({ item: entry }) => (

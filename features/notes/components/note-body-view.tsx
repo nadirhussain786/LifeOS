@@ -1,5 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { Check } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Platform, Pressable, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -32,11 +33,12 @@ type Props = {
 
 export function NoteBodyView({ body, onToggleChecklist }: Props) {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const lines = parseMarkdownLines(body);
   let checklistIndex = -1;
 
   if (!body.trim()) {
-    return <Text variant="muted">Nothing written yet.</Text>;
+    return <Text variant="muted">{t('notes.nothingWritten')}</Text>;
   }
 
   return (

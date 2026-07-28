@@ -1,5 +1,6 @@
 import { Link, useRouter } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
@@ -11,6 +12,7 @@ import { isSupabaseConfigured } from '@/lib/env';
 
 export default function LoginScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const signIn = useAuthStore((s) => s.signIn);
   const continueAsGuest = useAuthStore((s) => s.continueAsGuest);
   // Don't autofocus while the cold-start splash is still up — it would raise
@@ -24,7 +26,7 @@ export default function LoginScreen() {
 
   const handleSignIn = async () => {
     if (!email.trim() || !password) {
-      setError('Enter your email and password.');
+      setError(t('auth.enterEmailPassword'));
       return;
     }
     setBusy(true);
@@ -45,20 +47,19 @@ export default function LoginScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View className="gap-2">
-          <Text variant="heading">Welcome back</Text>
-          <Text variant="muted">Sign in to sync your LifeOS across devices.</Text>
+          <Text variant="heading">{t('auth.welcomeBack')}</Text>
+          <Text variant="muted">{t('auth.signInSubtitle')}</Text>
         </View>
 
         {!isSupabaseConfigured && (
           <Text variant="caption" className="text-warning">
-            Cloud sync isn&apos;t set up on this build yet. You can continue without an account —
-            everything works offline.
+            {t('auth.cloudSyncOff')}
           </Text>
         )}
 
         <View className="gap-4">
           <AuthField
-            label="Email"
+            label={t('auth.email')}
             value={email}
             onChangeText={setEmail}
             placeholder="you@example.com"
@@ -67,10 +68,10 @@ export default function LoginScreen() {
             autoFocus={splashComplete}
           />
           <AuthField
-            label="Password"
+            label={t('auth.password')}
             value={password}
             onChangeText={setPassword}
-            placeholder="Your password"
+            placeholder={t('auth.passwordPlaceholder')}
             secure
             autoComplete="password"
           />
@@ -78,7 +79,7 @@ export default function LoginScreen() {
           <Link href="/(auth)/forgot-password" asChild>
             <Pressable hitSlop={8} className="self-end">
               <Text variant="caption" className="font-sora-medium">
-                Forgot password?
+                {t('auth.forgotPassword')}
               </Text>
             </Pressable>
           </Link>
@@ -90,7 +91,7 @@ export default function LoginScreen() {
           )}
 
           <Button
-            label={busy ? 'Signing in…' : 'Sign in'}
+            label={busy ? t('auth.signingIn') : t('auth.signIn')}
             variant="accent"
             size="lg"
             disabled={busy}
@@ -99,10 +100,10 @@ export default function LoginScreen() {
         </View>
 
         <View className="flex-row items-center justify-center gap-1">
-          <Text variant="muted">New here?</Text>
+          <Text variant="muted">{t('auth.newHere')}</Text>
           <Link href="/(auth)/sign-up" asChild>
             <Pressable hitSlop={8}>
-              <Text className="font-sora-semibold text-accent">Create an account</Text>
+              <Text className="font-sora-semibold text-accent">{t('auth.createAccount')}</Text>
             </Pressable>
           </Link>
         </View>
@@ -115,7 +116,7 @@ export default function LoginScreen() {
           className="items-center py-2"
         >
           <Text variant="muted" className="underline">
-            Continue without an account
+            {t('auth.continueGuest')}
           </Text>
         </Pressable>
       </ScrollView>

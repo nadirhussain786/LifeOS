@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { DonutChart } from '@/components/ui/donut-chart';
@@ -15,6 +16,7 @@ type Props = {
  * their own slice; the rest fold into a neutral "Other" wedge so the ring never
  * fragments into hairline slivers. */
 export function ExpenseDonut({ categories, totalCents, currency }: Props) {
+  const { t } = useTranslation();
   const top = categories.slice(0, 6);
   const restCents = categories.slice(6).reduce((sum, c) => sum + c.amountCents, 0);
   const slices = [
@@ -28,7 +30,7 @@ export function ExpenseDonut({ categories, totalCents, currency }: Props) {
       ? [
           {
             categoryId: 'rest',
-            label: 'Other',
+            label: t('budget.other'),
             tint: '#94a3b8',
             amountCents: restCents,
             share: restCents / totalCents,
@@ -41,7 +43,7 @@ export function ExpenseDonut({ categories, totalCents, currency }: Props) {
     <View className="items-center gap-4">
       <DonutChart data={slices} size={180} strokeWidth={26}>
         <View className="items-center">
-          <Text variant="caption">Spent</Text>
+          <Text variant="caption">{t('budget.spent')}</Text>
           <Text
             className="font-sora-extrabold text-xl text-foreground"
             style={{ fontVariant: ['tabular-nums'] }}

@@ -1,6 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { Plus } from 'lucide-react-native';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, ScrollView, TextInput, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -21,6 +22,7 @@ type Props = {
  * since a note can carry any number of tags alongside its one category. */
 export function TagPicker({ tags, selectedTagIds, onToggle, onCreateTag, onDeleteTag }: Props) {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const [isAdding, setIsAdding] = useState(false);
   const [name, setName] = useState('');
   const selected = new Set(selectedTagIds);
@@ -33,9 +35,9 @@ export function TagPicker({ tags, selectedTagIds, onToggle, onCreateTag, onDelet
   };
 
   const confirmDelete = (tag: NoteTag) => {
-    Alert.alert('Delete tag?', `"${tag.name}" will be removed from every note.`, [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => onDeleteTag(tag.id) },
+    Alert.alert(t('notes.deleteTagTitle'), t('notes.deleteTagBody', { name: tag.name }), [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('common.delete'), style: 'destructive', onPress: () => onDeleteTag(tag.id) },
     ]);
   };
 
@@ -76,8 +78,8 @@ export function TagPicker({ tags, selectedTagIds, onToggle, onCreateTag, onDelet
           <TextInput
             value={name}
             onChangeText={setName}
-            accessibilityLabel="Tag name"
-            placeholder="Tag name"
+            accessibilityLabel={t('notes.tagName')}
+            placeholder={t('notes.tagName')}
             placeholderTextColor={colors[scheme].mutedForeground}
             autoFocus
             onSubmitEditing={confirmNewTag}
@@ -91,7 +93,7 @@ export function TagPicker({ tags, selectedTagIds, onToggle, onCreateTag, onDelet
           className="flex-row items-center gap-1 rounded-full border border-dashed border-border px-3 py-1.5"
         >
           <Plus size={14} color={colors[scheme].mutedForeground} />
-          <Text variant="muted">Tag</Text>
+          <Text variant="muted">{t('notes.addTag')}</Text>
         </Pressable>
       )}
     </ScrollView>

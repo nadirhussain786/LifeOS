@@ -1,4 +1,6 @@
+import type { TFunction } from 'i18next';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
@@ -28,6 +30,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 export function TodayFocusCard() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
 
   const { data: tasks } = useTodayTasks();
   const { data: habitRow } = useHabitRow();
@@ -45,7 +48,7 @@ export function TodayFocusCard() {
   const ratio = (done: number, total: number) => (total > 0 ? done / total : 0);
 
   // "What next?" — the single most useful action given the current state.
-  const next = resolveNextAction({
+  const next = resolveNextAction(t, {
     pendingTasks: taskTotal - taskDone,
     nextTask: tasks?.upcoming[0],
     hasWrittenToday: reflect?.hasWrittenToday ?? false,
@@ -64,10 +67,10 @@ export function TodayFocusCard() {
           className="font-sora-semibold uppercase tracking-wide text-muted-foreground"
           style={{ letterSpacing: 1 }}
         >
-          Today’s momentum
+          {t('dashboard.todaysMomentum')}
         </Text>
         <Text variant="caption" className="text-muted-foreground">
-          {summaryLine(taskTotal - taskDone, habitTotal - habitDone, water >= goalMl)}
+          {summaryLine(t, taskTotal - taskDone, habitTotal - habitDone, water >= goalMl)}
         </Text>
       </View>
 
@@ -75,19 +78,19 @@ export function TodayFocusCard() {
         <RingStat
           progress={ratio(taskDone, taskTotal)}
           value={taskTotal > 0 ? `${taskDone}/${taskTotal}` : '—'}
-          label="Tasks"
+          label={t('tabs.tasks')}
           tint={colors[scheme].accent}
         />
         <RingStat
           progress={ratio(habitDone, habitTotal)}
           value={habitTotal > 0 ? `${habitDone}/${habitTotal}` : '—'}
-          label="Habits"
+          label={t('tabs.habits')}
           tint={moduleTint('habit', scheme)}
         />
         <RingStat
           progress={goalMl > 0 ? water / goalMl : 0}
           value={`${(water / 1000).toFixed(1)}L`}
-          label="Water"
+          label={t('dashboard.water')}
           tint={moduleTint('water', scheme)}
         />
       </View>
@@ -145,10 +148,15 @@ function RingStat({
 }
 
 /** A single supportive line — never a guilt trip, never a fake urgency count. */
-function summaryLine(pendingTasks: number, pendingHabits: number, waterMet: boolean): string {
+function summaryLine(
+  t: TFunction,
+  pendingTasks: number,
+  pendingHabits: number,
+  waterMet: boolean,
+): string {
   const remaining = Math.max(0, pendingTasks) + Math.max(0, pendingHabits) + (waterMet ? 0 : 1);
-  if (remaining === 0) return 'All caught up ✓';
-  return `${remaining} ${remaining === 1 ? 'thing needs' : 'things need'} you`;
+  if (remaining === 0) return t('dashboard.allCaughtUpCheck');
+  return t('dashboard.thingsNeedYou', { count: remaining });
 }
 
 type NextAction = { eyebrow: string; title: string; cta: string; href: string };
@@ -157,41 +165,44 @@ type NextAction = { eyebrow: string; title: string; cta: string; href: string };
  * Resolve the one action worth surfacing. Order reflects daily rhythm: clear
  * what's due, then reflect, then check in on habits, and finally rest.
  */
-function resolveNextAction(input: {
-  pendingTasks: number;
-  nextTask?: { title: string; dueLabel?: string };
-  hasWrittenToday: boolean;
-  pendingHabits: number;
-}): NextAction {
+function resolveNextAction(
+  t: TFunction,
+  input: {
+    pendingTasks: number;
+    nextTask?: { title: string; dueLabel?: string };
+    hasWrittenToday: boolean;
+    pendingHabits: number;
+  },
+): NextAction {
   if (input.pendingTasks > 0 && input.nextTask) {
     const when = input.nextTask.dueLabel ? ` · ${input.nextTask.dueLabel}` : '';
     return {
-      eyebrow: 'Next up',
+      eyebrow: t('dashboard.nextUp'),
       title: `${input.nextTask.title}${when}`,
-      cta: 'View tasks',
+      cta: t('dashboard.viewTasks'),
       href: '/(tabs)/tasks',
     };
   }
   if (!input.hasWrittenToday) {
     return {
-      eyebrow: 'A quiet moment',
-      title: 'Reflect on how today went',
-      cta: 'Write today’s entry',
+      eyebrow: t('dashboard.quietMoment'),
+      title: t('dashboard.reflectToday'),
+      cta: t('dashboard.writeEntry'),
       href: '/(tabs)/journal',
     };
   }
   if (input.pendingHabits > 0) {
     return {
-      eyebrow: 'Keep it going',
-      title: 'Check in on your habits',
-      cta: 'Open habits',
+      eyebrow: t('dashboard.keepGoing'),
+      title: t('dashboard.checkHabits'),
+      cta: t('dashboard.openHabits'),
       href: '/(tabs)/habits',
     };
   }
   return {
-    eyebrow: 'Nothing pressing',
-    title: 'You’re all caught up — enjoy the day',
-    cta: 'Review your week',
+    eyebrow: t('dashboard.nothingPressing'),
+    title: t('dashboard.allCaughtUp'),
+    cta: t('dashboard.reviewWeek'),
     href: '/(tabs)/hub',
   };
 }

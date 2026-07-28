@@ -1,8 +1,10 @@
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { format } from 'date-fns';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import type { TFunction } from 'i18next';
 import { BellRing, CalendarDays, X } from 'lucide-react-native';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
@@ -18,28 +20,29 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { notificationsAvailable } from '@/lib/notifications';
 import type { DebtDirection } from '@/features/budget/types/budget.types';
 
-const DIRECTION_OPTIONS = [
-  { value: 'borrowed' as const, label: 'I borrowed' },
-  { value: 'lent' as const, label: 'I lent' },
-];
-
 const DEBT_TINT = '#6366f1';
 
-function reminderLabel(days: number): string {
-  if (days === 0) return 'On the day';
-  if (days === 7) return '1 week';
-  return `${days} day${days === 1 ? '' : 's'}`;
+function reminderLabel(days: number, t: TFunction): string {
+  if (days === 0) return t('budget.onTheDay');
+  if (days === 7) return t('budget.oneWeek');
+  return t('budget.daysCount', { count: days });
 }
 
 export default function DebtFormScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const { data: settings } = useBudgetSettings();
   const { debts } = useDebts();
   const { addDebt, editDebt } = useDebtMutations();
   const currency = settings?.currency ?? '$';
   const isEdit = !!id;
+
+  const directionOptions = [
+    { value: 'borrowed' as const, label: t('budget.iBorrowed') },
+    { value: 'lent' as const, label: t('budget.iLent') },
+  ];
 
   const [direction, setDirection] = useState<DebtDirection>('borrowed');
   const [counterparty, setCounterparty] = useState('');
@@ -99,7 +102,7 @@ export default function DebtFormScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <SheetHeader title={isEdit ? 'Edit IOU' : 'New IOU'} />
+      <SheetHeader title={isEdit ? t('budget.editIou') : t('budget.newIou')} />
 
       <ScrollView
         contentContainerClassName="gap-5 px-5 pt-3 pb-10"
@@ -109,12 +112,12 @@ export default function DebtFormScreen() {
         {isEdit ? (
           <View className="items-center">
             <Text variant="muted">
-              {direction === 'borrowed' ? 'You borrowed from' : 'You lent to'}
+              {direction === 'borrowed' ? t('budget.youBorrowedFrom') : t('budget.youLentTo')}
             </Text>
           </View>
         ) : (
           <Segmented
-            options={DIRECTION_OPTIONS}
+            options={directionOptions}
             value={direction}
             onChange={setDirection}
             activeColor={DEBT_TINT}
@@ -124,8 +127,8 @@ export default function DebtFormScreen() {
         <TextInput
           value={counterparty}
           onChangeText={setCounterparty}
-          accessibilityLabel="Person"
-          placeholder="Person's name"
+          accessibilityLabel={t('budget.person')}
+          placeholder={t('budget.personName')}
           placeholderTextColor={colors[scheme].mutedForeground}
           autoFocus={!isEdit}
           style={{ fontSize: 22, fontFamily: 'Sora_700Bold', color: colors[scheme].foreground }}
@@ -133,7 +136,7 @@ export default function DebtFormScreen() {
 
         <View className="gap-2.5">
           <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-            Amount
+            {t('budget.amount')}
           </Text>
           <View className="flex-row items-center gap-2 rounded-2xl border border-border bg-card px-4 py-3">
             <Text className="font-sora-bold text-xl" style={{ color: DEBT_TINT }}>
@@ -142,7 +145,7 @@ export default function DebtFormScreen() {
             <TextInput
               value={amount}
               onChangeText={setAmount}
-              accessibilityLabel="Amount"
+              accessibilityLabel={t('budget.amount')}
               placeholder="0"
               keyboardType="decimal-pad"
               placeholderTextColor={colors[scheme].mutedForeground}
@@ -158,7 +161,7 @@ export default function DebtFormScreen() {
         <View className="flex-row items-center justify-between rounded-2xl border border-border bg-card px-4 py-3">
           <View className="flex-row items-center gap-2">
             <CalendarDays size={16} color={colors[scheme].mutedForeground} />
-            <Text className="font-sora-medium text-foreground">Payback deadline</Text>
+            <Text className="font-sora-medium text-foreground">{t('budget.paybackDeadline')}</Text>
           </View>
           <View className="flex-row items-center gap-2">
             {Platform.OS === 'ios' ? (
@@ -174,7 +177,7 @@ export default function DebtFormScreen() {
                 className="rounded-lg bg-muted px-3 py-1.5"
               >
                 <Text className="font-sora-semibold text-foreground">
-                  {dueDate ? format(dueDate, 'MMM d, yyyy') : 'None'}
+                  {dueDate ? format(dueDate, 'MMM d, yyyy') : t('fields.none')}
                 </Text>
               </Pressable>
             )}
@@ -203,7 +206,7 @@ export default function DebtFormScreen() {
             <View className="flex-row items-center gap-2">
               <BellRing size={14} color={colors[scheme].mutedForeground} />
               <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-                Remind me before
+                {t('budget.remindMeBefore')}
               </Text>
             </View>
             <View className="flex-row flex-wrap gap-2">
@@ -221,14 +224,14 @@ export default function DebtFormScreen() {
                     <Text
                       className={selected ? 'font-sora-medium text-white' : 'text-muted-foreground'}
                     >
-                      {days == null ? 'Off' : reminderLabel(days)}
+                      {days == null ? t('budget.off') : reminderLabel(days, t)}
                     </Text>
                   </Pressable>
                 );
               })}
             </View>
             {!notificationsAvailable && reminderDaysBefore != null && (
-              <Text variant="caption">Reminders aren&apos;t available on this device.</Text>
+              <Text variant="caption">{t('reminders.notAvailable')}</Text>
             )}
           </View>
         )}
@@ -236,14 +239,14 @@ export default function DebtFormScreen() {
         <TextInput
           value={note}
           onChangeText={setNote}
-          accessibilityLabel="Note"
-          placeholder="What's it for? (optional)"
+          accessibilityLabel={t('budget.note')}
+          placeholder={t('budget.whatFor')}
           placeholderTextColor={colors[scheme].mutedForeground}
           className="rounded-2xl border border-border bg-card px-4 py-3 text-foreground"
         />
 
         <Button
-          label={isEdit ? 'Save changes' : 'Add IOU'}
+          label={isEdit ? t('budget.saveChanges') : t('budget.addIou')}
           onPress={save}
           disabled={!canSave}
           size="lg"

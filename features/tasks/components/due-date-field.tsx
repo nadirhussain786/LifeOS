@@ -2,6 +2,7 @@ import DateTimePicker, { type DateTimePickerEvent } from '@react-native-communit
 import { format, set } from 'date-fns';
 import { CalendarDays, Clock, X } from 'lucide-react-native';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Platform, Pressable, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -24,6 +25,7 @@ type Props = {
  */
 export function DueDateField({ value, hasTime, onChange }: Props) {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const [showPicker, setShowPicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
 
@@ -67,7 +69,7 @@ export function DueDateField({ value, hasTime, onChange }: Props) {
           className="flex-row items-center gap-1.5 rounded-full border border-border px-3 py-1.5"
         >
           <CalendarDays size={14} color={colors[scheme].mutedForeground} />
-          <Text variant="muted">{value ? format(value, 'MMM d, yyyy') : 'Due date'}</Text>
+          <Text variant="muted">{value ? format(value, 'MMM d, yyyy') : t('fields.dueDate')}</Text>
         </Pressable>
       )}
 
@@ -86,7 +88,9 @@ export function DueDateField({ value, hasTime, onChange }: Props) {
         )}
       >
         <Clock size={14} color={colors[scheme].mutedForeground} />
-        <Text variant="muted">{hasTime && value ? format(value, 'h:mm a') : 'No time'}</Text>
+        <Text variant="muted">
+          {hasTime && value ? format(value, 'h:mm a') : t('fields.noTime')}
+        </Text>
       </Pressable>
 
       {hasTime ? (

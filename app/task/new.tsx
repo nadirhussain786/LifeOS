@@ -2,6 +2,7 @@ import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { Bell, CalendarDays, Flag, Repeat, StickyNote, Tag } from 'lucide-react-native';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ScrollView, Switch, TextInput, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
@@ -31,6 +32,7 @@ import { useKeyboardHeight } from '@/hooks/use-keyboard-height';
 export default function NewTaskScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const keyboardHeight = useKeyboardHeight();
   const { create } = useTaskMutations();
 
@@ -68,7 +70,7 @@ export default function NewTaskScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <SheetHeader title="New Task" />
+      <SheetHeader title={t('tasks.newTask')} />
 
       <ScrollView
         contentContainerClassName="gap-6 px-5 pt-3"
@@ -80,8 +82,8 @@ export default function NewTaskScreen() {
           <TextInput
             value={title}
             onChangeText={setTitle}
-            accessibilityLabel="Task title"
-            placeholder="What needs to get done?"
+            accessibilityLabel={t('tasks.taskTitle')}
+            placeholder={t('tasks.titlePlaceholder')}
             placeholderTextColor={colors[scheme].mutedForeground}
             autoFocus
             multiline
@@ -103,11 +105,11 @@ export default function NewTaskScreen() {
         </View>
 
         <View className="rounded-2xl border border-border bg-card px-4 shadow-e1">
-          <AttributeRow icon={Flag} label="Priority" isFirst>
+          <AttributeRow icon={Flag} label={t('fields.priority')} isFirst>
             <PriorityPicker value={priority} onChange={setPriority} />
           </AttributeRow>
 
-          <AttributeRow icon={CalendarDays} label="Due date">
+          <AttributeRow icon={CalendarDays} label={t('fields.dueDate')}>
             <DueDateField
               value={dueDate}
               hasTime={hasDueTime}
@@ -119,21 +121,21 @@ export default function NewTaskScreen() {
           </AttributeRow>
 
           {dueDate !== null && (
-            <AttributeRow icon={Bell} label="Reminder">
+            <AttributeRow icon={Bell} label={t('fields.reminder')}>
               <View className="flex-row items-center justify-between">
                 <Text variant="muted">
-                  Notify me {hasDueTime ? 'at the due time' : 'at 9:00 AM that day'}
+                  {hasDueTime ? t('tasks.notifyAtDueTime') : t('tasks.notifyAtNineAm')}
                 </Text>
                 <Switch value={reminderEnabled} onValueChange={setReminderEnabled} />
               </View>
             </AttributeRow>
           )}
 
-          <AttributeRow icon={Repeat} label="Repeat">
+          <AttributeRow icon={Repeat} label={t('fields.repeat')}>
             <RecurrencePicker value={recurrenceFrequency} onChange={setRecurrenceFrequency} />
           </AttributeRow>
 
-          <AttributeRow icon={Tag} label="Category">
+          <AttributeRow icon={Tag} label={t('fields.category')}>
             <CategoryPicker value={categoryId} onChange={setCategoryId} />
           </AttributeRow>
         </View>
@@ -142,15 +144,15 @@ export default function NewTaskScreen() {
           <View className="flex-row items-center gap-1.5">
             <StickyNote size={13} color={colors[scheme].mutedForeground} />
             <Text variant="micro" className="font-sora-semibold">
-              Notes
+              {t('fields.notes')}
             </Text>
           </View>
           <TextInput
             value={notes}
             onChangeText={setNotes}
             multiline
-            accessibilityLabel="Task notes"
-            placeholder="Add notes…"
+            accessibilityLabel={t('tasks.taskNotes')}
+            placeholder={t('tasks.addNotes')}
             placeholderTextColor={colors[scheme].mutedForeground}
             className="min-h-24 rounded-2xl border border-border bg-card p-4 text-base text-foreground shadow-e1"
             textAlignVertical="top"
@@ -158,7 +160,7 @@ export default function NewTaskScreen() {
         </View>
 
         <Button
-          label="Add task"
+          label={t('tasks.addTask')}
           onPress={handleAdd}
           disabled={!title.trim()}
           size="lg"

@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { ListChecks } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -17,6 +18,7 @@ export function TodayTasksWidget() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const { data, isLoading } = useTodayTasks();
   const { complete } = useTaskMutations();
 
@@ -30,8 +32,8 @@ export function TodayTasksWidget() {
   return (
     <WidgetCard
       icon={ListChecks}
-      title="Today"
-      actionLabel="View all"
+      title={t('dashboard.today')}
+      actionLabel={t('dashboard.viewAll')}
       onActionPress={() => router.push('/(tabs)/tasks')}
     >
       {isLoading || !data ? (
@@ -42,17 +44,17 @@ export function TodayTasksWidget() {
         </View>
       ) : data.totalCount === 0 ? (
         <WidgetEmptyState
-          message="No tasks yet — plan your day"
-          actionLabel="Add task"
+          message={t('dashboard.noTasksYet')}
+          actionLabel={t('dashboard.addTask')}
           onAction={() => router.push('/task/new')}
         />
       ) : (
         <View className="gap-3">
           <Text variant="muted">
-            {data.completedCount} of {data.totalCount} done
+            {t('dashboard.xOfYDone', { completed: data.completedCount, total: data.totalCount })}
           </Text>
           {data.upcoming.length === 0 ? (
-            <Text variant="muted">Everything due today is done. 🎉</Text>
+            <Text variant="muted">{t('dashboard.allDoneToday')}</Text>
           ) : (
             <View className="gap-2">
               {data.upcoming.map((task) => (

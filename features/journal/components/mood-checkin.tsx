@@ -1,6 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { Battery, Moon, Target, Waves } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, TextInput, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import Animated, {
@@ -13,22 +14,22 @@ import Animated, {
 import { Text } from '@/components/ui/text';
 import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
-import { MOOD_EMOJI, MOOD_LABEL, MOOD_TINT } from '@/features/journal/constants';
+import { MOOD_EMOJI, MOOD_LABEL_KEY, MOOD_TINT } from '@/features/journal/constants';
 import { MOOD_REASONS, type MoodOption } from '@/features/journal/types/journal.types';
 
-const MOODS: { value: MoodOption; emoji: string; label: string; tint: string }[] = (
+const MOODS: { value: MoodOption; emoji: string; labelKey: string; tint: string }[] = (
   ['great', 'good', 'okay', 'low', 'rough'] as const
 ).map((value) => ({
   value,
   emoji: MOOD_EMOJI[value],
-  label: MOOD_LABEL[value],
+  labelKey: MOOD_LABEL_KEY[value],
   tint: MOOD_TINT[value],
 }));
 
-const ENERGY_LABELS = ['Depleted', 'Low', 'Moderate', 'Energized', 'Peak'] as const;
-const STRESS_LABELS = ['Calm', 'Mild', 'Noticeable', 'High', 'Overwhelmed'] as const;
-const FOCUS_LABELS = ['Scattered', 'Distracted', 'Steady', 'Sharp', 'Locked in'] as const;
-const SLEEP_QUALITY_LABELS = ['Poor', 'Rough', 'Okay', 'Good', 'Great'] as const;
+const ENERGY_LABELS = ['mood.energy1', 'mood.energy2', 'mood.energy3', 'mood.energy4', 'mood.energy5'] as const; // prettier-ignore
+const STRESS_LABELS = ['mood.stress1', 'mood.stress2', 'mood.stress3', 'mood.stress4', 'mood.stress5'] as const; // prettier-ignore
+const FOCUS_LABELS = ['mood.focus1', 'mood.focus2', 'mood.focus3', 'mood.focus4', 'mood.focus5'] as const; // prettier-ignore
+const SLEEP_QUALITY_LABELS = ['mood.sleep1', 'mood.sleep2', 'mood.sleep3', 'mood.sleep4', 'mood.sleep5'] as const; // prettier-ignore
 
 const ENERGY_TINT = '#22c55e';
 const STRESS_TINT = '#f97316';
@@ -45,6 +46,7 @@ function MoodButton({
   onPress: () => void;
 }) {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const scale = useSharedValue(1);
   const isMounted = useRef(false);
 
@@ -67,7 +69,7 @@ function MoodButton({
       onPress={onPress}
       accessibilityRole="radio"
       accessibilityState={{ checked: selected }}
-      accessibilityLabel={option.label}
+      accessibilityLabel={t(option.labelKey)}
       className="items-center gap-1.5 rounded-2xl px-2 py-3"
       style={{ backgroundColor: selected ? `${option.tint}1f` : 'transparent' }}
     >
@@ -81,7 +83,7 @@ function MoodButton({
         className="font-sora-medium"
         style={{ color: selected ? option.tint : colors[scheme].mutedForeground }}
       >
-        {option.label}
+        {t(option.labelKey)}
       </Text>
     </Pressable>
   );
@@ -98,7 +100,8 @@ type ScaleRowProps = {
 
 function ScaleRow({ icon: Icon, label, value, levelLabels, tint, onChange }: ScaleRowProps) {
   const scheme = useColorScheme() ?? 'light';
-  const descriptor = value ? levelLabels[value - 1] : null;
+  const { t } = useTranslation();
+  const descriptor = value ? t(levelLabels[value - 1]) : null;
 
   return (
     <View className="gap-1.5">
@@ -114,7 +117,7 @@ function ScaleRow({ icon: Icon, label, value, levelLabels, tint, onChange }: Sca
           className="font-sora-medium"
           style={{ color: descriptor ? tint : colors[scheme].mutedForeground }}
         >
-          {descriptor ?? 'Not set'}
+          {descriptor ?? t('mood.notSet')}
         </Text>
       </View>
       <View className="flex-row gap-2">
@@ -130,7 +133,7 @@ function ScaleRow({ icon: Icon, label, value, levelLabels, tint, onChange }: Sca
               }}
               accessibilityRole="radio"
               accessibilityState={{ checked: isCurrent }}
-              accessibilityLabel={`${label}: ${levelLabels[level - 1]}`}
+              accessibilityLabel={`${label}: ${t(levelLabels[level - 1])}`}
               className="h-9 flex-1 items-center justify-center rounded-full border"
               style={{
                 borderColor: selected ? tint : colors[scheme].border,
@@ -186,6 +189,7 @@ export function MoodCheckin({
   onToggleReason,
 }: Props) {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const [sleepHoursText, setSleepHoursText] = useState(
     sleepHours !== null ? String(sleepHours) : '',
   );
@@ -209,7 +213,7 @@ export function MoodCheckin({
 
       <ScaleRow
         icon={Battery}
-        label="Energy"
+        label={t('mood.energyLabel')}
         value={energy}
         levelLabels={ENERGY_LABELS}
         tint={ENERGY_TINT}
@@ -217,7 +221,7 @@ export function MoodCheckin({
       />
       <ScaleRow
         icon={Waves}
-        label="Stress"
+        label={t('mood.stressLabel')}
         value={stress}
         levelLabels={STRESS_LABELS}
         tint={STRESS_TINT}
@@ -225,7 +229,7 @@ export function MoodCheckin({
       />
       <ScaleRow
         icon={Target}
-        label="Focus"
+        label={t('mood.focusLabel')}
         value={focus}
         levelLabels={FOCUS_LABELS}
         tint={FOCUS_TINT}
@@ -233,7 +237,7 @@ export function MoodCheckin({
       />
       <ScaleRow
         icon={Moon}
-        label="Sleep quality"
+        label={t('mood.sleepQualityLabel')}
         value={sleepQuality}
         levelLabels={SLEEP_QUALITY_LABELS}
         tint={SLEEP_TINT}
@@ -243,7 +247,7 @@ export function MoodCheckin({
       <View className="flex-row items-center gap-2">
         <Moon size={13} color={SLEEP_TINT} />
         <Text variant="micro" className="font-sora-semibold">
-          Hours slept
+          {t('mood.hoursSlept')}
         </Text>
         <TextInput
           value={sleepHoursText}
@@ -261,7 +265,7 @@ export function MoodCheckin({
 
       <View className="gap-1.5">
         <Text variant="micro" className="font-sora-semibold">
-          What influenced today?
+          {t('mood.whatInfluenced')}
         </Text>
         <View className="flex-row flex-wrap gap-2">
           {MOOD_REASONS.map((reason) => {
@@ -281,10 +285,10 @@ export function MoodCheckin({
               >
                 <Text
                   variant="caption"
-                  className="font-sora-medium capitalize"
+                  className="font-sora-medium"
                   style={{ color: selected ? '#ffffff' : colors[scheme].mutedForeground }}
                 >
-                  {reason}
+                  {t(`mood.reasons.${reason}`)}
                 </Text>
               </Pressable>
             );

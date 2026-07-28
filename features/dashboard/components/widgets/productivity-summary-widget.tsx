@@ -1,4 +1,5 @@
 import { TrendingUp } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { Skeleton } from '@/components/ui/skeleton';
@@ -7,16 +8,19 @@ import { WidgetCard } from '@/features/dashboard/components/widget-card';
 import { useProductivitySummary } from '@/features/dashboard/hooks/use-widget-data';
 
 export function ProductivitySummaryWidget() {
+  const { t } = useTranslation();
   const { data, isLoading } = useProductivitySummary();
 
   return (
-    <WidgetCard icon={TrendingUp} title="This week">
+    <WidgetCard icon={TrendingUp} title={t('dashboard.thisWeek')}>
       {isLoading || !data ? (
         <Skeleton className="h-14 w-full" />
       ) : (
         <View className="gap-3">
           <Text variant="muted">
-            {Math.round(data.weeklyCompletionRate * 100)}% of tasks completed
+            {t('dashboard.percentTasksCompleted', {
+              percent: Math.round(data.weeklyCompletionRate * 100),
+            })}
           </Text>
           <View className="h-14 flex-row items-end gap-1.5">
             {data.trend.map((value, index) => {

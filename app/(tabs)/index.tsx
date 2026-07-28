@@ -1,6 +1,7 @@
 import { type BottomSheetModal } from '@gorhom/bottom-sheet';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { RefreshControl, ScrollView, View } from 'react-native';
 
 import { Fab } from '@/components/ui/fab';
@@ -49,6 +50,7 @@ function WidgetSection({ label, ids }: { label: string; ids: WidgetId[] }) {
 
 export default function DashboardScreen() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   const sheetRef = useRef<BottomSheetModal>(null);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -75,11 +77,11 @@ export default function DashboardScreen() {
         <TodayFocusCard />
         <FocusShortcuts />
 
-        <WidgetSection label="Today" ids={FULL_SECTIONS[0].ids} />
+        <WidgetSection label={t('dashboard.today')} ids={FULL_SECTIONS[0].ids} />
 
         <View className="gap-3">
           <Text variant="micro" className="px-1">
-            Wellbeing
+            {t('dashboard.wellbeing')}
           </Text>
           <View className="flex-row gap-3">
             <WaterTile />
@@ -87,9 +89,9 @@ export default function DashboardScreen() {
           </View>
         </View>
 
-        <WidgetSection label="For you" ids={FULL_SECTIONS[1].ids} />
+        <WidgetSection label={t('dashboard.forYou')} ids={FULL_SECTIONS[1].ids} />
 
-        {leftovers.length > 0 ? <WidgetSection label="More" ids={leftovers} /> : null}
+        {leftovers.length > 0 ? <WidgetSection label={t('tabs.more')} ids={leftovers} /> : null}
       </ScrollView>
 
       <Fab onPress={() => sheetRef.current?.present()} />

@@ -8,6 +8,7 @@ import {
   startOfYear,
   subMonths,
 } from 'date-fns';
+import type { TFunction } from 'i18next';
 
 import { expenseCategoryMeta } from '@/features/budget/config/budget-config';
 import type {
@@ -115,8 +116,12 @@ export function monthlyTrend(
   return points;
 }
 
-export function periodLabel(period: Period, anchor: Date): string {
-  if (period === 'week') return `Week of ${format(startOfWeek(anchor), 'MMM d')}`;
-  if (period === 'year') return format(anchor, 'yyyy');
-  return format(anchor, 'MMMM yyyy');
+export function periodLabel(period: Period, anchor: Date, t: TFunction, locale: string): string {
+  if (period === 'week') {
+    return t('budget.weekOf', {
+      date: startOfWeek(anchor).toLocaleDateString(locale, { month: 'short', day: 'numeric' }),
+    });
+  }
+  if (period === 'year') return String(anchor.getFullYear());
+  return anchor.toLocaleDateString(locale, { month: 'long', year: 'numeric' });
 }

@@ -1,4 +1,5 @@
 import * as Haptics from 'expo-haptics';
+import { useTranslation } from 'react-i18next';
 import { Pressable, TextInput, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -6,13 +7,13 @@ import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import type { HabitScheduleType } from '@/features/habits/types/habit.types';
 
-const SCHEDULE_OPTIONS: { value: HabitScheduleType; label: string }[] = [
-  { value: 'daily', label: 'Every day' },
-  { value: 'weekly', label: 'Weekly' },
-  { value: 'monthly', label: 'Monthly' },
-  { value: 'custom_days', label: 'Certain days' },
-  { value: 'every_x_days', label: 'Every X days' },
-  { value: 'flexible', label: 'Flexible' },
+const SCHEDULE_OPTIONS: { value: HabitScheduleType; labelKey: string }[] = [
+  { value: 'daily', labelKey: 'schedule.everyDay' },
+  { value: 'weekly', labelKey: 'schedule.weekly' },
+  { value: 'monthly', labelKey: 'schedule.monthly' },
+  { value: 'custom_days', labelKey: 'schedule.certainDays' },
+  { value: 'every_x_days', labelKey: 'schedule.everyXDays' },
+  { value: 'flexible', labelKey: 'schedule.flexible' },
 ];
 
 const WEEKDAYS = [
@@ -43,6 +44,7 @@ export function SchedulePicker({
   onChangeInterval,
 }: Props) {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const selectedDays = new Set(scheduleDays ?? []);
 
   const toggleDay = (day: number) => {
@@ -80,7 +82,7 @@ export function SchedulePicker({
                     : colors[scheme].mutedForeground,
                 }}
               >
-                {option.label}
+                {t(option.labelKey)}
               </Text>
             </Pressable>
           );
@@ -120,9 +122,9 @@ export function SchedulePicker({
 
       {scheduleType === 'every_x_days' && (
         <View className="flex-row items-center gap-2">
-          <Text variant="muted">Repeat every</Text>
+          <Text variant="muted">{t('schedule.repeatEvery')}</Text>
           <TextInput
-            accessibilityLabel="Repeat interval in days"
+            accessibilityLabel={t('schedule.repeatIntervalDays')}
             value={scheduleIntervalDays ? String(scheduleIntervalDays) : ''}
             onChangeText={(text) => {
               const parsed = parseInt(text, 10);
@@ -133,7 +135,7 @@ export function SchedulePicker({
             placeholderTextColor={colors[scheme].mutedForeground}
             className="w-14 rounded-lg border border-border px-2 py-1.5 text-center text-foreground"
           />
-          <Text variant="muted">days</Text>
+          <Text variant="muted">{t('schedule.days')}</Text>
         </View>
       )}
     </View>

@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import { ChevronRight } from 'lucide-react-native';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
@@ -21,6 +22,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 export default function BudgetSettingsScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const { data: settings } = useBudgetSettings();
   const { saveSettings } = useBudgetMutations();
 
@@ -47,7 +49,11 @@ export default function BudgetSettingsScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <ScreenHeader title="Budget Settings" eyebrow="Budget" tint={moduleTint('budget', scheme)} />
+      <ScreenHeader
+        title={t('budget.settingsTitle')}
+        eyebrow={t('budget.title')}
+        tint={moduleTint('budget', scheme)}
+      />
 
       <ScrollView
         contentContainerClassName="gap-5 px-5 pt-3 pb-10"
@@ -55,7 +61,7 @@ export default function BudgetSettingsScreen() {
       >
         <View className="gap-2.5">
           <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-            Currency
+            {t('budget.currency')}
           </Text>
           <Pressable
             onPress={() => router.push('/budget/currency')}
@@ -74,14 +80,14 @@ export default function BudgetSettingsScreen() {
 
         <View className="gap-2.5">
           <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-            Monthly budget (optional)
+            {t('budget.monthlyBudgetOptional')}
           </Text>
           <View className="flex-row items-center gap-2 rounded-2xl border border-border bg-card px-4 py-3">
             <Text className="font-sora-bold text-lg text-foreground">{currencySymbol(code)}</Text>
             <TextInput
               value={monthlyBudget}
               onChangeText={setMonthlyBudget}
-              accessibilityLabel="Monthly budget"
+              accessibilityLabel={t('budget.monthlyBudget')}
               placeholder="0"
               keyboardType="decimal-pad"
               placeholderTextColor={colors[scheme].mutedForeground}
@@ -89,10 +95,10 @@ export default function BudgetSettingsScreen() {
               style={{ fontSize: 18, fontFamily: 'Sora_600SemiBold' }}
             />
           </View>
-          <Text variant="caption">A soft target to compare your monthly spending against.</Text>
+          <Text variant="caption">{t('budget.monthlyBudgetHint')}</Text>
         </View>
 
-        <Button label="Save settings" onPress={save} size="lg" variant="accent" />
+        <Button label={t('budget.saveSettings')} onPress={save} size="lg" variant="accent" />
       </ScrollView>
     </View>
   );

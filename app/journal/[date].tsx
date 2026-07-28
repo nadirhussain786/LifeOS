@@ -5,6 +5,7 @@ import * as Location from 'expo-location';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Clock3, MapPin, Trash2 } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -33,6 +34,7 @@ export default function JournalEntryScreen() {
   const { date: entryDate } = useLocalSearchParams<{ date: string }>();
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const keyboardHeight = useKeyboardHeight();
 
   const { data: entry } = useJournalEntry(entryDate);
@@ -78,7 +80,7 @@ export default function JournalEntryScreen() {
     const [place] = await Location.reverseGeocodeAsync(position.coords).catch(() => []);
     const label = place
       ? [place.city, place.region].filter(Boolean).join(', ')
-      : 'Current location';
+      : t('journal.currentLocation');
 
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     upsert.mutate({
@@ -103,12 +105,12 @@ export default function JournalEntryScreen() {
       />
 
       <ScreenHeader
-        eyebrow="Journal"
+        eyebrow={t('tabs.journal')}
         tint={moduleTint('journal', scheme)}
         actions={[
           {
             icon: Trash2,
-            label: 'Delete entry',
+            label: t('journal.deleteEntry'),
             onPress: () => {
               remove.mutate(entry.id);
               router.back();
@@ -129,7 +131,7 @@ export default function JournalEntryScreen() {
           >
             <Clock3 size={12} color={colors[scheme].mutedForeground} />
             <Text variant="caption" className="font-sora-medium">
-              Day timeline
+              {t('journal.dayTimeline')}
             </Text>
           </Pressable>
         </View>
@@ -168,8 +170,8 @@ export default function JournalEntryScreen() {
           value={body}
           onChangeText={setBody}
           multiline
-          accessibilityLabel="Journal entry"
-          placeholder="How was today?"
+          accessibilityLabel={t('journal.journalEntry')}
+          placeholder={t('journal.howWasToday')}
           placeholderTextColor={colors[scheme].mutedForeground}
           style={{ fontFamily: 'Literata_400Regular', fontSize: 17, lineHeight: 25 }}
           className="min-h-32 rounded-2xl border border-border bg-card p-4 text-foreground"
@@ -183,7 +185,7 @@ export default function JournalEntryScreen() {
           >
             <MapPin size={14} color={colors[scheme].mutedForeground} />
             <Text variant="caption" className="font-sora-medium">
-              {entry.locationLabel ?? 'Tag location'}
+              {entry.locationLabel ?? t('journal.tagLocation')}
             </Text>
           </Pressable>
 

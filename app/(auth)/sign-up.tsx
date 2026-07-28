@@ -1,5 +1,6 @@
 import { Link, useRouter } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
@@ -9,6 +10,7 @@ import { useAuthStore } from '@/features/auth/services/auth-store';
 
 export default function SignUpScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const signUp = useAuthStore((s) => s.signUp);
 
   const [name, setName] = useState('');
@@ -19,11 +21,11 @@ export default function SignUpScreen() {
 
   const handleSignUp = async () => {
     if (!email.trim() || !password) {
-      setError('Enter your email and a password.');
+      setError(t('auth.enterEmailPassword'));
       return;
     }
     if (password.length < 6) {
-      setError('Password must be at least 6 characters.');
+      setError(t('auth.passwordMin'));
       return;
     }
     setBusy(true);
@@ -36,11 +38,9 @@ export default function SignUpScreen() {
     }
     // If the project requires email confirmation, there's no session yet.
     if (!useAuthStore.getState().session) {
-      Alert.alert(
-        'Check your inbox',
-        'We sent you a confirmation link. Confirm your email, then sign in.',
-        [{ text: 'OK', onPress: () => router.replace('/(auth)/login') }],
-      );
+      Alert.alert(t('auth.checkInbox'), t('auth.confirmationSent'), [
+        { text: 'OK', onPress: () => router.replace('/(auth)/login') },
+      ]);
     }
     // Otherwise the auth gate redirects into the app automatically.
   };
@@ -55,21 +55,21 @@ export default function SignUpScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View className="gap-2">
-          <Text variant="heading">Create your account</Text>
-          <Text variant="muted">Back up and sync your LifeOS across devices.</Text>
+          <Text variant="heading">{t('auth.createYourAccount')}</Text>
+          <Text variant="muted">{t('auth.backupSubtitle')}</Text>
         </View>
 
         <View className="gap-4">
           <AuthField
-            label="Name"
+            label={t('auth.name')}
             value={name}
             onChangeText={setName}
-            placeholder="What should we call you?"
+            placeholder={t('auth.namePlaceholder')}
             autoCapitalize="words"
             autoComplete="name"
           />
           <AuthField
-            label="Email"
+            label={t('auth.email')}
             value={email}
             onChangeText={setEmail}
             placeholder="you@example.com"
@@ -77,10 +77,10 @@ export default function SignUpScreen() {
             autoComplete="email"
           />
           <AuthField
-            label="Password"
+            label={t('auth.password')}
             value={password}
             onChangeText={setPassword}
-            placeholder="At least 6 characters"
+            placeholder={t('auth.atLeast6')}
             secure
             autoComplete="new-password"
           />
@@ -92,7 +92,7 @@ export default function SignUpScreen() {
           )}
 
           <Button
-            label={busy ? 'Creating account…' : 'Create account'}
+            label={busy ? t('auth.creatingAccount') : t('auth.createAccount')}
             variant="accent"
             size="lg"
             disabled={busy}
@@ -101,10 +101,10 @@ export default function SignUpScreen() {
         </View>
 
         <View className="flex-row items-center justify-center gap-1">
-          <Text variant="muted">Already have an account?</Text>
+          <Text variant="muted">{t('auth.alreadyHaveAccount')}</Text>
           <Link href="/(auth)/login" asChild>
             <Pressable hitSlop={8}>
-              <Text className="font-sora-semibold text-accent">Sign in</Text>
+              <Text className="font-sora-semibold text-accent">{t('auth.signIn')}</Text>
             </Pressable>
           </Link>
         </View>

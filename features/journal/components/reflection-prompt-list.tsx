@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { TextInput, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -18,6 +19,7 @@ function PromptField({
   onSave: (text: string) => void;
 }) {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const [answer, setAnswer] = useState(initialAnswer);
 
   useEffect(() => setAnswer(initialAnswer), [initialAnswer]);
@@ -36,7 +38,7 @@ function PromptField({
         onChangeText={setAnswer}
         multiline
         accessibilityLabel={prompt.text}
-        placeholder="Write a few words…"
+        placeholder={t('journal.writeAFewWords')}
         placeholderTextColor={colors[scheme].mutedForeground}
         style={{ fontFamily: 'Literata_400Regular', fontSize: 16, lineHeight: 23 }}
         className="min-h-11 rounded-xl border border-border bg-card p-3 text-foreground"

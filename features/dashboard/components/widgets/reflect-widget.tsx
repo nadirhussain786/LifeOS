@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { BookHeart } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
@@ -28,6 +29,7 @@ export function ReflectWidget() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const { data, isLoading } = useReflect();
   const { upsert } = useJournalMutations();
   const todayKey = toDateKey(new Date());
@@ -39,7 +41,11 @@ export function ReflectWidget() {
   };
 
   return (
-    <WidgetCard icon={BookHeart} title="Reflect" tint={moduleTint('journal', scheme)}>
+    <WidgetCard
+      icon={BookHeart}
+      title={t('dashboard.reflect')}
+      tint={moduleTint('journal', scheme)}
+    >
       {isLoading || !data ? (
         <Skeleton className="h-12 w-full" />
       ) : (
@@ -61,10 +67,12 @@ export function ReflectWidget() {
             ))}
           </View>
           <View className="flex-row items-center justify-between">
-            <Text variant="muted">🔥 {data.journalStreak}-day journal streak</Text>
+            <Text variant="muted">
+              🔥 {t('dashboard.journalDayStreak', { count: data.journalStreak })}
+            </Text>
             {!data.hasWrittenToday && (
               <Button
-                label="Write"
+                label={t('dashboard.write')}
                 size="sm"
                 variant="secondary"
                 onPress={() => router.push(`/journal/${todayKey}`)}

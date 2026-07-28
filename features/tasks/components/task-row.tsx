@@ -2,6 +2,7 @@ import { format, isToday } from 'date-fns';
 import * as Haptics from 'expo-haptics';
 import { Archive, Check, Trash2 } from 'lucide-react-native';
 import { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import Animated, {
@@ -26,6 +27,7 @@ type Props = {
 };
 
 function DueDateLabel({ task }: { task: Task }) {
+  const { t } = useTranslation();
   if (!task.dueDate) return null;
   const bucket = getDueBucket(task);
   const variant =
@@ -36,13 +38,14 @@ function DueDateLabel({ task }: { task: Task }) {
         : 'text-muted-foreground';
   return (
     <Text className={`font-sora-medium text-xs ${variant}`}>
-      {isToday(task.dueDate) ? 'Today' : format(task.dueDate, 'MMM d')}
+      {isToday(task.dueDate) ? t('common.today') : format(task.dueDate, 'MMM d')}
     </Text>
   );
 }
 
 export function TaskRow({ task, onPress, onToggleComplete, onArchive, onDelete }: Props) {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const isCompleted = task.status === 'completed';
   const scale = useSharedValue(1);
   const isMounted = useRef(false);
@@ -74,8 +77,8 @@ export function TaskRow({ task, onPress, onToggleComplete, onArchive, onDelete }
   return (
     <SwipeableRow
       accessibilityActions={[
-        { name: 'archive', label: 'Archive' },
-        { name: 'delete', label: 'Delete' },
+        { name: 'archive', label: t('common.archive') },
+        { name: 'delete', label: t('common.delete') },
       ]}
       onAccessibilityAction={(name) =>
         name === 'archive' ? onArchive() : name === 'delete' ? onDelete() : undefined

@@ -1,6 +1,7 @@
 import { format } from 'date-fns';
 import { useRouter } from 'expo-router';
 import { Clock3, Plus } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -16,6 +17,7 @@ import { toDateKey } from '@/lib/date';
 export function TodayTimelineWidget() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const { data, isLoading } = useTodayTimeline();
   const todayKey = toDateKey(new Date());
 
@@ -25,9 +27,9 @@ export function TodayTimelineWidget() {
   return (
     <WidgetCard
       icon={Clock3}
-      title="Today's timeline"
+      title={t('dashboard.todaysTimeline')}
       tint={moduleTint('calendar', scheme)}
-      actionLabel="View all"
+      actionLabel={t('dashboard.viewAll')}
       onActionPress={() => router.push(`/timeline/${todayKey}`)}
     >
       {isLoading || !data ? (
@@ -37,8 +39,8 @@ export function TodayTimelineWidget() {
         </View>
       ) : data.events.length === 0 ? (
         <WidgetEmptyState
-          message="Nothing on the timeline yet — it fills in as you go."
-          actionLabel="Add event"
+          message={t('dashboard.nothingOnTimeline')}
+          actionLabel={t('dashboard.addEvent')}
           onAction={addEvent}
         />
       ) : (
@@ -63,7 +65,7 @@ export function TodayTimelineWidget() {
           ))}
           <Pressable onPress={addEvent} className="flex-row items-center gap-1.5 pt-1" hitSlop={6}>
             <Plus size={13} color={colors[scheme].mutedForeground} />
-            <Text variant="muted">Add event</Text>
+            <Text variant="muted">{t('dashboard.addEvent')}</Text>
           </Pressable>
         </View>
       )}
