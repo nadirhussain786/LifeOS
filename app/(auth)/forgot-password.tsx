@@ -2,8 +2,8 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
-import { ChevronLeft } from 'lucide-react-native';
 
+import { ChevronBack } from '@/components/ui/directional-icon';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
@@ -49,7 +49,7 @@ export default function ForgotPasswordScreen() {
           hitSlop={10}
           className="h-9 w-9 items-center justify-center rounded-full bg-muted"
         >
-          <ChevronLeft size={20} color={colors[scheme].foreground} />
+          <ChevronBack size={20} color={colors[scheme].foreground} />
         </Pressable>
 
         <View className="gap-2">

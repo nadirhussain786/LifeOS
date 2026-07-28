@@ -46,7 +46,7 @@ export function DashboardHeader() {
           <Bell color={colors[scheme].foreground} size={20} />
           {unread > 0 && (
             <View
-              className="absolute right-1.5 top-1.5 h-4 min-w-4 items-center justify-center rounded-full px-1"
+              className="absolute end-1.5 top-1.5 h-4 min-w-4 items-center justify-center rounded-full px-1"
               style={{ backgroundColor: colors[scheme].destructive }}
             >
               <Text style={{ color: '#ffffff', fontSize: 9, fontFamily: 'Sora_700Bold' }}>

@@ -127,7 +127,7 @@ export function MiniPlayerBar() {
             style={{ width: `${progress * 100}%`, backgroundColor: MUSIC_TINT }}
           />
         </View>
-        <View className="flex-row items-center gap-1.5 py-2 pl-1.5 pr-2.5">
+        <View className="flex-row items-center gap-1.5 py-2 pe-2.5 ps-1.5">
           {/* Drag handle */}
           <View
             className="items-center justify-center px-0.5"

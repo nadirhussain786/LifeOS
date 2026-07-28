@@ -50,10 +50,10 @@ export function NoteCard({ note, categoryColor, onPress, onDelete, onToggleArchi
         </>
       }
     >
-      <Pressable onPress={onPress} className="gap-1.5 py-3.5 pl-4 pr-4">
+      <Pressable onPress={onPress} className="gap-1.5 px-4 py-3.5">
         {categoryColor && (
           <View
-            className="absolute bottom-2 left-0 top-2 w-1 rounded-full"
+            className="absolute bottom-2 start-0 top-2 w-1 rounded-full"
             style={{ backgroundColor: categoryColor }}
           />
         )}

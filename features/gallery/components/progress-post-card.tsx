@@ -85,7 +85,7 @@ export function ProgressPostCard({ photo, albumName, onOpen, onLike, onShare, on
               </View>
             </View>
             <View
-              className="absolute bottom-2 right-2 rounded-md px-2 py-0.5"
+              className="absolute bottom-2 end-2 rounded-md px-2 py-0.5"
               style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}
             >
               <Text className="font-sora-semibold text-[11px] text-white">

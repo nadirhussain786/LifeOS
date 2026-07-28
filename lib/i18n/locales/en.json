@@ -529,7 +529,9 @@
     "clearBody": "This permanently deletes every task, note, habit, journal entry, water log, and calendar event on this device. This cannot be undone.",
     "deleteEverything": "Delete Everything",
     "clearedTitle": "Data cleared",
-    "clearedBody": "LifeOS is back to a clean slate."
+    "clearedBody": "LifeOS is back to a clean slate.",
+    "restartTitle": "Restart to finish switching",
+    "restartBody": "Close and reopen LifeOS to apply the new layout direction."
   },
   "auth": {
     "welcomeBack": "Welcome back",

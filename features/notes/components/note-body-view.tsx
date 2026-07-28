@@ -94,7 +94,7 @@ export function NoteBodyView({ body, onToggleChecklist }: Props) {
         }
         if (line.type === 'bullet') {
           return (
-            <View key={index} className="flex-row gap-2 pl-1">
+            <View key={index} className="flex-row gap-2 ps-1">
               <Text variant="muted">•</Text>
               <InlineText text={line.text} className="flex-1" />
             </View>
@@ -102,7 +102,7 @@ export function NoteBodyView({ body, onToggleChecklist }: Props) {
         }
         if (line.type === 'quote') {
           return (
-            <View key={index} className="border-l-2 border-border pl-3">
+            <View key={index} className="border-l-2 border-border ps-3">
               <InlineText text={line.text} className="italic text-muted-foreground" />
             </View>
           );

@@ -229,7 +229,7 @@ export default function NotificationSettingsScreen() {
           <SectionLabel>{t('notif.quietHours')}</SectionLabel>
           <View className="rounded-2xl border border-border bg-card px-4">
             <View className="flex-row items-center justify-between py-3.5">
-              <View className="flex-1 pr-3">
+              <View className="flex-1 pe-3">
                 <Text className="font-sora-medium text-foreground">
                   {t('notif.silenceOvernight')}
                 </Text>

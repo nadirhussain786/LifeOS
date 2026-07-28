@@ -1,10 +1,11 @@
 import { differenceInCalendarDays, format } from 'date-fns';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ArrowRight, Play } from 'lucide-react-native';
+import { Play } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
+import { ArrowForward } from '@/components/ui/directional-icon';
 import { Text } from '@/components/ui/text';
 import { displayUri, type GalleryPhoto } from '@/features/gallery/types/gallery.types';
 import { alpha, glowShadow, tintGradientTriple } from '@/lib/color';
@@ -107,7 +108,7 @@ export function JourneyHero({ photos, onPlay }: Props) {
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center gap-3">
             <Thumb photo={first} label={t('gallery.dayOne')} />
-            <ArrowRight size={20} color={alpha('#ffffff', 0.85)} />
+            <ArrowForward size={20} color={alpha('#ffffff', 0.85)} />
             <Thumb photo={latest} label={t('gallery.now')} />
           </View>
           <View className="items-end">

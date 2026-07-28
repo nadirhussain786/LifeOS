@@ -24,7 +24,7 @@ export function DayCard({ entry, onPress }: Props) {
     <View style={styles.shadowWrap}>
       <Pressable
         onPress={onPress}
-        className="flex-row items-center gap-3 rounded-2xl border border-border bg-card py-3.5 pl-4 pr-4"
+        className="flex-row items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3.5"
       >
         <View className="w-11 items-center">
           <Text variant="micro" className="font-sora-semibold">

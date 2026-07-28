@@ -164,7 +164,7 @@ export default function SyncSettingsScreen() {
               disabled={status === 'syncing'}
             />
             <View className="flex-row items-center justify-between border-t border-border pt-3">
-              <View className="flex-1 pr-3">
+              <View className="flex-1 pe-3">
                 <Text className="font-sora-medium text-foreground">{t('sync.autoSync')}</Text>
                 <Text variant="caption">{t('sync.autoSyncDescription')}</Text>
               </View>

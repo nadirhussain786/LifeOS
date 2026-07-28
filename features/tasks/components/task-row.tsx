@@ -102,10 +102,10 @@ export function TaskRow({ task, onPress, onToggleComplete, onArchive, onDelete }
         </>
       }
     >
-      <Pressable onPress={onPress} className="flex-row items-center gap-3 py-3.5 pl-4 pr-4">
+      <Pressable onPress={onPress} className="flex-row items-center gap-3 px-4 py-3.5">
         {accentColor && (
           <View
-            className="absolute bottom-2 left-0 top-2 w-1 rounded-full"
+            className="absolute bottom-2 start-0 top-2 w-1 rounded-full"
             style={{ backgroundColor: accentColor }}
           />
         )}

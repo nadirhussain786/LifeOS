@@ -240,7 +240,7 @@ export default function CompareScreen() {
                       <View
                         style={{
                           position: 'absolute',
-                          left: 8,
+                          insetInlineStart: 8,
                           top: 8,
                           backgroundColor: 'rgba(0,0,0,0.55)',
                           borderRadius: 999,

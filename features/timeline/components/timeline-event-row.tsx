@@ -55,7 +55,7 @@ export function TimelineEventRow({ event, onDeleteCalendarEvent }: Props) {
       onLongPress={isCalendarEvent && onDeleteCalendarEvent ? confirmDelete : undefined}
       className="flex-row items-center gap-3 py-2.5"
     >
-      <View className="w-14 items-end pr-1">
+      <View className="w-14 items-end pe-1">
         <Text
           variant="caption"
           className="font-sora-medium"

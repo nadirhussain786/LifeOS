@@ -47,7 +47,7 @@ export function AlbumCard({ album, width, onPress }: Props) {
             <Icon size={30} color={meta.tint} strokeWidth={1.75} />
           </View>
         )}
-        <View className="absolute left-2 top-2 flex-row items-center gap-1.5">
+        <View className="absolute start-2 top-2 flex-row items-center gap-1.5">
           <View
             className="flex-row items-center gap-1 rounded-full px-2 py-0.5"
             style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}

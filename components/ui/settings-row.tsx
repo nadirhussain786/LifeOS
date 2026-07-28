@@ -1,7 +1,8 @@
-import { type LucideIcon, ChevronRight } from 'lucide-react-native';
+import { type LucideIcon } from 'lucide-react-native';
 import { type ReactNode } from 'react';
 import { Pressable, View } from 'react-native';
 
+import { ChevronForward } from '@/components/ui/directional-icon';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
@@ -60,7 +61,7 @@ export function SettingsRow({
         (value ? (
           <Text variant="muted">{value}</Text>
         ) : onPress && chevron ? (
-          <ChevronRight size={17} color={colors[scheme].mutedForeground} />
+          <ChevronForward size={17} color={colors[scheme].mutedForeground} />
         ) : null)}
     </View>
   );

@@ -34,11 +34,16 @@ import {
   getBiometricLabel,
   isBiometricAvailable,
 } from '@/features/security/lib/biometrics';
+import { reloadForDirectionChange } from '@/features/settings/lib/layout-direction';
 import {
   useAppearanceStore,
   type ThemePreference,
 } from '@/features/settings/store/appearance-store';
-import { LANGUAGES, useLanguageStore } from '@/features/settings/store/language-store';
+import {
+  LANGUAGES,
+  useLanguageStore,
+  type Language,
+} from '@/features/settings/store/language-store';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 /** Public privacy-policy URL (PRIVACY.md in the repo). Replace with your hosted
@@ -124,9 +129,25 @@ export default function SettingsScreen() {
     ]);
   };
 
+  /**
+   * Switching between an LTR and an RTL language flips the whole layout, which
+   * React Native only re-lays-out on a fresh start — so restart ourselves once
+   * the choice is safely on disk. Same-direction switches (English ↔ Hindi)
+   * need no restart and stay instant.
+   */
+  const chooseLanguage = async (language: Language) => {
+    const directionChanged = await setLanguage(language);
+    if (!directionChanged) return;
+    if (await reloadForDirectionChange()) return;
+    Alert.alert(t('settings.restartTitle'), t('settings.restartBody'));
+  };
+
   const pickLanguage = () => {
     Alert.alert(t('settings.language'), undefined, [
-      ...LANGUAGES.map((lng) => ({ text: t(`language.${lng}`), onPress: () => setLanguage(lng) })),
+      ...LANGUAGES.map((lng) => ({
+        text: t(`language.${lng}`),
+        onPress: () => void chooseLanguage(lng),
+      })),
       { text: t('common.cancel'), style: 'cancel' as const },
     ]);
   };

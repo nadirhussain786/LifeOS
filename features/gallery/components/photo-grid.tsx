@@ -58,7 +58,7 @@ export function PhotoTile({
             </View>
           </View>
           <View
-            className="absolute bottom-1 right-1 rounded-md px-1.5 py-0.5"
+            className="absolute bottom-1 end-1 rounded-md px-1.5 py-0.5"
             style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}
           >
             <Text className="font-sora-semibold text-[10px] text-white">
@@ -69,7 +69,7 @@ export function PhotoTile({
       )}
       {photo.isFavorite && (
         <View
-          className="absolute left-1 top-1 h-5 w-5 items-center justify-center rounded-full"
+          className="absolute start-1 top-1 h-5 w-5 items-center justify-center rounded-full"
           style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
         >
           <Heart size={11} color="#ffffff" fill="#ffffff" />

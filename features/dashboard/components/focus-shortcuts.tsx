@@ -43,7 +43,7 @@ export function FocusShortcuts() {
             <Pressable
               key={area.id}
               onPress={() => router.push(area.route as never)}
-              className="flex-row items-center gap-2.5 rounded-2xl border border-border bg-card py-2.5 pl-2.5 pr-4 shadow-e1"
+              className="flex-row items-center gap-2.5 rounded-2xl border border-border bg-card py-2.5 pe-4 ps-2.5 shadow-e1"
             >
               <View
                 className="h-8 w-8 items-center justify-center rounded-xl"

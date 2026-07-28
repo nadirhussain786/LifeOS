@@ -50,7 +50,7 @@ export function SongRow({
         onPress();
       }}
       onLongPress={onLongPress}
-      className="flex-row items-center gap-3 py-2.5 pl-4 pr-4"
+      className="flex-row items-center gap-3 px-4 py-2.5"
     >
       {/* Generative art thumbnail */}
       <View className="h-11 w-11 overflow-hidden rounded-xl">

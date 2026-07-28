@@ -1,19 +1,11 @@
 import { addMonths, format, isSameMonth, subMonths } from 'date-fns';
 import { useRouter } from 'expo-router';
-import {
-  BarChart3,
-  ChevronLeft,
-  ChevronRight,
-  HandCoins,
-  PiggyBank,
-  Plus,
-  Settings2,
-  Wallet,
-} from 'lucide-react-native';
+import { BarChart3, HandCoins, PiggyBank, Plus, Settings2, Wallet } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, View } from 'react-native';
 
+import { ChevronBack, ChevronForward } from '@/components/ui/directional-icon';
 import { EmptyState } from '@/components/ui/empty-state';
 import { QueryError } from '@/components/ui/query-error';
 import { Fab } from '@/components/ui/fab';
@@ -117,7 +109,7 @@ export default function BudgetScreen() {
               hitSlop={8}
               className="h-9 w-9 items-center justify-center rounded-full bg-muted"
             >
-              <ChevronLeft size={18} color={colors[scheme].foreground} />
+              <ChevronBack size={18} color={colors[scheme].foreground} />
             </Pressable>
             <Text className="font-sora-semibold text-foreground">
               {format(anchor, 'MMMM yyyy')}
@@ -128,7 +120,7 @@ export default function BudgetScreen() {
               className="h-9 w-9 items-center justify-center rounded-full bg-muted"
               style={{ opacity: isCurrentMonth ? 0.4 : 1 }}
             >
-              <ChevronRight size={18} color={colors[scheme].foreground} />
+              <ChevronForward size={18} color={colors[scheme].foreground} />
             </Pressable>
           </View>
 
@@ -216,7 +208,7 @@ export default function BudgetScreen() {
                     })}
               </Text>
             </View>
-            <ChevronRight size={18} color={colors[scheme].mutedForeground} />
+            <ChevronForward size={18} color={colors[scheme].mutedForeground} />
           </Pressable>
 
           {/* Budget vs actual */}

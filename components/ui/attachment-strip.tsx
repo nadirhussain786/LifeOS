@@ -104,7 +104,7 @@ export function AttachmentStrip({ attachments, onAddImage, onRemove }: Props) {
               onPress={() => onRemove(attachment.id)}
               hitSlop={8}
               accessibilityLabel={t('common.removeAttachment')}
-              className="absolute -right-1.5 -top-1.5 h-6 w-6 items-center justify-center rounded-full bg-destructive"
+              className="absolute -end-1.5 -top-1.5 h-6 w-6 items-center justify-center rounded-full bg-destructive"
             >
               <Trash2 size={12} color={colors[scheme].primaryForeground} />
             </Pressable>
@@ -132,7 +132,7 @@ export function AttachmentStrip({ attachments, onAddImage, onRemove }: Props) {
             hitSlop={10}
             accessibilityLabel={t('common.close')}
             style={{ top: insets.top + 12 }}
-            className="absolute right-5 z-10 h-10 w-10 items-center justify-center rounded-full bg-white/10"
+            className="absolute end-5 z-10 h-10 w-10 items-center justify-center rounded-full bg-white/10"
           >
             <X size={20} color="#ffffff" />
           </Pressable>

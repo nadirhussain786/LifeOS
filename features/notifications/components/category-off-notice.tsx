@@ -1,8 +1,9 @@
 import { useRouter } from 'expo-router';
-import { BellOff, ChevronRight } from 'lucide-react-native';
+import { BellOff } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
+import { ChevronForward } from '@/components/ui/directional-icon';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import { useNotificationsStore } from '@/features/notifications/store/notifications-store';
@@ -44,7 +45,7 @@ export function CategoryOffNotice({ category }: { category: NotificationCategory
         <Text className="font-sora-medium text-foreground">{title}</Text>
         <Text variant="caption">{t('notif.categoryOffBody')}</Text>
       </View>
-      <ChevronRight size={18} color={theme.mutedForeground} />
+      <ChevronForward size={18} color={theme.mutedForeground} />
     </Pressable>
   );
 }

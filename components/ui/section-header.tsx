@@ -1,6 +1,6 @@
-import { ChevronRight } from 'lucide-react-native';
 import { Pressable, View } from 'react-native';
 
+import { ChevronForward } from '@/components/ui/directional-icon';
 import { Text } from '@/components/ui/text';
 
 type Props = {
@@ -26,7 +26,7 @@ export function SectionHeader({ title, actionLabel, onAction, actionTint }: Prop
           >
             {actionLabel}
           </Text>
-          <ChevronRight size={13} color={actionTint} />
+          <ChevronForward size={13} color={actionTint} />
         </Pressable>
       ) : null}
     </View>

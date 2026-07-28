@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { ArrowLeft, Leaf, ShieldCheck } from 'lucide-react-native';
+import { Leaf, ShieldCheck } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -13,6 +13,7 @@ import {
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ArrowBack } from '@/components/ui/directional-icon';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
@@ -68,10 +69,10 @@ export default function OnboardingScreen() {
           <Pressable
             onPress={() => setStep((s) => s - 1)}
             hitSlop={10}
-            className="absolute left-5"
+            className="absolute start-5"
             accessibilityLabel={t('common.back')}
           >
-            <ArrowLeft size={22} color={colors[scheme].foreground} />
+            <ArrowBack size={22} color={colors[scheme].foreground} />
           </Pressable>
         ) : null}
         <View className="flex-row gap-1.5">
