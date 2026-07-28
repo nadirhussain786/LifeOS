@@ -2,6 +2,7 @@ import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { Bell, Minus, Plus, Target } from 'lucide-react-native';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, ScrollView, Switch, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -64,6 +65,7 @@ function HourStepper({
 export default function WaterSettingsScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const waterTint = moduleTint('water', scheme);
 
   const goalMl = useWaterSettingsStore((state) => state.goalMl);
@@ -77,10 +79,7 @@ export default function WaterSettingsScreen() {
 
   const handleSave = async () => {
     if (draft.enabled && draft.startHour >= draft.endHour) {
-      Alert.alert(
-        'Check your times',
-        'The start of your reminder window needs to be before the end.',
-      );
+      Alert.alert(t('water.checkTimesTitle'), t('water.checkTimesBody'));
       return;
     }
 
@@ -91,10 +90,10 @@ export default function WaterSettingsScreen() {
 
     if (draft.enabled && newIds.length === 0) {
       Alert.alert(
-        notificationsAvailable ? 'Notifications disabled' : 'Notifications unavailable',
         notificationsAvailable
-          ? 'Enable notifications for LifeOS in your device settings to get water reminders.'
-          : "Reminders aren't available on this device.",
+          ? t('reminders.notificationsDisabled')
+          : t('reminders.notificationsUnavailable'),
+        notificationsAvailable ? t('water.enableForReminders') : t('reminders.notAvailable'),
       );
     }
 
@@ -105,7 +104,7 @@ export default function WaterSettingsScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <ScreenHeader title="Water Settings" eyebrow="Water" tint={waterTint} />
+      <ScreenHeader title={t('water.settingsTitle')} eyebrow={t('water.title')} tint={waterTint} />
 
       <ScrollView
         contentContainerClassName="gap-6 px-5 pt-3 pb-10"
@@ -113,7 +112,7 @@ export default function WaterSettingsScreen() {
       >
         <CategoryOffNotice category="water" />
         <View className="rounded-2xl border border-border bg-card px-4 shadow-e1">
-          <AttributeRow icon={Target} label="Daily goal" isFirst>
+          <AttributeRow icon={Target} label={t('water.dailyGoal')} isFirst>
             <View className="flex-row flex-wrap gap-2">
               {GOAL_PRESETS_ML.map((ml) => {
                 const selected = ml === goalMl;
@@ -148,7 +147,7 @@ export default function WaterSettingsScreen() {
           <View className="flex-row items-center justify-between">
             <View className="flex-row items-center gap-2">
               <Bell size={16} color={colors[scheme].mutedForeground} />
-              <Text className="font-sora-semibold">Reminders</Text>
+              <Text className="font-sora-semibold">{t('water.reminders')}</Text>
             </View>
             <Switch
               value={draft.enabled}
@@ -161,7 +160,7 @@ export default function WaterSettingsScreen() {
             <View className="gap-4 pt-1">
               <View className="gap-1.5">
                 <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-                  Remind me every
+                  {t('water.remindEvery')}
                 </Text>
                 <View className="flex-row gap-2">
                   {REMINDER_INTERVALS_MIN.map((minutes) => {
@@ -184,7 +183,9 @@ export default function WaterSettingsScreen() {
                           className="font-sora-medium"
                           style={{ color: selected ? '#ffffff' : colors[scheme].mutedForeground }}
                         >
-                          {minutes < 60 ? `${minutes}m` : `${minutes / 60}h`}
+                          {minutes < 60
+                            ? t('water.minutesShort', { minutes })
+                            : t('water.hoursShort', { hours: minutes / 60 })}
                         </Text>
                       </Pressable>
                     );
@@ -194,30 +195,33 @@ export default function WaterSettingsScreen() {
 
               <View className="flex-row gap-3">
                 <HourStepper
-                  label="From"
+                  label={t('water.from')}
                   hour={draft.startHour}
                   onChange={(startHour) => setDraft((prev) => ({ ...prev, startHour }))}
                 />
                 <HourStepper
-                  label="Until"
+                  label={t('water.until')}
                   hour={draft.endHour}
                   onChange={(endHour) => setDraft((prev) => ({ ...prev, endHour }))}
                 />
               </View>
 
               <Text variant="muted">
-                You&apos;ll get a nudge every{' '}
-                {draft.intervalMinutes < 60
-                  ? `${draft.intervalMinutes} minutes`
-                  : `${draft.intervalMinutes / 60} hour${draft.intervalMinutes > 60 ? 's' : ''}`}{' '}
-                between {formatHour(draft.startHour)} and {formatHour(draft.endHour)}.
+                {t('water.nudgeSummary', {
+                  interval:
+                    draft.intervalMinutes < 60
+                      ? t('water.intervalMinutes', { count: draft.intervalMinutes })
+                      : t('water.intervalHours', { count: draft.intervalMinutes / 60 }),
+                  start: formatHour(draft.startHour),
+                  end: formatHour(draft.endHour),
+                })}
               </Text>
             </View>
           )}
         </View>
 
         <Button
-          label={saving ? 'Saving…' : 'Save'}
+          label={saving ? t('common.saving') : t('common.save')}
           onPress={handleSave}
           disabled={saving}
           size="lg"

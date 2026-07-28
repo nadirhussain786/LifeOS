@@ -1,6 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { Pause, Play, Trash2, X } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
 import { SwipeableRow } from '@/components/ui/swipeable-row';
@@ -39,6 +40,7 @@ export function SongRow({
   onRemove,
 }: Props) {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const [c1, c2, c3] = songGradient(song.id);
 
   const row = (
@@ -82,7 +84,7 @@ export function SongRow({
           {song.title}
         </Text>
         <Text variant="caption" numberOfLines={1}>
-          {song.artist ?? 'Unknown artist'}
+          {song.artist ?? t('music.unknownArtist')}
         </Text>
       </View>
 
@@ -98,7 +100,7 @@ export function SongRow({
         onDelete ? (
           <Pressable
             onPress={onDelete}
-            accessibilityLabel={`Delete "${song.title}"`}
+            accessibilityLabel={t('music.deleteSongA11y', { title: song.title })}
             className="flex-1 items-center justify-center bg-destructive"
           >
             <Trash2 color={colors[scheme].primaryForeground} size={18} />
@@ -106,7 +108,7 @@ export function SongRow({
         ) : (
           <Pressable
             onPress={onRemove}
-            accessibilityLabel={`Remove "${song.title}" from playlist`}
+            accessibilityLabel={t('music.removeFromPlaylistA11y', { title: song.title })}
             className="flex-1 items-center justify-center bg-secondary"
           >
             <X color={colors[scheme].foreground} size={18} />

@@ -2,6 +2,7 @@ import DateTimePicker, { type DateTimePickerEvent } from '@react-native-communit
 import { format } from 'date-fns';
 import { CalendarDays, X } from 'lucide-react-native';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Platform, Pressable, View } from 'react-native';
 
 import { Text } from '@/components/ui/text';
@@ -18,6 +19,7 @@ type Props = {
  * the time component a goal doesn't need. */
 export function GoalDueDateField({ value, onChange }: Props) {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const [showPicker, setShowPicker] = useState(false);
 
   const handleChange = (event: DateTimePickerEvent, date?: Date) => {
@@ -40,12 +42,18 @@ export function GoalDueDateField({ value, onChange }: Props) {
           className="flex-row items-center gap-1.5 rounded-full border border-border px-3 py-1.5"
         >
           <CalendarDays size={14} color={colors[scheme].mutedForeground} />
-          <Text variant="muted">{value ? format(value, 'MMM d, yyyy') : 'Set target date'}</Text>
+          <Text variant="muted">
+            {value ? format(value, 'MMM d, yyyy') : t('goals.setTargetDate')}
+          </Text>
         </Pressable>
       )}
 
       {value ? (
-        <Pressable onPress={() => onChange(null)} hitSlop={8} accessibilityLabel="Clear date">
+        <Pressable
+          onPress={() => onChange(null)}
+          hitSlop={8}
+          accessibilityLabel={t('goals.clearDate')}
+        >
           <X size={16} color={colors[scheme].mutedForeground} />
         </Pressable>
       ) : null}

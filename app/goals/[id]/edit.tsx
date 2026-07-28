@@ -1,4 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { SheetHeader } from '@/components/ui/sheet-header';
@@ -10,6 +11,7 @@ import { type GoalFormValues } from '@/features/goals/schemas/goal-form-schema';
 export default function EditGoalScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const { t } = useTranslation();
   const { data: goal } = useGoal(id);
   const { update } = useGoalMutations();
 
@@ -30,11 +32,11 @@ export default function EditGoalScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <SheetHeader title="Edit Goal" />
+      <SheetHeader title={t('goals.editGoal')} />
 
       <GoalForm
         defaultValues={defaults}
-        submitLabel="Save changes"
+        submitLabel={t('common.saveChanges')}
         showMilestones={false}
         onSubmit={(values) => {
           update.mutate({

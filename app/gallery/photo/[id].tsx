@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { CalendarDays, Heart, Trash2, X } from 'lucide-react-native';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Image } from 'expo-image';
 import { Alert, Dimensions, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
 
@@ -19,6 +20,7 @@ export default function PhotoDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const { data: photo } = usePhoto(id);
   const { editPhoto, toggleFavorite, removePhoto } = useGalleryMutations();
 
@@ -68,10 +70,10 @@ export default function PhotoDetailScreen() {
   };
 
   const confirmDelete = () => {
-    Alert.alert('Delete photo?', 'This photo will be permanently removed from your device.', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('gallery.deletePhotoTitle'), t('gallery.deletePhotoBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Delete',
+        text: t('common.delete'),
         style: 'destructive',
         onPress: () => (removePhoto.mutate(photo.id), router.back()),
       },
@@ -81,14 +83,14 @@ export default function PhotoDetailScreen() {
   return (
     <View className="flex-1 bg-background">
       <ScreenHeader
-        eyebrow="Progress"
+        eyebrow={t('gallery.title')}
         tint="#ec4899"
         right={
           <View className="flex-row items-center gap-4">
             <Pressable
               onPress={() => toggleFavorite.mutate({ id: photo.id, isFavorite: !photo.isFavorite })}
               hitSlop={8}
-              accessibilityLabel="Favorite"
+              accessibilityLabel={t('gallery.favorite')}
             >
               <Heart
                 size={22}
@@ -96,7 +98,7 @@ export default function PhotoDetailScreen() {
                 fill={photo.isFavorite ? '#ef4444' : 'transparent'}
               />
             </Pressable>
-            <Pressable onPress={confirmDelete} hitSlop={8} accessibilityLabel="Delete">
+            <Pressable onPress={confirmDelete} hitSlop={8} accessibilityLabel={t('common.delete')}>
               <Trash2 size={20} color={colors[scheme].destructive} />
             </Pressable>
           </View>
@@ -136,7 +138,7 @@ export default function PhotoDetailScreen() {
           <View className="flex-row items-center justify-between rounded-2xl border border-border bg-card px-4 py-3">
             <View className="flex-row items-center gap-2">
               <CalendarDays size={16} color={colors[scheme].mutedForeground} />
-              <Text className="font-sora-medium text-foreground">Date</Text>
+              <Text className="font-sora-medium text-foreground">{t('gallery.date')}</Text>
             </View>
             {Platform.OS === 'ios' ? (
               <DateTimePicker
@@ -167,13 +169,13 @@ export default function PhotoDetailScreen() {
 
           <View className="gap-2">
             <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-              Caption
+              {t('gallery.caption')}
             </Text>
             <TextInput
               value={caption}
               onChangeText={setCaption}
               onBlur={commitCaption}
-              placeholder="Add a caption…"
+              placeholder={t('gallery.captionPlaceholder')}
               placeholderTextColor={colors[scheme].mutedForeground}
               multiline
               className="min-h-12 rounded-2xl border border-border bg-card px-4 py-3 text-foreground"
@@ -182,7 +184,7 @@ export default function PhotoDetailScreen() {
 
           <View className="gap-2">
             <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-              Tags
+              {t('gallery.tags')}
             </Text>
             <View className="flex-row flex-wrap items-center gap-2">
               {tags.map((tag) => (
@@ -199,7 +201,7 @@ export default function PhotoDetailScreen() {
                 <TextInput
                   value={tagDraft}
                   onChangeText={setTagDraft}
-                  placeholder="Add tag"
+                  placeholder={t('gallery.addTag')}
                   placeholderTextColor={colors[scheme].mutedForeground}
                   onSubmitEditing={addTag}
                   returnKeyType="done"

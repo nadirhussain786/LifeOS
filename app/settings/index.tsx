@@ -90,7 +90,7 @@ export default function SettingsScreen() {
         return;
       }
       // Confirm the person can actually authenticate before arming the lock.
-      const ok = await authenticate(`Confirm ${bioLabel}`);
+      const ok = await authenticate(t('settings.confirmBiometric', { method: bioLabel }));
       if (!ok) return;
     }
     Haptics.selectionAsync();
@@ -102,30 +102,26 @@ export default function SettingsScreen() {
     try {
       await exportAllData();
     } catch {
-      Alert.alert('Export failed', "Couldn't prepare your data export. Try again in a moment.");
+      Alert.alert(t('settings.exportFailedTitle'), t('settings.exportFailedBody'));
     } finally {
       setIsExporting(false);
     }
   };
 
   const handleClearData = () => {
-    Alert.alert(
-      'Delete everything?',
-      'This permanently deletes every task, note, habit, journal entry, water log, and calendar event on this device. This cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete Everything',
-          style: 'destructive',
-          onPress: () => {
-            clearAllData();
-            queryClient.clear();
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-            Alert.alert('Data cleared', 'LifeOS is back to a clean slate.');
-          },
+    Alert.alert(t('settings.clearTitle'), t('settings.clearBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('settings.deleteEverything'),
+        style: 'destructive',
+        onPress: () => {
+          clearAllData();
+          queryClient.clear();
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+          Alert.alert(t('settings.clearedTitle'), t('settings.clearedBody'));
         },
-      ],
-    );
+      },
+    ]);
   };
 
   const pickLanguage = () => {
@@ -137,7 +133,7 @@ export default function SettingsScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <ScreenHeader title={t('settings.title')} eyebrow="System" tint="#737373" />
+      <ScreenHeader title={t('settings.title')} eyebrow={t('settings.eyebrow')} tint="#737373" />
       <ScrollView
         contentContainerClassName="gap-6 px-5 py-4 pb-10"
         showsVerticalScrollIndicator={false}
@@ -195,40 +191,39 @@ export default function SettingsScreen() {
           <View className="rounded-2xl border border-border bg-card px-4">
             <SettingsRow
               icon={Bell}
-              label="Notifications"
-              subtitle="Delivery, quiet hours & what you hear about"
+              label={t('settings.notifications')}
+              subtitle={t('settings.notificationsSubtitle')}
               isFirst
               onPress={() => router.push('/settings/notifications')}
             />
             <SettingsRow
               icon={Droplet}
-              label="Water intake reminders"
-              subtitle="Daily hydration nudges on your schedule"
+              label={t('settings.waterReminders')}
+              subtitle={t('settings.waterRemindersSubtitle')}
               onPress={() => router.push('/water-intake/settings')}
             />
             <SettingsRow
               icon={BookOpen}
-              label="Journal reminder"
-              subtitle="A daily nudge to write today's entry"
+              label={t('settings.journalReminder')}
+              subtitle={t('settings.journalReminderSubtitle')}
               onPress={() => router.push('/journal/reminder-settings')}
             />
           </View>
           <Text variant="caption" className="px-1">
-            Tasks, notes, habits, and calendar events each have their own reminder — set it right
-            from the item.
+            {t('settings.perItemReminderNote')}
           </Text>
         </View>
 
         <View className="gap-2">
-          <SectionLabel>Privacy</SectionLabel>
+          <SectionLabel>{t('settings.privacy')}</SectionLabel>
           <View className="rounded-2xl border border-border bg-card px-4">
             <SettingsRow
               icon={LockKeyhole}
-              label="App lock"
+              label={t('settings.appLock')}
               subtitle={
                 bioAvailable
-                  ? `Require ${bioLabel} to open LifeOS`
-                  : 'Add Face ID or a fingerprint to enable'
+                  ? t('settings.appLockRequire', { method: bioLabel })
+                  : t('settings.appLockUnavailable')
               }
               isFirst
               right={
@@ -245,12 +240,12 @@ export default function SettingsScreen() {
         </View>
 
         <View className="gap-2">
-          <SectionLabel>Data</SectionLabel>
+          <SectionLabel>{t('settings.data')}</SectionLabel>
           <View className="rounded-2xl border border-border bg-card px-4">
             <SettingsRow
               icon={Download}
-              label={isExporting ? 'Preparing export…' : 'Export data'}
-              subtitle="Save a JSON backup of everything"
+              label={isExporting ? t('settings.preparingExport') : t('settings.exportData')}
+              subtitle={t('settings.exportSubtitle')}
               isFirst
               disabled={isExporting}
               onPress={handleExport}
@@ -258,8 +253,8 @@ export default function SettingsScreen() {
             />
             <SettingsRow
               icon={Trash2}
-              label="Clear all data"
-              subtitle="Permanently delete everything on this device"
+              label={t('settings.clearData')}
+              subtitle={t('settings.clearDataSubtitle')}
               destructive
               onPress={handleClearData}
               chevron={false}
@@ -284,7 +279,7 @@ export default function SettingsScreen() {
             <SettingsRow
               icon={ShieldCheck}
               label={t('settings.syncAccount')}
-              subtitle="Backup, sync, and sign in"
+              subtitle={t('settings.syncAccountSubtitle')}
               onPress={() => router.push('/settings/sync')}
             />
             <SettingsRow

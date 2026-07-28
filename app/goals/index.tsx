@@ -2,6 +2,7 @@ import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import { ArrowUpDown, Search, Target } from 'lucide-react-native';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { EmptyState } from '@/components/ui/empty-state';
@@ -22,24 +23,31 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { cn } from '@/lib/utils';
 
 const STATUS_OPTIONS = [
-  { value: 'active' as const, label: 'Active' },
-  { value: 'completed' as const, label: 'Completed' },
-  { value: 'archived' as const, label: 'Archived' },
+  { value: 'active' as const, labelKey: 'goals.filterActive' },
+  { value: 'completed' as const, labelKey: 'goals.filterCompleted' },
+  { value: 'archived' as const, labelKey: 'goals.filterArchived' },
 ];
 
-const SORT_LABELS: Record<GoalSort, string> = {
-  manual: 'Default',
-  progress: 'Progress',
-  due: 'Due date',
-  priority: 'Priority',
-  created: 'Newest',
+const SORT_LABEL_KEYS: Record<GoalSort, string> = {
+  manual: 'goals.sortDefault',
+  progress: 'goals.sortProgress',
+  due: 'goals.sortDue',
+  priority: 'goals.sortPriority',
+  created: 'goals.sortNewest',
 };
+
+const EMPTY_TITLE_KEYS = {
+  active: 'goals.emptyTitle',
+  completed: 'goals.emptyCompleted',
+  archived: 'goals.emptyArchived',
+} as const;
 
 const SORT_CYCLE: GoalSort[] = ['manual', 'progress', 'due', 'priority', 'created'];
 
 export default function GoalsScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const [showSearch, setShowSearch] = useState(false);
 
   const { data: goals = [], isLoading, isError, refetch } = useGoals();
@@ -71,7 +79,11 @@ export default function GoalsScreen() {
         />
       )}
 
-      <Segmented options={STATUS_OPTIONS} value={statusFilter} onChange={setStatusFilter} />
+      <Segmented
+        options={STATUS_OPTIONS.map((option) => ({ ...option, label: t(option.labelKey) }))}
+        value={statusFilter}
+        onChange={setStatusFilter}
+      />
 
       {showSearch && (
         <View className="flex-row items-center gap-2 rounded-full border border-border bg-surface px-4 py-2.5">
@@ -79,7 +91,7 @@ export default function GoalsScreen() {
           <TextInput
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholder="Search goals"
+            placeholder={t('goals.searchGoals')}
             placeholderTextColor={colors[scheme].mutedForeground}
             autoFocus
             className="flex-1 text-foreground"
@@ -94,12 +106,17 @@ export default function GoalsScreen() {
   return (
     <View className="flex-1 bg-background">
       <ScreenHeader
-        title="Goals"
-        eyebrow="Focus & Growth"
+        title={t('goals.title')}
+        eyebrow={t('goals.eyebrow')}
         tint={moduleTint('goals', scheme)}
         actions={[
-          { icon: Search, label: 'Search', onPress: () => setShowSearch((s) => !s) },
-          { icon: ArrowUpDown, label: 'Change sort', onPress: cycleSort, text: SORT_LABELS[sort] },
+          { icon: Search, label: t('common.search'), onPress: () => setShowSearch((s) => !s) },
+          {
+            icon: ArrowUpDown,
+            label: t('goals.changeSort'),
+            onPress: cycleSort,
+            text: t(SORT_LABEL_KEYS[sort]),
+          },
         ]}
       />
 
@@ -122,14 +139,12 @@ export default function GoalsScreen() {
             <View style={{ minHeight: 340 }}>
               <EmptyState
                 icon={Target}
-                title={statusFilter === 'active' ? 'No goals yet' : `No ${statusFilter} goals`}
+                title={t(EMPTY_TITLE_KEYS[statusFilter])}
                 description={
-                  statusFilter === 'active'
-                    ? 'Set an ambition and track it to the finish line.'
-                    : 'Goals you finish or archive will show up here.'
+                  statusFilter === 'active' ? t('goals.emptyActive') : t('goals.emptyOther')
                 }
                 tint={moduleTint('goals', scheme)}
-                actionLabel={statusFilter === 'active' ? 'Create a goal' : undefined}
+                actionLabel={statusFilter === 'active' ? t('goals.createGoal') : undefined}
                 onAction={statusFilter === 'active' ? () => router.push('/goals/new') : undefined}
               />
             </View>
@@ -140,7 +155,7 @@ export default function GoalsScreen() {
         />
       )}
 
-      <Fab onPress={() => router.push('/goals/new')} accessibilityLabel="Add goal" />
+      <Fab onPress={() => router.push('/goals/new')} accessibilityLabel={t('goals.addGoal')} />
     </View>
   );
 }
@@ -153,7 +168,8 @@ function CategoryChips({
   categoryFilter: string;
   setCategoryFilter: (c: never) => void;
 }) {
-  const items = [{ id: 'all', label: 'All', tint: '#737373' }, ...GOAL_CATEGORIES];
+  const { t } = useTranslation();
+  const items = [{ id: 'all', labelKey: 'common.all', tint: '#737373' }, ...GOAL_CATEGORIES];
   return (
     <ScrollView
       horizontal
@@ -170,7 +186,7 @@ function CategoryChips({
             className={cn('rounded-full border px-3 py-1.5', !selected && 'border-border')}
           >
             <Text className={selected ? 'font-sora-medium text-white' : 'text-muted-foreground'}>
-              {item.label}
+              {t(item.labelKey)}
             </Text>
           </Pressable>
         );

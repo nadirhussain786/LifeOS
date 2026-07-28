@@ -1,5 +1,6 @@
 import { Image } from 'expo-image';
 import { Video } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
 import { Text } from '@/components/ui/text';
@@ -13,6 +14,7 @@ type Props = {
 };
 
 export function AlbumCard({ album, width, onPress }: Props) {
+  const { t } = useTranslation();
   const meta = albumCategoryMeta(album.category);
   const Icon = meta.icon;
 
@@ -68,7 +70,7 @@ export function AlbumCard({ album, width, onPress }: Props) {
         <Text className="font-sora-semibold text-foreground" numberOfLines={1}>
           {album.name}
         </Text>
-        <Text variant="caption">{meta.label}</Text>
+        <Text variant="caption">{t(meta.labelKey)}</Text>
       </View>
     </Pressable>
   );

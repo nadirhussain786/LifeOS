@@ -1,5 +1,6 @@
 import { Eye, Pencil } from 'lucide-react-native';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, TextInput, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -22,6 +23,7 @@ type Props = {
  * contenteditable surface, which is where RN rich-text libraries get
  * unreliable on the new architecture. */
 export function NoteEditorBody({ value, onChangeText, placeholder }: Props) {
+  const { t } = useTranslation();
   const scheme = useColorScheme() ?? 'light';
   const [mode, setMode] = useState<'edit' | 'read'>('edit');
   const [selection, setSelection] = useState<Selection>({ start: 0, end: 0 });
@@ -52,7 +54,7 @@ export function NoteEditorBody({ value, onChangeText, placeholder }: Props) {
             onChangeText={onChangeText}
             onSelectionChange={(event) => setSelection(event.nativeEvent.selection)}
             multiline
-            accessibilityLabel="Note body"
+            accessibilityLabel={t('notes.noteBody')}
             placeholder={placeholder}
             placeholderTextColor={colors[scheme].mutedForeground}
             className="min-h-32 p-4 text-base text-foreground"

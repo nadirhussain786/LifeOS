@@ -1,4 +1,5 @@
 import { Camera, ImagePlus, Video, X, type LucideIcon } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Alert, Modal, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -25,8 +26,8 @@ type Props = {
 
 type Option = {
   key: string;
-  label: string;
-  hint: string;
+  labelKey: string;
+  hintKey: string;
   icon: LucideIcon;
   tint: string;
   source: MediaSource;
@@ -36,8 +37,8 @@ type Option = {
 const OPTIONS: Option[] = [
   {
     key: 'photo',
-    label: 'Take Photo',
-    hint: 'Capture a new progress shot',
+    labelKey: 'gallery.takePhoto',
+    hintKey: 'gallery.takePhotoHint',
     icon: Camera,
     tint: '#0ea5e9',
     source: 'camera',
@@ -45,8 +46,8 @@ const OPTIONS: Option[] = [
   },
   {
     key: 'video',
-    label: 'Record Video',
-    hint: `Up to 60s · ${MAX_VIDEO_MB}MB`,
+    labelKey: 'gallery.recordVideo',
+    hintKey: 'gallery.recordVideoHint',
     icon: Video,
     tint: '#8b5cf6',
     source: 'camera',
@@ -54,8 +55,8 @@ const OPTIONS: Option[] = [
   },
   {
     key: 'library',
-    label: 'Choose from Library',
-    hint: 'Photos & videos',
+    labelKey: 'gallery.chooseLibrary',
+    hintKey: 'gallery.chooseLibraryHint',
     icon: ImagePlus,
     tint: '#ec4899',
     source: 'library',
@@ -69,6 +70,7 @@ const OPTIONS: Option[] = [
 export function AddMediaSheet({ visible, onClose, albumId }: Props) {
   const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const { importMedia } = useGalleryMutations();
 
   const run = (option: Option) => {
@@ -78,18 +80,24 @@ export function AddMediaSheet({ visible, onClose, albumId }: Props) {
       {
         onSuccess: (result) => {
           if (result.rejectedOversize > 0) {
-            const n = result.rejectedOversize;
             Alert.alert(
-              'Video too large',
-              `${n} video${n === 1 ? '' : 's'} skipped for being over ${MAX_VIDEO_MB}MB. Trim it or record a shorter clip and try again.`,
+              t('gallery.videoTooLargeTitle'),
+              t('gallery.videoTooLargeBody', {
+                count: result.rejectedOversize,
+                mb: MAX_VIDEO_MB,
+              }),
             );
           }
         },
         onError: (error) => {
           if (error instanceof PermissionDeniedError) {
             Alert.alert(
-              option.source === 'camera' ? 'Camera access needed' : 'Photo access needed',
-              `Allow ${option.source === 'camera' ? 'camera' : 'photo library'} access in Settings to add progress media.`,
+              option.source === 'camera'
+                ? t('gallery.cameraAccessTitle')
+                : t('gallery.photoAccessTitle'),
+              option.source === 'camera'
+                ? t('gallery.cameraAccessBody')
+                : t('gallery.photoAccessBody'),
             );
           }
         },
@@ -121,7 +129,7 @@ export function AddMediaSheet({ visible, onClose, albumId }: Props) {
               style={{ backgroundColor: colors[scheme].border }}
             />
             <View className="flex-row items-center justify-between pb-1">
-              <Text variant="subheading">Add to your progress</Text>
+              <Text variant="subheading">{t('gallery.addToProgress')}</Text>
               <Pressable
                 onPress={onClose}
                 hitSlop={8}
@@ -146,8 +154,8 @@ export function AddMediaSheet({ visible, onClose, albumId }: Props) {
                     <Icon size={21} color={option.tint} />
                   </View>
                   <View className="flex-1">
-                    <Text className="font-sora-semibold text-foreground">{option.label}</Text>
-                    <Text variant="caption">{option.hint}</Text>
+                    <Text className="font-sora-semibold text-foreground">{t(option.labelKey)}</Text>
+                    <Text variant="caption">{t(option.hintKey, { mb: MAX_VIDEO_MB })}</Text>
                   </View>
                 </Pressable>
               );

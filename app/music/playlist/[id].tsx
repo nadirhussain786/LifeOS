@@ -3,6 +3,7 @@ import * as Haptics from 'expo-haptics';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { ListMusic, Play, Plus, Trash2 } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, TextInput, View } from 'react-native';
 
 import { EmptyState } from '@/components/ui/empty-state';
@@ -24,6 +25,7 @@ export default function PlaylistDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
 
   const { data: playlist } = usePlaylist(id);
   const { data: songs = [], isLoading } = usePlaylistSongs(id);
@@ -49,12 +51,12 @@ export default function PlaylistDetailScreen() {
 
   const handleDeletePlaylist = () => {
     Alert.alert(
-      'Delete playlist?',
-      `"${playlist.name}" will be deleted. Your songs stay in your library.`,
+      t('music.deletePlaylistTitle'),
+      t('music.deletePlaylistBody', { name: playlist.name }),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: () => {
             remove.mutate(playlist.id);
@@ -70,12 +72,12 @@ export default function PlaylistDetailScreen() {
       <Stack.Screen options={{ headerShown: false }} />
 
       <ScreenHeader
-        eyebrow="Playlist"
+        eyebrow={t('music.playlistEyebrow')}
         tint={MUSIC_TINT}
         actions={[
           {
             icon: Trash2,
-            label: 'Delete playlist',
+            label: t('music.deletePlaylist'),
             onPress: handleDeletePlaylist,
             tint: colors[scheme].destructive,
           },
@@ -86,16 +88,14 @@ export default function PlaylistDetailScreen() {
         <TextInput
           value={name}
           onChangeText={setName}
-          accessibilityLabel="Playlist name"
-          placeholder="Playlist name"
+          accessibilityLabel={t('music.playlistName')}
+          placeholder={t('music.playlistName')}
           placeholderTextColor={colors[scheme].mutedForeground}
           style={{ fontSize: 26, fontFamily: 'Sora_700Bold', color: colors[scheme].foreground }}
         />
 
         <View className="flex-row items-center justify-between">
-          <Text variant="muted">
-            {songs.length} song{songs.length === 1 ? '' : 's'}
-          </Text>
+          <Text variant="muted">{t('music.songsCount', { count: songs.length })}</Text>
           <View className="flex-row items-center gap-4">
             <Pressable
               onPress={() => router.push(`/music/playlist/${playlist.id}/add-songs`)}
@@ -103,7 +103,7 @@ export default function PlaylistDetailScreen() {
             >
               <Plus size={15} color={MUSIC_TINT} />
               <Text variant="caption" className="font-sora-semibold" style={{ color: MUSIC_TINT }}>
-                Add songs
+                {t('music.addSongs')}
               </Text>
             </Pressable>
             {songs.length > 0 && (
@@ -117,7 +117,7 @@ export default function PlaylistDetailScreen() {
               >
                 <Play size={13} color="#ffffff" fill="#ffffff" />
                 <Text variant="caption" className="font-sora-semibold" style={{ color: '#ffffff' }}>
-                  Play all
+                  {t('music.playAll')}
                 </Text>
               </Pressable>
             )}
@@ -128,9 +128,9 @@ export default function PlaylistDetailScreen() {
       {!isLoading && songs.length === 0 ? (
         <EmptyState
           icon={ListMusic}
-          title="No songs in this playlist"
-          description="Add songs from your library to get started."
-          actionLabel="Add songs"
+          title={t('music.playlistEmptyTitle')}
+          description={t('music.playlistEmptyBody')}
+          actionLabel={t('music.addSongs')}
           onAction={() => router.push(`/music/playlist/${playlist.id}/add-songs`)}
           tint={MUSIC_TINT}
         />

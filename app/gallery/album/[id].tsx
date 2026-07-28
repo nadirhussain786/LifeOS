@@ -1,6 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { CalendarClock, Grid3x3, ImagePlus, Trash2 } from 'lucide-react-native';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
 
 import { EmptyState } from '@/components/ui/empty-state';
@@ -17,6 +18,7 @@ export default function AlbumDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const [timeline, setTimeline] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
 
@@ -30,32 +32,31 @@ export default function AlbumDetailScreen() {
   const addPhotos = () => setAddOpen(true);
 
   const confirmDelete = () => {
-    Alert.alert(
-      'Delete album?',
-      `"${album.name}" will be removed. Its photos move to All Photos — they aren't deleted.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete album',
-          style: 'destructive',
-          onPress: () => (removeAlbum.mutate(album.id), router.back()),
-        },
-      ],
-    );
+    Alert.alert(t('gallery.deleteAlbumTitle'), t('gallery.deleteAlbumBody', { name: album.name }), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('gallery.deleteAlbum'),
+        style: 'destructive',
+        onPress: () => (removeAlbum.mutate(album.id), router.back()),
+      },
+    ]);
   };
 
   return (
     <View className="flex-1 bg-background">
       <ScreenHeader
         title={album.name}
-        eyebrow={`${meta.label} · ${photos.length} ${photos.length === 1 ? 'item' : 'items'}`}
+        eyebrow={t('gallery.albumEyebrow', {
+          category: t(meta.labelKey),
+          items: t('gallery.itemsCount', { count: photos.length }),
+        })}
         tint={meta.tint}
         right={
           <View className="flex-row items-center gap-4">
             <Pressable
               onPress={() => setTimeline((t) => !t)}
               hitSlop={8}
-              accessibilityLabel="Toggle timeline"
+              accessibilityLabel={t('gallery.toggleTimeline')}
             >
               {timeline ? (
                 <Grid3x3 size={20} color={colors[scheme].foreground} />
@@ -63,10 +64,14 @@ export default function AlbumDetailScreen() {
                 <CalendarClock size={20} color={colors[scheme].foreground} />
               )}
             </Pressable>
-            <Pressable onPress={addPhotos} hitSlop={8} accessibilityLabel="Add photos">
+            <Pressable onPress={addPhotos} hitSlop={8} accessibilityLabel={t('gallery.addPhotos')}>
               <ImagePlus size={20} color={colors[scheme].foreground} />
             </Pressable>
-            <Pressable onPress={confirmDelete} hitSlop={8} accessibilityLabel="Delete album">
+            <Pressable
+              onPress={confirmDelete}
+              hitSlop={8}
+              accessibilityLabel={t('gallery.deleteAlbum')}
+            >
               <Trash2 size={19} color={colors[scheme].destructive} />
             </Pressable>
           </View>
@@ -76,10 +81,10 @@ export default function AlbumDetailScreen() {
       {photos.length === 0 ? (
         <EmptyState
           icon={ImagePlus}
-          title="Nothing here yet"
-          description="Add your first photo or video to this album to start tracking."
+          title={t('gallery.albumEmptyTitle')}
+          description={t('gallery.albumEmptyBody')}
           tint={meta.tint}
-          actionLabel="Add media"
+          actionLabel={t('gallery.addMedia')}
           onAction={addPhotos}
         />
       ) : (

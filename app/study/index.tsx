@@ -11,6 +11,7 @@ import {
   Timer,
 } from 'lucide-react-native';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { BarChart, type BarDatum } from '@/components/ui/bar-chart';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -37,13 +38,13 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { alpha } from '@/lib/color';
 
 const RANGE_OPTIONS = [
-  { value: 'week' as const, label: 'Week' },
-  { value: 'month' as const, label: 'Month' },
+  { value: 'week' as const, labelKey: 'study.rangeWeek' },
+  { value: 'month' as const, labelKey: 'study.rangeMonth' },
 ];
 const MODE_OPTIONS = [
-  { value: 'pomodoro' as const, label: 'Pomodoro' },
-  { value: 'custom' as const, label: 'Custom' },
-  { value: 'stopwatch' as const, label: 'Stopwatch' },
+  { value: 'pomodoro' as const, labelKey: 'study.modePomodoro' },
+  { value: 'custom' as const, labelKey: 'study.modeCustom' },
+  { value: 'stopwatch' as const, labelKey: 'study.modeStopwatch' },
 ];
 
 type StartMode = 'pomodoro' | 'custom' | 'stopwatch';
@@ -51,6 +52,7 @@ type StartMode = 'pomodoro' | 'custom' | 'stopwatch';
 export default function StudyScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const [range, setRange] = useState<'week' | 'month'>('week');
   const [mode, setMode] = useState<StartMode>('pomodoro');
   const [subjectId, setSubjectId] = useState<string | null>(null);
@@ -95,26 +97,26 @@ export default function StudyScreen() {
 
   const startLabel =
     mode === 'pomodoro'
-      ? `Start ${settings.focusMinutes}m focus`
+      ? t('study.startFocus', { minutes: settings.focusMinutes })
       : mode === 'custom'
-        ? `Start ${customMinutes}m session`
-        : 'Start stopwatch';
+        ? t('study.startSession', { minutes: customMinutes })
+        : t('study.startStopwatch');
 
   return (
     <View className="flex-1 bg-background">
       <ScreenHeader
-        title="Study"
-        eyebrow="Focus"
+        title={t('study.title')}
+        eyebrow={t('study.eyebrow')}
         tint={studyTint}
         actions={[
           {
             icon: NotebookPen,
-            label: 'Log past study time',
+            label: t('study.logPastAction'),
             onPress: () => router.push('/study/log'),
           },
           {
             icon: Settings2,
-            label: 'Study settings',
+            label: t('study.settingsAction'),
             onPress: () => router.push('/study/settings'),
           },
         ]}
@@ -139,10 +141,10 @@ export default function StudyScreen() {
             >
               <Timer size={20} color="#ffffff" />
               <Text className="flex-1 font-sora-semibold" style={{ color: '#ffffff' }}>
-                Session in progress
+                {t('study.sessionInProgress')}
               </Text>
               <Text className="font-sora-semibold" style={{ color: '#ffffff' }}>
-                Resume →
+                {t('study.resumeArrow')}
               </Text>
             </Pressable>
           )}
@@ -164,7 +166,7 @@ export default function StudyScreen() {
                     {formatStudyDuration(stats.todaySeconds)}
                   </Text>
                   <Text style={{ color: alpha('#ffffff', 0.8), fontSize: 12 }}>
-                    of {formatStudyDuration(dailyGoalSeconds)} today
+                    {t('study.ofToday', { duration: formatStudyDuration(dailyGoalSeconds) })}
                   </Text>
                 </View>
               </ProgressRing>
@@ -173,7 +175,7 @@ export default function StudyScreen() {
 
           {/* Start a session */}
           <View className="gap-3 rounded-2xl border border-border bg-card p-4 shadow-e1">
-            <Text variant="subheading">Start focusing</Text>
+            <Text variant="subheading">{t('study.startFocusing')}</Text>
             <SubjectPicker
               subjects={subjects}
               value={subjectId}
@@ -186,7 +188,7 @@ export default function StudyScreen() {
               }
             />
             <Segmented
-              options={MODE_OPTIONS}
+              options={MODE_OPTIONS.map((option) => ({ ...option, label: t(option.labelKey) }))}
               value={mode}
               onChange={setMode}
               activeColor={studyTint}
@@ -194,7 +196,7 @@ export default function StudyScreen() {
 
             {mode === 'custom' && (
               <View className="flex-row items-center justify-between rounded-xl bg-surface px-3 py-2">
-                <Text variant="muted">Focus length</Text>
+                <Text variant="muted">{t('study.focusLength')}</Text>
                 <View className="flex-row items-center gap-4">
                   <Pressable
                     onPress={() => setCustomMinutes((m) => Math.max(5, m - 5))}
@@ -206,7 +208,7 @@ export default function StudyScreen() {
                     className="font-sora-bold text-foreground"
                     style={{ minWidth: 56, textAlign: 'center' }}
                   >
-                    {customMinutes}m
+                    {t('study.minutesShort', { minutes: customMinutes })}
                   </Text>
                   <Pressable
                     onPress={() => setCustomMinutes((m) => Math.min(180, m + 5))}
@@ -225,10 +227,10 @@ export default function StudyScreen() {
             <View style={{ minHeight: 160 }}>
               <EmptyState
                 icon={GraduationCap}
-                title="No study time yet"
-                description="Start a focus session above, or log time you studied offline — your streak and stats build from here."
+                title={t('study.emptyTitle')}
+                description={t('study.emptyBody')}
                 tint={studyTint}
-                actionLabel="Log past time"
+                actionLabel={t('study.logPastTime')}
                 onAction={() => router.push('/study/log')}
               />
             </View>
@@ -240,10 +242,13 @@ export default function StudyScreen() {
 
               <View className="gap-3 rounded-2xl border border-border bg-card p-4 shadow-e1">
                 <View className="flex-row items-center justify-between">
-                  <Text variant="subheading">Focus time</Text>
+                  <Text variant="subheading">{t('study.focusTime')}</Text>
                   <View style={{ width: 160 }}>
                     <Segmented
-                      options={RANGE_OPTIONS}
+                      options={RANGE_OPTIONS.map((option) => ({
+                        ...option,
+                        label: t(option.labelKey),
+                      }))}
                       value={range}
                       onChange={setRange}
                       activeColor={studyTint}
@@ -261,13 +266,13 @@ export default function StudyScreen() {
 
               {breakdown.length > 0 && (
                 <View className="gap-3 rounded-2xl border border-border bg-card p-4 shadow-e1">
-                  <Text variant="subheading">By subject · this week</Text>
+                  <Text variant="subheading">{t('study.bySubjectThisWeek')}</Text>
                   <SubjectBreakdownList breakdown={breakdown} />
                 </View>
               )}
 
               <View className="gap-3">
-                <Text variant="subheading">Recent sessions</Text>
+                <Text variant="subheading">{t('study.recentSessions')}</Text>
                 <View className="gap-2.5">
                   {sessions.slice(0, 12).map((session) => (
                     <StudySessionCard
@@ -277,10 +282,10 @@ export default function StudyScreen() {
                         session.subjectId ? (subjectById.get(session.subjectId) ?? null) : null
                       }
                       onLongPress={(s) =>
-                        Alert.alert('Delete session?', 'This study session will be removed.', [
-                          { text: 'Cancel', style: 'cancel' },
+                        Alert.alert(t('study.deleteSessionTitle'), t('study.deleteSessionBody'), [
+                          { text: t('common.cancel'), style: 'cancel' },
                           {
-                            text: 'Delete',
+                            text: t('common.delete'),
                             style: 'destructive',
                             onPress: () => removeSession.mutate(s.id),
                           },

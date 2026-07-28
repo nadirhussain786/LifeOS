@@ -1,6 +1,7 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Trash2 } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { TextInput, View } from 'react-native';
 
 import { ScreenHeader } from '@/components/ui/screen-header';
@@ -17,6 +18,7 @@ export default function SongDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
 
   const { data: songs = [] } = useSongs();
   const song = songs.find((item) => item.id === id) ?? null;
@@ -57,12 +59,12 @@ export default function SongDetailScreen() {
       <Stack.Screen options={{ headerShown: false }} />
 
       <ScreenHeader
-        eyebrow="Song"
+        eyebrow={t('music.songEyebrow')}
         tint={MUSIC_TINT}
         actions={[
           {
             icon: Trash2,
-            label: 'Delete song',
+            label: t('music.deleteSong'),
             onPress: () => {
               remove.mutate(song.id);
               router.back();
@@ -75,7 +77,7 @@ export default function SongDetailScreen() {
       <View className="gap-5 px-5 pt-2">
         <View className="gap-1.5">
           <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-            Title
+            {t('music.songTitle')}
           </Text>
           <TextInput
             value={title}
@@ -87,19 +89,21 @@ export default function SongDetailScreen() {
 
         <View className="gap-1.5">
           <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-            Artist
+            {t('music.artist')}
           </Text>
           <TextInput
             value={artist}
             onChangeText={setArtist}
-            accessibilityLabel="Artist"
-            placeholder="Unknown artist"
+            accessibilityLabel={t('music.artist')}
+            placeholder={t('music.unknownArtist')}
             placeholderTextColor={colors[scheme].mutedForeground}
             className="text-lg text-foreground"
           />
         </View>
 
-        <Text variant="muted">Duration: {formatDuration(song.durationMs)}</Text>
+        <Text variant="muted">
+          {t('music.duration', { duration: formatDuration(song.durationMs) })}
+        </Text>
       </View>
     </View>
   );

@@ -18,7 +18,7 @@ export type SyncModule =
 
 export type SyncModuleConfig = {
   key: SyncModule;
-  label: string;
+  labelKey: string;
   /** Local table names synced for this module, parents before children. */
   tables: string[];
   /** Sensitive modules default OFF and stay local unless the user opts in. */
@@ -26,22 +26,37 @@ export type SyncModuleConfig = {
 };
 
 export const SYNC_MODULES: SyncModuleConfig[] = [
-  { key: 'tasks', label: 'Tasks', tables: ['task_categories', 'tasks'], sensitive: false },
-  { key: 'notes', label: 'Notes', tables: ['note_categories', 'notes'], sensitive: false },
+  {
+    key: 'tasks',
+    labelKey: 'syncModule.tasks',
+    tables: ['task_categories', 'tasks'],
+    sensitive: false,
+  },
+  {
+    key: 'notes',
+    labelKey: 'syncModule.notes',
+    tables: ['note_categories', 'notes'],
+    sensitive: false,
+  },
   {
     key: 'habits',
-    label: 'Habits',
+    labelKey: 'syncModule.habits',
     tables: ['habit_categories', 'habits', 'habit_routines'],
     sensitive: false,
   },
-  { key: 'journal', label: 'Journal', tables: ['journal_entries'], sensitive: false },
-  { key: 'calendar', label: 'Calendar', tables: ['calendar_events'], sensitive: false },
-  { key: 'goals', label: 'Goals', tables: ['goals'], sensitive: false },
-  { key: 'sleep', label: 'Sleep', tables: ['sleep_sessions'], sensitive: false },
-  { key: 'study', label: 'Study', tables: ['study_subjects'], sensitive: false },
+  { key: 'journal', labelKey: 'syncModule.journal', tables: ['journal_entries'], sensitive: false },
+  {
+    key: 'calendar',
+    labelKey: 'syncModule.calendar',
+    tables: ['calendar_events'],
+    sensitive: false,
+  },
+  { key: 'goals', labelKey: 'syncModule.goals', tables: ['goals'], sensitive: false },
+  { key: 'sleep', labelKey: 'syncModule.sleep', tables: ['sleep_sessions'], sensitive: false },
+  { key: 'study', labelKey: 'syncModule.study', tables: ['study_subjects'], sensitive: false },
   {
     key: 'budget',
-    label: 'Budget',
+    labelKey: 'syncModule.budget',
     tables: ['budget_transactions', 'savings_goals', 'budget_debts'],
     sensitive: false,
   },

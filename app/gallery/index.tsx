@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { GitCompareArrows, Heart, Images, Plus } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, Dimensions, Pressable, ScrollView, View } from 'react-native';
 
 import { EmptyState } from '@/components/ui/empty-state';
@@ -27,6 +28,7 @@ const GALLERY_TINT = '#ec4899';
 export default function GalleryScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const [addOpen, setAddOpen] = useState(false);
 
   const { data: albums = [], isLoading } = useAlbums();
@@ -40,9 +42,9 @@ export default function GalleryScreen() {
   const share = async (photo: GalleryPhoto) => {
     try {
       if (await Sharing.isAvailableAsync())
-        await Sharing.shareAsync(photo.uri, { dialogTitle: 'Share your progress' });
+        await Sharing.shareAsync(photo.uri, { dialogTitle: t('gallery.shareDialogTitle') });
     } catch {
-      Alert.alert('Could not share', 'Something went wrong sharing this moment.');
+      Alert.alert(t('gallery.couldNotShareTitle'), t('gallery.couldNotShareBody'));
     }
   };
 
@@ -51,7 +53,7 @@ export default function GalleryScreen() {
   const quickTiles = [
     {
       key: 'all',
-      label: 'All Media',
+      label: t('gallery.allMedia'),
       icon: Images,
       tint: '#0ea5e9',
       count: photos.length,
@@ -59,7 +61,7 @@ export default function GalleryScreen() {
     },
     {
       key: 'fav',
-      label: 'Favorites',
+      label: t('gallery.favorites'),
       icon: Heart,
       tint: '#ef4444',
       count: favorites.length,
@@ -67,7 +69,7 @@ export default function GalleryScreen() {
     },
     {
       key: 'compare',
-      label: 'Before & After',
+      label: t('gallery.beforeAfter'),
       icon: GitCompareArrows,
       tint: '#8b5cf6',
       count: null,
@@ -77,7 +79,7 @@ export default function GalleryScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <ScreenHeader title="Progress" eyebrow="Memories & Media" tint={GALLERY_TINT} />
+      <ScreenHeader title={t('gallery.title')} eyebrow={t('gallery.eyebrow')} tint={GALLERY_TINT} />
 
       {isLoading ? (
         <View className="gap-3 px-5 pt-2">
@@ -87,10 +89,10 @@ export default function GalleryScreen() {
       ) : albums.length === 0 && photos.length === 0 ? (
         <EmptyState
           icon={Images}
-          title="Track your progress"
-          description="Capture photos and videos of your transformation — gym gains, milestones, memories — and compare them over time."
+          title={t('gallery.emptyTitle')}
+          description={t('gallery.emptyBody')}
           tint={GALLERY_TINT}
-          actionLabel="Add media"
+          actionLabel={t('gallery.addMedia')}
           onAction={() => setAddOpen(true)}
         />
       ) : (
@@ -104,7 +106,7 @@ export default function GalleryScreen() {
           {/* Story highlights (full-bleed) */}
           <View className="gap-3" style={{ marginHorizontal: -20 }}>
             <Text variant="caption" className="px-5 font-sora-semibold uppercase tracking-wide">
-              Story highlights
+              {t('gallery.storyHighlights')}
             </Text>
             <StoryReels
               photos={photos}
@@ -155,14 +157,14 @@ export default function GalleryScreen() {
           {feedPreview.length > 0 && (
             <View className="gap-3">
               <View className="flex-row items-center justify-between">
-                <Text variant="subheading">Recent moments</Text>
+                <Text variant="subheading">{t('gallery.recentMoments')}</Text>
                 <Pressable onPress={() => router.push('/gallery/feed')} hitSlop={8}>
                   <Text
                     variant="caption"
                     style={{ color: GALLERY_TINT }}
                     className="font-sora-semibold"
                   >
-                    See feed
+                    {t('gallery.seeFeed')}
                   </Text>
                 </Pressable>
               </View>
@@ -185,7 +187,7 @@ export default function GalleryScreen() {
           {/* Albums */}
           <View className="gap-3">
             <View className="flex-row items-center justify-between">
-              <Text variant="subheading">Albums</Text>
+              <Text variant="subheading">{t('gallery.albums')}</Text>
               <Pressable
                 onPress={() => router.push('/gallery/album/new')}
                 hitSlop={8}
@@ -197,7 +199,7 @@ export default function GalleryScreen() {
                   style={{ color: GALLERY_TINT }}
                   className="font-sora-semibold"
                 >
-                  New album
+                  {t('gallery.newAlbum')}
                 </Text>
               </Pressable>
             </View>
@@ -209,7 +211,7 @@ export default function GalleryScreen() {
               >
                 <Images size={20} color={colors[scheme].mutedForeground} />
                 <Text variant="muted" className="flex-1">
-                  Create an album to organize your photos and videos by theme.
+                  {t('gallery.createAlbumHint')}
                 </Text>
               </Pressable>
             ) : (
@@ -228,7 +230,7 @@ export default function GalleryScreen() {
         </ScrollView>
       )}
 
-      <Fab onPress={() => setAddOpen(true)} accessibilityLabel="Add media" />
+      <Fab onPress={() => setAddOpen(true)} accessibilityLabel={t('gallery.addMedia')} />
 
       <AddMediaSheet visible={addOpen} onClose={() => setAddOpen(false)} albumId={null} />
     </View>

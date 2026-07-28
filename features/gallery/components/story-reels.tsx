@@ -3,6 +3,7 @@ import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Sparkles } from 'lucide-react-native';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, View } from 'react-native';
 
 import { Text } from '@/components/ui/text';
@@ -90,6 +91,7 @@ function Reel({
  * player for that period.
  */
 export function StoryReels({ photos, onOpen }: Props) {
+  const { t } = useTranslation();
   const buckets = useMemo(() => {
     const map = new Map<string, GalleryPhoto[]>();
     for (const photo of photos) {
@@ -111,7 +113,12 @@ export function StoryReels({ photos, onOpen }: Props) {
       showsHorizontalScrollIndicator={false}
       contentContainerClassName="gap-3 px-4"
     >
-      <Reel cover={photos[0]} label="All" onPress={() => onOpen('all')} ring={allRing} />
+      <Reel
+        cover={photos[0]}
+        label={t('common.all')}
+        onPress={() => onOpen('all')}
+        ring={allRing}
+      />
       {buckets.map(([key, group]) => (
         <Reel
           key={key}

@@ -2,6 +2,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Camera, GitCompareArrows, Heart, Play, Share2, Video } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Dimensions, Pressable, View } from 'react-native';
 
 import { Text } from '@/components/ui/text';
@@ -27,6 +28,7 @@ type Props = {
  * time header, the media, and like / compare / share actions. The building
  * block of the personal progress feed. */
 export function ProgressPostCard({ photo, albumName, onOpen, onLike, onShare, onCompare }: Props) {
+  const { t } = useTranslation();
   const isVideo = photo.mediaType === 'video';
   const outerW = Dimensions.get('window').width - 32;
 
@@ -55,7 +57,7 @@ export function ProgressPostCard({ photo, albumName, onOpen, onLike, onShare, on
           <AvatarIcon size={18} color="#ffffff" />
         </LinearGradient>
         <View className="flex-1">
-          <Text className="font-sora-bold text-foreground">You</Text>
+          <Text className="font-sora-bold text-foreground">{t('gallery.you')}</Text>
           <Text variant="caption">
             {formatDistanceToNow(photo.takenAt, { addSuffix: true })}
             {albumName ? ` · ${albumName}` : ''}
@@ -100,20 +102,24 @@ export function ProgressPostCard({ photo, albumName, onOpen, onLike, onShare, on
           onPress={() => onLike(photo)}
           hitSlop={8}
           className="flex-row items-center gap-1.5"
-          accessibilityLabel="Like"
+          accessibilityLabel={t('gallery.like')}
         >
           <Heart size={20} color="#ef4444" fill={photo.isFavorite ? '#ef4444' : 'transparent'} />
           {photo.isFavorite && (
             <Text className="font-sora-semibold" style={{ color: '#ef4444', fontSize: 13 }}>
-              Loved
+              {t('gallery.loved')}
             </Text>
           )}
         </Pressable>
-        <Pressable onPress={onCompare} hitSlop={8} accessibilityLabel="Compare">
+        <Pressable onPress={onCompare} hitSlop={8} accessibilityLabel={t('gallery.compare')}>
           <GitCompareArrows size={20} color="#8b5cf6" />
         </Pressable>
         <View className="flex-1" />
-        <Pressable onPress={() => onShare(photo)} hitSlop={8} accessibilityLabel="Share">
+        <Pressable
+          onPress={() => onShare(photo)}
+          hitSlop={8}
+          accessibilityLabel={t('gallery.share')}
+        >
           <Share2 size={19} color="#0ea5e9" />
         </Pressable>
       </View>
@@ -123,7 +129,7 @@ export function ProgressPostCard({ photo, albumName, onOpen, onLike, onShare, on
         <View className="gap-2 px-4 pb-4">
           {photo.caption ? (
             <Text className="text-foreground">
-              <Text className="font-sora-bold text-foreground">You </Text>
+              <Text className="font-sora-bold text-foreground">{t('gallery.you')} </Text>
               {photo.caption}
             </Text>
           ) : null}

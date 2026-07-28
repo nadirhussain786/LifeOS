@@ -3,6 +3,7 @@ import { format, set } from 'date-fns';
 import * as Haptics from 'expo-haptics';
 import { BellRing } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Platform, Pressable, ScrollView, Switch, View } from 'react-native';
 
 import { ScreenHeader } from '@/components/ui/screen-header';
@@ -91,13 +92,14 @@ function TimeRow({
   );
 }
 
-const DELIVERY_OPTIONS: { value: DeliveryMode; label: string }[] = [
-  { value: 'digest', label: 'Smart digest' },
-  { value: 'individual', label: 'Individual' },
+const DELIVERY_OPTIONS: { value: DeliveryMode; labelKey: string }[] = [
+  { value: 'digest', labelKey: 'notif.deliveryDigest' },
+  { value: 'individual', labelKey: 'notif.deliveryIndividual' },
 ];
 
 export default function NotificationSettingsScreen() {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const theme = colors[scheme];
 
   const store = useNotificationsStore();
@@ -144,7 +146,7 @@ export default function NotificationSettingsScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <ScreenHeader title="Notifications" eyebrow="Settings" tint="#737373" />
+      <ScreenHeader title={t('notif.title')} eyebrow={t('notif.settingsEyebrow')} tint="#737373" />
       <ScrollView
         contentContainerClassName="gap-6 px-5 py-4 pb-12"
         showsVerticalScrollIndicator={false}
@@ -159,8 +161,10 @@ export default function NotificationSettingsScreen() {
               <BellRing size={18} color={theme.accent} />
             </View>
             <View className="flex-1">
-              <Text className="font-sora-semibold text-foreground">All notifications</Text>
-              <Text variant="caption">Master switch for every LifeOS reminder</Text>
+              <Text className="font-sora-semibold text-foreground">
+                {t('notif.allNotifications')}
+              </Text>
+              <Text variant="caption">{t('notif.masterDescription')}</Text>
             </View>
             <Switch
               value={store.masterEnabled}
@@ -172,13 +176,12 @@ export default function NotificationSettingsScreen() {
 
         {!notificationsAvailable && (
           <Text variant="caption" className="px-1">
-            Notifications aren&apos;t available on this device.
+            {t('notif.notAvailable')}
           </Text>
         )}
         {notificationsAvailable && store.masterEnabled && !permissionGranted && (
           <Text variant="caption" className="px-1" style={{ color: theme.destructive }}>
-            System notifications are turned off for LifeOS. Enable them in your device settings to
-            receive reminders.
+            {t('notif.systemOff')}
           </Text>
         )}
 
@@ -188,9 +191,9 @@ export default function NotificationSettingsScreen() {
           style={{ opacity: disabled ? 0.5 : 1 }}
           pointerEvents={disabled ? 'none' : 'auto'}
         >
-          <SectionLabel>Delivery</SectionLabel>
+          <SectionLabel>{t('notif.delivery')}</SectionLabel>
           <Segmented
-            options={DELIVERY_OPTIONS}
+            options={DELIVERY_OPTIONS.map((option) => ({ ...option, label: t(option.labelKey) }))}
             value={store.deliveryMode}
             onChange={(mode) => {
               store.setDeliveryMode(mode);
@@ -200,13 +203,13 @@ export default function NotificationSettingsScreen() {
           />
           <Text variant="caption" className="px-1">
             {store.deliveryMode === 'digest'
-              ? 'One morning summary of your day, plus only time-critical pings (due tasks, events, money).'
-              : 'Every reminder fires on its own, exactly when scheduled.'}
+              ? t('notif.digestDescription')
+              : t('notif.individualDescription')}
           </Text>
           {store.deliveryMode === 'digest' && (
             <View className="rounded-2xl border border-border bg-card px-4">
               <TimeRow
-                label="Digest time"
+                label={t('notif.digestTime')}
                 minutes={store.digestHour * 60 + store.digestMinute}
                 onChange={(m) => {
                   store.setDigestTime(Math.floor(m / 60), m % 60);
@@ -223,15 +226,17 @@ export default function NotificationSettingsScreen() {
           style={{ opacity: disabled ? 0.5 : 1 }}
           pointerEvents={disabled ? 'none' : 'auto'}
         >
-          <SectionLabel>Quiet hours</SectionLabel>
+          <SectionLabel>{t('notif.quietHours')}</SectionLabel>
           <View className="rounded-2xl border border-border bg-card px-4">
             <View className="flex-row items-center justify-between py-3.5">
               <View className="flex-1 pr-3">
-                <Text className="font-sora-medium text-foreground">Silence nudges overnight</Text>
+                <Text className="font-sora-medium text-foreground">
+                  {t('notif.silenceOvernight')}
+                </Text>
                 <Text variant="caption">
                   {store.quietHoursEnabled
                     ? formatQuietWindow(store.quietStartMinutes, store.quietEndMinutes)
-                    : 'Off'}
+                    : t('notif.off')}
                 </Text>
               </View>
               <Switch
@@ -246,13 +251,13 @@ export default function NotificationSettingsScreen() {
             {store.quietHoursEnabled && (
               <>
                 <TimeRow
-                  label="From"
+                  label={t('notif.from')}
                   minutes={store.quietStartMinutes}
                   borderTop
                   onChange={(m) => store.setQuietHours(m, store.quietEndMinutes)}
                 />
                 <TimeRow
-                  label="Until"
+                  label={t('notif.until')}
                   minutes={store.quietEndMinutes}
                   borderTop
                   onChange={(m) => store.setQuietHours(store.quietStartMinutes, m)}
@@ -261,7 +266,7 @@ export default function NotificationSettingsScreen() {
             )}
           </View>
           <Text variant="caption" className="px-1">
-            Due tasks, calendar events, money reminders and your bedtime nudge always come through.
+            {t('notif.quietNote')}
           </Text>
         </View>
 
@@ -271,7 +276,7 @@ export default function NotificationSettingsScreen() {
           style={{ opacity: disabled ? 0.5 : 1 }}
           pointerEvents={disabled ? 'none' : 'auto'}
         >
-          <SectionLabel>What you hear about</SectionLabel>
+          <SectionLabel>{t('notif.whatYouHearAbout')}</SectionLabel>
           <View className="rounded-2xl border border-border bg-card px-4">
             {CONFIGURABLE_CATEGORIES.map((category, index) => {
               const meta = CATEGORY_META[category];
@@ -292,8 +297,8 @@ export default function NotificationSettingsScreen() {
                     <Icon size={17} color={meta.tint} />
                   </View>
                   <View className="flex-1">
-                    <Text className="font-sora-medium text-foreground">{meta.label}</Text>
-                    <Text variant="caption">{meta.description}</Text>
+                    <Text className="font-sora-medium text-foreground">{t(meta.labelKey)}</Text>
+                    <Text variant="caption">{t(meta.descriptionKey)}</Text>
                   </View>
                   <Switch
                     value={store.categories[category] ?? true}
@@ -305,8 +310,7 @@ export default function NotificationSettingsScreen() {
             })}
           </View>
           <Text variant="caption" className="px-1">
-            Turning a category off clears its queued reminders right away. They come back as you
-            edit each item once it&apos;s on again.
+            {t('notif.categoryNote')}
           </Text>
         </View>
       </ScrollView>

@@ -3,6 +3,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import { X } from 'lucide-react-native';
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, useWindowDimensions, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
@@ -45,6 +46,7 @@ export default function StoryPlayerScreen() {
   const { period } = useLocalSearchParams<{ period: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   const { width, height } = useWindowDimensions();
   const { data: photos = [] } = usePhotos();
 
@@ -202,7 +204,11 @@ export default function StoryPlayerScreen() {
             <Text style={{ color: '#ffffff', fontSize: 13 }} className="font-sora-semibold">
               {format(current.takenAt, 'EEEE, MMM d, yyyy')}
             </Text>
-            <Pressable onPress={() => router.back()} hitSlop={10} accessibilityLabel="Close">
+            <Pressable
+              onPress={() => router.back()}
+              hitSlop={10}
+              accessibilityLabel={t('common.close')}
+            >
               <X size={22} color="#ffffff" />
             </Pressable>
           </View>

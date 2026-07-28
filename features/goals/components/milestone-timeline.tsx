@@ -2,6 +2,7 @@ import * as Haptics from 'expo-haptics';
 import { format } from 'date-fns';
 import { Check, Plus } from 'lucide-react-native';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, TextInput, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
@@ -26,6 +27,7 @@ type Props = {
  */
 export function MilestoneTimeline({ milestones, tint, onToggle, onAdd, onRemove }: Props) {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const [draft, setDraft] = useState('');
 
   const submitDraft = () => {
@@ -69,7 +71,7 @@ export function MilestoneTimeline({ milestones, tint, onToggle, onAdd, onRemove 
             <Pressable
               onLongPress={() => onRemove(milestone)}
               className="flex-1 pb-4"
-              accessibilityHint="Long-press to delete"
+              accessibilityHint={t('goals.longPressDelete')}
             >
               <Text
                 className={
@@ -81,7 +83,9 @@ export function MilestoneTimeline({ milestones, tint, onToggle, onAdd, onRemove 
                 {milestone.title}
               </Text>
               {milestone.isCompleted && milestone.completedAt && (
-                <Text variant="caption">Done {format(milestone.completedAt, 'MMM d')}</Text>
+                <Text variant="caption">
+                  {t('goals.doneOn', { date: format(milestone.completedAt, 'MMM d') })}
+                </Text>
               )}
             </Pressable>
           </Animated.View>
@@ -98,7 +102,7 @@ export function MilestoneTimeline({ milestones, tint, onToggle, onAdd, onRemove 
         <TextInput
           value={draft}
           onChangeText={setDraft}
-          placeholder="Add a milestone"
+          placeholder={t('goals.addAMilestone')}
           placeholderTextColor={colors[scheme].mutedForeground}
           onSubmitEditing={submitDraft}
           returnKeyType="done"

@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { Bookmark, GitCompareArrows, Share2, Sparkles, TrendingUp } from 'lucide-react-native';
 import { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, Dimensions, Image, Pressable, ScrollView, TextInput, View } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
 
@@ -22,8 +23,8 @@ import { alpha, tintGradient } from '@/lib/color';
 const COMPARE_TINT = '#8b5cf6';
 
 const LAYOUT_OPTIONS = [
-  { value: 'split' as const, label: 'Side by side' },
-  { value: 'slider' as const, label: 'Slider' },
+  { value: 'split' as const, labelKey: 'gallery.layoutSplit' },
+  { value: 'slider' as const, labelKey: 'gallery.layoutSlider' },
 ];
 
 type Layout = 'split' | 'slider';
@@ -31,6 +32,7 @@ type Layout = 'split' | 'slider';
 export default function CompareScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const { data: photos = [] } = usePhotos();
 
   // Only still photos can anchor a before/after.
@@ -47,6 +49,10 @@ export default function CompareScreen() {
   const { saveComparison } = useGalleryMutations();
 
   const cardRef = useRef<View>(null);
+
+  /** Human label for a comparison slot, used in the picker prompts. */
+  const slotLabel = (slot: 'before' | 'after') =>
+    slot === 'before' ? t('gallery.slotBefore') : t('gallery.slotAfter');
 
   const before = stills.find((p) => p.id === beforeId) ?? null;
   const after = stills.find((p) => p.id === afterId) ?? null;
@@ -79,13 +85,13 @@ export default function CompareScreen() {
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(uri, {
           mimeType: 'image/png',
-          dialogTitle: 'Share your progress',
+          dialogTitle: t('gallery.shareDialogTitle'),
         });
       } else {
-        Alert.alert('Sharing unavailable', 'Sharing is not available on this device.');
+        Alert.alert(t('gallery.sharingUnavailableTitle'), t('gallery.sharingUnavailableBody'));
       }
     } catch {
-      Alert.alert('Could not share', 'Something went wrong creating your progress image.');
+      Alert.alert(t('gallery.couldNotShareTitle'), t('gallery.couldNotShareBody'));
     } finally {
       setSharing(false);
     }
@@ -97,12 +103,12 @@ export default function CompareScreen() {
       setSaving(true);
       const uri = await captureRef(cardRef, { format: 'png', quality: 1 });
       await saveComparison.mutateAsync({ tempUri: uri, caption, takenAt: after!.takenAt });
-      Alert.alert('Saved to feed', 'Your before & after was added to your progress feed.', [
-        { text: 'View feed', onPress: () => router.push('/gallery/feed') },
-        { text: 'Done', style: 'cancel' },
+      Alert.alert(t('gallery.savedToFeedTitle'), t('gallery.savedToFeedBody'), [
+        { text: t('gallery.viewFeed'), onPress: () => router.push('/gallery/feed') },
+        { text: t('common.done'), style: 'cancel' },
       ]);
     } catch {
-      Alert.alert('Could not save', 'Something went wrong saving your comparison.');
+      Alert.alert(t('gallery.couldNotSaveTitle'), t('gallery.couldNotSaveBody'));
     } finally {
       setSaving(false);
     }
@@ -111,11 +117,15 @@ export default function CompareScreen() {
   if (stills.length < 2) {
     return (
       <View className="flex-1 bg-background">
-        <ScreenHeader title="Before & After" eyebrow="Progress" tint={COMPARE_TINT} />
+        <ScreenHeader
+          title={t('gallery.beforeAfter')}
+          eyebrow={t('gallery.title')}
+          tint={COMPARE_TINT}
+        />
         <EmptyState
           icon={GitCompareArrows}
-          title="Add more photos"
-          description="You need at least two photos to build a before-and-after comparison."
+          title={t('gallery.addMorePhotosTitle')}
+          description={t('gallery.addMorePhotosBody')}
           tint={COMPARE_TINT}
         />
       </View>
@@ -126,7 +136,11 @@ export default function CompareScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <ScreenHeader title="Before & After" eyebrow="Progress" tint={COMPARE_TINT} />
+      <ScreenHeader
+        title={t('gallery.beforeAfter')}
+        eyebrow={t('gallery.title')}
+        tint={COMPARE_TINT}
+      />
 
       <ScrollView
         contentContainerClassName="gap-5 px-4 pb-10"
@@ -171,11 +185,11 @@ export default function CompareScreen() {
               <TrendingUp size={20} color="#ffffff" />
             </LinearGradient>
             <View style={{ flex: 1 }}>
-              <Text className="font-sora-bold text-foreground">My Progress</Text>
+              <Text className="font-sora-bold text-foreground">{t('gallery.myProgress')}</Text>
               <Text variant="caption">
                 {ready
                   ? `${format(before!.takenAt, 'MMM d, yyyy')} → ${format(after!.takenAt, 'MMM d, yyyy')}`
-                  : 'Pick a before & after'}
+                  : t('gallery.pickBeforeAfter')}
               </Text>
             </View>
             {ready && elapsed > 0 && (
@@ -195,7 +209,7 @@ export default function CompareScreen() {
                   {elapsed}
                 </Text>
                 <Text style={{ color: COMPARE_TINT, fontSize: 9, fontFamily: 'Sora_600SemiBold' }}>
-                  DAYS
+                  {t('gallery.days')}
                 </Text>
               </View>
             )}
@@ -206,10 +220,10 @@ export default function CompareScreen() {
             layout === 'split' ? (
               <View style={{ flexDirection: 'row', gap: 10, paddingHorizontal: pad }}>
                 {[
-                  { photo: before!, label: 'BEFORE' },
-                  { photo: after!, label: 'AFTER' },
-                ].map(({ photo, label }) => (
-                  <View key={label} style={{ width: splitW }}>
+                  { photo: before!, key: 'before', label: t('gallery.beforeBadge') },
+                  { photo: after!, key: 'after', label: t('gallery.afterBadge') },
+                ].map(({ photo, key, label }) => (
+                  <View key={key} style={{ width: splitW }}>
                     <View
                       style={{
                         width: splitW,
@@ -297,7 +311,7 @@ export default function CompareScreen() {
                       className="text-white"
                       style={{ fontSize: 10, fontFamily: 'Sora_700Bold' }}
                     >
-                      BEFORE
+                      {t('gallery.beforeBadge')}
                     </Text>
                   </View>
                   <View
@@ -315,7 +329,7 @@ export default function CompareScreen() {
                       className="text-white"
                       style={{ fontSize: 10, fontFamily: 'Sora_700Bold' }}
                     >
-                      AFTER
+                      {t('gallery.afterBadge')}
                     </Text>
                   </View>
                 </View>
@@ -336,7 +350,9 @@ export default function CompareScreen() {
               }}
             >
               <GitCompareArrows size={24} color={colors[scheme].mutedForeground} />
-              <Text variant="muted">Pick a {active} photo below</Text>
+              <Text variant="muted">
+                {t('gallery.pickPhotoBelow', { slot: slotLabel(active) })}
+              </Text>
             </View>
           )}
 
@@ -352,7 +368,7 @@ export default function CompareScreen() {
                   fontFamily: 'Sora_600SemiBold',
                 }}
               >
-                Tracked with LifeOS
+                {t('gallery.trackedWith')}
               </Text>
             </View>
           </View>
@@ -360,7 +376,7 @@ export default function CompareScreen() {
 
         {/* Controls (not part of the captured card) */}
         <Segmented
-          options={LAYOUT_OPTIONS}
+          options={LAYOUT_OPTIONS.map((option) => ({ ...option, label: t(option.labelKey) }))}
           value={layout}
           onChange={setLayout}
           activeColor={COMPARE_TINT}
@@ -381,8 +397,8 @@ export default function CompareScreen() {
         <TextInput
           value={caption}
           onChangeText={setCaption}
-          accessibilityLabel="Caption"
-          placeholder="Add a caption to your progress…"
+          accessibilityLabel={t('gallery.caption')}
+          placeholder={t('gallery.captionLongPlaceholder')}
           placeholderTextColor={colors[scheme].mutedForeground}
           className="rounded-2xl border border-border bg-card px-4 py-3 text-foreground"
           maxLength={140}
@@ -391,7 +407,7 @@ export default function CompareScreen() {
         {ready && (
           <View className="gap-2.5">
             <GradientButton
-              label={saving ? 'Saving…' : 'Save to feed'}
+              label={saving ? t('gallery.saving') : t('gallery.saveToFeed')}
               tint={COMPARE_TINT}
               icon={Bookmark}
               onPress={saveToFeed}
@@ -405,7 +421,7 @@ export default function CompareScreen() {
             >
               <Share2 size={17} color={COMPARE_TINT} />
               <Text className="font-sora-semibold" style={{ color: COMPARE_TINT }}>
-                {sharing ? 'Preparing…' : 'Share image'}
+                {sharing ? t('gallery.preparing') : t('gallery.shareImage')}
               </Text>
             </Pressable>
           </View>
@@ -434,10 +450,10 @@ export default function CompareScreen() {
                   />
                 ) : (
                   <View className="h-20 w-full items-center justify-center rounded-lg bg-surface">
-                    <Text variant="caption">Pick photo</Text>
+                    <Text variant="caption">{t('gallery.pickPhoto')}</Text>
                   </View>
                 )}
-                <Text className="font-sora-semibold capitalize text-foreground">{slot}</Text>
+                <Text className="font-sora-semibold text-foreground">{slotLabel(slot)}</Text>
               </Pressable>
             );
           })}
@@ -446,7 +462,7 @@ export default function CompareScreen() {
         {/* Photo picker strip */}
         <View className="gap-2">
           <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-            Tap to set “{active}”
+            {t('gallery.tapToSet', { slot: slotLabel(active) })}
           </Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4 }}>
             {stills.map((photo) => {

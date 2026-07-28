@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal, Pressable, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -23,6 +24,7 @@ type Props = {
 export function ReflectionSheet({ visible, focusSeconds, onSave }: Props) {
   const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const [rating, setRating] = useState<number | null>(null);
   const [note, setNote] = useState('');
 
@@ -53,9 +55,9 @@ export function ReflectionSheet({ visible, focusSeconds, onSave }: Props) {
             />
 
             <View className="items-center gap-1">
-              <Text variant="heading">Nice work! 🎉</Text>
+              <Text variant="heading">{t('study.niceWork')}</Text>
               <Text variant="muted">
-                You focused for{' '}
+                {t('study.youFocusedFor')}{' '}
                 <Text className="font-sora-bold" style={{ color: STUDY_TINT }}>
                   {formatStudyDuration(focusSeconds)}
                 </Text>
@@ -64,7 +66,7 @@ export function ReflectionSheet({ visible, focusSeconds, onSave }: Props) {
 
             <View className="items-center gap-2">
               <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-                How focused were you?
+                {t('study.howFocused')}
               </Text>
               <StarRating value={rating} onChange={setRating} />
             </View>
@@ -72,13 +74,13 @@ export function ReflectionSheet({ visible, focusSeconds, onSave }: Props) {
             <TextInput
               value={note}
               onChangeText={setNote}
-              accessibilityLabel="Session reflection"
-              placeholder="What did you work on? (optional)"
+              accessibilityLabel={t('study.sessionReflection')}
+              placeholder={t('study.notePlaceholder')}
               placeholderTextColor={colors[scheme].mutedForeground}
               className="rounded-2xl border border-border px-4 py-3 text-foreground"
             />
 
-            <GradientButton label="Save session" tint={STUDY_TINT} onPress={commit} />
+            <GradientButton label={t('study.saveSession')} tint={STUDY_TINT} onPress={commit} />
           </Pressable>
         </View>
       </Pressable>

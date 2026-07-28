@@ -3,6 +3,7 @@ import { format, set, subDays } from 'date-fns';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { CalendarDays, Moon, Sun, Trash2 } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
@@ -50,6 +51,7 @@ export default function SleepLogScreen() {
   }>();
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const sleepTint = moduleTint('sleep', scheme);
   const { create, update, remove } = useSleepMutations();
   const { data: existing } = useSleepSession(id);
@@ -114,10 +116,7 @@ export default function SleepLogScreen() {
     const { bedtime, wakeTime, logDate } = buildTimestamps(nightDate, bed, wake);
     // Sleep can't happen in the future.
     if (wakeTime > Date.now()) {
-      Alert.alert(
-        "That's in the future",
-        "Your wake-up time hasn't happened yet. Pick a night and wake time that have already passed.",
-      );
+      Alert.alert(t('sleep.futureTitle'), t('sleep.futureBody'));
       return;
     }
     if (isEdit && existing) {
@@ -147,10 +146,10 @@ export default function SleepLogScreen() {
 
   const confirmDelete = () => {
     if (!existing) return;
-    Alert.alert('Delete sleep record?', 'This night will be removed from your history.', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('sleep.deleteTitle'), t('sleep.deleteBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Delete',
+        text: t('common.delete'),
         style: 'destructive',
         onPress: () => {
           remove.mutate(existing.id);
@@ -163,14 +162,14 @@ export default function SleepLogScreen() {
   return (
     <View className="flex-1 bg-background">
       <SheetHeader
-        title={isEdit ? 'Edit Sleep' : 'Log Sleep'}
+        title={isEdit ? t('sleep.editSleep') : t('sleep.logSleepTitle')}
         right={
           isEdit ? (
             <Pressable
               onPress={confirmDelete}
               hitSlop={10}
               className="h-9 w-9 items-center justify-center"
-              accessibilityLabel="Delete"
+              accessibilityLabel={t('common.delete')}
             >
               <Trash2 size={18} color={colors[scheme].destructive} />
             </Pressable>
@@ -186,7 +185,7 @@ export default function SleepLogScreen() {
         <View className="flex-row items-center justify-between rounded-2xl border border-border bg-card px-4 py-3">
           <View className="flex-row items-center gap-2">
             <CalendarDays size={16} color={colors[scheme].mutedForeground} />
-            <Text className="font-sora-medium text-foreground">Night of</Text>
+            <Text className="font-sora-medium text-foreground">{t('sleep.nightOf')}</Text>
           </View>
           {Platform.OS === 'ios' ? (
             <DateTimePicker
@@ -218,13 +217,25 @@ export default function SleepLogScreen() {
         )}
 
         <View className="flex-row gap-3">
-          <TimeField icon={Moon} label="Bedtime" value={bed} onChange={setBed} tint={sleepTint} />
-          <TimeField icon={Sun} label="Wake up" value={wake} onChange={setWake} tint="#f59e0b" />
+          <TimeField
+            icon={Moon}
+            label={t('sleep.bedtime')}
+            value={bed}
+            onChange={setBed}
+            tint={sleepTint}
+          />
+          <TimeField
+            icon={Sun}
+            label={t('sleep.wakeUp')}
+            value={wake}
+            onChange={setWake}
+            tint="#f59e0b"
+          />
         </View>
 
         <View className="flex-row gap-3 rounded-2xl bg-surface p-4">
           <View className="flex-1 items-center gap-1">
-            <Text variant="micro">In bed</Text>
+            <Text variant="micro">{t('sleep.inBed')}</Text>
             <Text
               className="font-sora-bold text-2xl text-foreground"
               style={{ fontVariant: ['tabular-nums'] }}
@@ -234,7 +245,7 @@ export default function SleepLogScreen() {
           </View>
           <View className="w-px bg-border" />
           <View className="flex-1 items-center gap-1">
-            <Text variant="micro">Asleep</Text>
+            <Text variant="micro">{t('sleep.asleep')}</Text>
             <Text
               className="font-sora-extrabold text-2xl text-sleep"
               style={{ fontVariant: ['tabular-nums'] }}
@@ -245,7 +256,7 @@ export default function SleepLogScreen() {
         </View>
 
         <View className="gap-2.5">
-          <Text variant="micro">Time to fall asleep (optional)</Text>
+          <Text variant="micro">{t('sleep.timeToFallAsleep')}</Text>
           <View className="flex-row flex-wrap gap-2">
             {FELL_ASLEEP_OPTIONS.map((minutes) => {
               const selected = fellAsleep === minutes;
@@ -258,7 +269,7 @@ export default function SleepLogScreen() {
                   <Text
                     className={selected ? 'font-sora-semibold text-white' : 'text-muted-foreground'}
                   >
-                    {minutes === 0 ? 'Instantly' : `${minutes}m`}
+                    {minutes === 0 ? t('sleep.instantly') : t('sleep.minutesShort', { minutes })}
                   </Text>
                 </Pressable>
               );
@@ -267,16 +278,16 @@ export default function SleepLogScreen() {
         </View>
 
         <View className="gap-2.5">
-          <Text variant="micro">Quality (optional)</Text>
+          <Text variant="micro">{t('sleep.qualityOptional')}</Text>
           <StarRating value={quality} onChange={setQuality} />
         </View>
 
         <View className="gap-2.5">
-          <Text variant="micro">Note (optional)</Text>
+          <Text variant="micro">{t('sleep.noteOptional')}</Text>
           <TextInput
             value={note}
             onChangeText={setNote}
-            placeholder="Dreams, disruptions, how you felt…"
+            placeholder={t('sleep.notePlaceholder')}
             placeholderTextColor={colors[scheme].mutedForeground}
             multiline
             className="min-h-16 rounded-2xl border border-border bg-card px-4 py-3 text-foreground"
@@ -284,7 +295,7 @@ export default function SleepLogScreen() {
         </View>
 
         <Button
-          label={isEdit ? 'Save changes' : 'Save sleep'}
+          label={isEdit ? t('common.saveChanges') : t('sleep.saveSleep')}
           onPress={save}
           size="lg"
           variant="accent"

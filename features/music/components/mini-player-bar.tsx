@@ -2,6 +2,7 @@ import { usePathname, useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { GripVertical, Pause, Play, SkipForward, X } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, useWindowDimensions, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
@@ -36,6 +37,7 @@ export function MiniPlayerBar() {
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const { width: screenW, height: screenH } = useWindowDimensions();
   const { currentSong, isPlaying, positionMs, durationMs, togglePlayPause, playNext, clearPlayer } =
     useNowPlaying();
@@ -127,7 +129,10 @@ export function MiniPlayerBar() {
         </View>
         <View className="flex-row items-center gap-1.5 py-2 pl-1.5 pr-2.5">
           {/* Drag handle */}
-          <View className="items-center justify-center px-0.5" accessibilityLabel="Drag to move">
+          <View
+            className="items-center justify-center px-0.5"
+            accessibilityLabel={t('music.dragToMove')}
+          >
             <GripVertical size={16} color={colors[scheme].mutedForeground} />
           </View>
 
@@ -135,7 +140,7 @@ export function MiniPlayerBar() {
           <Pressable
             onPress={() => router.push('/music/now-playing')}
             className="flex-1 flex-row items-center gap-2.5"
-            accessibilityLabel="Open now playing"
+            accessibilityLabel={t('music.openNowPlaying')}
           >
             <LinearGradient
               colors={[c1, c2, c3]}
@@ -156,7 +161,7 @@ export function MiniPlayerBar() {
                 {currentSong.title}
               </Text>
               <Text variant="caption" numberOfLines={1}>
-                {currentSong.artist ?? 'Unknown artist'}
+                {currentSong.artist ?? t('music.unknownArtist')}
               </Text>
             </View>
           </Pressable>
@@ -165,7 +170,7 @@ export function MiniPlayerBar() {
             onPress={togglePlayPause}
             hitSlop={6}
             className="h-9 w-9 items-center justify-center"
-            accessibilityLabel={isPlaying ? 'Pause' : 'Play'}
+            accessibilityLabel={isPlaying ? t('music.pause') : t('music.play')}
           >
             {isPlaying ? (
               <Pause size={20} color={colors[scheme].foreground} fill={colors[scheme].foreground} />
@@ -177,7 +182,7 @@ export function MiniPlayerBar() {
             onPress={playNext}
             hitSlop={6}
             className="h-9 w-9 items-center justify-center"
-            accessibilityLabel="Next track"
+            accessibilityLabel={t('music.nextTrack')}
           >
             <SkipForward
               size={18}
@@ -189,7 +194,7 @@ export function MiniPlayerBar() {
             onPress={clearPlayer}
             hitSlop={6}
             className="h-9 w-9 items-center justify-center"
-            accessibilityLabel="Stop and dismiss"
+            accessibilityLabel={t('music.stopAndDismiss')}
           >
             <X size={18} color={colors[scheme].mutedForeground} />
           </Pressable>

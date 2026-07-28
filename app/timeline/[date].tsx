@@ -2,6 +2,7 @@ import { FlashList } from '@shopify/flash-list';
 import { addDays, format, parseISO, subDays } from 'date-fns';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronLeft, ChevronRight, Clock3, Plus } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -20,6 +21,7 @@ export default function TimelineScreen() {
   const { date: dateKey } = useLocalSearchParams<{ date: string }>();
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
 
   const date = parseISO(dateKey);
   const { data: events = [], isLoading } = useTimelineForDate(dateKey);
@@ -30,13 +32,13 @@ export default function TimelineScreen() {
   return (
     <View className="flex-1 bg-background">
       <ScreenHeader
-        title="Timeline"
-        eyebrow="Your day"
+        title={t('timeline.title')}
+        eyebrow={t('timeline.eyebrow')}
         tint={moduleTint('calendar', scheme)}
         actions={[
           {
             icon: Plus,
-            label: 'Add event',
+            label: t('timeline.addEvent'),
             onPress: () =>
               router.push({ pathname: '/timeline/event/new', params: { date: dateKey } }),
           },
@@ -70,8 +72,8 @@ export default function TimelineScreen() {
       ) : events.length === 0 ? (
         <EmptyState
           icon={Clock3}
-          title="Nothing here yet"
-          description="What you do today will show up here automatically."
+          title={t('timeline.emptyTitle')}
+          description={t('timeline.emptyBody')}
         />
       ) : (
         <FlashList

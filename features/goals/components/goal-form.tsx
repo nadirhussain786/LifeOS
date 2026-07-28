@@ -3,6 +3,7 @@ import * as Haptics from 'expo-haptics';
 import { CalendarClock, Flag, ListChecks, Tag } from 'lucide-react-native';
 import { useMemo } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { ScrollView, TextInput, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
@@ -28,19 +29,20 @@ type Props = {
 };
 
 const PRIORITY_OPTIONS = [
-  { value: 'low' as const, label: 'Low' },
-  { value: 'medium' as const, label: 'Medium' },
-  { value: 'high' as const, label: 'High' },
+  { value: 'low' as const, labelKey: 'fields.low' },
+  { value: 'medium' as const, labelKey: 'fields.medium' },
+  { value: 'high' as const, labelKey: 'fields.high' },
 ];
 
 const PROGRESS_OPTIONS = [
-  { value: 'percent' as const, label: 'Percent' },
-  { value: 'count' as const, label: 'Number' },
-  { value: 'milestones' as const, label: 'Milestones' },
+  { value: 'percent' as const, labelKey: 'goals.modePercent' },
+  { value: 'count' as const, labelKey: 'goals.modeCount' },
+  { value: 'milestones' as const, labelKey: 'goals.modeMilestones' },
 ];
 
 export function GoalForm({ defaultValues, submitLabel, onSubmit, showMilestones = true }: Props) {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const keyboardHeight = useKeyboardHeight();
   const schema = useMemo(() => makeGoalFormSchema(showMilestones), [showMilestones]);
   const focusProgress = useSharedValue(0);
@@ -82,8 +84,8 @@ export function GoalForm({ defaultValues, submitLabel, onSubmit, showMilestones 
             <TextInput
               value={field.value}
               onChangeText={field.onChange}
-              accessibilityLabel="Goal title"
-              placeholder="What do you want to achieve?"
+              accessibilityLabel={t('goals.goalTitle')}
+              placeholder={t('goals.titlePlaceholder')}
               placeholderTextColor={colors[scheme].mutedForeground}
               autoFocus
               multiline
@@ -106,8 +108,8 @@ export function GoalForm({ defaultValues, submitLabel, onSubmit, showMilestones 
           <TextInput
             value={field.value ?? ''}
             onChangeText={(text) => field.onChange(text || null)}
-            accessibilityLabel="Goal description"
-            placeholder="Add a note or why this matters (optional)"
+            accessibilityLabel={t('goals.goalDescription')}
+            placeholder={t('goals.descriptionPlaceholder')}
             placeholderTextColor={colors[scheme].mutedForeground}
             multiline
             className="min-h-12 rounded-2xl border border-border bg-card px-4 py-3 text-foreground"
@@ -116,7 +118,7 @@ export function GoalForm({ defaultValues, submitLabel, onSubmit, showMilestones 
       />
 
       <View className="rounded-2xl border border-border bg-card px-4">
-        <AttributeRow icon={Tag} label="Category" isFirst>
+        <AttributeRow icon={Tag} label={t('fields.category')} isFirst>
           <Controller
             control={control}
             name="category"
@@ -137,24 +139,34 @@ export function GoalForm({ defaultValues, submitLabel, onSubmit, showMilestones 
           />
         </AttributeRow>
 
-        <AttributeRow icon={Flag} label="Priority">
+        <AttributeRow icon={Flag} label={t('fields.priority')}>
           <Controller
             control={control}
             name="priority"
             render={({ field }) => (
-              <Segmented options={PRIORITY_OPTIONS} value={field.value} onChange={field.onChange} />
+              <Segmented
+                options={PRIORITY_OPTIONS.map((option) => ({
+                  ...option,
+                  label: t(option.labelKey),
+                }))}
+                value={field.value}
+                onChange={field.onChange}
+              />
             )}
           />
         </AttributeRow>
 
-        <AttributeRow icon={ListChecks} label="Track progress by">
+        <AttributeRow icon={ListChecks} label={t('goals.trackProgressBy')}>
           <View className="gap-3">
             <Controller
               control={control}
               name="progressMode"
               render={({ field }) => (
                 <Segmented
-                  options={PROGRESS_OPTIONS}
+                  options={PROGRESS_OPTIONS.map((option) => ({
+                    ...option,
+                    label: t(option.labelKey),
+                  }))}
                   value={field.value}
                   onChange={field.onChange}
                 />
@@ -173,8 +185,8 @@ export function GoalForm({ defaultValues, submitLabel, onSubmit, showMilestones 
                         const parsed = parseFloat(text);
                         field.onChange(Number.isFinite(parsed) ? parsed : null);
                       }}
-                      accessibilityLabel="Target value"
-                      placeholder="Target"
+                      accessibilityLabel={t('goals.targetValue')}
+                      placeholder={t('goals.targetPlaceholder')}
                       keyboardType="decimal-pad"
                       placeholderTextColor={colors[scheme].mutedForeground}
                       className="w-24 rounded-lg border border-border px-3 py-2 text-center text-foreground"
@@ -188,8 +200,8 @@ export function GoalForm({ defaultValues, submitLabel, onSubmit, showMilestones 
                     <TextInput
                       value={field.value ?? ''}
                       onChangeText={(text) => field.onChange(text || null)}
-                      accessibilityLabel="Unit"
-                      placeholder="books, kg, $…"
+                      accessibilityLabel={t('fields.unit')}
+                      placeholder={t('goals.unitPlaceholder')}
                       placeholderTextColor={colors[scheme].mutedForeground}
                       className="flex-1 rounded-lg border border-border px-3 py-2 text-foreground"
                     />
@@ -208,12 +220,12 @@ export function GoalForm({ defaultValues, submitLabel, onSubmit, showMilestones 
                   )}
                 />
               ) : (
-                <Text variant="caption">Manage milestones from the goal screen.</Text>
+                <Text variant="caption">{t('goals.manageMilestonesHint')}</Text>
               ))}
           </View>
         </AttributeRow>
 
-        <AttributeRow icon={CalendarClock} label="Target date">
+        <AttributeRow icon={CalendarClock} label={t('goals.targetDate')}>
           <Controller
             control={control}
             name="dueDate"

@@ -2,6 +2,7 @@ import { FlashList } from '@shopify/flash-list';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { ListMusic, Play, Plus, Shuffle } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, View } from 'react-native';
 
 import { EmptyState } from '@/components/ui/empty-state';
@@ -23,6 +24,7 @@ import { alpha, tintGradient } from '@/lib/color';
 export default function MusicScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
 
   const { data: songs = [], isLoading, isError, refetch } = useSongs();
   const { data: playlists = [] } = usePlaylists();
@@ -40,8 +42,8 @@ export default function MusicScreen() {
   return (
     <View className="flex-1 bg-background">
       <ScreenHeader
-        title="Music"
-        eyebrow="Library"
+        title={t('music.title')}
+        eyebrow={t('music.eyebrow')}
         tint={MUSIC_TINT}
         right={
           <Pressable
@@ -52,7 +54,7 @@ export default function MusicScreen() {
           >
             <Plus size={15} color="#ffffff" />
             <Text variant="caption" className="font-sora-semibold" style={{ color: '#ffffff' }}>
-              {importFromDevice.isPending ? 'Adding…' : 'Add songs'}
+              {importFromDevice.isPending ? t('music.adding') : t('music.addSongs')}
             </Text>
           </Pressable>
         }
@@ -69,9 +71,9 @@ export default function MusicScreen() {
       ) : songs.length === 0 ? (
         <EmptyState
           icon={ListMusic}
-          title="No songs yet"
-          description="Add songs from your device to build your library."
-          actionLabel="Add songs"
+          title={t('music.emptyTitle')}
+          description={t('music.emptyBody')}
+          actionLabel={t('music.addSongs')}
           onAction={handleAddSongs}
           tint={MUSIC_TINT}
         />
@@ -96,7 +98,7 @@ export default function MusicScreen() {
                       className="font-sora-semibold uppercase tracking-wide"
                       style={{ color: MUSIC_TINT }}
                     >
-                      Now Playing
+                      {t('music.nowPlaying')}
                     </Text>
                     <Text className="font-sora-semibold text-foreground" numberOfLines={1}>
                       {currentSong.title}
@@ -126,7 +128,7 @@ export default function MusicScreen() {
                   >
                     <Play size={17} color="#ffffff" fill="#ffffff" />
                     <Text className="font-sora-bold" style={{ color: '#ffffff' }}>
-                      Play all
+                      {t('music.playAll')}
                     </Text>
                   </LinearGradient>
                 </Pressable>
@@ -137,27 +139,30 @@ export default function MusicScreen() {
                 >
                   <Shuffle size={17} color={MUSIC_TINT} />
                   <Text className="font-sora-bold" style={{ color: MUSIC_TINT }}>
-                    Shuffle
+                    {t('music.shuffle')}
                   </Text>
                 </Pressable>
               </View>
 
               <Text variant="caption" className="px-5">
-                {songs.length} {songs.length === 1 ? 'song' : 'songs'} · {playlists.length}{' '}
-                {playlists.length === 1 ? 'playlist' : 'playlists'} · {totalLabel}
+                {t('music.librarySummary', {
+                  songs: t('music.songsCount', { count: songs.length }),
+                  playlists: t('music.playlistsCount', { count: playlists.length }),
+                  duration: totalLabel,
+                })}
               </Text>
 
               {/* Playlists */}
               <View className="gap-2.5">
                 <View className="flex-row items-center justify-between px-4">
-                  <Text variant="subheading">Playlists</Text>
+                  <Text variant="subheading">{t('music.playlists')}</Text>
                   <Pressable onPress={() => router.push('/music/playlist/new')} hitSlop={8}>
                     <Text
                       variant="caption"
                       className="font-sora-semibold"
                       style={{ color: MUSIC_TINT }}
                     >
-                      New playlist
+                      {t('music.newPlaylist')}
                     </Text>
                   </Pressable>
                 </View>
@@ -172,7 +177,7 @@ export default function MusicScreen() {
                       className="h-40 w-40 items-center justify-center gap-1.5 rounded-3xl border border-dashed border-border"
                     >
                       <Plus size={20} color={colors[scheme].mutedForeground} />
-                      <Text variant="caption">New playlist</Text>
+                      <Text variant="caption">{t('music.newPlaylist')}</Text>
                     </Pressable>
                   ) : (
                     playlists.map((playlist) => (
@@ -187,7 +192,7 @@ export default function MusicScreen() {
               </View>
 
               <Text variant="subheading" className="px-4 pt-1">
-                All songs
+                {t('music.allSongs')}
               </Text>
             </View>
           }

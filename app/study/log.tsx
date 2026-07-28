@@ -3,6 +3,7 @@ import { format, set } from 'date-fns';
 import { useRouter } from 'expo-router';
 import { CalendarDays, Clock, Minus, Plus } from 'lucide-react-native';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
@@ -24,6 +25,7 @@ const QUICK_MINUTES = [15, 25, 50, 90];
 export default function StudyLogScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const studyTint = moduleTint('study', scheme);
   const { data: subjects = [] } = useStudySubjects();
   const { logSession, addSubject } = useStudyMutations();
@@ -58,7 +60,7 @@ export default function StudyLogScreen() {
       milliseconds: 0,
     }).getTime();
     if (startedAt > Date.now()) {
-      Alert.alert("That's in the future", 'Pick a start date and time that have already happened.');
+      Alert.alert(t('study.futureTitle'), t('study.futureBody'));
       return;
     }
     logSession.mutate({
@@ -76,7 +78,7 @@ export default function StudyLogScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <SheetHeader title="Log Study Time" />
+      <SheetHeader title={t('study.logStudyTitle')} />
 
       <ScrollView
         contentContainerClassName="gap-5 px-5 pt-3 pb-10"
@@ -84,7 +86,7 @@ export default function StudyLogScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View className="gap-2.5">
-          <Text variant="micro">Subject</Text>
+          <Text variant="micro">{t('study.subject')}</Text>
           <SubjectPicker
             subjects={subjects}
             value={subjectId}
@@ -100,12 +102,12 @@ export default function StudyLogScreen() {
 
         {/* Duration */}
         <View className="items-center gap-3 rounded-2xl border border-border bg-card p-5 shadow-e1">
-          <Text variant="micro">How long did you study?</Text>
+          <Text variant="micro">{t('study.howLong')}</Text>
           <View className="flex-row items-center gap-6">
             <Pressable
               onPress={() => adjust(-5)}
               className="h-11 w-11 items-center justify-center rounded-2xl border border-border bg-surface"
-              accessibilityLabel="Less"
+              accessibilityLabel={t('study.less')}
             >
               <Minus size={20} color={colors[scheme].foreground} />
             </Pressable>
@@ -123,7 +125,7 @@ export default function StudyLogScreen() {
             <Pressable
               onPress={() => adjust(5)}
               className="h-11 w-11 items-center justify-center rounded-2xl bg-study"
-              accessibilityLabel="More"
+              accessibilityLabel={t('study.more')}
             >
               <Plus size={20} color="#ffffff" />
             </Pressable>
@@ -143,7 +145,7 @@ export default function StudyLogScreen() {
                     minutes === m ? 'font-sora-semibold text-white' : 'text-muted-foreground'
                   }
                 >
-                  {m}m
+                  {t('study.minutesShort', { minutes: m })}
                 </Text>
               </Pressable>
             ))}
@@ -201,7 +203,7 @@ export default function StudyLogScreen() {
 
         <View className="items-center gap-2">
           <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-            How focused were you? (optional)
+            {t('study.howFocusedOptional')}
           </Text>
           <StarRating value={rating} onChange={setRating} />
         </View>
@@ -209,12 +211,12 @@ export default function StudyLogScreen() {
         <TextInput
           value={note}
           onChangeText={setNote}
-          placeholder="What did you work on? (optional)"
+          placeholder={t('study.notePlaceholder')}
           placeholderTextColor={colors[scheme].mutedForeground}
           className="rounded-2xl border border-border bg-card px-4 py-3 text-foreground"
         />
 
-        <Button label="Save session" onPress={save} size="lg" variant="accent" />
+        <Button label={t('study.saveSession')} onPress={save} size="lg" variant="accent" />
       </ScrollView>
     </View>
   );

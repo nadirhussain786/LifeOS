@@ -13,6 +13,7 @@ import {
   X,
 } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -61,6 +62,7 @@ function GlassChip({
 export default function NowPlayingScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   const {
     currentSong,
     isPlaying,
@@ -116,16 +118,18 @@ export default function NowPlayingScreen() {
       >
         {/* Header */}
         <View className="flex-row items-center justify-between">
-          <GlassChip onPress={() => router.back()} label="Minimize">
+          <GlassChip onPress={() => router.back()} label={t('music.minimize')}>
             <ChevronDown size={20} color={WHITE} />
           </GlassChip>
           <Text
             style={{ color: alpha(WHITE, 0.75), fontSize: 11, letterSpacing: 1 }}
             className="font-sora-semibold uppercase"
           >
-            {queue.length > 0 ? `${currentIndex + 1} of ${queue.length}` : 'Now Playing'}
+            {queue.length > 0
+              ? t('music.indexOfTotal', { index: currentIndex + 1, total: queue.length })
+              : t('music.nowPlaying')}
           </Text>
-          <GlassChip onPress={dismiss} label="Stop and close">
+          <GlassChip onPress={dismiss} label={t('music.stopAndClose')}>
             <X size={18} color={WHITE} />
           </GlassChip>
         </View>
@@ -141,7 +145,7 @@ export default function NowPlayingScreen() {
             {currentSong.title}
           </Text>
           <Text numberOfLines={1} style={{ color: alpha(WHITE, 0.7), fontSize: 15 }}>
-            {currentSong.artist ?? 'Unknown artist'}
+            {currentSong.artist ?? t('music.unknownArtist')}
           </Text>
         </View>
 
@@ -164,17 +168,17 @@ export default function NowPlayingScreen() {
 
         {/* Transport */}
         <View className="mt-5 flex-row items-center justify-between">
-          <Pressable onPress={toggleShuffle} hitSlop={12} accessibilityLabel="Shuffle">
+          <Pressable onPress={toggleShuffle} hitSlop={12} accessibilityLabel={t('music.shuffle')}>
             <Shuffle size={20} color={shuffle ? accent : alpha(WHITE, 0.55)} />
           </Pressable>
 
           <View className="flex-row items-center gap-7">
-            <Pressable onPress={playPrevious} hitSlop={12} accessibilityLabel="Previous">
+            <Pressable onPress={playPrevious} hitSlop={12} accessibilityLabel={t('music.previous')}>
               <SkipBack size={28} color={WHITE} fill={WHITE} />
             </Pressable>
             <Pressable
               onPress={togglePlayPause}
-              accessibilityLabel={isPlaying ? 'Pause' : 'Play'}
+              accessibilityLabel={isPlaying ? t('music.pause') : t('music.play')}
               className="h-[72px] w-[72px] items-center justify-center rounded-full"
               style={{ backgroundColor: WHITE }}
             >
@@ -184,7 +188,7 @@ export default function NowPlayingScreen() {
                 <Play size={30} color="#0b0b10" fill="#0b0b10" style={{ marginLeft: 3 }} />
               )}
             </Pressable>
-            <Pressable onPress={playNext} hitSlop={12} accessibilityLabel="Next">
+            <Pressable onPress={playNext} hitSlop={12} accessibilityLabel={t('music.next')}>
               <SkipForward size={28} color={WHITE} fill={WHITE} />
             </Pressable>
           </View>
@@ -192,7 +196,7 @@ export default function NowPlayingScreen() {
           <Pressable
             onPress={() => setRepeatMode(REPEAT_CYCLE[repeatMode])}
             hitSlop={12}
-            accessibilityLabel="Repeat"
+            accessibilityLabel={t('music.repeat')}
           >
             <RepeatIcon size={20} color={repeatMode === 'off' ? alpha(WHITE, 0.55) : accent} />
           </Pressable>
@@ -211,7 +215,7 @@ export default function NowPlayingScreen() {
           >
             <Moon size={16} color={sleepActive ? accent : WHITE} />
             <Text className="font-sora-semibold" style={{ color: WHITE }}>
-              {sleepActive ? formatDuration(sleepRemainingMs) : 'Sleep'}
+              {sleepActive ? formatDuration(sleepRemainingMs) : t('music.sleep')}
             </Text>
           </Pressable>
           <Pressable
@@ -225,7 +229,7 @@ export default function NowPlayingScreen() {
           >
             <ListMusic size={16} color={WHITE} />
             <Text className="font-sora-semibold" style={{ color: WHITE }}>
-              Up Next
+              {t('music.upNext')}
             </Text>
           </Pressable>
         </View>

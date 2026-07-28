@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import { ChevronLeft, type LucideIcon } from 'lucide-react-native';
 import { type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -55,6 +56,7 @@ export function ScreenHeader({
   actions,
   right,
 }: Props) {
+  const { t } = useTranslation();
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
   const insets = useSafeAreaInsets();
@@ -73,7 +75,7 @@ export function ScreenHeader({
             onPress={handleBack}
             hitSlop={8}
             accessibilityRole="button"
-            accessibilityLabel="Back"
+            accessibilityLabel={t('common.back')}
             className="h-10 w-10 items-center justify-center rounded-full"
             style={{ backgroundColor: tint ? alpha(tint, 0.12) : c.muted }}
           >

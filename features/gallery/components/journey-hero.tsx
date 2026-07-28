@@ -2,6 +2,7 @@ import { differenceInCalendarDays, format } from 'date-fns';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowRight, Play } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
 import { Text } from '@/components/ui/text';
@@ -22,6 +23,8 @@ type Props = {
  * wash. Tapping it plays your whole journey as a full-screen story.
  */
 export function JourneyHero({ photos, onPlay }: Props) {
+  const { t } = useTranslation();
+
   if (photos.length === 0) return null;
 
   const latest = photos[0];
@@ -62,7 +65,7 @@ export function JourneyHero({ photos, onPlay }: Props) {
       onPress={onPlay}
       style={[{ borderRadius: 28, overflow: 'hidden' }, glowShadow(GALLERY_TINT, 0.35)]}
       accessibilityRole="button"
-      accessibilityLabel="Play your progress journey"
+      accessibilityLabel={t('gallery.playJourney')}
     >
       <LinearGradient
         colors={[g1, g2, g3]}
@@ -88,7 +91,7 @@ export function JourneyHero({ photos, onPlay }: Props) {
             style={{ color: alpha('#ffffff', 0.9), fontSize: 11, letterSpacing: 1.2 }}
             className="font-sora-bold uppercase"
           >
-            Your journey
+            {t('gallery.yourJourney')}
           </Text>
           <View
             className="flex-row items-center gap-1.5 rounded-full px-3 py-1.5"
@@ -96,16 +99,16 @@ export function JourneyHero({ photos, onPlay }: Props) {
           >
             <Play size={12} color="#ffffff" fill="#ffffff" />
             <Text className="font-sora-semibold" style={{ color: '#ffffff', fontSize: 12 }}>
-              Play story
+              {t('gallery.playStory')}
             </Text>
           </View>
         </View>
 
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center gap-3">
-            <Thumb photo={first} label="Day one" />
+            <Thumb photo={first} label={t('gallery.dayOne')} />
             <ArrowRight size={20} color={alpha('#ffffff', 0.85)} />
-            <Thumb photo={latest} label="Now" />
+            <Thumb photo={latest} label={t('gallery.now')} />
           </View>
           <View className="items-end">
             <Text
@@ -118,14 +121,16 @@ export function JourneyHero({ photos, onPlay }: Props) {
               style={{ color: alpha('#ffffff', 0.9), fontSize: 12 }}
               className="font-sora-semibold"
             >
-              {days === 1 ? 'day strong' : 'days strong'}
+              {t('gallery.daysStrong', { count: days })}
             </Text>
           </View>
         </View>
 
         <Text style={{ color: alpha('#ffffff', 0.9), fontSize: 12 }}>
-          {photos.length} {photos.length === 1 ? 'moment' : 'moments'} · since{' '}
-          {format(first.takenAt, 'MMM yyyy')}
+          {t('gallery.momentsSince', {
+            moments: t('gallery.momentsCount', { count: photos.length }),
+            date: format(first.takenAt, 'MMM yyyy'),
+          })}
         </Text>
       </LinearGradient>
     </Pressable>

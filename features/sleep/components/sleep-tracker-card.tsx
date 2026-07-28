@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import { Moon, Sunrise } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
 import { GradientButton } from '@/components/ui/gradient-button';
@@ -17,6 +18,7 @@ const SLEEP_TINT = '#6366f1';
  * the log form so the user never has to remember or calculate their times. */
 export function SleepTrackerCard() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { sleepingSince, startSleep, cancelSleep } = useSleepTrackerStore();
   const [now, setNow] = useState(() => Date.now());
 
@@ -44,22 +46,24 @@ export function SleepTrackerCard() {
               className="font-sora-semibold uppercase tracking-wide"
               style={{ color: alpha('#ffffff', 0.85), fontSize: 12 }}
             >
-              Sleeping since {formatClock(minutesOfDay(sleepingSince))}
+              {t('sleep.sleepingSince', { time: formatClock(minutesOfDay(sleepingSince)) })}
             </Text>
           </View>
           <View className="items-center gap-0.5">
             <Text className="font-sora-extrabold text-4xl" style={{ color: '#ffffff' }}>
               {formatDuration(elapsedMinutes)}
             </Text>
-            <Text style={{ color: alpha('#ffffff', 0.85), fontSize: 12 }}>in bed so far</Text>
+            <Text style={{ color: alpha('#ffffff', 0.85), fontSize: 12 }}>
+              {t('sleep.inBedSoFar')}
+            </Text>
           </View>
-          <GradientButton label="I'm awake" tint="#f59e0b" icon={Sunrise} onPress={wake} />
+          <GradientButton label={t('sleep.imAwake')} tint="#f59e0b" icon={Sunrise} onPress={wake} />
           <Pressable onPress={cancelSleep} hitSlop={8} className="items-center">
             <Text
               style={{ color: alpha('#ffffff', 0.8), fontSize: 12 }}
               className="font-sora-medium"
             >
-              Cancel — I didn&apos;t sleep
+              {t('sleep.cancelDidntSleep')}
             </Text>
           </Pressable>
         </View>
@@ -77,11 +81,16 @@ export function SleepTrackerCard() {
           <Moon size={22} color={SLEEP_TINT} />
         </View>
         <View className="flex-1">
-          <Text className="font-sora-semibold text-foreground">Going to sleep?</Text>
-          <Text variant="caption">Tap when you get in bed — we&apos;ll time it for you.</Text>
+          <Text className="font-sora-semibold text-foreground">{t('sleep.goingToSleep')}</Text>
+          <Text variant="caption">{t('sleep.trackerHint')}</Text>
         </View>
       </View>
-      <GradientButton label="Going to bed" tint={SLEEP_TINT} icon={Moon} onPress={startSleep} />
+      <GradientButton
+        label={t('sleep.goingToBed')}
+        tint={SLEEP_TINT}
+        icon={Moon}
+        onPress={startSleep}
+      />
     </View>
   );
 }

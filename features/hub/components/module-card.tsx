@@ -1,5 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
@@ -21,7 +22,8 @@ type Props = {
  * muted outlined card so the live modules pop and the grid reads as a roadmap.
  */
 export function ModuleCard({ module, onPress }: Props) {
-  const { icon: Icon, title, subtitle, tint, status } = module;
+  const { t } = useTranslation();
+  const { icon: Icon, titleKey, subtitleKey, tint, status } = module;
   const isReady = status === 'ready';
   const scale = useSharedValue(1);
   const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
@@ -47,14 +49,14 @@ export function ModuleCard({ module, onPress }: Props) {
           </View>
           <View className="rounded-full bg-muted px-2 py-0.5">
             <Text className="font-sora-semibold text-[10px] uppercase tracking-wide text-muted-foreground">
-              Soon
+              {t('hub.soon')}
             </Text>
           </View>
         </View>
         <View className="mt-auto gap-0.5">
-          <Text className="font-sora-bold text-base text-foreground">{title}</Text>
+          <Text className="font-sora-bold text-base text-foreground">{t(titleKey)}</Text>
           <Text variant="caption" numberOfLines={1}>
-            {subtitle}
+            {t(subtitleKey)}
           </Text>
         </View>
       </View>
@@ -69,8 +71,8 @@ export function ModuleCard({ module, onPress }: Props) {
       onPressIn={() => (scale.value = withTiming(0.96, { duration: 90 }))}
       onPressOut={() => (scale.value = withTiming(1, { duration: 90 }))}
       accessibilityRole="button"
-      accessibilityLabel={title}
-      accessibilityHint={`Open ${title}`}
+      accessibilityLabel={t(titleKey)}
+      accessibilityHint={t('hub.openHint', { title: t(titleKey) })}
       style={[animatedStyle, { flex: 1, borderRadius: 24, minHeight: 130 }, glowShadow(tint, 0.28)]}
     >
       <View style={{ flex: 1, borderRadius: 24, overflow: 'hidden' }}>
@@ -113,10 +115,10 @@ export function ModuleCard({ module, onPress }: Props) {
           </View>
           <View className="mt-auto gap-0.5">
             <Text className="font-sora-bold text-base" style={{ color: '#ffffff' }}>
-              {title}
+              {t(titleKey)}
             </Text>
             <Text numberOfLines={1} style={{ color: alpha('#ffffff', 0.85), fontSize: 12 }}>
-              {subtitle}
+              {t(subtitleKey)}
             </Text>
           </View>
         </LinearGradient>

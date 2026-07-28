@@ -1,4 +1,5 @@
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { SheetHeader } from '@/components/ui/sheet-header';
@@ -8,15 +9,16 @@ import { goalFormDefaults } from '@/features/goals/schemas/goal-form-schema';
 
 export default function NewGoalScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { create } = useGoalMutations();
 
   return (
     <View className="flex-1 bg-background">
-      <SheetHeader title="New Goal" />
+      <SheetHeader title={t('goals.newGoal')} />
 
       <GoalForm
         defaultValues={goalFormDefaults}
-        submitLabel="Create goal"
+        submitLabel={t('goals.createSubmit')}
         onSubmit={(values) => {
           create.mutate({
             title: values.title,

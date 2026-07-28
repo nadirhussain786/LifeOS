@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { useRouter } from 'expo-router';
 import { Pause, Play, Square, SkipForward } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -30,6 +31,7 @@ export default function StudyTimerScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const store = useStudyTimerStore();
   const { logSession } = useStudyMutations();
   const { data: subjects = [] } = useStudySubjects();
@@ -122,7 +124,11 @@ export default function StudyTimerScreen() {
   // Stopwatch counts up (and its ring sweeps once per minute); timed modes count down.
   const displaySeconds = isStopwatch ? elapsed : remaining;
   const ratio = isStopwatch ? (elapsed % 60) / 60 : target > 0 ? Math.min(1, elapsed / target) : 0;
-  const phaseLabel = isStopwatch ? 'Stopwatch' : isFocus ? 'Focus' : 'Break';
+  const phaseLabel = isStopwatch
+    ? t('study.modeStopwatch')
+    : isFocus
+      ? t('study.phaseFocus')
+      : t('study.phaseBreak');
   const subject = subjects.find((s) => s.id === store.subjectId) ?? null;
   const totalFocus = focusSecondsNow(store, now);
 
@@ -142,7 +148,7 @@ export default function StudyTimerScreen() {
               {phaseLabel}
             </Text>
           </View>
-          <Text variant="muted">{subject?.name ?? 'General study'}</Text>
+          <Text variant="muted">{subject?.name ?? t('study.generalStudy')}</Text>
         </View>
 
         <ProgressRing
@@ -161,8 +167,12 @@ export default function StudyTimerScreen() {
               {formatTimer(displaySeconds)}
             </Text>
             <Text variant="caption">
-              {store.completedPomodoros > 0 ? `${store.completedPomodoros} done · ` : ''}
-              {formatStudyDuration(totalFocus)} focused
+              {store.completedPomodoros > 0
+                ? t('study.doneAndFocused', {
+                    count: store.completedPomodoros,
+                    duration: formatStudyDuration(totalFocus),
+                  })
+                : t('study.focused', { duration: formatStudyDuration(totalFocus) })}
             </Text>
           </View>
         </ProgressRing>
@@ -172,7 +182,7 @@ export default function StudyTimerScreen() {
             <Pressable
               onPress={() => useStudyTimerStore.getState().completeBreak()}
               className="h-14 w-14 items-center justify-center rounded-full border border-border"
-              accessibilityLabel="Skip break"
+              accessibilityLabel={t('study.skipBreak')}
             >
               <SkipForward size={22} color={colors[scheme].foreground} />
             </Pressable>
@@ -182,7 +192,7 @@ export default function StudyTimerScreen() {
             onPress={() => (store.running ? store.pause() : store.resume())}
             className="h-20 w-20 items-center justify-center rounded-full"
             style={{ backgroundColor: tint }}
-            accessibilityLabel={store.running ? 'Pause' : 'Resume'}
+            accessibilityLabel={store.running ? t('study.pause') : t('study.resume')}
           >
             {store.running ? (
               <Pause size={30} color="#ffffff" fill="#ffffff" />
@@ -194,7 +204,7 @@ export default function StudyTimerScreen() {
           <Pressable
             onPress={requestFinish}
             className="h-14 w-14 items-center justify-center rounded-full border border-border"
-            accessibilityLabel="End session"
+            accessibilityLabel={t('study.endSession')}
           >
             <Square
               size={20}
@@ -206,10 +216,10 @@ export default function StudyTimerScreen() {
 
         <Text variant="caption" className="text-center">
           {isStopwatch
-            ? 'Counting up — tap ■ when you’re done.'
+            ? t('study.hintStopwatch')
             : isFocus
-              ? 'Stay with it — the timer keeps running if you leave this screen.'
-              : 'Take a breather. Focus resumes automatically.'}
+              ? t('study.hintFocus')
+              : t('study.hintBreak')}
         </Text>
       </View>
 

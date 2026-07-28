@@ -1,4 +1,5 @@
 import { Moon, TimerOff } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Modal, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -24,6 +25,7 @@ const OPTIONS = [15, 30, 45, 60];
 export function SleepTimerSheet({ visible, onClose, remainingMs, active, onSelect }: Props) {
   const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
 
   const pick = (minutes: number | null) => {
     onSelect(minutes);
@@ -55,7 +57,7 @@ export function SleepTimerSheet({ visible, onClose, remainingMs, active, onSelec
             />
             <View className="flex-row items-center gap-2 pb-1">
               <Moon size={18} color={MUSIC_TINT} />
-              <Text variant="subheading">Sleep timer</Text>
+              <Text variant="subheading">{t('music.sleepTimer')}</Text>
             </View>
 
             {active && (
@@ -64,7 +66,7 @@ export function SleepTimerSheet({ visible, onClose, remainingMs, active, onSelec
                 style={{ backgroundColor: alpha(MUSIC_TINT, 0.12) }}
               >
                 <Text className="font-sora-medium" style={{ color: MUSIC_TINT }}>
-                  Pausing in {formatDuration(remainingMs)}
+                  {t('music.pausingIn', { duration: formatDuration(remainingMs) })}
                 </Text>
                 <Pressable
                   onPress={() => pick(null)}
@@ -73,7 +75,7 @@ export function SleepTimerSheet({ visible, onClose, remainingMs, active, onSelec
                 >
                   <TimerOff size={15} color={colors[scheme].mutedForeground} />
                   <Text variant="caption" className="font-sora-semibold">
-                    Turn off
+                    {t('music.turnOff')}
                   </Text>
                 </Pressable>
               </View>
@@ -88,7 +90,7 @@ export function SleepTimerSheet({ visible, onClose, remainingMs, active, onSelec
                   style={{ minWidth: '45%' }}
                 >
                   <Text className="font-sora-bold text-lg text-foreground">{minutes}</Text>
-                  <Text variant="caption">minutes</Text>
+                  <Text variant="caption">{t('music.minutes')}</Text>
                 </Pressable>
               ))}
             </View>

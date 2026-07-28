@@ -1,4 +1,5 @@
 import { ListMusic } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Modal, Pressable, ScrollView, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -24,6 +25,7 @@ type Props = {
 export function QueueSheet({ visible, onClose, queue, currentIndex, isPlaying, onJump }: Props) {
   const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const { height } = useWindowDimensions();
 
   const jump = (index: number) => {
@@ -56,8 +58,8 @@ export function QueueSheet({ visible, onClose, queue, currentIndex, isPlaying, o
             />
             <View className="flex-row items-center gap-2 px-3 pb-2">
               <ListMusic size={18} color={MUSIC_TINT} />
-              <Text variant="subheading">Up Next</Text>
-              <Text variant="caption">· {queue.length} tracks</Text>
+              <Text variant="subheading">{t('music.upNext')}</Text>
+              <Text variant="caption">· {t('music.tracksCount', { count: queue.length })}</Text>
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false}>
@@ -89,7 +91,7 @@ export function QueueSheet({ visible, onClose, queue, currentIndex, isPlaying, o
                         {song.title}
                       </Text>
                       <Text variant="caption" numberOfLines={1}>
-                        {song.artist ?? 'Unknown artist'}
+                        {song.artist ?? t('music.unknownArtist')}
                       </Text>
                     </View>
                     <Text variant="caption">{formatDuration(song.durationMs)}</Text>

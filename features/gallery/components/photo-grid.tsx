@@ -2,6 +2,7 @@ import { format } from 'date-fns';
 import { Image } from 'expo-image';
 import { Heart, Play } from 'lucide-react-native';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Dimensions, Pressable, View } from 'react-native';
 
 import { Text } from '@/components/ui/text';
@@ -30,13 +31,14 @@ export function PhotoTile({
   size: number;
   onPress: (p: GalleryPhoto) => void;
 }) {
+  const { t } = useTranslation();
   const isVideo = photo.mediaType === 'video';
   return (
     <Pressable
       onPress={() => onPress(photo)}
       style={{ width: size, height: size }}
       accessibilityRole="imagebutton"
-      accessibilityLabel={photo.caption ?? (isVideo ? 'Video' : 'Photo')}
+      accessibilityLabel={photo.caption ?? (isVideo ? t('gallery.video') : t('gallery.photo'))}
     >
       <Image
         source={{ uri: displayUri(photo) }}

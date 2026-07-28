@@ -1,4 +1,5 @@
 import { CheckCircle2, Flag, ListChecks } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
@@ -22,13 +23,14 @@ type Props = {
 
 export function GoalCard({ goal, onPress }: Props) {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const meta = goalCategoryMeta(goal.category);
   const Icon = meta.icon;
   const isCompleted = goal.status === 'completed';
   const scale = useSharedValue(1);
   const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
-  const due = goal.dueDate && !isCompleted ? formatDueDate(goal.dueDate) : null;
+  const due = goal.dueDate && !isCompleted ? formatDueDate(goal.dueDate, t) : null;
   const timeline = goalTimeline(goal, goal.progress);
   const showPaceTick = timeline.hasDeadline && !isCompleted;
 
@@ -65,7 +67,7 @@ export function GoalCard({ goal, onPress }: Props) {
           </Text>
           <View className="flex-row items-center gap-1.5">
             <Text variant="caption" style={{ color: meta.tint }} className="font-sora-medium">
-              {goalCategoryLabel(goal.category, goal.categoryLabel)}
+              {goalCategoryLabel(goal.category, goal.categoryLabel, t)}
             </Text>
             <View className="h-1 w-1 rounded-full bg-muted-foreground" />
             <Flag
@@ -73,9 +75,7 @@ export function GoalCard({ goal, onPress }: Props) {
               color={goalPriorityColor(goal.priority)}
               fill={goalPriorityColor(goal.priority)}
             />
-            <Text variant="caption" className="capitalize">
-              {goal.priority}
-            </Text>
+            <Text variant="caption">{t(`fields.${goal.priority}`)}</Text>
           </View>
         </View>
         <Text className="font-sora-bold text-base" style={{ color: meta.tint }}>
@@ -107,7 +107,10 @@ export function GoalCard({ goal, onPress }: Props) {
             <View className="flex-row items-center gap-1.5">
               <ListChecks size={12} color={colors[scheme].mutedForeground} />
               <Text variant="caption">
-                {goal.milestoneDone}/{goal.milestoneTotal} milestones
+                {t('goals.milestonesProgress', {
+                  done: goal.milestoneDone,
+                  total: goal.milestoneTotal,
+                })}
               </Text>
             </View>
           ) : (

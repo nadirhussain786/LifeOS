@@ -1,6 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
@@ -13,6 +14,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 export default function NewPlaylistScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const { create } = usePlaylistMutations();
   const [name, setName] = useState('');
   const [colorToken, setColorToken] = useState<string>(categoryColorPalette[0]);
@@ -29,13 +31,13 @@ export default function NewPlaylistScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <SheetHeader title="New Playlist" />
+      <SheetHeader title={t('music.newPlaylistTitle')} />
 
       <View className="gap-6 px-5 pt-3">
         <TextInput
           value={name}
           onChangeText={setName}
-          placeholder="Road trip, Focus, Workout…"
+          placeholder={t('music.playlistPlaceholder')}
           placeholderTextColor={colors[scheme].mutedForeground}
           autoFocus
           onSubmitEditing={handleCreate}
@@ -44,7 +46,7 @@ export default function NewPlaylistScreen() {
 
         <View className="gap-2.5">
           <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-            Color
+            {t('music.color')}
           </Text>
           <View className="flex-row gap-2.5">
             {categoryColorPalette.map((swatch) => {
@@ -56,7 +58,7 @@ export default function NewPlaylistScreen() {
                     Haptics.selectionAsync();
                     setColorToken(swatch);
                   }}
-                  accessibilityLabel={`Color ${swatch}`}
+                  accessibilityLabel={t('music.colorSwatch', { color: swatch })}
                   className="h-9 w-9 items-center justify-center rounded-full"
                   style={{
                     backgroundColor: swatch,
@@ -70,7 +72,7 @@ export default function NewPlaylistScreen() {
         </View>
 
         <Button
-          label="Create playlist"
+          label={t('music.createPlaylist')}
           onPress={handleCreate}
           disabled={!name.trim()}
           size="lg"

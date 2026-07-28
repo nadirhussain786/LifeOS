@@ -37,9 +37,9 @@ export type NotificationCategory =
   | 'streak';
 
 export type NotificationCategoryMeta = {
-  label: string;
+  labelKey: string;
   /** Shown under the toggle in Notification Settings. */
-  description: string;
+  descriptionKey: string;
   icon: LucideIcon;
   /** Hex tint used for the inbox icon chip and settings row. */
   tint: string;
@@ -52,85 +52,85 @@ export type NotificationCategoryMeta = {
 
 export const CATEGORY_META: Record<NotificationCategory, NotificationCategoryMeta> = {
   tasks: {
-    label: 'Task reminders',
-    description: 'Due-date reminders for your tasks',
+    labelKey: 'notifCategory.tasks.label',
+    descriptionKey: 'notifCategory.tasks.description',
     icon: CheckSquare,
     tint: '#6366f1',
     bypassQuietHours: true,
   },
   habits: {
-    label: 'Habit nudges',
-    description: 'Daily reminders to check in on your habits',
+    labelKey: 'notifCategory.habits.label',
+    descriptionKey: 'notifCategory.habits.description',
     icon: Repeat,
     tint: '#10b981',
     bypassQuietHours: false,
   },
   journal: {
-    label: 'Journal reminder',
-    description: "A daily nudge to write today's entry",
+    labelKey: 'notifCategory.journal.label',
+    descriptionKey: 'notifCategory.journal.description',
     icon: BookOpen,
     tint: '#f59e0b',
     bypassQuietHours: false,
   },
   water: {
-    label: 'Hydration reminders',
-    description: 'Water nudges on your schedule',
+    labelKey: 'notifCategory.water.label',
+    descriptionKey: 'notifCategory.water.description',
     icon: Droplet,
     tint: '#0ea5e9',
     bypassQuietHours: false,
   },
   sleep: {
-    label: 'Bedtime reminder',
-    description: 'A nightly wind-down nudge',
+    labelKey: 'notifCategory.sleep.label',
+    descriptionKey: 'notifCategory.sleep.description',
     icon: Moon,
     tint: '#8b5cf6',
     bypassQuietHours: true,
   },
   study: {
-    label: 'Study reminders',
-    description: 'Focus-session and study nudges',
+    labelKey: 'notifCategory.study.label',
+    descriptionKey: 'notifCategory.study.description',
     icon: NotebookPen,
     tint: '#ec4899',
     bypassQuietHours: false,
   },
   budget: {
-    label: 'Money reminders',
-    description: 'IOU due dates and budget alerts',
+    labelKey: 'notifCategory.budget.label',
+    descriptionKey: 'notifCategory.budget.description',
     icon: Wallet,
     tint: '#22c55e',
     bypassQuietHours: true,
   },
   calendar: {
-    label: 'Calendar events',
-    description: 'Reminders before your events',
+    labelKey: 'notifCategory.calendar.label',
+    descriptionKey: 'notifCategory.calendar.description',
     icon: CalendarClock,
     tint: '#ef4444',
     bypassQuietHours: true,
   },
   notes: {
-    label: 'Note reminders',
-    description: 'Reminders you set on a note',
+    labelKey: 'notifCategory.notes.label',
+    descriptionKey: 'notifCategory.notes.description',
     icon: StickyNote,
     tint: '#eab308',
     bypassQuietHours: true,
   },
   goals: {
-    label: 'Goal reminders',
-    description: 'Deadline and pace nudges for your goals',
+    labelKey: 'notifCategory.goals.label',
+    descriptionKey: 'notifCategory.goals.description',
     icon: Target,
     tint: '#14b8a6',
     bypassQuietHours: false,
   },
   digest: {
-    label: 'Daily digest',
-    description: 'One morning summary of your day',
+    labelKey: 'notifCategory.digest.label',
+    descriptionKey: 'notifCategory.digest.description',
     icon: Sparkles,
     tint: '#f97316',
     bypassQuietHours: false,
   },
   streak: {
-    label: 'Streaks & wins',
-    description: 'Streak-at-risk warnings and celebrations',
+    labelKey: 'notifCategory.streak.label',
+    descriptionKey: 'notifCategory.streak.description',
     icon: PartyPopper,
     tint: '#a855f7',
     bypassQuietHours: false,
