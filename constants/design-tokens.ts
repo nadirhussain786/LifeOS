@@ -133,6 +133,12 @@ export type ThemeName = keyof typeof colors;
 // energy & aspiration (fitness/goals); emerald = the brand + growth (habits).
 // Pass any of these through lib/color.ts (tintGradient / glowShadow) so a
 // module's whole surface derives from the one value.
+//
+// Every module must be registered here. Gallery and Music used to hardcode
+// their hex in feature files instead — as a single value with no dark variant,
+// so neither retuned for dark mode, and Music's teal sat 2° from Budget's while
+// failing contrast on light (2.39:1). Keep hues at least ~30° apart and clear of
+// the semantic colors above, or two modules start reading as the same thing.
 // ---------------------------------------------------------------------------
 
 export const moduleTints = {
@@ -146,6 +152,7 @@ export const moduleTints = {
   budget: { light: '#0d9488', dark: '#2dd4bf' }, // teal — balance, ledgers
   study: { light: '#7c3aed', dark: '#a78bfa' }, // deep violet — focus
   gallery: { light: '#a21caf', dark: '#e879f9' }, // plum — visible change over time
+  music: { light: '#4d7c0f', dark: '#a3e635' }, // lime — the one gap left on the wheel
 } as const;
 
 export type ModuleName = keyof typeof moduleTints;

@@ -4,8 +4,8 @@ import { Modal, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
-import { MUSIC_TINT } from '@/features/music/components/song-row';
 import { formatDuration } from '@/features/music/utils/format-duration';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { alpha } from '@/lib/color';
@@ -25,6 +25,7 @@ const OPTIONS = [15, 30, 45, 60];
 export function SleepTimerSheet({ visible, onClose, remainingMs, active, onSelect }: Props) {
   const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
+  const tint = moduleTint('music', scheme);
   const { t } = useTranslation();
 
   const pick = (minutes: number | null) => {
@@ -56,16 +57,16 @@ export function SleepTimerSheet({ visible, onClose, remainingMs, active, onSelec
               style={{ backgroundColor: colors[scheme].border }}
             />
             <View className="flex-row items-center gap-2 pb-1">
-              <Moon size={18} color={MUSIC_TINT} />
+              <Moon size={18} color={tint} />
               <Text variant="subheading">{t('music.sleepTimer')}</Text>
             </View>
 
             {active && (
               <View
                 className="mb-1 flex-row items-center justify-between rounded-2xl px-4 py-3"
-                style={{ backgroundColor: alpha(MUSIC_TINT, 0.12) }}
+                style={{ backgroundColor: alpha(tint, 0.12) }}
               >
-                <Text className="font-sora-medium" style={{ color: MUSIC_TINT }}>
+                <Text className="font-sora-medium" style={{ color: tint }}>
                   {t('music.pausingIn', { duration: formatDuration(remainingMs) })}
                 </Text>
                 <Pressable

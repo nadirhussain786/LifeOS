@@ -143,7 +143,7 @@ export const HUB_SECTIONS: HubSection[] = [
         titleKey: 'hubModule.musicTitle',
         subtitleKey: 'hubModule.musicSubtitle',
         icon: Music2,
-        tint: '#14b8a6',
+        tint: moduleTints.music.light,
         status: 'ready',
         getRoute: () => '/music',
       },

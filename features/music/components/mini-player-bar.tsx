@@ -14,9 +14,9 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { Equalizer } from '@/features/music/components/equalizer';
-import { MUSIC_TINT } from '@/features/music/components/song-row';
 import { useNowPlaying } from '@/features/music/hooks/use-player';
 import { usePlayerUiStore } from '@/features/music/store/player-ui-store';
 import { songGradient } from '@/features/music/utils/song-art';
@@ -37,6 +37,7 @@ export function MiniPlayerBar() {
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
+  const tint = moduleTint('music', scheme);
   const { t } = useTranslation();
   const { width: screenW, height: screenH } = useWindowDimensions();
   const { currentSong, isPlaying, positionMs, durationMs, togglePlayPause, playNext, clearPlayer } =
@@ -112,7 +113,7 @@ export function MiniPlayerBar() {
           { position: 'absolute', left: 0, top: 0, width: barW },
           animatedStyle,
           {
-            shadowColor: MUSIC_TINT,
+            shadowColor: tint,
             shadowOpacity: 0.28,
             shadowRadius: 14,
             shadowOffset: { width: 0, height: 6 },
@@ -122,10 +123,7 @@ export function MiniPlayerBar() {
         className="overflow-hidden rounded-2xl border border-border bg-card"
       >
         <View className="h-[2px] w-full bg-muted">
-          <View
-            className="h-full"
-            style={{ width: `${progress * 100}%`, backgroundColor: MUSIC_TINT }}
-          />
+          <View className="h-full" style={{ width: `${progress * 100}%`, backgroundColor: tint }} />
         </View>
         <View className="flex-row items-center gap-1.5 py-2 pe-2.5 ps-1.5">
           {/* Drag handle */}

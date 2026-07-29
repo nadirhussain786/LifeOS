@@ -4,9 +4,9 @@ import { Modal, Pressable, ScrollView, View, useWindowDimensions } from 'react-n
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { Equalizer } from '@/features/music/components/equalizer';
-import { MUSIC_TINT } from '@/features/music/components/song-row';
 import { formatDuration } from '@/features/music/utils/format-duration';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import type { Song } from '@/features/music/types/music.types';
@@ -25,6 +25,7 @@ type Props = {
 export function QueueSheet({ visible, onClose, queue, currentIndex, isPlaying, onJump }: Props) {
   const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
+  const tint = moduleTint('music', scheme);
   const { t } = useTranslation();
   const { height } = useWindowDimensions();
 
@@ -57,7 +58,7 @@ export function QueueSheet({ visible, onClose, queue, currentIndex, isPlaying, o
               style={{ backgroundColor: colors[scheme].border }}
             />
             <View className="flex-row items-center gap-2 px-3 pb-2">
-              <ListMusic size={18} color={MUSIC_TINT} />
+              <ListMusic size={18} color={tint} />
               <Text variant="subheading">{t('music.upNext')}</Text>
               <Text variant="caption">· {t('music.tracksCount', { count: queue.length })}</Text>
             </View>
@@ -75,7 +76,7 @@ export function QueueSheet({ visible, onClose, queue, currentIndex, isPlaying, o
                   >
                     <View className="h-8 w-8 items-center justify-center">
                       {isCurrent ? (
-                        <Equalizer size={15} playing={isPlaying} color={MUSIC_TINT} />
+                        <Equalizer size={15} playing={isPlaying} color={tint} />
                       ) : (
                         <Text variant="caption" className="font-sora-semibold">
                           {index + 1}
@@ -86,7 +87,7 @@ export function QueueSheet({ visible, onClose, queue, currentIndex, isPlaying, o
                       <Text
                         className="font-sora-medium"
                         numberOfLines={1}
-                        style={{ color: isCurrent ? MUSIC_TINT : colors[scheme].foreground }}
+                        style={{ color: isCurrent ? tint : colors[scheme].foreground }}
                       >
                         {song.title}
                       </Text>

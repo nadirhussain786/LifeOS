@@ -9,8 +9,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/ui/empty-state';
 import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
-import { MUSIC_TINT } from '@/features/music/components/song-row';
 import {
   usePlaylist,
   usePlaylistMutations,
@@ -25,6 +25,7 @@ export default function AddSongsToPlaylistScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
+  const tint = moduleTint('music', scheme);
   const { t } = useTranslation();
 
   const { data: playlist } = usePlaylist(id);
@@ -62,7 +63,7 @@ export default function AddSongsToPlaylistScreen() {
           icon={ListMusic}
           title={t('music.libraryEmptyTitle')}
           description={t('music.libraryEmptyBody')}
-          tint={MUSIC_TINT}
+          tint={tint}
         />
       ) : (
         <FlashList
@@ -83,8 +84,8 @@ export default function AddSongsToPlaylistScreen() {
                 <View
                   className="h-6 w-6 items-center justify-center rounded-full border"
                   style={{
-                    borderColor: inPlaylist ? MUSIC_TINT : colors[scheme].border,
-                    backgroundColor: inPlaylist ? MUSIC_TINT : 'transparent',
+                    borderColor: inPlaylist ? tint : colors[scheme].border,
+                    backgroundColor: inPlaylist ? tint : 'transparent',
                   }}
                 >
                   {inPlaylist && <Check size={13} color="#ffffff" />}

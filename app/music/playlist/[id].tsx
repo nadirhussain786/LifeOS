@@ -9,8 +9,9 @@ import { Alert, Pressable, TextInput, View } from 'react-native';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
-import { MUSIC_TINT, SongRow } from '@/features/music/components/song-row';
+import { SongRow } from '@/features/music/components/song-row';
 import { useNowPlaying } from '@/features/music/hooks/use-player';
 import {
   usePlaylist,
@@ -25,6 +26,7 @@ export default function PlaylistDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const tint = moduleTint('music', scheme);
   const { t } = useTranslation();
 
   const { data: playlist } = usePlaylist(id);
@@ -73,7 +75,7 @@ export default function PlaylistDetailScreen() {
 
       <ScreenHeader
         eyebrow={t('music.playlistEyebrow')}
-        tint={MUSIC_TINT}
+        tint={tint}
         actions={[
           {
             icon: Trash2,
@@ -101,8 +103,8 @@ export default function PlaylistDetailScreen() {
               onPress={() => router.push(`/music/playlist/${playlist.id}/add-songs`)}
               className="flex-row items-center gap-1.5"
             >
-              <Plus size={15} color={MUSIC_TINT} />
-              <Text variant="caption" className="font-sora-semibold" style={{ color: MUSIC_TINT }}>
+              <Plus size={15} color={tint} />
+              <Text variant="caption" className="font-sora-semibold" style={{ color: tint }}>
                 {t('music.addSongs')}
               </Text>
             </Pressable>
@@ -113,7 +115,7 @@ export default function PlaylistDetailScreen() {
                   playQueue(songs, 0);
                 }}
                 className="flex-row items-center gap-1.5 rounded-full px-3 py-1.5"
-                style={{ backgroundColor: MUSIC_TINT }}
+                style={{ backgroundColor: tint }}
               >
                 <Play size={13} color="#ffffff" fill="#ffffff" />
                 <Text variant="caption" className="font-sora-semibold" style={{ color: '#ffffff' }}>
@@ -132,7 +134,7 @@ export default function PlaylistDetailScreen() {
           description={t('music.playlistEmptyBody')}
           actionLabel={t('music.addSongs')}
           onAction={() => router.push(`/music/playlist/${playlist.id}/add-songs`)}
-          tint={MUSIC_TINT}
+          tint={tint}
         />
       ) : (
         <FlashList

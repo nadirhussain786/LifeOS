@@ -6,16 +6,13 @@ import { Pressable, View } from 'react-native';
 
 import { SwipeableRow } from '@/components/ui/swipeable-row';
 import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { Equalizer } from '@/features/music/components/equalizer';
 import { songGradient } from '@/features/music/utils/song-art';
 import { formatDuration } from '@/features/music/utils/format-duration';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import type { Song } from '@/features/music/types/music.types';
-
-/** Music's signature chrome tint — teal, matching the Hub tile. Per-song art
- *  (song-art.ts) supplies the color variety; this is only for controls/labels. */
-export const MUSIC_TINT = '#14b8a6';
 
 type Props = {
   song: Song;
@@ -40,6 +37,7 @@ export function SongRow({
   onRemove,
 }: Props) {
   const scheme = useColorScheme() ?? 'light';
+  const tint = moduleTint('music', scheme);
   const { t } = useTranslation();
   const [c1, c2, c3] = songGradient(song.id);
 
@@ -79,7 +77,7 @@ export function SongRow({
         <Text
           className="font-sora-medium"
           numberOfLines={1}
-          style={{ color: isActive ? MUSIC_TINT : colors[scheme].foreground }}
+          style={{ color: isActive ? tint : colors[scheme].foreground }}
         >
           {song.title}
         </Text>

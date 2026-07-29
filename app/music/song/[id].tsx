@@ -6,8 +6,8 @@ import { TextInput, View } from 'react-native';
 
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
-import { MUSIC_TINT } from '@/features/music/components/song-row';
 import { formatDuration } from '@/features/music/utils/format-duration';
 import { useSongMutations, useSongs } from '@/features/music/hooks/use-songs';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -18,6 +18,7 @@ export default function SongDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const tint = moduleTint('music', scheme);
   const { t } = useTranslation();
 
   const { data: songs = [] } = useSongs();
@@ -60,7 +61,7 @@ export default function SongDetailScreen() {
 
       <ScreenHeader
         eyebrow={t('music.songEyebrow')}
-        tint={MUSIC_TINT}
+        tint={tint}
         actions={[
           {
             icon: Trash2,
