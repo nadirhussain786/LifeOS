@@ -10,6 +10,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "check:migrations": "node scripts/check-migrations.mjs",
+    "test:sql": "node scripts/test-migrations.mjs",
     "test": "jest",
     "test:watch": "jest --watch",
     "format": "prettier --write .",
@@ -84,6 +85,7 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.4",
     "@testing-library/react-native": "^14.0.1",
     "@types/jest": "29.5.14",
     "@types/react": "~19.1.0",

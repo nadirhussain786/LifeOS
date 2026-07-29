@@ -30,6 +30,58 @@ alter table public.push_tokens enable row level security;
 create policy "push_tokens_own" on public.push_tokens
   for all using (user_id = auth.uid()) with check (user_id = auth.uid());
 
+-- ---------------------------------------------------------------------------
+-- Registering a device.
+--
+-- Has to be SECURITY DEFINER. `push_tokens_own` evaluates its USING clause
+-- against the EXISTING row on an ON CONFLICT DO UPDATE, so a plain upsert fails
+-- the moment a device is handed to a different account — the previous owner's
+-- row is invisible to the new user, and the takeover is refused. That is the one
+-- case this most needs to handle.
+--
+-- Safe in that mode because it can only ever assign the token to auth.uid():
+-- you cannot register somebody else's device, and holding the token is itself
+-- proof of being on the device.
+-- ---------------------------------------------------------------------------
+create or replace function public.register_push_token(
+  p_token text,
+  p_platform text,
+  p_now bigint
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if auth.uid() is null then
+    raise exception 'not authenticated' using errcode = 'insufficient_privilege';
+  end if;
+
+  insert into public.push_tokens (token, user_id, platform, created_at, updated_at)
+  values (p_token, auth.uid(), p_platform, p_now, p_now)
+  on conflict (token) do update
+    set user_id = auth.uid(),
+        platform = excluded.platform,
+        updated_at = excluded.updated_at;
+end;
+$$;
+
+/** Releases this device, e.g. on sign-out. Scoped to the caller's own rows. */
+create or replace function public.release_push_token(p_token text)
+returns void
+language sql
+security definer
+set search_path = public
+as $$
+  delete from public.push_tokens where token = p_token and user_id = auth.uid();
+$$;
+
+revoke all on function public.register_push_token(text, text, bigint) from public, anon;
+revoke all on function public.release_push_token(text) from public, anon;
+grant execute on function public.register_push_token(text, text, bigint) to authenticated;
+grant execute on function public.release_push_token(text) to authenticated;
+
 -- ===========================================================================
 -- 2. INVITATIONS
 -- ===========================================================================

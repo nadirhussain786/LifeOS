@@ -46,20 +46,15 @@ export async function registerPushToken(): Promise<string | null> {
 
   if (token === lastRegistered) return token;
 
-  const now = Date.now();
-  // Token is the primary key, so re-registering the same device updates the
-  // owner rather than piling up rows — which matters when a phone is handed on
-  // or a second account signs in.
-  const { error } = await supabase.from('push_tokens').upsert(
-    {
-      token,
-      user_id: userId,
-      platform: Platform.OS === 'ios' ? 'ios' : Platform.OS === 'android' ? 'android' : 'web',
-      created_at: now,
-      updated_at: now,
-    },
-    { onConflict: 'token' },
-  );
+  // Goes through an RPC, not a plain upsert: `push_tokens_own` evaluates its
+  // USING clause against the EXISTING row on conflict, so a direct upsert is
+  // refused the moment a device is handed to a different account — verified
+  // against real Postgres in scripts/test-migrations.mjs.
+  const { error } = await supabase.rpc('register_push_token', {
+    p_token: token,
+    p_platform: Platform.OS === 'ios' ? 'ios' : Platform.OS === 'android' ? 'android' : 'web',
+    p_now: Date.now(),
+  });
   if (error) return null;
 
   lastRegistered = token;
@@ -70,7 +65,7 @@ export async function registerPushToken(): Promise<string | null> {
  *  receiving a previous account's group notifications. */
 export async function unregisterPushToken(): Promise<void> {
   if (!lastRegistered) return;
-  await supabase.from('push_tokens').delete().eq('token', lastRegistered);
+  await supabase.rpc('release_push_token', { p_token: lastRegistered });
   lastRegistered = null;
 }
 

@@ -366,12 +366,22 @@ begin
   -- Fired from either side of the relationship, so the expense is identified
   -- differently depending on which table changed. NEW is unassigned on DELETE,
   -- hence the explicit TG_OP branch rather than coalesce(new.., old..).
+  -- Deliberately IF/ELSIF and not a CASE expression: PL/pgSQL resolves every
+  -- field reference in an expression, so `case ... then new.id else
+  -- new.expense_id end` fails with `record "new" has no field "expense_id"`
+  -- when firing from expense_group_expenses. Only one branch may be compiled.
   if tg_op = 'DELETE' then
-    v_expense_id := case when tg_table_name = 'expense_group_expenses'
-                         then old.id else old.expense_id end;
+    if tg_table_name = 'expense_group_expenses' then
+      v_expense_id := old.id;
+    else
+      v_expense_id := old.expense_id;
+    end if;
   else
-    v_expense_id := case when tg_table_name = 'expense_group_expenses'
-                         then new.id else new.expense_id end;
+    if tg_table_name = 'expense_group_expenses' then
+      v_expense_id := new.id;
+    else
+      v_expense_id := new.expense_id;
+    end if;
   end if;
 
   select amount_cents into v_amount
