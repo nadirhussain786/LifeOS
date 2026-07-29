@@ -1,6 +1,6 @@
 import { usePathname, useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { GripVertical, Pause, Play, SkipForward, X } from 'lucide-react-native';
+import { ChevronDown, GripVertical, Pause, Play, SkipForward } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, useWindowDimensions, View } from 'react-native';
@@ -29,8 +29,9 @@ const ESTIMATED_HEIGHT = 60;
  * Persistent, freely-draggable "now playing" widget. Mounted once at the app
  * root (app/_layout.tsx) so it floats over EVERY screen like a true top-level
  * player. Drag it to drop it anywhere on screen (position persisted); tap it to
- * open Now Playing; tap ✕ to stop and dismiss. Hidden on the Now Playing screen
- * itself.
+ * open Now Playing; tap ⌄ to tuck it away — playback continues in the
+ * background, and the bar returns when the next track starts. Hidden on the
+ * Now Playing screen itself.
  */
 export function MiniPlayerBar() {
   const router = useRouter();
@@ -40,12 +41,14 @@ export function MiniPlayerBar() {
   const tint = moduleTint('music', scheme);
   const { t } = useTranslation();
   const { width: screenW, height: screenH } = useWindowDimensions();
-  const { currentSong, isPlaying, positionMs, durationMs, togglePlayPause, playNext, clearPlayer } =
+  const { currentSong, isPlaying, positionMs, durationMs, togglePlayPause, playNext } =
     useNowPlaying();
 
   const storeX = usePlayerUiStore((s) => s.x);
   const storeY = usePlayerUiStore((s) => s.y);
   const setPosition = usePlayerUiStore((s) => s.setPosition);
+  const hidden = usePlayerUiStore((s) => s.hidden);
+  const setHidden = usePlayerUiStore((s) => s.setHidden);
 
   const [barH, setBarH] = useState(ESTIMATED_HEIGHT);
   const barW = screenW - SIDE_MARGIN * 2;
@@ -80,6 +83,8 @@ export function MiniPlayerBar() {
   }));
 
   if (!currentSong) return null;
+  // Dismissed by the user — playback carries on in the background.
+  if (hidden) return null;
   // The full Now Playing screen is the player — don't overlay the mini bar on it.
   if (pathname === '/music/now-playing') return null;
 
@@ -189,12 +194,12 @@ export function MiniPlayerBar() {
             />
           </Pressable>
           <Pressable
-            onPress={clearPlayer}
+            onPress={() => setHidden(true)}
             hitSlop={6}
             className="h-9 w-9 items-center justify-center"
-            accessibilityLabel={t('music.stopAndDismiss')}
+            accessibilityLabel={t('music.hidePlayer')}
           >
-            <X size={18} color={colors[scheme].mutedForeground} />
+            <ChevronDown size={18} color={colors[scheme].mutedForeground} />
           </Pressable>
         </View>
       </Animated.View>

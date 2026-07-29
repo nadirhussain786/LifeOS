@@ -929,7 +929,7 @@
     "dragToMove": "اسحب للتحريك",
     "openNowPlaying": "فتح ما يُشغّل الآن",
     "nextTrack": "المقطع التالي",
-    "stopAndDismiss": "إيقاف وإخفاء"
+    "hidePlayer": "إخفاء المشغّل"
   },
   "albumCategory": {
     "gym": "تقدّم الجيم",

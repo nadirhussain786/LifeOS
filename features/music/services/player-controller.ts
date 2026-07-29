@@ -1,6 +1,7 @@
 import { createAudioPlayer, setAudioModeAsync, type AudioPlayer } from 'expo-audio';
 
 import { usePlayerStore } from '@/features/music/store/player-store';
+import { usePlayerUiStore } from '@/features/music/store/player-ui-store';
 import type { RepeatMode, Song } from '@/features/music/types/music.types';
 
 let player: AudioPlayer | null = null;
@@ -114,6 +115,8 @@ function shuffleAround(songs: Song[], startIndex: number): Song[] {
 export async function playQueue(songs: Song[], startIndex: number) {
   if (songs.length === 0) return;
   await configureAudioMode();
+  // A dismissed bar comes back as soon as something new starts playing.
+  usePlayerUiStore.getState().setHidden(false);
 
   const { shuffle } = usePlayerStore.getState();
   const queue = shuffle ? shuffleAround(songs, startIndex) : songs;
@@ -176,6 +179,7 @@ export function seekTo(seconds: number) {
  * controls, releases the native player, and clears the queue. Backs the
  * mini-player's swipe-to-dismiss / close action. */
 export function clearPlayer() {
+  usePlayerUiStore.getState().setHidden(false);
   // Pause FIRST so audio actually stops immediately — releasing the native
   // player without pausing can leave the current buffer playing out (and the
   // only way to stop it becomes the OS media widget).

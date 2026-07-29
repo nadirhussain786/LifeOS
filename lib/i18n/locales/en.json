@@ -889,7 +889,7 @@
     "dragToMove": "Drag to move",
     "openNowPlaying": "Open now playing",
     "nextTrack": "Next track",
-    "stopAndDismiss": "Stop and dismiss"
+    "hidePlayer": "Hide player"
   },
   "albumCategory": {
     "gym": "Gym Progress",
