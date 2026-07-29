@@ -578,7 +578,17 @@
     "resetSubtitle": "We’ll email you a link to set a new password.",
     "resetSent": "If an account exists for {{email}}, a reset link is on its way. Check your inbox.",
     "verifyingLink": "Verifying your reset link…",
-    "linkInvalid": "This reset link is invalid or has expired. Request a new one from the sign-in screen."
+    "linkInvalid": "This reset link is invalid or has expired. Request a new one from the sign-in screen.",
+    "username": "Username",
+    "usernamePlaceholder": "yourname",
+    "usernameHint": "3–20 characters. Letters, numbers and underscores.",
+    "usernameInvalid": "Start with a letter; 3–20 letters, numbers or underscores.",
+    "usernameChecking": "Checking availability…",
+    "usernameAvailable": "That name is available.",
+    "usernameTaken": "That name is already taken.",
+    "usernameRequired": "Pick an available username first.",
+    "usernameJustTaken": "Someone just took that name — try another.",
+    "usernameClaimFailed": "Your account was created, but the username couldn't be saved. You can set it in Settings."
   },
   "language": {
     "en": "English",

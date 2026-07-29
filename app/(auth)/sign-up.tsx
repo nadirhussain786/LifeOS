@@ -6,14 +6,18 @@ import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, View } fr
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { AuthField } from '@/features/auth/components/auth-field';
+import { UsernameField, type UsernameStatus } from '@/features/auth/components/username-field';
 import { useAuthStore } from '@/features/auth/services/auth-store';
 
 export default function SignUpScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const signUp = useAuthStore((s) => s.signUp);
+  const claimUsername = useAuthStore((s) => s.claimUsername);
 
   const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
+  const [usernameStatus, setUsernameStatus] = useState<UsernameStatus>('empty');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -28,14 +32,31 @@ export default function SignUpScreen() {
       setError(t('auth.passwordMin'));
       return;
     }
+    if (usernameStatus !== 'available') {
+      setError(t('auth.usernameRequired'));
+      return;
+    }
     setBusy(true);
     setError(null);
     const result = await signUp(email, password, name);
-    setBusy(false);
     if (!result.ok) {
+      setBusy(false);
       setError(result.error);
       return;
     }
+
+    // The account exists now; the name is claimed separately so that losing a
+    // race for it can never roll back a successful sign-up. Only possible with
+    // a session — with email confirmation on, it's claimed after first log-in.
+    if (useAuthStore.getState().session) {
+      const claim = await claimUsername(username.trim());
+      if (claim !== 'ok') {
+        setBusy(false);
+        setError(claim === 'taken' ? t('auth.usernameJustTaken') : t('auth.usernameClaimFailed'));
+        return;
+      }
+    }
+    setBusy(false);
     // If the project requires email confirmation, there's no session yet.
     if (!useAuthStore.getState().session) {
       Alert.alert(t('auth.checkInbox'), t('auth.confirmationSent'), [
@@ -68,6 +89,14 @@ export default function SignUpScreen() {
             autoCapitalize="words"
             autoComplete="name"
           />
+          <View className="gap-1.5">
+            <Text variant="micro">{t('auth.username')}</Text>
+            <UsernameField
+              value={username}
+              onChangeText={setUsername}
+              onStatusChange={setUsernameStatus}
+            />
+          </View>
           <AuthField
             label={t('auth.email')}
             value={email}

@@ -27,7 +27,17 @@ export type AuthProfile = {
   id: string;
   email: string | null;
   displayName: string | null;
+  /** Unique account name. Null until claimed — sign-up creates the account
+   *  first and claims the name after, so a lost race never blocks sign-up. */
+  username: string | null;
 };
+
+/** Outcome of claiming a name. 'taken' is a normal result, not an error: two
+ *  people can pass the availability probe and race for the same name. */
+export type UsernameClaim = 'ok' | 'taken' | 'invalid' | 'error';
+
+/** Mirrors the DB check constraint in 0002_username.sql. */
+export const USERNAME_PATTERN = /^[a-zA-Z][a-zA-Z0-9_]{2,19}$/;
 
 type AuthState = {
   session: Session | null;
@@ -50,6 +60,9 @@ type AuthState = {
   continueAsGuest: () => void;
   loadProfile: () => Promise<void>;
   updateDisplayName: (displayName: string) => Promise<AuthResult>;
+  /** True when `candidate` is well-formed and unclaimed by anyone else. */
+  isUsernameAvailable: (candidate: string) => Promise<boolean>;
+  claimUsername: (candidate: string) => Promise<UsernameClaim>;
 };
 
 /** Maps Supabase's error messages to something a person wants to read. */
@@ -170,7 +183,7 @@ export const useAuthStore = create<AuthState>()(
         if (!user) return;
         const { data } = await supabase
           .from('profiles')
-          .select('id, email, display_name')
+          .select('id, email, display_name, username')
           .eq('id', user.id)
           .maybeSingle();
         set({
@@ -181,6 +194,7 @@ export const useAuthStore = create<AuthState>()(
               data?.display_name ??
               (user.user_metadata?.display_name as string | undefined) ??
               null,
+            username: data?.username ?? null,
           },
         });
       },
@@ -197,6 +211,26 @@ export const useAuthStore = create<AuthState>()(
           profile: s.profile ? { ...s.profile, displayName: displayName.trim() } : s.profile,
         }));
         return { ok: true };
+      },
+
+      isUsernameAvailable: async (candidate) => {
+        if (!USERNAME_PATTERN.test(candidate)) return false;
+        // RPC, not a select: `profiles_own` RLS hides other people's rows, so a
+        // direct query would report every taken name as free.
+        const { data, error } = await supabase.rpc('is_username_available', { candidate });
+        if (error) return false;
+        return data === true;
+      },
+
+      claimUsername: async (candidate) => {
+        if (!USERNAME_PATTERN.test(candidate)) return 'invalid';
+        const { data, error } = await supabase.rpc('claim_username', { candidate });
+        if (error) return 'error';
+        const result = data as UsernameClaim;
+        if (result === 'ok') {
+          set((s) => ({ profile: s.profile ? { ...s.profile, username: candidate } : s.profile }));
+        }
+        return result;
       },
     }),
     {
