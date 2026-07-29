@@ -7,6 +7,7 @@ import { Pressable, TextInput, View } from 'react-native';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Fab } from '@/components/ui/fab';
 import { ScreenHeader } from '@/components/ui/screen-header';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { AddMediaSheet } from '@/features/gallery/components/add-media-sheet';
 import { PhotoGridList } from '@/features/gallery/components/photo-grid-list';
@@ -18,6 +19,7 @@ export default function AllPhotosScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
   const { t } = useTranslation();
+  const tint = moduleTint('gallery', scheme);
 
   const { data: photos = [] } = usePhotos();
   const [timeline, setTimeline] = useState(true);
@@ -44,7 +46,7 @@ export default function AllPhotosScreen() {
       <ScreenHeader
         title={favoritesOnly ? t('gallery.favorites') : t('gallery.allPhotos')}
         eyebrow={t('gallery.title')}
-        tint="#ec4899"
+        tint={tint}
         right={
           <View className="flex-row items-center gap-4">
             <Pressable
@@ -61,8 +63,8 @@ export default function AllPhotosScreen() {
             >
               <Heart
                 size={20}
-                color={favoritesOnly ? '#ef4444' : colors[scheme].foreground}
-                fill={favoritesOnly ? '#ef4444' : 'transparent'}
+                color={favoritesOnly ? tint : colors[scheme].foreground}
+                fill={favoritesOnly ? tint : 'transparent'}
               />
             </Pressable>
             <Pressable
@@ -118,7 +120,7 @@ export default function AllPhotosScreen() {
                 ? t('gallery.noMatchesBody')
                 : t('gallery.noPhotosBody')
           }
-          tint="#ec4899"
+          tint={tint}
           actionLabel={!favoritesOnly && !query ? t('gallery.addMedia') : undefined}
           onAction={!favoritesOnly && !query ? () => setAddOpen(true) : undefined}
         />

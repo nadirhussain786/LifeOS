@@ -6,6 +6,7 @@ import { Pressable, ScrollView, TextInput, View } from 'react-native';
 import { Button } from '@/components/ui/button';
 import { SheetHeader } from '@/components/ui/sheet-header';
 import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { ALBUM_CATEGORIES } from '@/features/gallery/config/album-categories';
 import { useGalleryMutations } from '@/features/gallery/hooks/use-gallery-mutations';
@@ -17,6 +18,7 @@ export default function NewAlbumScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
   const { t } = useTranslation();
+  const tint = moduleTint('gallery', scheme);
   const { addAlbum } = useGalleryMutations();
 
   const [name, setName] = useState('');
@@ -62,15 +64,17 @@ export default function NewAlbumScreen() {
                 <Pressable
                   key={item.id}
                   onPress={() => setCategory(item.id)}
-                  style={
-                    selected ? { backgroundColor: item.tint, borderColor: item.tint } : undefined
-                  }
+                  style={selected ? { backgroundColor: tint, borderColor: tint } : undefined}
                   className={cn(
                     'flex-row items-center gap-1.5 rounded-full border px-3 py-2',
                     !selected && 'border-border',
                   )}
                 >
-                  <Icon size={15} color={selected ? '#ffffff' : item.tint} strokeWidth={2.2} />
+                  <Icon
+                    size={15}
+                    color={selected ? '#ffffff' : colors[scheme].mutedForeground}
+                    strokeWidth={2.2}
+                  />
                   <Text
                     className={selected ? 'font-sora-medium text-white' : 'text-muted-foreground'}
                   >

@@ -15,22 +15,26 @@ export type AlbumCategoryMeta = {
   id: AlbumCategory;
   labelKey: string;
   icon: LucideIcon;
-  tint: string;
 };
 
+/**
+ * What a subject is tracking. Identity is carried by the icon and the label —
+ * deliberately *not* by a per-category color.
+ *
+ * These used to hold seven saturated tints, which put a rainbow on every screen
+ * and borrowed other modules' identities (violet is Journal's, orange is
+ * Fitness's). In a media module the photos are the color; chrome stays neutral
+ * and only the one Progress tint marks what's interactive. Icons also survive
+ * grayscale and color-blindness, which a seven-hue code never did.
+ */
 export const ALBUM_CATEGORIES: AlbumCategoryMeta[] = [
-  { id: 'gym', labelKey: 'albumCategory.gym', icon: Dumbbell, tint: '#ef4444' },
-  { id: 'body', labelKey: 'albumCategory.body', icon: User, tint: '#f97316' },
-  { id: 'weight_loss', labelKey: 'albumCategory.weight_loss', icon: Scale, tint: '#22c55e' },
-  {
-    id: 'certificates',
-    labelKey: 'albumCategory.certificates',
-    icon: GraduationCap,
-    tint: '#8b5cf6',
-  },
-  { id: 'achievements', labelKey: 'albumCategory.achievements', icon: Award, tint: '#eab308' },
-  { id: 'memories', labelKey: 'albumCategory.memories', icon: Sparkles, tint: '#ec4899' },
-  { id: 'custom', labelKey: 'albumCategory.custom', icon: Images, tint: '#0ea5e9' },
+  { id: 'gym', labelKey: 'albumCategory.gym', icon: Dumbbell },
+  { id: 'body', labelKey: 'albumCategory.body', icon: User },
+  { id: 'weight_loss', labelKey: 'albumCategory.weight_loss', icon: Scale },
+  { id: 'certificates', labelKey: 'albumCategory.certificates', icon: GraduationCap },
+  { id: 'achievements', labelKey: 'albumCategory.achievements', icon: Award },
+  { id: 'memories', labelKey: 'albumCategory.memories', icon: Sparkles },
+  { id: 'custom', labelKey: 'albumCategory.custom', icon: Images },
 ];
 
 const BY_ID = new Map(ALBUM_CATEGORIES.map((c) => [c.id, c]));

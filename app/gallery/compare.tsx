@@ -1,7 +1,7 @@
 import Slider from '@react-native-community/slider';
 import { differenceInCalendarDays, format } from 'date-fns';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { Bookmark, GitCompareArrows, Share2, Sparkles, TrendingUp } from 'lucide-react-native';
 import { useRef, useState } from 'react';
@@ -14,13 +14,12 @@ import { GradientButton } from '@/components/ui/gradient-button';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Segmented } from '@/components/ui/segmented';
 import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
-import { usePhotos } from '@/features/gallery/hooks/use-gallery';
+import { usePhotos, usePhotosByAlbum } from '@/features/gallery/hooks/use-gallery';
 import { useGalleryMutations } from '@/features/gallery/hooks/use-gallery-mutations';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { alpha, tintGradient } from '@/lib/color';
-
-const COMPARE_TINT = '#8b5cf6';
 
 const LAYOUT_OPTIONS = [
   { value: 'split' as const, labelKey: 'gallery.layoutSplit' },
@@ -33,10 +32,16 @@ export default function CompareScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
   const { t } = useTranslation();
-  const { data: photos = [] } = usePhotos();
+  // Arriving from a subject card scopes the comparison to that subject.
+  const { album: albumId } = useLocalSearchParams<{ album?: string }>();
+  const { data: allPhotos = [], isLoading: loadingAll } = usePhotos();
+  const { data: albumPhotos = [], isLoading: loadingAlbum } = usePhotosByAlbum(albumId);
+
+  const COMPARE_TINT = moduleTint('gallery', scheme);
 
   // Only still photos can anchor a before/after.
-  const stills = photos.filter((p) => p.mediaType === 'photo');
+  const source = albumId ? albumPhotos : allPhotos;
+  const stills = source.filter((p) => p.mediaType === 'photo');
 
   const [beforeId, setBeforeId] = useState<string | null>(null);
   const [afterId, setAfterId] = useState<string | null>(null);
@@ -49,6 +54,15 @@ export default function CompareScreen() {
   const { saveComparison } = useGalleryMutations();
 
   const cardRef = useRef<View>(null);
+
+  // Seed the slots with the subject's two ends (photos come back takenAt DESC)
+  // so tapping Compare lands on a finished before/after instead of empty slots.
+  const [seeded, setSeeded] = useState(false);
+  if (!seeded && stills.length > 1) {
+    setBeforeId(stills[stills.length - 1].id);
+    setAfterId(stills[0].id);
+    setSeeded(true);
+  }
 
   /** Human label for a comparison slot, used in the picker prompts. */
   const slotLabel = (slot: 'before' | 'after') =>
@@ -104,7 +118,7 @@ export default function CompareScreen() {
       const uri = await captureRef(cardRef, { format: 'png', quality: 1 });
       await saveComparison.mutateAsync({ tempUri: uri, caption, takenAt: after!.takenAt });
       Alert.alert(t('gallery.savedToFeedTitle'), t('gallery.savedToFeedBody'), [
-        { text: t('gallery.viewFeed'), onPress: () => router.push('/gallery/feed') },
+        { text: t('gallery.viewInAll'), onPress: () => router.push('/gallery/all') },
         { text: t('common.done'), style: 'cancel' },
       ]);
     } catch {
@@ -114,7 +128,11 @@ export default function CompareScreen() {
     }
   };
 
-  if (stills.length < 2) {
+  // Wait for the source query before judging the library empty, otherwise the
+  // empty state flashes on every entry.
+  const loading = albumId ? loadingAlbum : loadingAll;
+
+  if (!loading && stills.length < 2) {
     return (
       <View className="flex-1 bg-background">
         <ScreenHeader

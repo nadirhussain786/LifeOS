@@ -47,6 +47,12 @@ export type AlbumWithCover = GalleryAlbum & {
   coverUri: string | null;
   photoCount: number;
   videoCount: number;
+  /** The two ends of the transformation: oldest and newest media by `takenAt`.
+   *  Both null while the album is still empty. */
+  firstUri: string | null;
+  latestUri: string | null;
+  firstTakenAt: number | null;
+  latestTakenAt: number | null;
 };
 
 export type CreatePhotoInput = {

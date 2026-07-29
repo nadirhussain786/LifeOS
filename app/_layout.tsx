@@ -174,7 +174,6 @@ export default function RootLayout() {
                 <Stack.Screen name="budget/debts/index" />
                 <Stack.Screen name="budget/debts/[id]" />
                 <Stack.Screen name="gallery/index" />
-                <Stack.Screen name="gallery/feed" />
                 <Stack.Screen name="gallery/all" />
                 <Stack.Screen name="gallery/compare" />
                 <Stack.Screen name="gallery/album/[id]" />

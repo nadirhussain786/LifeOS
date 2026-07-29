@@ -4,6 +4,7 @@ import { Alert, Modal, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import {
   PermissionDeniedError,
@@ -29,7 +30,6 @@ type Option = {
   labelKey: string;
   hintKey: string;
   icon: LucideIcon;
-  tint: string;
   source: MediaSource;
   mediaTypes: MediaKind[];
 };
@@ -40,7 +40,6 @@ const OPTIONS: Option[] = [
     labelKey: 'gallery.takePhoto',
     hintKey: 'gallery.takePhotoHint',
     icon: Camera,
-    tint: '#0ea5e9',
     source: 'camera',
     mediaTypes: ['images'],
   },
@@ -49,7 +48,6 @@ const OPTIONS: Option[] = [
     labelKey: 'gallery.recordVideo',
     hintKey: 'gallery.recordVideoHint',
     icon: Video,
-    tint: '#8b5cf6',
     source: 'camera',
     mediaTypes: ['videos'],
   },
@@ -58,7 +56,6 @@ const OPTIONS: Option[] = [
     labelKey: 'gallery.chooseLibrary',
     hintKey: 'gallery.chooseLibraryHint',
     icon: ImagePlus,
-    tint: '#ec4899',
     source: 'library',
     mediaTypes: ['images', 'videos'],
   },
@@ -71,6 +68,7 @@ export function AddMediaSheet({ visible, onClose, albumId }: Props) {
   const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
   const { t } = useTranslation();
+  const tint = moduleTint('gallery', scheme);
   const { importMedia } = useGalleryMutations();
 
   const run = (option: Option) => {
@@ -149,9 +147,9 @@ export function AddMediaSheet({ visible, onClose, albumId }: Props) {
                 >
                   <View
                     className="h-11 w-11 items-center justify-center rounded-xl"
-                    style={{ backgroundColor: alpha(option.tint, 0.14) }}
+                    style={{ backgroundColor: alpha(tint, 0.14) }}
                   >
-                    <Icon size={21} color={option.tint} />
+                    <Icon size={21} color={tint} />
                   </View>
                   <View className="flex-1">
                     <Text className="font-sora-semibold text-foreground">{t(option.labelKey)}</Text>

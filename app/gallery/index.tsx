@@ -1,30 +1,42 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import * as Sharing from 'expo-sharing';
-import { GitCompareArrows, Heart, Images, Plus } from 'lucide-react-native';
-import { useMemo, useState } from 'react';
+import { GitCompareArrows, Images, Plus } from 'lucide-react-native';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Dimensions, Pressable, ScrollView, View } from 'react-native';
+import { Dimensions, Pressable, ScrollView, View } from 'react-native';
 
 import { EmptyState } from '@/components/ui/empty-state';
 import { Fab } from '@/components/ui/fab';
 import { ScreenHeader } from '@/components/ui/screen-header';
+import { SectionHeader } from '@/components/ui/section-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { AddMediaSheet } from '@/features/gallery/components/add-media-sheet';
-import { AlbumCard } from '@/features/gallery/components/album-card';
-import { JourneyHero } from '@/features/gallery/components/journey-hero';
-import { ProgressPostCard } from '@/features/gallery/components/progress-post-card';
-import { StoryReels } from '@/features/gallery/components/story-reels';
-import { useAlbums, useFavoritePhotos, usePhotos } from '@/features/gallery/hooks/use-gallery';
-import { useGalleryMutations } from '@/features/gallery/hooks/use-gallery-mutations';
-import type { GalleryPhoto } from '@/features/gallery/types/gallery.types';
+import { GAP, PhotoTile } from '@/features/gallery/components/photo-grid';
+import { SubjectCard } from '@/features/gallery/components/subject-card';
+import { useAlbums, usePhotos } from '@/features/gallery/hooks/use-gallery';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { alpha, glowShadow, tintGradient } from '@/lib/color';
 
-const GALLERY_TINT = '#ec4899';
+/** Newest media shown on the home screen before "All photos" takes over. */
+const RECENT_COUNT = 6;
+/** This screen pads by px-5; the shared `tileSize()` assumes 16, which would
+ *  overflow the row by 8px and wrap the third tile. */
+const H_PADDING = 20;
+const RECENT_COLUMNS = 3;
 
+/**
+ * Progress home — a transformation tracker.
+ *
+ * The screen answers one question: what has changed? So tracked subjects come
+ * first, each card carrying its own before/after, and everything else is a
+ * quiet route into the archive.
+ *
+ * The previous home stacked a hero, story reels, three rainbow tiles, a feed
+ * preview and an album grid — five patterns competing before the user had done
+ * anything, wrapped in social affordances (a feed, likes, "You" bylines) that a
+ * single-user photo journal has no audience for.
+ */
 export default function GalleryScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
@@ -33,200 +45,94 @@ export default function GalleryScreen() {
 
   const { data: albums = [], isLoading } = useAlbums();
   const { data: photos = [] } = usePhotos();
-  const { data: favorites = [] } = useFavoritePhotos();
-  const { toggleFavorite } = useGalleryMutations();
 
-  const albumWidth = (Dimensions.get('window').width - 40 - 12) / 2;
-  const albumName = useMemo(() => new Map(albums.map((a) => [a.id, a.name])), [albums]);
-
-  const share = async (photo: GalleryPhoto) => {
-    try {
-      if (await Sharing.isAvailableAsync())
-        await Sharing.shareAsync(photo.uri, { dialogTitle: t('gallery.shareDialogTitle') });
-    } catch {
-      Alert.alert(t('gallery.couldNotShareTitle'), t('gallery.couldNotShareBody'));
-    }
-  };
-
-  const feedPreview = photos.slice(0, 3);
-
-  const quickTiles = [
-    {
-      key: 'all',
-      label: t('gallery.allMedia'),
-      icon: Images,
-      tint: '#0ea5e9',
-      count: photos.length,
-      route: '/gallery/all',
-    },
-    {
-      key: 'fav',
-      label: t('gallery.favorites'),
-      icon: Heart,
-      tint: '#ef4444',
-      count: favorites.length,
-      route: '/gallery/all?favorites=1',
-    },
-    {
-      key: 'compare',
-      label: t('gallery.beforeAfter'),
-      icon: GitCompareArrows,
-      tint: '#8b5cf6',
-      count: null,
-      route: '/gallery/compare',
-    },
-  ];
+  const tint = moduleTint('gallery', scheme);
+  const recent = photos.slice(0, RECENT_COUNT);
+  const size =
+    (Dimensions.get('window').width - H_PADDING * 2 - GAP * (RECENT_COLUMNS - 1)) / RECENT_COLUMNS;
 
   return (
     <View className="flex-1 bg-background">
-      <ScreenHeader title={t('gallery.title')} eyebrow={t('gallery.eyebrow')} tint={GALLERY_TINT} />
+      <ScreenHeader
+        title={t('gallery.title')}
+        eyebrow={t('gallery.eyebrow')}
+        tint={tint}
+        actions={
+          photos.length > 1
+            ? [
+                {
+                  icon: GitCompareArrows,
+                  label: t('gallery.beforeAfter'),
+                  onPress: () => router.push('/gallery/compare'),
+                },
+              ]
+            : undefined
+        }
+      />
 
       {isLoading ? (
         <View className="gap-3 px-5 pt-2">
-          <Skeleton className="h-44 w-full rounded-3xl" />
-          <Skeleton className="h-20 w-full rounded-2xl" />
+          <Skeleton className="h-52 w-full rounded-2xl" />
+          <Skeleton className="h-52 w-full rounded-2xl" />
         </View>
       ) : albums.length === 0 && photos.length === 0 ? (
         <EmptyState
           icon={Images}
           title={t('gallery.emptyTitle')}
           description={t('gallery.emptyBody')}
-          tint={GALLERY_TINT}
-          actionLabel={t('gallery.addMedia')}
-          onAction={() => setAddOpen(true)}
+          tint={tint}
+          actionLabel={t('gallery.newSubject')}
+          onAction={() => router.push('/gallery/album/new')}
         />
       ) : (
         <ScrollView
           contentContainerClassName="gap-6 px-5 pb-28 pt-1"
           showsVerticalScrollIndicator={false}
         >
-          {/* Journey hero → plays the whole story */}
-          <JourneyHero photos={photos} onPlay={() => router.push('/gallery/story/all')} />
-
-          {/* Story highlights (full-bleed) */}
-          <View className="gap-3" style={{ marginHorizontal: -20 }}>
-            <Text variant="caption" className="px-5 font-sora-semibold uppercase tracking-wide">
-              {t('gallery.storyHighlights')}
-            </Text>
-            <StoryReels
-              photos={photos}
-              onOpen={(period) => router.push(`/gallery/story/${period}`)}
-            />
+          {/* What you're tracking — the module's primary object. */}
+          <View className="gap-3">
+            <SectionHeader title={t('gallery.tracking')} />
+            {albums.map((album) => (
+              <SubjectCard
+                key={album.id}
+                album={album}
+                onPress={(a) => router.push(`/gallery/album/${a.id}`)}
+                onCompare={(a) => router.push(`/gallery/compare?album=${a.id}`)}
+              />
+            ))}
+            <Pressable
+              onPress={() => router.push('/gallery/album/new')}
+              accessibilityRole="button"
+              className="flex-row items-center justify-center gap-2 rounded-2xl border border-dashed border-border py-3.5"
+            >
+              <Plus size={16} color={colors[scheme].mutedForeground} />
+              <Text variant="muted" className="font-sora-medium">
+                {t('gallery.newSubject')}
+              </Text>
+            </Pressable>
           </View>
 
-          {/* Quick tiles */}
-          <View className="flex-row gap-2.5">
-            {quickTiles.map((tile) => {
-              const Icon = tile.icon;
-              const [g1, g2] = tintGradient(tile.tint);
-              return (
-                <Pressable
-                  key={tile.key}
-                  onPress={() => router.push(tile.route as never)}
-                  style={[
-                    { flex: 1, borderRadius: 20, overflow: 'hidden' },
-                    glowShadow(tile.tint, 0.25),
-                  ]}
-                >
-                  <LinearGradient
-                    colors={[g1, g2]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={{ alignItems: 'center', gap: 6, paddingVertical: 18 }}
-                  >
-                    <Icon size={20} color="#ffffff" />
-                    <Text
-                      className="font-sora-semibold"
-                      style={{ color: '#ffffff', fontSize: 13 }}
-                      numberOfLines={1}
-                    >
-                      {tile.label}
-                    </Text>
-                    {tile.count !== null && (
-                      <Text style={{ color: alpha('#ffffff', 0.85), fontSize: 11 }}>
-                        {tile.count}
-                      </Text>
-                    )}
-                  </LinearGradient>
-                </Pressable>
-              );
-            })}
-          </View>
-
-          {/* Feed preview */}
-          {feedPreview.length > 0 && (
+          {/* The archive, one tap away — no separate "feed" destination. */}
+          {recent.length > 0 && (
             <View className="gap-3">
-              <View className="flex-row items-center justify-between">
-                <Text variant="subheading">{t('gallery.recentMoments')}</Text>
-                <Pressable onPress={() => router.push('/gallery/feed')} hitSlop={8}>
-                  <Text
-                    variant="caption"
-                    style={{ color: GALLERY_TINT }}
-                    className="font-sora-semibold"
-                  >
-                    {t('gallery.seeFeed')}
-                  </Text>
-                </Pressable>
-              </View>
-              <View className="gap-4">
-                {feedPreview.map((item) => (
-                  <ProgressPostCard
-                    key={item.id}
-                    photo={item}
-                    albumName={item.albumId ? albumName.get(item.albumId) : null}
-                    onOpen={(p) => router.push(`/gallery/photo/${p.id}`)}
-                    onLike={(p) => toggleFavorite.mutate({ id: p.id, isFavorite: !p.isFavorite })}
-                    onShare={share}
-                    onCompare={() => router.push('/gallery/compare')}
+              <SectionHeader
+                title={t('gallery.recent')}
+                actionLabel={t('gallery.allPhotos')}
+                actionTint={tint}
+                onAction={() => router.push('/gallery/all')}
+              />
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: GAP }}>
+                {recent.map((photo) => (
+                  <PhotoTile
+                    key={photo.id}
+                    photo={photo}
+                    size={size}
+                    onPress={(p) => router.push(`/gallery/photo/${p.id}`)}
                   />
                 ))}
               </View>
             </View>
           )}
-
-          {/* Albums */}
-          <View className="gap-3">
-            <View className="flex-row items-center justify-between">
-              <Text variant="subheading">{t('gallery.albums')}</Text>
-              <Pressable
-                onPress={() => router.push('/gallery/album/new')}
-                hitSlop={8}
-                className="flex-row items-center gap-1"
-              >
-                <Plus size={15} color={GALLERY_TINT} />
-                <Text
-                  variant="caption"
-                  style={{ color: GALLERY_TINT }}
-                  className="font-sora-semibold"
-                >
-                  {t('gallery.newAlbum')}
-                </Text>
-              </Pressable>
-            </View>
-
-            {albums.length === 0 ? (
-              <Pressable
-                onPress={() => router.push('/gallery/album/new')}
-                className="flex-row items-center gap-3 rounded-2xl border border-dashed border-border p-4"
-              >
-                <Images size={20} color={colors[scheme].mutedForeground} />
-                <Text variant="muted" className="flex-1">
-                  {t('gallery.createAlbumHint')}
-                </Text>
-              </Pressable>
-            ) : (
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
-                {albums.map((album) => (
-                  <AlbumCard
-                    key={album.id}
-                    album={album}
-                    width={albumWidth}
-                    onPress={(a) => router.push(`/gallery/album/${a.id}`)}
-                  />
-                ))}
-              </View>
-            )}
-          </View>
         </ScrollView>
       )}
 

@@ -9,6 +9,7 @@ import { Alert, Dimensions, Platform, Pressable, ScrollView, TextInput, View } f
 
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { GalleryVideo } from '@/features/gallery/components/gallery-video';
 import { usePhoto } from '@/features/gallery/hooks/use-gallery';
@@ -21,6 +22,7 @@ export default function PhotoDetailScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
   const { t } = useTranslation();
+  const tint = moduleTint('gallery', scheme);
   const { data: photo } = usePhoto(id);
   const { editPhoto, toggleFavorite, removePhoto } = useGalleryMutations();
 
@@ -84,7 +86,7 @@ export default function PhotoDetailScreen() {
     <View className="flex-1 bg-background">
       <ScreenHeader
         eyebrow={t('gallery.title')}
-        tint="#ec4899"
+        tint={tint}
         right={
           <View className="flex-row items-center gap-4">
             <Pressable
@@ -92,11 +94,7 @@ export default function PhotoDetailScreen() {
               hitSlop={8}
               accessibilityLabel={t('gallery.favorite')}
             >
-              <Heart
-                size={22}
-                color="#ef4444"
-                fill={photo.isFavorite ? '#ef4444' : 'transparent'}
-              />
+              <Heart size={22} color={tint} fill={photo.isFavorite ? tint : 'transparent'} />
             </Pressable>
             <Pressable onPress={confirmDelete} hitSlop={8} accessibilityLabel={t('common.delete')}>
               <Trash2 size={20} color={colors[scheme].destructive} />

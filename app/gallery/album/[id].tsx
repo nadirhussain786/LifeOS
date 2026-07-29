@@ -1,11 +1,20 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { CalendarClock, Grid3x3, ImagePlus, Trash2 } from 'lucide-react-native';
+import {
+  CalendarClock,
+  GitCompareArrows,
+  Grid3x3,
+  ImagePlus,
+  Play,
+  Trash2,
+} from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
 
 import { EmptyState } from '@/components/ui/empty-state';
 import { ScreenHeader } from '@/components/ui/screen-header';
+import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { albumCategoryMeta } from '@/features/gallery/config/album-categories';
 import { AddMediaSheet } from '@/features/gallery/components/add-media-sheet';
@@ -13,12 +22,14 @@ import { PhotoGrid } from '@/features/gallery/components/photo-grid';
 import { useAlbum, usePhotosByAlbum } from '@/features/gallery/hooks/use-gallery';
 import { useGalleryMutations } from '@/features/gallery/hooks/use-gallery-mutations';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { alpha } from '@/lib/color';
 
 export default function AlbumDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
   const { t } = useTranslation();
+  const tint = moduleTint('gallery', scheme);
   const [timeline, setTimeline] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
 
@@ -50,7 +61,7 @@ export default function AlbumDetailScreen() {
           category: t(meta.labelKey),
           items: t('gallery.itemsCount', { count: photos.length }),
         })}
-        tint={meta.tint}
+        tint={tint}
         right={
           <View className="flex-row items-center gap-4">
             <Pressable
@@ -83,7 +94,7 @@ export default function AlbumDetailScreen() {
           icon={ImagePlus}
           title={t('gallery.albumEmptyTitle')}
           description={t('gallery.albumEmptyBody')}
-          tint={meta.tint}
+          tint={tint}
           actionLabel={t('gallery.addMedia')}
           onAction={addPhotos}
         />
@@ -92,6 +103,31 @@ export default function AlbumDetailScreen() {
           contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
           showsVerticalScrollIndicator={false}
         >
+          {/* Two ends and everything between: the reason a subject exists. */}
+          {photos.length > 1 && (
+            <View className="mb-4 flex-row gap-2.5">
+              <Pressable
+                onPress={() => router.push(`/gallery/compare?album=${album.id}`)}
+                className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl py-3"
+                style={{ backgroundColor: alpha(tint, 0.12) }}
+              >
+                <GitCompareArrows size={16} color={tint} />
+                <Text className="font-sora-semibold" style={{ color: tint }}>
+                  {t('gallery.compare')}
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={() => router.push(`/gallery/story/all?album=${album.id}`)}
+                className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl border border-border py-3"
+              >
+                <Play size={15} color={colors[scheme].foreground} />
+                <Text className="font-sora-semibold text-foreground">
+                  {t('gallery.playProgression')}
+                </Text>
+              </Pressable>
+            </View>
+          )}
+
           <PhotoGrid
             photos={photos}
             timeline={timeline}
