@@ -134,7 +134,7 @@ export const HUB_SECTIONS: HubSection[] = [
         titleKey: 'hubModule.galleryTitle',
         subtitleKey: 'hubModule.gallerySubtitle',
         icon: Images,
-        tint: '#ec4899',
+        tint: moduleTints.gallery.light,
         status: 'ready',
         getRoute: () => '/gallery',
       },

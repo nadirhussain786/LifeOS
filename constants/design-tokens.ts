@@ -145,7 +145,7 @@ export const moduleTints = {
   goals: { light: '#f43f5e', dark: '#fb7185' }, // rose — aspiration, achievement
   budget: { light: '#0d9488', dark: '#2dd4bf' }, // teal — balance, ledgers
   study: { light: '#7c3aed', dark: '#a78bfa' }, // deep violet — focus
-  gallery: { light: '#db2777', dark: '#f472b6' }, // pink — visible change over time
+  gallery: { light: '#a21caf', dark: '#e879f9' }, // plum — visible change over time
 } as const;
 
 export type ModuleName = keyof typeof moduleTints;
