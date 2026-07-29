@@ -36,6 +36,56 @@ revoke all on function public.current_actor_name() from public, anon;
 grant execute on function public.current_actor_name() to authenticated;
 
 -- ---------------------------------------------------------------------------
+-- Create a group and its first member together.
+--
+-- Two inserts that must not come apart: a group whose creator never became a
+-- member is invisible to everybody (the read policy needs membership) AND
+-- undeletable (the delete policy needs ownership), so a half-failure would
+-- strand a row nobody can ever see or remove.
+--
+-- SECURITY INVOKER, so expense_groups_insert still requires created_by =
+-- auth.uid() and the member row goes through is_expense_group_creator.
+-- ---------------------------------------------------------------------------
+create or replace function public.create_expense_group(
+  p_group_id text,
+  p_name text,
+  p_kind text,
+  p_currency text,
+  p_member_id text,
+  p_display_name text,
+  p_activity_id text,
+  p_now bigint
+)
+returns text
+language plpgsql
+security invoker
+set search_path = public
+as $$
+begin
+  insert into public.expense_groups (id, name, kind, currency, created_by, created_at, updated_at)
+  values (p_group_id, p_name, p_kind, p_currency, auth.uid(), p_now, p_now);
+
+  insert into public.expense_group_members (
+    id, group_id, user_id, email, display_name, role, joined_at, created_at, updated_at
+  )
+  select
+    p_member_id, p_group_id, auth.uid(), p.email,
+    coalesce(p_display_name, p.display_name, p.username), 'owner', p_now, p_now, p_now
+  from public.profiles p
+  where p.id = auth.uid();
+
+  insert into public.expense_group_activity (
+    id, group_id, actor_id, actor_name, action, meta, created_at
+  ) values (
+    p_activity_id, p_group_id, auth.uid(), public.current_actor_name(), 'group_created',
+    jsonb_build_object('name', p_name), p_now
+  );
+
+  return p_group_id;
+end;
+$$;
+
+-- ---------------------------------------------------------------------------
 -- Add an expense together with its split.
 --
 -- `p_shares` is [{"member_id": "...", "share_cents": 123}, ...] and must sum to
@@ -253,6 +303,9 @@ begin
   return p_settlement_id;
 end;
 $$;
+
+revoke all on function public.create_expense_group(text, text, text, text, text, text, text, bigint) from public, anon;
+grant execute on function public.create_expense_group(text, text, text, text, text, text, text, bigint) to authenticated;
 
 revoke all on function public.create_group_expense(text, text, text, text, bigint, text, bigint, text, jsonb, text, bigint) from public, anon;
 revoke all on function public.update_group_expense(text, text, bigint, text, bigint, text, jsonb, text, bigint) from public, anon;

@@ -8,6 +8,7 @@ import {
   Settings,
   StickyNote,
   Target,
+  Users,
   Wallet,
   type LucideIcon,
 } from 'lucide-react-native';
@@ -122,6 +123,17 @@ export const HUB_SECTIONS: HubSection[] = [
         tint: moduleTints.budget.light,
         status: 'ready',
         getRoute: () => '/budget',
+      },
+      {
+        id: 'split',
+        titleKey: 'hubModule.splitTitle',
+        subtitleKey: 'hubModule.splitSubtitle',
+        icon: Users,
+        // Shares Budget's teal deliberately: this is money, and the hue wheel
+        // has no room left for a 12th identity that clears the others by 30°.
+        tint: moduleTints.budget.light,
+        status: 'ready',
+        getRoute: () => '/split',
       },
     ],
   },

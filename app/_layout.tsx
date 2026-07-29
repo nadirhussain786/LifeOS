@@ -173,6 +173,12 @@ export default function RootLayout() {
                 <Stack.Screen name="budget/savings/[id]" />
                 <Stack.Screen name="budget/debts/index" />
                 <Stack.Screen name="budget/debts/[id]" />
+                <Stack.Screen name="split/index" />
+                <Stack.Screen name="split/[id]" />
+                <Stack.Screen name="split/new" options={{ presentation: 'modal' }} />
+                <Stack.Screen name="split/[id]/expense" options={{ presentation: 'modal' }} />
+                <Stack.Screen name="split/[id]/settle" options={{ presentation: 'modal' }} />
+                <Stack.Screen name="split/[id]/members" options={{ presentation: 'modal' }} />
                 <Stack.Screen name="gallery/index" />
                 <Stack.Screen name="gallery/all" />
                 <Stack.Screen name="gallery/compare" />
