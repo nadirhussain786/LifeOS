@@ -9,6 +9,7 @@
     "web": "expo start --web",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "check:migrations": "node scripts/check-migrations.mjs",
     "test": "jest",
     "test:watch": "jest --watch",
     "format": "prettier --write .",
