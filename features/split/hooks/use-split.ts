@@ -1,8 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { useAuthStore } from '@/features/auth/services/auth-store';
 import * as repo from '@/features/split/services/split-repository';
+import { notifyGroup } from '@/features/split/services/push-registration';
 import { computeBalances, simplifyDebts, totalSpend } from '@/features/split/services/split-math';
 import type { GroupKind, MemberBalance, Transfer } from '@/features/split/types/split.types';
 
@@ -79,6 +81,13 @@ export function useGroupBalances(data: ReturnType<typeof useGroupDetail>['data']
 export function useSplitMutations(groupId?: string) {
   const queryClient = useQueryClient();
   const profile = useAuthStore((s) => s.profile);
+  const { t } = useTranslation();
+  // Composed here rather than in the edge function: the notification should
+  // read in the SENDER's language only as a fallback — the recipient's device
+  // cannot be localised from the server without storing their locale.
+  const actor = profile?.displayName || profile?.username || t('split.someone');
+  const notifyTitle = t('split.notifyTitle', { actor });
+  const settlementBody = t('split.notifySettlement');
 
   /** Group data is shared, so a local write is not the whole truth — refetch
    *  rather than patching the cache by hand. */
@@ -99,6 +108,12 @@ export function useSplitMutations(groupId?: string) {
     onSuccess: invalidate,
   });
 
+  const invite = useMutation({
+    mutationFn: (input: { memberId: string; email: string; groupName: string }) =>
+      repo.sendInvite({ groupId: groupId!, ...input }),
+    onSuccess: invalidate,
+  });
+
   const removeMember = useMutation({
     mutationFn: (memberId: string) => repo.removeMember(memberId),
     onSuccess: invalidate,
@@ -107,7 +122,16 @@ export function useSplitMutations(groupId?: string) {
   const addExpense = useMutation({
     mutationFn: (input: Omit<Parameters<typeof repo.createExpense>[0], 'groupId'>) =>
       repo.createExpense({ groupId: groupId!, ...input }),
-    onSuccess: invalidate,
+    onSuccess: (_id, input) => {
+      invalidate();
+      // Fire-and-forget: the expense is already saved, so a failed push must
+      // not surface as a failed write.
+      void notifyGroup({
+        groupId: groupId!,
+        title: notifyTitle,
+        body: input.description,
+      });
+    },
   });
 
   const editExpense = useMutation({
@@ -123,8 +147,20 @@ export function useSplitMutations(groupId?: string) {
   const settleUp = useMutation({
     mutationFn: (input: Omit<Parameters<typeof repo.recordSettlement>[0], 'groupId'>) =>
       repo.recordSettlement({ groupId: groupId!, ...input }),
-    onSuccess: invalidate,
+    onSuccess: () => {
+      invalidate();
+      void notifyGroup({ groupId: groupId!, title: notifyTitle, body: settlementBody });
+    },
   });
 
-  return { createGroup, addMember, removeMember, addExpense, editExpense, removeExpense, settleUp };
+  return {
+    createGroup,
+    addMember,
+    invite,
+    removeMember,
+    addExpense,
+    editExpense,
+    removeExpense,
+    settleUp,
+  };
 }

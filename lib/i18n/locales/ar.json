@@ -1371,6 +1371,29 @@
       "expense_deleted": "حذف {{actor}} {{description}}",
       "settlement_added": "سجّل {{actor}} دفعة",
       "settlement_deleted": "أزال {{actor}} دفعة"
+    },
+    "notifyTitle": "{{actor}} في مجموعتك",
+    "notifySettlement": "سجّل دفعة",
+    "sendInvite": "إرسال الدعوة",
+    "inviteHint": "يمكن التقسيم معه فورًا. أرسل الدعوة ليتمكن من رؤية المجموعة.",
+    "inviteSentTitle": "أُرسلت الدعوة",
+    "inviteSentBody": "أرسلنا إلى {{email}} رابطًا للانضمام.",
+    "inviteShareMessage": "انضم إلى مجموعة نفقاتي على LifeOS: {{link}}",
+    "inviteFailedTitle": "تعذّر إنشاء الدعوة",
+    "inviteFailedBody": "تحقق من اتصالك وحاول مرة أخرى.",
+    "joinTitle": "الانضمام إلى المجموعة",
+    "aGroup": "هذه المجموعة",
+    "joinBody": "اقبل لتبدأ مشاركة النفقات مع هذه المجموعة.",
+    "joinNeedsAccount": "سجّل الدخول أو أنشئ حسابًا للانضمام. تبقى دعوتك صالحة.",
+    "joinGroup": "انضمام",
+    "backToGroups": "العودة إلى المجموعات",
+    "joinFailedTitle": "لا يمكن استخدام هذه الدعوة",
+    "joinStatus": {
+      "invalid": "الرابط غير صالح. اطلب دعوة جديدة.",
+      "expired": "انتهت صلاحية هذه الدعوة. اطلب واحدة جديدة.",
+      "already_accepted": "استُخدمت هذه الدعوة بالفعل.",
+      "member_unavailable": "مكانك في المجموعة لم يعد متاحًا. اطلب إضافتك مرة أخرى.",
+      "error": "حدث خطأ ما. حاول بعد قليل."
     }
   }
 }

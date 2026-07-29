@@ -216,6 +216,47 @@ export async function addMemberByEmail(input: {
   if (error) throw new Error(error.message);
 }
 
+/**
+ * Emails an invitation for an existing placeholder member.
+ *
+ * The token is minted in the edge function, never here: an invite token is a
+ * bearer credential — whoever holds it can join the group — so the client must
+ * not be able to choose it. When email isn't configured yet the function still
+ * creates a real, redeemable invitation and returns the link to share by hand.
+ */
+export async function sendInvite(input: {
+  groupId: string;
+  memberId: string;
+  email: string;
+  groupName: string;
+}): Promise<{ link: string; emailed: boolean }> {
+  const { data, error } = await supabase.functions.invoke('send-invite', { body: input });
+  if (error) throw new Error(error.message);
+  return { link: String(data?.link ?? ''), emailed: data?.emailed === true };
+}
+
+/** What an invitee may see before joining: the group's name, nothing more. */
+export async function peekInvitation(
+  token: string,
+): Promise<{ groupName: string | null; status: string }> {
+  const { data, error } = await supabase.rpc('peek_group_invitation', {
+    p_token: token,
+    p_now: Date.now(),
+  });
+  if (error) throw new Error(error.message);
+  const row = Array.isArray(data) ? data[0] : data;
+  return { groupName: row?.group_name ?? null, status: String(row?.status ?? 'invalid') };
+}
+
+export async function acceptInvitation(token: string): Promise<string> {
+  const { data, error } = await supabase.rpc('accept_group_invitation', {
+    p_token: token,
+    p_now: Date.now(),
+  });
+  if (error) throw new Error(error.message);
+  return String(data);
+}
+
 export async function removeMember(memberId: string): Promise<void> {
   const { error } = await supabase
     .from('expense_group_members')

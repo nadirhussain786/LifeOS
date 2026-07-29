@@ -1,0 +1,136 @@
+// Supabase Edge Function: notify-group
+//
+// Push notification fan-out for shared expense groups. The client calls this
+// after a successful write; it collects the OTHER members' device tokens and
+// hands them to Expo's push service.
+//
+// Two clients are used deliberately:
+//   - the caller's JWT, to answer "is this person actually in this group?"
+//     using the RLS policies from 0003 rather than trusting the request body
+//   - the service-role key, to read push_tokens, which is `*_own` and would
+//     otherwise expose nothing but the caller's own device
+//
+// Notification delivery is NOT the source of truth. If this fails the expense
+// still exists, which is the correct failure direction — so the client treats
+// errors here as non-fatal.
+//
+// Deploy:
+//   supabase functions deploy notify-group
+// SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are injected by the runtime.
+// EXPO_ACCESS_TOKEN is optional; set it if you enable Expo's push security.
+//
+// This file is Deno (URL imports) and is excluded from the app's tsconfig.
+
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const EXPO_PUSH_URL = 'https://exp.host/--/api/v2/push/send';
+/** Expo rejects batches larger than this. */
+const CHUNK = 100;
+
+type Payload = {
+  groupId: string;
+  title: string;
+  body: string;
+  /** Deep-link target, e.g. /split/<groupId>. */
+  route?: string;
+};
+
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { 'Content-Type': 'application/json' },
+  });
+
+Deno.serve(async (req: Request) => {
+  if (req.method !== 'POST') return json({ error: 'method_not_allowed' }, 405);
+
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader) return json({ error: 'unauthorized' }, 401);
+
+  let payload: Payload;
+  try {
+    payload = await req.json();
+  } catch {
+    return json({ error: 'bad_request' }, 400);
+  }
+  if (!payload?.groupId || !payload.title) return json({ error: 'bad_request' }, 400);
+
+  const url = Deno.env.get('SUPABASE_URL')!;
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
+  // 1. Who is calling, and are they really in this group? Asked through their
+  //    own token so RLS answers it — never from the request body.
+  const asCaller = createClient(url, Deno.env.get('SUPABASE_ANON_KEY')!, {
+    global: { headers: { Authorization: authHeader } },
+  });
+
+  const { data: userData } = await asCaller.auth.getUser();
+  const actorId = userData?.user?.id;
+  if (!actorId) return json({ error: 'unauthorized' }, 401);
+
+  const { data: membership, error: membershipError } = await asCaller
+    .from('expense_group_members')
+    .select('id, user_id')
+    .eq('group_id', payload.groupId)
+    .is('deleted_at', null);
+
+  if (membershipError) return json({ error: 'forbidden' }, 403);
+  const members = membership ?? [];
+  if (!members.some((m: { user_id: string | null }) => m.user_id === actorId)) {
+    // RLS returns an empty set rather than an error for a non-member, so the
+    // absence of the caller in the result IS the rejection.
+    return json({ error: 'forbidden' }, 403);
+  }
+
+  // 2. Everyone else in the group who has a device registered.
+  const recipientIds = members
+    .map((m: { user_id: string | null }) => m.user_id)
+    .filter((id: string | null): id is string => !!id && id !== actorId);
+
+  if (recipientIds.length === 0) return json({ sent: 0, reason: 'no_recipients' });
+
+  const admin = createClient(url, serviceKey);
+  const { data: tokenRows, error: tokenError } = await admin
+    .from('push_tokens')
+    .select('token')
+    .in('user_id', recipientIds);
+
+  if (tokenError) return json({ error: 'token_lookup_failed' }, 500);
+
+  const tokens = (tokenRows ?? []).map((r: { token: string }) => r.token);
+  if (tokens.length === 0) return json({ sent: 0, reason: 'no_tokens' });
+
+  // 3. Hand off to Expo, in batches it will accept.
+  const expoToken = Deno.env.get('EXPO_ACCESS_TOKEN');
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (expoToken) headers.Authorization = `Bearer ${expoToken}`;
+
+  let sent = 0;
+  const failures: unknown[] = [];
+
+  for (let i = 0; i < tokens.length; i += CHUNK) {
+    const messages = tokens.slice(i, i + CHUNK).map((to: string) => ({
+      to,
+      title: payload.title,
+      body: payload.body,
+      sound: 'default',
+      data: { route: payload.route ?? `/split/${payload.groupId}`, category: 'budget' },
+    }));
+
+    try {
+      const res = await fetch(EXPO_PUSH_URL, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(messages),
+      });
+      if (res.ok) sent += messages.length;
+      else failures.push(await res.text());
+    } catch (error) {
+      failures.push(String(error));
+    }
+  }
+
+  // A partial failure is still reported 200: the write it accompanies already
+  // succeeded, and the client must not retry the expense because a push bounced.
+  return json({ sent, failures: failures.length });
+});

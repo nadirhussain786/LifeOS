@@ -1,9 +1,9 @@
 import { useLocalSearchParams } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { Mail, Trash2, UserPlus } from 'lucide-react-native';
+import { Mail, Send, Trash2, UserPlus } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Alert, Pressable, ScrollView, Share, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
 import { SheetHeader } from '@/components/ui/sheet-header';
@@ -30,7 +30,7 @@ export default function SplitMembersScreen() {
   const tint = moduleTint('budget', scheme);
 
   const { data } = useGroupDetail(id);
-  const { addMember, removeMember } = useSplitMutations(id);
+  const { addMember, invite, removeMember } = useSplitMutations(id);
 
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
@@ -48,6 +48,27 @@ export default function SplitMembersScreen() {
           setEmail('');
           setName('');
         },
+      },
+    );
+  };
+
+  /**
+   * Sends (or re-sends) the invitation. If email isn't configured yet the
+   * function still returns a real, redeemable link — so hand it to the share
+   * sheet rather than pretending an email went out.
+   */
+  const sendInvite = (memberId: string, email: string) => {
+    invite.mutate(
+      { memberId, email, groupName: data?.group?.name ?? '' },
+      {
+        onSuccess: async ({ link, emailed }) => {
+          if (emailed) {
+            Alert.alert(t('split.inviteSentTitle'), t('split.inviteSentBody', { email }));
+            return;
+          }
+          await Share.share({ message: t('split.inviteShareMessage', { link }) });
+        },
+        onError: () => Alert.alert(t('split.inviteFailedTitle'), t('split.inviteFailedBody')),
       },
     );
   };
@@ -96,6 +117,17 @@ export default function SplitMembersScreen() {
                         : (member.email ?? '')}
                   </Text>
                 </View>
+                {pending && member.email && (
+                  <Pressable
+                    onPress={() => sendInvite(member.id, member.email!)}
+                    hitSlop={8}
+                    disabled={invite.isPending}
+                    accessibilityLabel={t('split.sendInvite')}
+                    className="h-9 w-9 items-center justify-center"
+                  >
+                    <Send size={16} color={tint} />
+                  </Pressable>
+                )}
                 {member.role !== 'owner' && (
                   <Pressable
                     onPress={() => confirmRemove(member.id, label)}
@@ -142,7 +174,7 @@ export default function SplitMembersScreen() {
             />
           </View>
 
-          <Text variant="caption">{t('split.inviteNote')}</Text>
+          <Text variant="caption">{t('split.inviteHint')}</Text>
 
           {addMember.isError && (
             <Text variant="caption" className="text-destructive">

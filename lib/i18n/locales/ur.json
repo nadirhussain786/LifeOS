@@ -1307,6 +1307,29 @@
       "expense_deleted": "{{actor}} نے {{description}} حذف کیا",
       "settlement_added": "{{actor}} نے ادائیگی درج کی",
       "settlement_deleted": "{{actor}} نے ادائیگی ہٹائی"
+    },
+    "notifyTitle": "آپ کے گروپ میں {{actor}}",
+    "notifySettlement": "ادائیگی درج کی",
+    "sendInvite": "دعوت بھیجیں",
+    "inviteHint": "ان کے ساتھ ابھی سے حساب بانٹا جا سکتا ہے۔ گروپ دیکھنے کے لیے دعوت بھیجیں۔",
+    "inviteSentTitle": "دعوت بھیج دی گئی",
+    "inviteSentBody": "ہم نے {{email}} کو شامل ہونے کا لنک ای میل کر دیا ہے۔",
+    "inviteShareMessage": "LifeOS پر میرے اخراجات کے گروپ میں شامل ہوں: {{link}}",
+    "inviteFailedTitle": "دعوت نہیں بن سکی",
+    "inviteFailedBody": "اپنا کنکشن دیکھ کر دوبارہ کوشش کریں۔",
+    "joinTitle": "گروپ میں شامل ہوں",
+    "aGroup": "یہ گروپ",
+    "joinBody": "اس گروپ کے ساتھ اخراجات بانٹنا شروع کرنے کے لیے قبول کریں۔",
+    "joinNeedsAccount": "شامل ہونے کے لیے سائن اِن کریں یا اکاؤنٹ بنائیں۔ آپ کی دعوت برقرار رہے گی۔",
+    "joinGroup": "شامل ہوں",
+    "backToGroups": "گروپس پر واپس",
+    "joinFailedTitle": "یہ دعوت استعمال نہیں ہو سکتی",
+    "joinStatus": {
+      "invalid": "لنک درست نہیں۔ نئی دعوت طلب کریں۔",
+      "expired": "یہ دعوت ختم ہو چکی ہے۔ نئی دعوت طلب کریں۔",
+      "already_accepted": "یہ دعوت پہلے استعمال ہو چکی ہے۔",
+      "member_unavailable": "گروپ میں آپ کی جگہ اب دستیاب نہیں۔ دوبارہ شامل کرنے کو کہیں۔",
+      "error": "کچھ غلط ہو گیا۔ ذرا دیر بعد کوشش کریں۔"
     }
   }
 }

@@ -1307,6 +1307,29 @@
       "expense_deleted": "{{actor}} ने {{description}} हटाया",
       "settlement_added": "{{actor}} ने भुगतान दर्ज किया",
       "settlement_deleted": "{{actor}} ने भुगतान हटाया"
+    },
+    "notifyTitle": "आपके समूह में {{actor}}",
+    "notifySettlement": "भुगतान दर्ज किया",
+    "sendInvite": "निमंत्रण भेजें",
+    "inviteHint": "उनके साथ अभी से खर्च बाँटा जा सकता है। समूह दिखाने के लिए निमंत्रण भेजें।",
+    "inviteSentTitle": "निमंत्रण भेजा गया",
+    "inviteSentBody": "हमने {{email}} को जुड़ने का लिंक ईमेल कर दिया।",
+    "inviteShareMessage": "LifeOS पर मेरे खर्च समूह में जुड़ें: {{link}}",
+    "inviteFailedTitle": "निमंत्रण नहीं बन सका",
+    "inviteFailedBody": "अपना कनेक्शन देखकर फिर कोशिश करें।",
+    "joinTitle": "समूह में जुड़ें",
+    "aGroup": "यह समूह",
+    "joinBody": "इस समूह के साथ खर्च बाँटना शुरू करने के लिए स्वीकार करें।",
+    "joinNeedsAccount": "जुड़ने के लिए साइन इन करें या खाता बनाएँ। आपका निमंत्रण बना रहेगा।",
+    "joinGroup": "जुड़ें",
+    "backToGroups": "समूहों पर वापस",
+    "joinFailedTitle": "यह निमंत्रण इस्तेमाल नहीं हो सकता",
+    "joinStatus": {
+      "invalid": "लिंक मान्य नहीं है। नया निमंत्रण मांगें।",
+      "expired": "यह निमंत्रण समाप्त हो गया है। नया मांगें।",
+      "already_accepted": "यह निमंत्रण पहले इस्तेमाल हो चुका है।",
+      "member_unavailable": "समूह में आपकी जगह अब उपलब्ध नहीं है। दोबारा जोड़ने को कहें।",
+      "error": "कुछ गड़बड़ हुई। थोड़ी देर बाद कोशिश करें।"
     }
   }
 }

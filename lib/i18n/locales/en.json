@@ -1307,6 +1307,29 @@
       "expense_deleted": "{{actor}} deleted {{description}}",
       "settlement_added": "{{actor}} recorded a payment",
       "settlement_deleted": "{{actor}} removed a payment"
+    },
+    "notifyTitle": "{{actor}} in your group",
+    "notifySettlement": "Recorded a payment",
+    "sendInvite": "Send invite",
+    "inviteHint": "They can be split with straight away. Send the invitation to let them see the group.",
+    "inviteSentTitle": "Invitation sent",
+    "inviteSentBody": "We emailed {{email}} a link to join.",
+    "inviteShareMessage": "Join my expense group on LifeOS: {{link}}",
+    "inviteFailedTitle": "Couldn't create the invitation",
+    "inviteFailedBody": "Check your connection and try again.",
+    "joinTitle": "Join group",
+    "aGroup": "This group",
+    "joinBody": "Accept to start sharing expenses with this group.",
+    "joinNeedsAccount": "Sign in or create an account to join. Your invitation stays valid.",
+    "joinGroup": "Join group",
+    "backToGroups": "Back to groups",
+    "joinFailedTitle": "This invitation can't be used",
+    "joinStatus": {
+      "invalid": "The link is not valid. Ask for a fresh invitation.",
+      "expired": "This invitation has expired. Ask for a new one.",
+      "already_accepted": "This invitation has already been used.",
+      "member_unavailable": "Your place in the group is no longer available. Ask to be added again.",
+      "error": "Something went wrong. Try again in a moment."
     }
   }
 }
