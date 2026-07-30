@@ -35,6 +35,7 @@ export function RecurrencePicker({ value, onChange }: Props) {
         const selected = option.value === value;
         return (
           <Pressable
+            accessibilityRole="button"
             key={option.value}
             onPress={() => {
               Haptics.selectionAsync();

@@ -24,6 +24,10 @@ type SyncState = {
   // Transient (not persisted):
   status: SyncStatus;
   lastError: string | null;
+  /** True once AsyncStorage has rehydrated. Nothing read this before, so
+   *  `lastUserId` was consulted while it was still the initial `null` — see
+   *  account-reconcile.ts for why that mattered. */
+  hydrated: boolean;
 
   setAutoSync: (on: boolean) => void;
   setModuleEnabled: (module: SyncModule, on: boolean) => void;
@@ -46,6 +50,7 @@ export const useSyncStore = create<SyncState>()(
       lastUserId: null,
       status: 'idle',
       lastError: null,
+      hydrated: false,
 
       setAutoSync: (autoSync) => set({ autoSync }),
       setModuleEnabled: (module, on) => set((s) => ({ modules: { ...s.modules, [module]: on } })),
@@ -62,7 +67,7 @@ export const useSyncStore = create<SyncState>()(
     {
       name: 'sync-store',
       storage: createJSONStorage(() => AsyncStorage),
-      // Persist settings + cursors; status/lastError are runtime-only.
+      // Persist settings + cursors; status/lastError/hydrated are runtime-only.
       partialize: (s) => ({
         autoSync: s.autoSync,
         modules: s.modules,
@@ -71,6 +76,9 @@ export const useSyncStore = create<SyncState>()(
         lastSyncedAt: s.lastSyncedAt,
         lastUserId: s.lastUserId,
       }),
+      onRehydrateStorage: () => () => {
+        useSyncStore.setState({ hydrated: true });
+      },
       // Backfill any module added in a later release.
       merge: (persisted, current) => {
         const saved = persisted as Partial<SyncState> | undefined;

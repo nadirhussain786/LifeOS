@@ -7,6 +7,7 @@ import {
   reconcileAccountOnSignIn,
   wipeLocalData,
 } from '@/features/sync/services/account-reconcile';
+import { ensureProfileRow } from '@/features/auth/services/ensure-profile';
 import { isSupabaseConfigured } from '@/lib/env';
 import { passwordResetRedirectUrl, supabase } from '@/lib/supabase';
 
@@ -191,6 +192,9 @@ export const useAuthStore = create<AuthState>()(
       loadProfile: async () => {
         const user = get().user;
         if (!user) return;
+        // Repairs a missing profiles row before anything depends on it — see
+        // ensure-profile.ts for the Split group-creation failure this prevents.
+        await ensureProfileRow();
         const { data } = await supabase
           .from('profiles')
           .select('id, email, display_name, username')

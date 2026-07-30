@@ -30,7 +30,13 @@
     "all": "सभी",
     "saveChanges": "बदलाव सहेजें",
     "viewPhoto": "तस्वीर देखें",
-    "removeAttachment": "अटैचमेंट हटाएँ"
+    "removeAttachment": "अटैचमेंट हटाएँ",
+    "archiveNamed": "“{{name}}” संग्रहीत करें",
+    "deleteNamed": "“{{name}}” हटाएँ",
+    "markDone": "“{{name}}” को पूर्ण चिह्नित करें",
+    "markNotDone": "“{{name}}” को अपूर्ण चिह्नित करें",
+    "more": "और विकल्प",
+    "undo": "पूर्ववत"
   },
   "reminder": {
     "in1Hour": "1 घंटे में",
@@ -167,7 +173,9 @@
     "emptyArchived": "कोई संग्रहीत कार्य नहीं",
     "notifyAtDueTime": "नियत समय पर मुझे सूचित करें",
     "notifyAtNineAm": "उस दिन सुबह 9:00 बजे मुझे सूचित करें",
-    "addNotes": "नोट्स जोड़ें…"
+    "addNotes": "नोट्स जोड़ें…",
+    "deletedToast": "“{{title}}” हटाया गया।",
+    "archivedToast": "“{{title}}” संग्रहीत।"
   },
   "buckets": {
     "overdue": "अतिदेय",
@@ -232,7 +240,12 @@
     "routineNextHint": "आप अगले चरण में इस दिनचर्या में आदतें जोड़ेंगे, उसी क्रम में जिसमें आप उन्हें करना चाहते हैं।",
     "todayCount": "{{done}}/{{total}} आज",
     "loggedToday": "आज {{amount}} लॉग किया · संपादित करने के लिए टैप करें",
-    "doneToday": "आज पूर्ण ✓"
+    "doneToday": "आज पूर्ण ✓",
+    "streakDays_one": "{{count}} दिन की लय",
+    "streakDays_other": "{{count}} दिन की लय",
+    "withoutDays_one": "{{count}} दिन से नहीं",
+    "withoutDays_other": "{{count}} दिन से नहीं",
+    "quickLog": "“{{name}}” दर्ज करें"
   },
   "habitType": {
     "boolean": "हां / नहीं",
@@ -270,7 +283,8 @@
     "dayTimeline": "दिन की टाइमलाइन",
     "enableNotifBody": "जर्नल अनुस्मारक पाने के लिए अपनी डिवाइस सेटिंग्स में LifeOS के लिए सूचनाएं सक्षम करें।",
     "reminderSummary": "आपको हर दिन {{time}} बजे आज की प्रविष्टि लिखने का अनुस्मारक मिलेगा।",
-    "writeAFewWords": "कुछ शब्द लिखें…"
+    "writeAFewWords": "कुछ शब्द लिखें…",
+    "reminderSettings": "अनुस्मारक सेटिंग्स"
   },
   "mood": {
     "notSet": "सेट नहीं",
@@ -354,7 +368,10 @@
     "deleteTagBody": "\"{{name}}\" हर नोट से हटा दिया जाएगा।",
     "tagName": "टैग नाम",
     "addTag": "टैग",
-    "writeSomething": "कुछ लिखें…"
+    "writeSomething": "कुछ लिखें…",
+    "unarchive": "संग्रह से निकालें",
+    "unarchiveNamed": "“{{name}}” को संग्रह से निकालें",
+    "deletedToast": "“{{title}}” हटाया गया।"
   },
   "budget": {
     "title": "बजट",
@@ -534,7 +551,19 @@
     "restartBody": "नई लेआउट दिशा लागू करने के लिए LifeOS बंद करके फिर खोलें।",
     "rtlRestartNote": "اردو या العربية चुनने पर LifeOS दाएँ-से-बाएँ लेआउट में बदल जाएगा और ऐप फिर शुरू होगा।",
     "setUpBiometricsTitle": "पहले बायोमेट्रिक्स सेट करें",
-    "setUpBiometricsBody": "अपनी डिवाइस सेटिंग्स में Face ID या फ़िंगरप्रिंट जोड़ें, फिर यहाँ ऐप लॉक चालू करें।"
+    "setUpBiometricsBody": "अपनी डिवाइस सेटिंग्स में Face ID या फ़िंगरप्रिंट जोड़ें, फिर यहाँ ऐप लॉक चालू करें।",
+    "importData": "बैकअप से पुनर्स्थापित करें",
+    "importSubtitle": "निर्यात की गई फ़ाइल वापस मिलाएँ — नया कुछ नहीं मिटेगा",
+    "importing": "पुनर्स्थापित हो रहा है…",
+    "importTitle": "बैकअप से पुनर्स्थापित करें",
+    "importBody": "कोई lifeos-export JSON फ़ाइल चुनें। समान id वाली प्रविष्टियाँ उससे ताज़ा होंगी; उसके बाद बनाई गई चीज़ें अछूती रहेंगी।",
+    "chooseFile": "फ़ाइल चुनें",
+    "importDone": "{{rows}} रिकॉर्ड पुनर्स्थापित हुए।",
+    "import_unreadable": "वह फ़ाइल पढ़ी नहीं जा सकी।",
+    "import_notabackup": "यह LifeOS बैकअप फ़ाइल नहीं है।",
+    "import_failed": "पुनर्स्थापना विफल रही और कुछ नहीं बदला।",
+    "importMissingMedia_one": "{{count}} मीडिया फ़ाइल गायब है — बैकअप में मीडिया संग्रहीत नहीं होता।",
+    "importMissingMedia_other": "{{count}} मीडिया फ़ाइलें गायब हैं — बैकअप में मीडिया संग्रहीत नहीं होता।"
   },
   "auth": {
     "welcomeBack": "वापसी पर स्वागत है",
@@ -915,7 +944,8 @@
     "dragToMove": "हिलाने के लिए खींचें",
     "openNowPlaying": "अभी चल रहा है खोलें",
     "nextTrack": "अगला ट्रैक",
-    "hidePlayer": "प्लेयर छिपाएँ"
+    "hidePlayer": "प्लेयर छिपाएँ",
+    "playHint": "यह गाना चलाता है"
   },
   "albumCategory": {
     "gym": "जिम प्रगति",
@@ -1254,7 +1284,8 @@
     "buildConfig": "बिल्ड कॉन्फ़िगरेशन",
     "notConfiguredTitle": "इस बिल्ड में Supabase क्रेडेंशियल नहीं हैं",
     "notConfiguredBody": "खाते और क्लाउड सिंक बंद हैं — ऑफ़लाइन सब कुछ फिर भी चलता है। EAS बिल्ड के लिए ये मान उस एनवायरनमेंट में सेट करें जिसे बिल्ड प्रोफ़ाइल उपयोग करती है, फिर दोबारा बिल्ड करें।",
-    "envMissing": "अनुपस्थित"
+    "envMissing": "अनुपस्थित",
+    "failedToast": "सिंक पूरा नहीं हुआ। आपका डेटा इस डिवाइस पर सुरक्षित है।"
   },
   "syncModule": {
     "tasks": "कार्य",
@@ -1349,7 +1380,10 @@
       "expense_edited": "{{actor}} ने {{description}} बदला",
       "expense_deleted": "{{actor}} ने {{description}} हटाया",
       "settlement_added": "{{actor}} ने भुगतान दर्ज किया",
-      "settlement_deleted": "{{actor}} ने भुगतान हटाया"
+      "settlement_deleted": "{{actor}} ने भुगतान हटाया",
+      "group_deleted": "{{actor}} ने समूह हटाया",
+      "member_removed": "{{actor}} ने {{name}} को हटाया",
+      "group_renamed": "{{actor}} ने समूह का नाम बदला"
     },
     "notifyTitle": "आपके समूह में {{actor}}",
     "notifySettlement": "भुगतान दर्ज किया",
@@ -1373,6 +1407,57 @@
       "already_accepted": "यह निमंत्रण पहले इस्तेमाल हो चुका है।",
       "member_unavailable": "समूह में आपकी जगह अब उपलब्ध नहीं है। दोबारा जोड़ने को कहें।",
       "error": "कुछ गड़बड़ हुई। थोड़ी देर बाद कोशिश करें।"
-    }
+    },
+    "groupCreated": "“{{name}}” बन गया।",
+    "currencyNote": "यह समूह {{currency}} में हिसाब करता है।",
+    "notConfiguredTitle": "साझा समूहों के लिए क्लाउड सेटअप चाहिए",
+    "expenseCount_one": "{{count}} खर्च",
+    "expenseCount_other": "{{count}} खर्च",
+    "expenseAdded": "खर्च जोड़ा गया।",
+    "expenseDeleted": "खर्च हटाया गया।",
+    "memberRemoved": "{{name}} हटाए गए।",
+    "settlementRecorded": "भुगतान दर्ज हुआ।",
+    "undo": "पूर्ववत करें",
+    "inviteLinkCopied": "आमंत्रण लिंक साझा करने के लिए तैयार है।",
+    "refresh": "ताज़ा करें",
+    "settleEmptyHint": "पहले कोई खर्च जोड़ें — अभी हिसाब करने को कुछ नहीं है।",
+    "date": "तारीख़",
+    "memberAdded": "{{name}} समूह में जोड़े गए।",
+    "mode": {
+      "equal": "बराबर",
+      "exact": "सटीक"
+    },
+    "splitBalanced": "हिस्से पूरे मिल रहे हैं।",
+    "splitRemaining": "{{amount}} अभी बाँटना बाकी",
+    "splitOver": "{{amount}} कुल से ज़्यादा",
+    "spreadRemainder": "बाकी बाँटें",
+    "settleA11y": "दर्ज करें कि {{from}} ने {{to}} को {{amount}} दिए",
+    "deleteGroup": "समूह हटाएँ",
+    "deleteGroupTitle": "“{{name}}” हटाएँ?",
+    "deleteGroupBody": "यह समूह सभी सदस्यों के लिए हट जाएगा। खर्च और हिसाब मिटते नहीं, सुरक्षित रहते हैं — पर समूह अब किसी को नहीं दिखेगा।",
+    "groupDeleted": "“{{name}}” हटा दिया गया।",
+    "leave": "समूह छोड़ें",
+    "leaveTitle": "यह समूह छोड़ें?",
+    "leaveBody": "आपके पुराने खर्च समूह में बने रहेंगे ताकि बाकी सबका हिसाब सही रहे। बस नए खर्चों में आप शामिल नहीं होंगे।",
+    "leaveUnsettledBody": "आपका हिसाब अभी बराबर नहीं है। आपके पुराने खर्च और लेन-देन समूह में बने रहेंगे — छोड़ने से वे ख़त्म नहीं होते।",
+    "leftGroup": "आपने समूह छोड़ दिया।",
+    "removedMember": "अब समूह में नहीं",
+    "removeMemberUnsettledBody": "{{name}} का हिसाब बराबर नहीं है — {{amount}} बकाया। उनके पुराने खर्च और हिसाब समूह में बने रहेंगे; बस नए खर्चों में शामिल नहीं होंगे।",
+    "formerMembers": "अब समूह में नहीं",
+    "formerMembersHint": "उनके खर्च हिसाब में बने रहते हैं, ताकि बाकी सबका हिसाब सही रहे।",
+    "removedSettled": "हिसाब बराबर",
+    "removedOutstanding": "{{amount}} बकाया"
+  },
+  "errors": {
+    "offline": "आप ऑफ़लाइन लग रहे हैं। इसके लिए कनेक्शन चाहिए — वापस आते ही यह हो जाएगा।",
+    "not-configured": "इस बिल्ड में कोई क्लाउड खाता सेट नहीं है, इसलिए साझा सुविधाएँ उपलब्ध नहीं हैं। बाकी सब ऑफ़लाइन काम करता रहेगा।",
+    "signed-out": "आपका सत्र समाप्त हो गया है। जारी रखने के लिए फिर से साइन इन करें।",
+    "backend-missing": "इस खाते का क्लाउड सेटअप अधूरा है, इसलिए साझा सुविधाएँ अभी नहीं चल सकतीं।",
+    "permission": "आपके पास इसकी पहुँच नहीं है। यदि किसी ने इसे आपके साथ साझा किया था, तो उन्हें दोबारा जोड़ने को कहें।",
+    "conflict": "यह पहले से मौजूद है।",
+    "server": "हमारी ओर से कुछ गड़बड़ हुई। इसे दर्ज कर लिया गया है — थोड़ी देर में फिर कोशिश करें।",
+    "unknown": "यह नहीं हो सका। कृपया फिर कोशिश करें।",
+    "title": "यह नहीं हो सका",
+    "detail": "विवरण: {{code}}"
   }
 }

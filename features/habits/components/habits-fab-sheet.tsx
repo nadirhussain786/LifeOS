@@ -43,6 +43,7 @@ export const HabitsFabSheet = forwardRef<BottomSheetModal>(function HabitsFabShe
     >
       <BottomSheetView className="gap-1 px-4 pb-8 pt-2">
         <Pressable
+          accessibilityRole="button"
           onPress={() => go('/habit/new')}
           className="flex-row items-center gap-3 rounded-md px-2 py-3 active:bg-muted"
         >
@@ -50,6 +51,7 @@ export const HabitsFabSheet = forwardRef<BottomSheetModal>(function HabitsFabShe
           <Text>{t('habits.newHabit')}</Text>
         </Pressable>
         <Pressable
+          accessibilityRole="button"
           onPress={() => go('/routine/new')}
           className="flex-row items-center gap-3 rounded-md px-2 py-3 active:bg-muted"
         >

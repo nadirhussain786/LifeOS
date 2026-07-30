@@ -44,6 +44,7 @@ export function VoiceNoteRecorder({ onRecorded }: Props) {
 
   return (
     <Pressable
+      accessibilityRole="button"
       onPress={state.isRecording ? stop : start}
       className="flex-row items-center gap-2 rounded-full border border-border px-3 py-2"
     >

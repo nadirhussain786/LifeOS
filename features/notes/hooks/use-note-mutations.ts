@@ -8,6 +8,7 @@ import {
   deleteNote,
   deleteNoteAttachment,
   getNote,
+  restoreNote,
   setTagsForNote,
   unarchiveNote,
   updateNote,
@@ -48,6 +49,16 @@ export function useNoteMutations() {
       const note = getNote(id);
       deleteNote(id);
       if (note) await cancelNoteReminder(note);
+    },
+    onSuccess: invalidate,
+  });
+
+  /** Puts back a note the user just deleted, from the undo toast. */
+  const restore = useMutation({
+    mutationFn: async (id: string) => {
+      restoreNote(id);
+      const note = getNote(id);
+      if (note) await syncNoteReminder(note);
     },
     onSuccess: invalidate,
   });
@@ -97,5 +108,15 @@ export function useNoteMutations() {
       }),
   });
 
-  return { create, update, remove, archive, unarchive, setTags, attach, removeAttachment };
+  return {
+    create,
+    update,
+    remove,
+    restore,
+    archive,
+    unarchive,
+    setTags,
+    attach,
+    removeAttachment,
+  };
 }

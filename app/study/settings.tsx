@@ -30,6 +30,7 @@ function Stepper({ label, value, onDecrease, onIncrease }: StepperProps) {
       <Text className="font-sora-medium text-foreground">{label}</Text>
       <View className="flex-row items-center gap-4">
         <Pressable
+          accessibilityRole="button"
           onPress={onDecrease}
           hitSlop={6}
           className="h-9 w-9 items-center justify-center rounded-xl bg-muted"
@@ -43,6 +44,7 @@ function Stepper({ label, value, onDecrease, onIncrease }: StepperProps) {
           {value}
         </Text>
         <Pressable
+          accessibilityRole="button"
           onPress={onIncrease}
           hitSlop={6}
           className="h-9 w-9 items-center justify-center rounded-xl"
@@ -149,7 +151,11 @@ export default function StudySettingsScreen() {
                 style={{ backgroundColor: subject.colorToken }}
               />
               <Text className="flex-1 font-sora-medium text-foreground">{subject.name}</Text>
-              <Pressable onPress={() => confirmRemove(subject.id, subject.name)} hitSlop={8}>
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => confirmRemove(subject.id, subject.name)}
+                hitSlop={8}
+              >
                 <Trash2 size={17} color={colors[scheme].mutedForeground} />
               </Pressable>
             </View>
@@ -165,7 +171,7 @@ export default function StudySettingsScreen() {
               returnKeyType="done"
               className="flex-1 text-foreground"
             />
-            <Pressable onPress={addNewSubject} hitSlop={8}>
+            <Pressable accessibilityRole="button" onPress={addNewSubject} hitSlop={8}>
               <Plus size={18} color={STUDY_TINT} />
             </Pressable>
           </View>

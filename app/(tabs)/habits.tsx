@@ -1,9 +1,9 @@
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import { Repeat, Search } from 'lucide-react-native';
-import { useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { TextInput, View } from 'react-native';
+import { RefreshControl, TextInput, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
@@ -46,6 +46,15 @@ export default function HabitsScreen() {
   const { data: routines = [] } = useRoutines();
   const { data: categories = [] } = useHabitCategories();
   const { logToday, unlogToday, logDate, archive, remove } = useHabitMutations();
+
+  // Pull-to-refresh existed on the dashboard and nowhere else, so the reflex
+  // gesture did nothing on every list in the app.
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  }, [refetch]);
 
   const progress = useMemo(() => {
     const scheduledToday = habits.filter((habit) => habit.todayStatus !== 'not_scheduled');
@@ -160,6 +169,15 @@ export default function HabitsScreen() {
                 : item.habit.id
           }
           contentContainerStyle={{ paddingTop: 4, paddingBottom: 120 }}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              // Without an explicit tint the spinner is invisible on dark.
+              tintColor={colors[scheme].mutedForeground}
+              colors={[colors[scheme].accent]}
+            />
+          }
           renderItem={({ item }) => {
             if (item.type === 'header')
               return (

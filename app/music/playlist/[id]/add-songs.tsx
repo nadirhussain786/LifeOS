@@ -46,6 +46,7 @@ export default function AddSongsToPlaylistScreen() {
         className="flex-row items-center justify-between px-4 pb-2"
       >
         <Pressable
+          accessibilityRole="button"
           onPress={() => router.back()}
           hitSlop={10}
           className="h-8 w-8 items-center justify-center rounded-full border border-border bg-surface"
@@ -74,6 +75,7 @@ export default function AddSongsToPlaylistScreen() {
             const inPlaylist = memberIds.has(item.id);
             return (
               <Pressable
+                accessibilityRole="button"
                 onPress={() => {
                   Haptics.selectionAsync();
                   if (inPlaylist) removeSong.mutate({ playlistId: playlist.id, songId: item.id });

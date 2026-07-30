@@ -85,6 +85,7 @@ export default function TaskDetailScreen() {
           <View className="flex-row gap-4">
             {task.dueDate && (
               <Pressable
+                accessibilityRole="button"
                 onPress={() => router.push(`/timeline/${toDateKey(new Date(task.dueDate!))}`)}
                 hitSlop={8}
               >
@@ -92,6 +93,7 @@ export default function TaskDetailScreen() {
               </Pressable>
             )}
             <Pressable
+              accessibilityRole="button"
               onPress={() => {
                 archive.mutate(task.id);
                 router.back();
@@ -101,6 +103,7 @@ export default function TaskDetailScreen() {
               <Archive size={20} color={colors[scheme].foreground} />
             </Pressable>
             <Pressable
+              accessibilityRole="button"
               onPress={() => {
                 remove.mutate(task.id);
                 router.back();

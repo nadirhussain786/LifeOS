@@ -1,39 +1,56 @@
 /**
- * Raw color values mirrored from global.css HSL variables.
- * Use these only where NativeWind classNames can't reach (e.g. native
- * components like StatusBar, or navigation theme objects). Everywhere else,
- * prefer the Tailwind tokens (bg-background, text-foreground, etc).
+ * Raw color values for the places a NativeWind className can't reach — native
+ * components (StatusBar, RefreshControl), navigation theme objects, SVG charts,
+ * Reanimated worklets, gradient stops. Everywhere else, prefer the Tailwind
+ * tokens (bg-background, text-foreground, …).
+ *
+ * These are now DERIVED from constants/design-tokens.ts rather than being a
+ * second, hand-maintained copy of the palette. They had drifted: this file said
+ * the light background was #ffffff and the dark one #121212, while
+ * design-tokens (and global.css, which the classNames actually resolve from)
+ * said #f8fbf9 and #0e1210. 137 files import this one and 65 import the other,
+ * so most screens were drawing native chrome from one palette and Tailwind
+ * chrome from the other — a mismatch that shows up as a faint seam wherever a
+ * hand-colored icon or sheet backdrop sits on a class-colored surface.
+ *
+ * Keeping the old key names means nothing had to be rewritten to fix it. New
+ * code should import from design-tokens directly; this shape is the bridge, not
+ * a second system.
  */
+
+import { colors as tokens } from '@/constants/design-tokens';
+
 export const colors = {
   light: {
-    background: '#ffffff',
-    foreground: '#171717',
-    card: '#ffffff',
-    primary: '#171717',
-    primaryForeground: '#ffffff',
-    muted: '#f5f5f5',
-    mutedForeground: '#737373',
-    border: '#e5e5e5',
-    destructive: '#dc2828',
-    success: '#16a34a',
-    successForeground: '#ffffff',
-    accent: '#188b61',
-    accentForeground: '#ffffff',
+    background: tokens.light.background,
+    foreground: tokens.light.foreground,
+    card: tokens.light.card,
+    primary: tokens.light.primary,
+    primaryForeground: tokens.light.primaryForeground,
+    /** The sunken/grouped surface — `surface` in the design tokens. */
+    muted: tokens.light.surface,
+    mutedForeground: tokens.light.mutedForeground,
+    border: tokens.light.border,
+    destructive: tokens.light.error,
+    success: tokens.light.success,
+    successForeground: tokens.light.successForeground,
+    accent: tokens.light.accent,
+    accentForeground: tokens.light.accentForeground,
   },
   dark: {
-    background: '#121212',
-    foreground: '#f5f5f5',
-    card: '#1a1a1a',
-    primary: '#f5f5f5',
-    primaryForeground: '#171717',
-    muted: '#262626',
-    mutedForeground: '#a3a3a3',
-    border: '#333333',
-    destructive: '#a62626',
-    success: '#47d07f',
-    successForeground: '#0f241c',
-    accent: '#47d19f',
-    accentForeground: '#0f241c',
+    background: tokens.dark.background,
+    foreground: tokens.dark.foreground,
+    card: tokens.dark.card,
+    primary: tokens.dark.primary,
+    primaryForeground: tokens.dark.primaryForeground,
+    muted: tokens.dark.surface,
+    mutedForeground: tokens.dark.mutedForeground,
+    border: tokens.dark.border,
+    destructive: tokens.dark.error,
+    success: tokens.dark.success,
+    successForeground: tokens.dark.successForeground,
+    accent: tokens.dark.accent,
+    accentForeground: tokens.dark.accentForeground,
   },
 } as const;
 
@@ -41,10 +58,13 @@ export type ThemeName = keyof typeof colors;
 
 /**
  * Small curated palette for user-created content color-coding (task
- * categories, and later note folders/calendar colors) — a deliberate,
- * scoped exception to the app's own grayscale chrome, not a general accent
- * palette. Same set in both themes; these are chosen to read clearly on
- * both light and dark backgrounds.
+ * categories, note folders, calendar colors) — a deliberate, scoped exception
+ * to the app's own grayscale chrome, not a general accent palette.
+ *
+ * These are SWATCHES: chosen to be told apart as fills at swatch size. Several
+ * are far too light to read as text on a white card (yellow is 1.92:1), so any
+ * screen rendering a category name in its color must pass it through
+ * `readableTint()` from design-tokens first.
  */
 export const categoryColorPalette = [
   '#f97316', // orange
@@ -61,6 +81,8 @@ export const categoryColorPalette = [
  * deliberately distinct from the brand accent so "urgent" always reads as
  * urgent regardless of theme. High reuses the app's existing destructive
  * red so "urgent" and "destructive" share one consistent red language.
+ *
+ * As with the palette above: fills as-is, text via `readableTint()`.
  */
 export const priorityColors = {
   low: '#0ea5e9',
@@ -72,7 +94,12 @@ export const priorityColors = {
  * "Done today" for habits, deliberately not the brand accent — the accent is
  * already the app's generic CTA color (buttons, FAB, pin), so reusing it here
  * would make a completed habit read as "tap me" instead of "already done."
- * Same green as the category palette's "green" swatch, promoted to a named
- * semantic token since habit completion needs it in more than one component.
  */
 export const habitDoneColor = '#22c55e';
+
+/**
+ * The streak flame. Amber reads as warmth and momentum, but at 2.06:1 on the
+ * light ground it was the least legible text in the app — so the fill keeps the
+ * amber and the label gets a darkened form of it.
+ */
+export const streakColor = { light: '#b45309', dark: '#fbbf24' } as const;

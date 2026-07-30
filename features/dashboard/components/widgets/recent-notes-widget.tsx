@@ -63,7 +63,11 @@ export function RecentNotesWidget() {
       ) : (
         <View className="gap-3">
           {data.notes.map((note) => (
-            <Pressable key={note.id} onPress={() => router.push(`/note/${note.id}`)}>
+            <Pressable
+              accessibilityRole="button"
+              key={note.id}
+              onPress={() => router.push(`/note/${note.id}`)}
+            >
               <NoteRow title={note.title} snippet={note.snippet} updatedAt={note.updatedAt} />
             </Pressable>
           ))}

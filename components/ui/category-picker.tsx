@@ -81,6 +81,7 @@ export function CategoryPicker({
       contentContainerClassName="items-center gap-2"
     >
       <Pressable
+        accessibilityRole="button"
         onPress={() => select(null)}
         className={cn(
           'rounded-full border px-3 py-1.5',
@@ -97,6 +98,7 @@ export function CategoryPicker({
         const isDeleted = !!category.deletedAt;
         return (
           <Pressable
+            accessibilityRole="button"
             key={category.id}
             onPress={() => select(category.id)}
             onLongPress={() => !isDeleted && confirmDelete(category)}
@@ -140,6 +142,7 @@ export function CategoryPicker({
         </View>
       ) : (
         <Pressable
+          accessibilityRole="button"
           onPress={() => setIsAdding(true)}
           className="flex-row items-center gap-1 rounded-full border border-dashed border-border px-3 py-1.5"
         >

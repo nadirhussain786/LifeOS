@@ -65,6 +65,7 @@ export default function AlbumDetailScreen() {
         right={
           <View className="flex-row items-center gap-4">
             <Pressable
+              accessibilityRole="button"
               onPress={() => setTimeline((t) => !t)}
               hitSlop={8}
               accessibilityLabel={t('gallery.toggleTimeline')}
@@ -75,10 +76,16 @@ export default function AlbumDetailScreen() {
                 <CalendarClock size={20} color={colors[scheme].foreground} />
               )}
             </Pressable>
-            <Pressable onPress={addPhotos} hitSlop={8} accessibilityLabel={t('gallery.addPhotos')}>
+            <Pressable
+              accessibilityRole="button"
+              onPress={addPhotos}
+              hitSlop={8}
+              accessibilityLabel={t('gallery.addPhotos')}
+            >
               <ImagePlus size={20} color={colors[scheme].foreground} />
             </Pressable>
             <Pressable
+              accessibilityRole="button"
               onPress={confirmDelete}
               hitSlop={8}
               accessibilityLabel={t('gallery.deleteAlbum')}
@@ -107,6 +114,7 @@ export default function AlbumDetailScreen() {
           {photos.length > 1 && (
             <View className="mb-4 flex-row gap-2.5">
               <Pressable
+                accessibilityRole="button"
                 onPress={() => router.push(`/gallery/compare?album=${album.id}`)}
                 className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl py-3"
                 style={{ backgroundColor: alpha(tint, 0.12) }}
@@ -117,6 +125,7 @@ export default function AlbumDetailScreen() {
                 </Text>
               </Pressable>
               <Pressable
+                accessibilityRole="button"
                 onPress={() => router.push(`/gallery/story/all?album=${album.id}`)}
                 className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl border border-border py-3"
               >

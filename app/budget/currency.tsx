@@ -72,6 +72,7 @@ export default function CurrencyPickerScreen() {
           const selected = item.code === current;
           return (
             <Pressable
+              accessibilityRole="button"
               onPress={() => pick(item.code)}
               className="flex-row items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3"
               style={selected ? { borderColor: BUDGET_TINT } : undefined}

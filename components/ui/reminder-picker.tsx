@@ -43,7 +43,7 @@ export function ReminderPicker({ value, onChange }: Props) {
       {value !== null && (
         <View className="flex-row items-center justify-between">
           <Text variant="muted">{format(value, "EEE, MMM d 'at' h:mm a")}</Text>
-          <Pressable onPress={() => onChange(null)} hitSlop={8}>
+          <Pressable accessibilityRole="button" onPress={() => onChange(null)} hitSlop={8}>
             <Text
               variant="caption"
               className="font-sora-medium"
@@ -57,6 +57,7 @@ export function ReminderPicker({ value, onChange }: Props) {
       <View className="flex-row flex-wrap gap-2">
         {QUICK_PICKS.map((option) => (
           <Pressable
+            accessibilityRole="button"
             key={option.labelKey}
             onPress={() => onChange(option.getDate())}
             className="rounded-full border border-border px-3 py-1.5"

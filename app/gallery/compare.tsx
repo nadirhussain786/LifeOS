@@ -6,7 +6,7 @@ import * as Sharing from 'expo-sharing';
 import { Bookmark, GitCompareArrows, Share2, Sparkles, TrendingUp } from 'lucide-react-native';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Dimensions, Image, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Dimensions, Image, Pressable, ScrollView, TextInput, View } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
 
 import { EmptyState } from '@/components/ui/empty-state';
@@ -20,6 +20,7 @@ import { usePhotos, usePhotosByAlbum } from '@/features/gallery/hooks/use-galler
 import { useGalleryMutations } from '@/features/gallery/hooks/use-gallery-mutations';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { alpha, tintGradient } from '@/lib/color';
+import { toast } from '@/lib/toast-store';
 
 const LAYOUT_OPTIONS = [
   { value: 'split' as const, labelKey: 'gallery.layoutSplit' },
@@ -102,10 +103,10 @@ export default function CompareScreen() {
           dialogTitle: t('gallery.shareDialogTitle'),
         });
       } else {
-        Alert.alert(t('gallery.sharingUnavailableTitle'), t('gallery.sharingUnavailableBody'));
+        toast.error(t('gallery.sharingUnavailableBody'));
       }
     } catch {
-      Alert.alert(t('gallery.couldNotShareTitle'), t('gallery.couldNotShareBody'));
+      toast.error(t('gallery.couldNotShareBody'));
     } finally {
       setSharing(false);
     }
@@ -117,12 +118,14 @@ export default function CompareScreen() {
       setSaving(true);
       const uri = await captureRef(cardRef, { format: 'png', quality: 1 });
       await saveComparison.mutateAsync({ tempUri: uri, caption, takenAt: after!.takenAt });
-      Alert.alert(t('gallery.savedToFeedTitle'), t('gallery.savedToFeedBody'), [
-        { text: t('gallery.viewInAll'), onPress: () => router.push('/gallery/all') },
-        { text: t('common.done'), style: 'cancel' },
-      ]);
+      // Was a two-button modal. The "view it" route is now an optional tap on a
+      // toast instead of a decision the user is forced to make.
+      toast.success(t('gallery.savedToFeedBody'), {
+        label: t('gallery.viewInAll'),
+        onPress: () => router.push('/gallery/all'),
+      });
     } catch {
-      Alert.alert(t('gallery.couldNotSaveTitle'), t('gallery.couldNotSaveBody'));
+      toast.error(t('gallery.couldNotSaveBody'));
     } finally {
       setSaving(false);
     }
@@ -432,6 +435,7 @@ export default function CompareScreen() {
               disabled={saving || sharing}
             />
             <Pressable
+              accessibilityRole="button"
               onPress={share}
               disabled={sharing || saving}
               className="flex-row items-center justify-center gap-2 rounded-2xl border border-border py-3.5"
@@ -452,6 +456,7 @@ export default function CompareScreen() {
             const isActive = active === slot;
             return (
               <Pressable
+                accessibilityRole="button"
                 key={slot}
                 onPress={() => setActive(slot)}
                 className="flex-1 items-center gap-1 rounded-2xl border p-2"
@@ -488,6 +493,7 @@ export default function CompareScreen() {
               const tile = (Dimensions.get('window').width - 32 - 4 * 3) / 4;
               return (
                 <Pressable
+                  accessibilityRole="button"
                   key={photo.id}
                   onPress={() => assign(photo.id)}
                   style={{ width: tile, height: tile }}

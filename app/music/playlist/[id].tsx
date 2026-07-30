@@ -100,6 +100,7 @@ export default function PlaylistDetailScreen() {
           <Text variant="muted">{t('music.songsCount', { count: songs.length })}</Text>
           <View className="flex-row items-center gap-4">
             <Pressable
+              accessibilityRole="button"
               onPress={() => router.push(`/music/playlist/${playlist.id}/add-songs`)}
               className="flex-row items-center gap-1.5"
             >
@@ -110,6 +111,7 @@ export default function PlaylistDetailScreen() {
             </Pressable>
             {songs.length > 0 && (
               <Pressable
+                accessibilityRole="button"
                 onPress={() => {
                   Haptics.selectionAsync();
                   playQueue(songs, 0);

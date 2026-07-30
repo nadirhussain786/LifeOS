@@ -126,6 +126,7 @@ export default function DebtDetailScreen() {
               </Text>
             </View>
             <Pressable
+              accessibilityRole="button"
               onPress={() => markReopened.mutate(debt.id)}
               className="flex-row items-center justify-center gap-2 rounded-2xl border border-border py-3"
             >

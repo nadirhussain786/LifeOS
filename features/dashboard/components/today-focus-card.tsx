@@ -13,6 +13,7 @@ import { useHabitRow, useReflect, useTodayTasks } from '@/features/dashboard/hoo
 import { useTodayWaterTotal } from '@/features/water-intake/hooks/use-water-intake';
 import { useWaterSettingsStore } from '@/features/water-intake/store/water-settings-store';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useReducedMotion } from '@/hooks/use-reduced-motion';
 
 /**
  * The dashboard's calm summary hero — the reference implementation of the
@@ -31,6 +32,7 @@ export function TodayFocusCard() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
   const { t } = useTranslation();
+  const reducedMotion = useReducedMotion();
 
   const { data: tasks } = useTodayTasks();
   const { data: habitRow } = useHabitRow();
@@ -57,7 +59,7 @@ export function TodayFocusCard() {
 
   return (
     <Animated.View
-      entering={FadeInDown.duration(320)}
+      entering={reducedMotion ? undefined : FadeInDown.duration(320)}
       className="gap-4 rounded-[28px] border border-border bg-card p-5"
       style={elevation.e2}
     >

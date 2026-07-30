@@ -40,7 +40,7 @@ export function WidgetCard({
           <Text variant="subheading">{title}</Text>
         </View>
         {actionLabel && onActionPress ? (
-          <Pressable onPress={onActionPress} hitSlop={8}>
+          <Pressable accessibilityRole="button" onPress={onActionPress} hitSlop={8}>
             <Text variant="caption" className="font-sora-semibold" style={{ color: accent }}>
               {actionLabel}
             </Text>

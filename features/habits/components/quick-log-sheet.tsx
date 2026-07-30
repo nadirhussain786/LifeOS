@@ -66,6 +66,7 @@ export const QuickLogSheet = forwardRef<BottomSheetModal, Props>(function QuickL
 
         <View className="flex-row items-center justify-center gap-4">
           <Pressable
+            accessibilityRole="button"
             onPress={() => adjust(-step)}
             className="h-11 w-11 items-center justify-center rounded-full border border-border"
           >
@@ -88,6 +89,7 @@ export const QuickLogSheet = forwardRef<BottomSheetModal, Props>(function QuickL
           </View>
 
           <Pressable
+            accessibilityRole="button"
             onPress={() => adjust(step)}
             className="h-11 w-11 items-center justify-center rounded-full border border-border"
           >

@@ -60,6 +60,7 @@ export function HabitRowWidget() {
         >
           {data.habits.map((habit) => (
             <Pressable
+              accessibilityRole="button"
               key={habit.id}
               onPress={() => toggleHabit(habit.id, habit.doneToday)}
               className="items-center gap-1.5"

@@ -129,6 +129,7 @@ export default function NewCalendarEventScreen() {
               />
             ) : (
               <Pressable
+                accessibilityRole="button"
                 onPress={() => setShowTimePicker(true)}
                 className="flex-row items-center gap-1.5 self-start rounded-full border border-border px-3 py-1.5"
               >
@@ -144,6 +145,7 @@ export default function NewCalendarEventScreen() {
                 const selected = durationMinutes === option.minutes;
                 return (
                   <Pressable
+                    accessibilityRole="button"
                     key={option.key}
                     onPress={() => {
                       Haptics.selectionAsync();
@@ -174,6 +176,7 @@ export default function NewCalendarEventScreen() {
                 const selected = swatch === colorToken;
                 return (
                   <Pressable
+                    accessibilityRole="button"
                     key={swatch}
                     onPress={() => {
                       Haptics.selectionAsync();
@@ -202,6 +205,7 @@ export default function NewCalendarEventScreen() {
                 const selected = reminderMinutesBefore === option.minutesBefore;
                 return (
                   <Pressable
+                    accessibilityRole="button"
                     key={option.key}
                     onPress={() => {
                       Haptics.selectionAsync();

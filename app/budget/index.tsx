@@ -105,6 +105,7 @@ export default function BudgetScreen() {
           {/* Month selector */}
           <View className="flex-row items-center justify-between">
             <Pressable
+              accessibilityRole="button"
               onPress={() => setAnchorTime(subMonths(anchor, 1).getTime())}
               hitSlop={8}
               className="h-9 w-9 items-center justify-center rounded-full bg-muted"
@@ -115,6 +116,7 @@ export default function BudgetScreen() {
               {format(anchor, 'MMMM yyyy')}
             </Text>
             <Pressable
+              accessibilityRole="button"
               onPress={() => !isCurrentMonth && setAnchorTime(addMonths(anchor, 1).getTime())}
               hitSlop={8}
               className="h-9 w-9 items-center justify-center rounded-full bg-muted"
@@ -188,6 +190,7 @@ export default function BudgetScreen() {
 
           {/* Borrow & Lend */}
           <Pressable
+            accessibilityRole="button"
             onPress={() => router.push('/budget/debts')}
             className="flex-row items-center gap-3 rounded-2xl border border-border bg-card p-4"
           >
@@ -259,6 +262,7 @@ export default function BudgetScreen() {
             <View className="flex-row items-center justify-between">
               <Text variant="subheading">{t('budget.savingsGoals')}</Text>
               <Pressable
+                accessibilityRole="button"
                 onPress={() => router.push('/budget/savings/new')}
                 hitSlop={8}
                 className="flex-row items-center gap-1"
@@ -275,6 +279,7 @@ export default function BudgetScreen() {
             </View>
             {savingsGoals.length === 0 ? (
               <Pressable
+                accessibilityRole="button"
                 onPress={() => router.push('/budget/savings/new')}
                 className="flex-row items-center gap-3 rounded-2xl border border-dashed border-border p-4"
               >

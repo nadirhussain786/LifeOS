@@ -86,6 +86,7 @@ export function WaterIntakeWidget() {
               </Text>
             </Animated.View>
             <Pressable
+              accessibilityRole="button"
               onPress={() => router.push('/water-intake/settings')}
               hitSlop={8}
               className="h-8 w-8 items-center justify-center rounded-full border border-border bg-surface"
@@ -99,6 +100,7 @@ export function WaterIntakeWidget() {
               const filled = index < filledGlasses;
               return (
                 <Pressable
+                  accessibilityRole="button"
                   key={index}
                   onPress={() => tapGlass(index)}
                   hitSlop={4}
@@ -122,6 +124,7 @@ export function WaterIntakeWidget() {
           <View className="flex-row gap-2">
             {QUICK_ADD_ML.map((ml) => (
               <Pressable
+                accessibilityRole="button"
                 key={ml}
                 onPress={() => quickAdd(ml)}
                 className="flex-1 items-center rounded-full border border-dashed border-border py-2"
@@ -134,6 +137,7 @@ export function WaterIntakeWidget() {
           </View>
 
           <Pressable
+            accessibilityRole="button"
             onPress={() => router.push('/water-intake/history')}
             className="flex-row items-center justify-center gap-1.5"
           >

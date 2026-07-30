@@ -1,9 +1,9 @@
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import { CheckCircle2, Search } from 'lucide-react-native';
-import { useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, TextInput, View } from 'react-native';
+import { Pressable, RefreshControl, TextInput, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -20,6 +20,7 @@ import { useTasks } from '@/features/tasks/hooks/use-tasks';
 import { groupTasksByDueDate } from '@/features/tasks/services/task-grouping';
 import { useTasksFilterStore } from '@/features/tasks/store/tasks-filter-store';
 import type { Task, TaskDueBucket, TaskListFilter } from '@/features/tasks/types/task.types';
+import { toast } from '@/lib/toast-store';
 
 type ListItem =
   | { type: 'header'; bucket: TaskDueBucket; labelKey: string; count: number }
@@ -39,7 +40,16 @@ export default function TasksScreen() {
 
   const { filter, setFilter, searchQuery, setSearchQuery } = useTasksFilterStore();
   const { data: tasks = [], isLoading, isError, refetch } = useTasks();
-  const { complete, reopen, archive, remove } = useTaskMutations();
+  const { complete, reopen, archive, remove, restore } = useTaskMutations();
+
+  // Pull-to-refresh existed on the dashboard and nowhere else, so the reflex
+  // gesture did nothing on every list in the app.
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  }, [refetch]);
 
   const bucketDotColor: Record<TaskDueBucket, string | undefined> = {
     overdue: colors[scheme].destructive,
@@ -87,6 +97,9 @@ export default function TasksScreen() {
               <Pressable
                 key={tab.value}
                 onPress={() => setFilter(tab.value)}
+                accessibilityRole="tab"
+                accessibilityState={{ selected }}
+                accessibilityLabel={t(tab.labelKey)}
                 className={
                   selected
                     ? 'flex-1 items-center rounded-full bg-primary py-2'
@@ -135,6 +148,15 @@ export default function TasksScreen() {
             item.type === 'header' ? `header-${item.labelKey}` : item.task.id
           }
           contentContainerStyle={{ paddingTop: 4, paddingBottom: 120 }}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              // Without an explicit tint the spinner is invisible on dark.
+              tintColor={colors[scheme].mutedForeground}
+              colors={[colors[scheme].accent]}
+            />
+          }
           renderItem={({ item }) =>
             item.type === 'header' ? (
               <ListSectionHeader
@@ -151,8 +173,27 @@ export default function TasksScreen() {
                     ? reopen.mutate(item.task.id)
                     : complete.mutate(item.task.id)
                 }
-                onArchive={() => archive.mutate(item.task.id)}
-                onDelete={() => remove.mutate(item.task.id)}
+                onArchive={() => {
+                  const { id, title } = item.task;
+                  archive.mutate(id, {
+                    onSuccess: () =>
+                      toast.undo(t('tasks.archivedToast', { title }), t('common.undo'), () =>
+                        reopen.mutate(id),
+                      ),
+                  });
+                }}
+                onDelete={() => {
+                  // Deletes are tombstones, so the row can come straight back.
+                  // An undo window beats a confirmation dialog here: dialogs get
+                  // dismissed reflexively, undo does not.
+                  const { id, title } = item.task;
+                  remove.mutate(id, {
+                    onSuccess: () =>
+                      toast.undo(t('tasks.deletedToast', { title }), t('common.undo'), () =>
+                        restore.mutate(id),
+                      ),
+                  });
+                }}
               />
             )
           }

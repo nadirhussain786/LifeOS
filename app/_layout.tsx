@@ -25,6 +25,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AnimatedSplash } from '@/components/animated-splash';
 import { ErrorBoundary } from '@/components/error-boundary';
+import { ToastHost } from '@/components/ui/toast';
 import { DevErrorBanner } from '@/components/dev/dev-error-banner';
 import { MiniPlayerBar } from '@/features/music/components/mini-player-bar';
 import { useNotificationNavigation } from '@/features/notifications/hooks/use-notification-navigation';
@@ -43,6 +44,7 @@ import { useAuthStore } from '@/features/auth/services/auth-store';
 import { useAuthGate } from '@/features/auth/hooks/use-auth-gate';
 import { useSplashStore } from '@/hooks/use-splash-store';
 import { useSyncTrigger } from '@/features/sync/hooks/use-sync';
+import { SyncStatusBridge } from '@/features/sync/components/sync-status-bridge';
 import { colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { configureAndroidChannels, configureNotificationHandler } from '@/lib/notifications';
@@ -230,6 +232,7 @@ export default function RootLayout() {
               </Stack>
               <AuthGate />
               <SyncTrigger />
+              <SyncStatusBridge />
               <WidgetSync />
               <LanguageBridge />
               <PushRegistrationBridge />
@@ -238,6 +241,9 @@ export default function RootLayout() {
               <MiniPlayerBar />
               <DevErrorBanner />
             </ErrorBoundary>
+            {/* Above the navigator so a toast raised by a delete outlives the
+                router.back() that immediately follows it. */}
+            <ToastHost />
             {/* On top of everything: the lock shield, then the cold-start splash. */}
             <AppLockOverlay />
             {!splashDone && (

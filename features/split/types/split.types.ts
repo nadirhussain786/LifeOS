@@ -33,6 +33,14 @@ export type GroupMember = {
   displayName: string | null;
   role: MemberRole;
   joinedAt: number | null;
+  /**
+   * Set when they were removed or left. The row is a tombstone, never deleted:
+   * their expenses, shares and settlements all point at it, and the arithmetic
+   * only balances while every party to it still resolves. Filtering these out
+   * of the balance computation is what made £75 disappear from a £100 dinner —
+   * see supabase/migrations/0008.
+   */
+  removedAt: number | null;
 };
 
 export type GroupExpense = {
@@ -71,9 +79,12 @@ export type Settlement = {
 
 export type ActivityAction =
   | 'group_created'
+  | 'group_deleted'
+  | 'group_renamed'
   | 'member_added'
   | 'member_joined'
   | 'member_left'
+  | 'member_removed'
   | 'expense_added'
   | 'expense_edited'
   | 'expense_deleted'

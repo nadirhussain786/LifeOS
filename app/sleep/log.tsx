@@ -166,6 +166,7 @@ export default function SleepLogScreen() {
         right={
           isEdit ? (
             <Pressable
+              accessibilityRole="button"
               onPress={confirmDelete}
               hitSlop={10}
               className="h-9 w-9 items-center justify-center"
@@ -197,6 +198,7 @@ export default function SleepLogScreen() {
             />
           ) : (
             <Pressable
+              accessibilityRole="button"
               onPress={() => setShowDatePicker(true)}
               className="rounded-lg border border-border bg-surface px-3 py-1.5"
             >
@@ -262,6 +264,7 @@ export default function SleepLogScreen() {
               const selected = fellAsleep === minutes;
               return (
                 <Pressable
+                  accessibilityRole="button"
                   key={minutes}
                   onPress={() => setFellAsleep(selected ? null : minutes)}
                   className={`rounded-full border px-3.5 py-2 ${selected ? 'border-sleep bg-sleep' : 'border-border'}`}

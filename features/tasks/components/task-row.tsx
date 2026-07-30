@@ -1,7 +1,7 @@
 import { format, isToday } from 'date-fns';
 import * as Haptics from 'expo-haptics';
 import { Archive, Check, Trash2 } from 'lucide-react-native';
-import { useEffect, useRef } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -43,7 +43,7 @@ function DueDateLabel({ task }: { task: Task }) {
   );
 }
 
-export function TaskRow({ task, onPress, onToggleComplete, onArchive, onDelete }: Props) {
+function TaskRowComponent({ task, onPress, onToggleComplete, onArchive, onDelete }: Props) {
   const scheme = useColorScheme() ?? 'light';
   const { t } = useTranslation();
   const isCompleted = task.status === 'completed';
@@ -86,15 +86,17 @@ export function TaskRow({ task, onPress, onToggleComplete, onArchive, onDelete }
       actions={
         <>
           <Pressable
+            accessibilityRole="button"
             onPress={onArchive}
-            accessibilityLabel={`Archive "${task.title}"`}
+            accessibilityLabel={t('common.archiveNamed', { name: task.title })}
             className="flex-1 items-center justify-center bg-secondary"
           >
             <Archive color={colors[scheme].foreground} size={18} />
           </Pressable>
           <Pressable
+            accessibilityRole="button"
             onPress={onDelete}
-            accessibilityLabel={`Delete "${task.title}"`}
+            accessibilityLabel={t('common.deleteNamed', { name: task.title })}
             className="flex-1 items-center justify-center bg-destructive"
           >
             <Trash2 color={colors[scheme].primaryForeground} size={18} />
@@ -102,7 +104,11 @@ export function TaskRow({ task, onPress, onToggleComplete, onArchive, onDelete }
         </>
       }
     >
-      <Pressable onPress={onPress} className="flex-row items-center gap-3 px-4 py-3.5">
+      <Pressable
+        accessibilityRole="button"
+        onPress={onPress}
+        className="flex-row items-center gap-3 px-4 py-3.5"
+      >
         {accentColor && (
           <View
             className="absolute bottom-2 start-0 top-2 w-1 rounded-full"
@@ -114,9 +120,9 @@ export function TaskRow({ task, onPress, onToggleComplete, onArchive, onDelete }
           hitSlop={8}
           accessibilityRole="checkbox"
           accessibilityState={{ checked: isCompleted }}
-          accessibilityLabel={
-            isCompleted ? `Mark "${task.title}" as not done` : `Mark "${task.title}" as done`
-          }
+          accessibilityLabel={t(isCompleted ? 'common.markNotDone' : 'common.markDone', {
+            name: task.title,
+          })}
         >
           <Animated.View style={checkboxStyle}>
             <View
@@ -148,3 +154,9 @@ export function TaskRow({ task, onPress, onToggleComplete, onArchive, onDelete }
     </SwipeableRow>
   );
 }
+
+/**
+ * Memoised: these rows carry their own Reanimated hooks, and every keystroke in
+ * the list's search field re-rendered all of them.
+ */
+export const TaskRow = memo(TaskRowComponent);

@@ -58,16 +58,29 @@ export default function HabitDetailScreen() {
         tint={moduleTint('habit', scheme)}
         right={
           <View className="flex-row gap-4">
-            <Pressable onPress={() => router.push(`/timeline/${todayKey}`)} hitSlop={8}>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => router.push(`/timeline/${todayKey}`)}
+              hitSlop={8}
+            >
               <Clock3 size={19} color={colors[scheme].foreground} />
             </Pressable>
-            <Pressable onPress={() => router.push(`/habit/${habit.id}/edit`)} hitSlop={8}>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => router.push(`/habit/${habit.id}/edit`)}
+              hitSlop={8}
+            >
               <Pencil size={19} color={colors[scheme].foreground} />
             </Pressable>
-            <Pressable onPress={() => archive.mutate(habit.id)} hitSlop={8}>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => archive.mutate(habit.id)}
+              hitSlop={8}
+            >
               <Archive size={19} color={colors[scheme].foreground} />
             </Pressable>
             <Pressable
+              accessibilityRole="button"
               onPress={() => {
                 remove.mutate(habit.id);
                 router.back();
@@ -140,6 +153,7 @@ export default function HabitDetailScreen() {
 
         {isQuantified ? (
           <Pressable
+            accessibilityRole="button"
             onPress={() => quickLogRef.current?.present()}
             className="items-center rounded-2xl bg-success py-3.5"
           >
@@ -153,6 +167,7 @@ export default function HabitDetailScreen() {
           </Pressable>
         ) : (
           <Pressable
+            accessibilityRole="button"
             onPress={() =>
               todayLog ? unlogToday.mutate(habit.id) : logToday.mutate({ habitId: habit.id })
             }
@@ -177,6 +192,7 @@ export default function HabitDetailScreen() {
           {recentLogs.length === 0 && <Text variant="muted">{t('habits.noLogsYet')}</Text>}
           {recentLogs.map((log) => (
             <Pressable
+              accessibilityRole="button"
               key={log.id}
               onPress={() => router.push(`/timeline/${log.logDate}`)}
               className="flex-row items-center justify-between border-t border-border py-2.5"

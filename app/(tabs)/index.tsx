@@ -6,6 +6,7 @@ import { RefreshControl, ScrollView, View } from 'react-native';
 
 import { Fab } from '@/components/ui/fab';
 import { Text } from '@/components/ui/text';
+import { colors } from '@/constants/theme';
 import { WIDGET_REGISTRY } from '@/features/dashboard/config/widget-registry';
 import { DashboardHeader } from '@/features/dashboard/components/dashboard-header';
 import { FocusShortcuts } from '@/features/dashboard/components/focus-shortcuts';
@@ -13,6 +14,7 @@ import { QuickActionsSheet } from '@/features/dashboard/components/quick-actions
 import { TodayFocusCard } from '@/features/dashboard/components/today-focus-card';
 import { MoodTile, WaterTile } from '@/features/dashboard/components/wellbeing-tiles';
 import type { WidgetId } from '@/features/dashboard/types/dashboard.types';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 /**
  * Widgets are grouped into three calm, scannable zones rather than stacked as
@@ -51,6 +53,7 @@ function WidgetSection({ label, ids }: { label: string; ids: WidgetId[] }) {
 export default function DashboardScreen() {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
+  const scheme = useColorScheme() ?? 'light';
   const sheetRef = useRef<BottomSheetModal>(null);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -71,7 +74,15 @@ export default function DashboardScreen() {
       <ScrollView
         contentContainerClassName="gap-6 px-5 pb-28"
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            // Without an explicit tint the spinner is invisible on dark.
+            tintColor={colors[scheme].mutedForeground}
+            colors={[colors[scheme].accent]}
+          />
+        }
       >
         <DashboardHeader />
         <TodayFocusCard />

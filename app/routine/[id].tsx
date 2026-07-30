@@ -111,6 +111,7 @@ export default function RoutineDetailScreen() {
                     {habit.name}
                   </Text>
                   <Pressable
+                    accessibilityRole="button"
                     onPress={() => move(index, -1)}
                     disabled={index === 0}
                     hitSlop={8}
@@ -119,6 +120,7 @@ export default function RoutineDetailScreen() {
                     <ChevronUp size={18} color={colors[scheme].mutedForeground} />
                   </Pressable>
                   <Pressable
+                    accessibilityRole="button"
                     onPress={() => move(index, 1)}
                     disabled={index === routine.habits.length - 1}
                     hitSlop={8}
@@ -127,6 +129,7 @@ export default function RoutineDetailScreen() {
                     <ChevronDown size={18} color={colors[scheme].mutedForeground} />
                   </Pressable>
                   <Pressable
+                    accessibilityRole="button"
                     onPress={() => removeHabit.mutate({ routineId: routine.id, habitId: habit.id })}
                     hitSlop={8}
                   >
@@ -148,6 +151,7 @@ export default function RoutineDetailScreen() {
             <View className="flex-row flex-wrap gap-2">
               {availableHabits.map((habit) => (
                 <Pressable
+                  accessibilityRole="button"
                   key={habit.id}
                   onPress={() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);

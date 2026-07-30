@@ -48,6 +48,7 @@ export default function TimelineScreen() {
 
       <View className="flex-row items-center justify-between px-5 pb-3 pt-1">
         <Pressable
+          accessibilityRole="button"
           onPress={() => goToDate(subDays(date, 1))}
           hitSlop={10}
           className="h-9 w-9 items-center justify-center"
@@ -56,6 +57,7 @@ export default function TimelineScreen() {
         </Pressable>
         <Text variant="subheading">{format(date, 'EEEE, MMM d')}</Text>
         <Pressable
+          accessibilityRole="button"
           onPress={() => goToDate(addDays(date, 1))}
           hitSlop={10}
           className="h-9 w-9 items-center justify-center"

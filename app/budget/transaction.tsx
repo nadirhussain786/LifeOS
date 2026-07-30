@@ -141,6 +141,7 @@ export default function TransactionScreen() {
         right={
           isEdit ? (
             <Pressable
+              accessibilityRole="button"
               onPress={confirmDelete}
               hitSlop={10}
               className="h-9 w-9 items-center justify-center"
@@ -196,6 +197,7 @@ export default function TransactionScreen() {
                   const selected = goal.id === savingsGoalId;
                   return (
                     <Pressable
+                      accessibilityRole="button"
                       key={goal.id}
                       onPress={() => setSavingsGoalId(selected ? null : goal.id)}
                       style={
@@ -257,6 +259,7 @@ export default function TransactionScreen() {
             />
           ) : (
             <Pressable
+              accessibilityRole="button"
               onPress={() => setShowDate(true)}
               className="rounded-lg bg-muted px-3 py-1.5"
             >

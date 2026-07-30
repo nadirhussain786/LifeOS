@@ -74,6 +74,7 @@ export function MoodMonthStrip({ monthAnchor, entries, onSelectDate }: Props) {
           return (
             <View key={dateKey} style={{ width: `${100 / 7}%` }} className="aspect-square p-0.5">
               <Pressable
+                accessibilityRole="button"
                 onPress={() => onSelectDate(dateKey)}
                 disabled={isFuture}
                 accessibilityLabel={format(day, 'MMMM d')}

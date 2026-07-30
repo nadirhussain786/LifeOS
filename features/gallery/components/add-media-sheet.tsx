@@ -112,12 +112,14 @@ export function AddMediaSheet({ visible, onClose, albumId }: Props) {
       statusBarTranslucent
     >
       <Pressable
+        accessibilityRole="button"
         className="flex-1"
         style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
         onPress={onClose}
       >
         <View className="flex-1 justify-end">
           <Pressable
+            accessibilityRole="button"
             onPress={(e) => e.stopPropagation()}
             style={{ paddingBottom: insets.bottom + 12 }}
             className="gap-2 rounded-t-3xl bg-card px-5 pt-3"
@@ -129,6 +131,7 @@ export function AddMediaSheet({ visible, onClose, albumId }: Props) {
             <View className="flex-row items-center justify-between pb-1">
               <Text variant="subheading">{t('gallery.addToProgress')}</Text>
               <Pressable
+                accessibilityRole="button"
                 onPress={onClose}
                 hitSlop={8}
                 className="h-8 w-8 items-center justify-center rounded-full border border-border bg-surface"
@@ -141,6 +144,7 @@ export function AddMediaSheet({ visible, onClose, albumId }: Props) {
               const Icon = option.icon;
               return (
                 <Pressable
+                  accessibilityRole="button"
                   key={option.key}
                   onPress={() => run(option)}
                   className="flex-row items-center gap-3.5 rounded-2xl border border-border p-3.5"

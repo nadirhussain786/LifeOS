@@ -111,6 +111,7 @@ export default function NoteDetailScreen() {
         right={
           <View className="flex-row gap-4">
             <Pressable
+              accessibilityRole="button"
               onPress={() => update.mutate({ id: note.id, input: { isPinned: !note.isPinned } })}
               hitSlop={8}
             >
@@ -121,6 +122,7 @@ export default function NoteDetailScreen() {
               />
             </Pressable>
             <Pressable
+              accessibilityRole="button"
               onPress={() =>
                 note.isArchived ? unarchive.mutate(note.id) : archive.mutate(note.id)
               }
@@ -133,6 +135,7 @@ export default function NoteDetailScreen() {
               )}
             </Pressable>
             <Pressable
+              accessibilityRole="button"
               onPress={() => {
                 remove.mutate(note.id);
                 router.back();

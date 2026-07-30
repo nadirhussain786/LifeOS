@@ -95,6 +95,7 @@ export default function GoalDetailScreen() {
         right={
           <View className="flex-row gap-4">
             <Pressable
+              accessibilityRole="button"
               onPress={() => router.push(`/goals/${goal.id}/edit`)}
               hitSlop={8}
               accessibilityLabel={t('common.edit')}
@@ -103,6 +104,7 @@ export default function GoalDetailScreen() {
             </Pressable>
             {!isCompleted && (
               <Pressable
+                accessibilityRole="button"
                 onPress={() => (mutations.archive.mutate(goal.id), router.back())}
                 hitSlop={8}
                 accessibilityLabel={t('common.archive')}
@@ -110,7 +112,12 @@ export default function GoalDetailScreen() {
                 <Archive size={19} color={colors[scheme].foreground} />
               </Pressable>
             )}
-            <Pressable onPress={confirmDelete} hitSlop={8} accessibilityLabel={t('common.delete')}>
+            <Pressable
+              accessibilityRole="button"
+              onPress={confirmDelete}
+              hitSlop={8}
+              accessibilityLabel={t('common.delete')}
+            >
               <Trash2 size={19} color={colors[scheme].destructive} />
             </Pressable>
           </View>
@@ -228,6 +235,7 @@ export default function GoalDetailScreen() {
               </Text>
             </View>
             <Pressable
+              accessibilityRole="button"
               onPress={() => mutations.reopen.mutate(goal.id)}
               className="flex-row items-center justify-center gap-1.5 rounded-xl border border-border py-3"
             >
@@ -363,6 +371,7 @@ export default function GoalDetailScreen() {
             />
           ) : (
             <Pressable
+              accessibilityRole="button"
               onPress={handleComplete}
               className="flex-row items-center justify-center gap-2 rounded-2xl border border-border py-4"
             >

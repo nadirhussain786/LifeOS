@@ -38,6 +38,7 @@ export function GoalDueDateField({ value, onChange }: Props) {
         />
       ) : (
         <Pressable
+          accessibilityRole="button"
           onPress={() => setShowPicker(true)}
           className="flex-row items-center gap-1.5 rounded-full border border-border px-3 py-1.5"
         >
@@ -50,6 +51,7 @@ export function GoalDueDateField({ value, onChange }: Props) {
 
       {value ? (
         <Pressable
+          accessibilityRole="button"
           onPress={() => onChange(null)}
           hitSlop={8}
           accessibilityLabel={t('goals.clearDate')}

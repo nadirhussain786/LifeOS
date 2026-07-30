@@ -173,6 +173,7 @@ export default function DebtFormScreen() {
               />
             ) : (
               <Pressable
+                accessibilityRole="button"
                 onPress={() => setShowDate(true)}
                 className="rounded-lg bg-muted px-3 py-1.5"
               >
@@ -183,6 +184,7 @@ export default function DebtFormScreen() {
             )}
             {dueDate != null && (
               <Pressable
+                accessibilityRole="button"
                 onPress={() => setDueDate(null)}
                 hitSlop={8}
                 className="h-6 w-6 items-center justify-center rounded-full bg-muted"
@@ -214,6 +216,7 @@ export default function DebtFormScreen() {
                 const selected = reminderDaysBefore === days;
                 return (
                   <Pressable
+                    accessibilityRole="button"
                     key={days ?? 'off'}
                     onPress={() => setReminderDaysBefore(days)}
                     style={

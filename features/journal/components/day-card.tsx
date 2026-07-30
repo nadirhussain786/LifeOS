@@ -23,6 +23,7 @@ export function DayCard({ entry, onPress }: Props) {
   return (
     <View style={styles.shadowWrap}>
       <Pressable
+        accessibilityRole="button"
         onPress={onPress}
         className="flex-row items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3.5"
       >

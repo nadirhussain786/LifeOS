@@ -109,6 +109,7 @@ export default function LoginScreen() {
         </View>
 
         <Pressable
+          accessibilityRole="button"
           onPress={() => {
             continueAsGuest();
             router.replace('/(tabs)');

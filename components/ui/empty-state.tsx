@@ -13,6 +13,7 @@ import Animated, {
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
+import { useReducedMotion } from '@/hooks/use-reduced-motion';
 
 type Props = {
   icon: LucideIcon;
@@ -26,11 +27,16 @@ type Props = {
 
 export function EmptyState({ icon: Icon, title, description, actionLabel, onAction, tint }: Props) {
   const scheme = useColorScheme() ?? 'light';
-  const scale = useSharedValue(0.7);
+  const reducedMotion = useReducedMotion();
+  const scale = useSharedValue(reducedMotion ? 1 : 0.7);
 
   useEffect(() => {
+    if (reducedMotion) {
+      scale.value = 1;
+      return;
+    }
     scale.value = withDelay(80, withSpring(1, { damping: 11, stiffness: 140 }));
-  }, [scale]);
+  }, [scale, reducedMotion]);
 
   const iconStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   const tintColor = tint ?? colors[scheme].accent;
@@ -45,7 +51,10 @@ export function EmptyState({ icon: Icon, title, description, actionLabel, onActi
           <Icon color={tintColor} size={28} strokeWidth={1.75} />
         </View>
       </Animated.View>
-      <Animated.View entering={FadeIn.delay(120).duration(300)} className="items-center gap-2">
+      <Animated.View
+        entering={reducedMotion ? undefined : FadeIn.delay(120).duration(300)}
+        className="items-center gap-2"
+      >
         <Text variant="heading" className="text-center">
           {title}
         </Text>

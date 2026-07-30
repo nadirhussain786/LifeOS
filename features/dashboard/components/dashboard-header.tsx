@@ -38,6 +38,7 @@ export function DashboardHeader() {
       </View>
       <View className="flex-row items-center gap-2">
         <Pressable
+          accessibilityRole="button"
           onPress={() => router.push('/notifications')}
           hitSlop={8}
           accessibilityLabel={t('settings.notifications')}
@@ -56,6 +57,7 @@ export function DashboardHeader() {
           )}
         </Pressable>
         <Pressable
+          accessibilityRole="button"
           onPress={() => router.push('/settings')}
           hitSlop={8}
           accessibilityLabel={t('settings.title')}

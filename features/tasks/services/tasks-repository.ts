@@ -163,6 +163,23 @@ export function deleteTask(id: string) {
     .run();
 }
 
+/**
+ * Puts a soft-deleted task back.
+ *
+ * Deletes here are tombstones, not destruction — `deletedAt` is set and the row
+ * stays — so undo is a matter of clearing it. `updatedAt` has to move again for
+ * the same reason the delete moved it: the sync push is `WHERE updated_at >
+ * cursor`, so a restore that didn't bump it would never reach the other devices
+ * and the task would come back locally and stay deleted everywhere else.
+ */
+export function restoreTask(id: string) {
+  getDb()
+    .update(tasks)
+    .set({ deletedAt: null, updatedAt: Date.now(), syncStatus: 'pending' })
+    .where(eq(tasks.id, id))
+    .run();
+}
+
 export function listCategories(): TaskCategory[] {
   return getDb()
     .select()

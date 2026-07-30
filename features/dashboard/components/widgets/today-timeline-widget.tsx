@@ -63,7 +63,12 @@ export function TodayTimelineWidget() {
               </Text>
             </View>
           ))}
-          <Pressable onPress={addEvent} className="flex-row items-center gap-1.5 pt-1" hitSlop={6}>
+          <Pressable
+            accessibilityRole="button"
+            onPress={addEvent}
+            className="flex-row items-center gap-1.5 pt-1"
+            hitSlop={6}
+          >
             <Plus size={13} color={colors[scheme].mutedForeground} />
             <Text variant="muted">{t('dashboard.addEvent')}</Text>
           </Pressable>

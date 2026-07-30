@@ -90,13 +90,19 @@ export default function PhotoDetailScreen() {
         right={
           <View className="flex-row items-center gap-4">
             <Pressable
+              accessibilityRole="button"
               onPress={() => toggleFavorite.mutate({ id: photo.id, isFavorite: !photo.isFavorite })}
               hitSlop={8}
               accessibilityLabel={t('gallery.favorite')}
             >
               <Heart size={22} color={tint} fill={photo.isFavorite ? tint : 'transparent'} />
             </Pressable>
-            <Pressable onPress={confirmDelete} hitSlop={8} accessibilityLabel={t('common.delete')}>
+            <Pressable
+              accessibilityRole="button"
+              onPress={confirmDelete}
+              hitSlop={8}
+              accessibilityLabel={t('common.delete')}
+            >
               <Trash2 size={20} color={colors[scheme].destructive} />
             </Pressable>
           </View>
@@ -147,6 +153,7 @@ export default function PhotoDetailScreen() {
               />
             ) : (
               <Pressable
+                accessibilityRole="button"
                 onPress={() => setShowDate(true)}
                 className="rounded-lg bg-surface px-3 py-1.5"
               >
@@ -187,6 +194,7 @@ export default function PhotoDetailScreen() {
             <View className="flex-row flex-wrap items-center gap-2">
               {tags.map((tag) => (
                 <Pressable
+                  accessibilityRole="button"
                   key={tag}
                   onPress={() => removeTag(tag)}
                   className="flex-row items-center gap-1 rounded-full border border-border bg-surface px-3 py-1.5"

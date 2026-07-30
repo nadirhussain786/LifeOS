@@ -29,6 +29,7 @@ export function SavingsGoalCard({ goal, currency, onPress, onAdd }: Props) {
           <Text className="font-sora-semibold text-foreground">{goal.name}</Text>
         </View>
         <Pressable
+          accessibilityRole="button"
           onPress={() => onAdd(goal)}
           hitSlop={8}
           className="h-8 w-8 items-center justify-center rounded-full"

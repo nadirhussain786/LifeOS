@@ -45,6 +45,7 @@ export default function ForgotPasswordScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <Pressable
+          accessibilityRole="button"
           onPress={() => router.back()}
           hitSlop={10}
           className="h-9 w-9 items-center justify-center rounded-full bg-muted"

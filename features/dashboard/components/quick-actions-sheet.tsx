@@ -85,6 +85,7 @@ export const QuickActionsSheet = forwardRef<BottomSheetModal>(
           </Text>
           {ACTIONS.map((action) => (
             <Pressable
+              accessibilityRole="button"
               key={action.labelKey}
               onPress={() => handleActionPress(action)}
               className="flex-row items-center gap-3 rounded-md px-2 py-3 active:bg-muted"

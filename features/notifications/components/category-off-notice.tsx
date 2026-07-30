@@ -36,6 +36,7 @@ export function CategoryOffNotice({ category }: { category: NotificationCategory
 
   return (
     <Pressable
+      accessibilityRole="button"
       onPress={() => router.push('/settings/notifications')}
       className="flex-row items-center gap-3 rounded-2xl border p-3.5"
       style={{ borderColor: theme.border, backgroundColor: theme.muted }}

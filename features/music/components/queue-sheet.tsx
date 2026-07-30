@@ -43,12 +43,14 @@ export function QueueSheet({ visible, onClose, queue, currentIndex, isPlaying, o
       statusBarTranslucent
     >
       <Pressable
+        accessibilityRole="button"
         className="flex-1"
         style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
         onPress={onClose}
       >
         <View className="flex-1 justify-end">
           <Pressable
+            accessibilityRole="button"
             onPress={(e) => e.stopPropagation()}
             style={{ paddingBottom: insets.bottom + 8, maxHeight: height * 0.7 }}
             className="rounded-t-3xl bg-card px-2 pt-3"
@@ -69,6 +71,7 @@ export function QueueSheet({ visible, onClose, queue, currentIndex, isPlaying, o
                 const isPast = index < currentIndex;
                 return (
                   <Pressable
+                    accessibilityRole="button"
                     key={`${song.id}-${index}`}
                     onPress={() => jump(index)}
                     className="flex-row items-center gap-3 rounded-2xl px-3 py-2.5"

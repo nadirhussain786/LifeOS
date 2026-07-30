@@ -272,6 +272,7 @@ export function MoodCheckin({
             const selected = reasons.has(reason);
             return (
               <Pressable
+                accessibilityRole="button"
                 key={reason}
                 onPress={() => {
                   Haptics.selectionAsync();

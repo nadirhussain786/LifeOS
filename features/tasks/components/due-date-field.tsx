@@ -65,6 +65,7 @@ export function DueDateField({ value, hasTime, onChange }: Props) {
         />
       ) : (
         <Pressable
+          accessibilityRole="button"
           onPress={() => setShowPicker(true)}
           className="flex-row items-center gap-1.5 rounded-full border border-border px-3 py-1.5"
         >
@@ -74,12 +75,13 @@ export function DueDateField({ value, hasTime, onChange }: Props) {
       )}
 
       {value ? (
-        <Pressable onPress={() => onChange(null, false)} hitSlop={8}>
+        <Pressable accessibilityRole="button" onPress={() => onChange(null, false)} hitSlop={8}>
           <X size={16} color={colors[scheme].mutedForeground} />
         </Pressable>
       ) : null}
 
       <Pressable
+        accessibilityRole="button"
         onPress={() => value && setShowTimePicker(true)}
         disabled={!value}
         className={cn(
@@ -94,7 +96,7 @@ export function DueDateField({ value, hasTime, onChange }: Props) {
       </Pressable>
 
       {hasTime ? (
-        <Pressable onPress={clearTime} hitSlop={8}>
+        <Pressable accessibilityRole="button" onPress={clearTime} hitSlop={8}>
           <X size={16} color={colors[scheme].mutedForeground} />
         </Pressable>
       ) : null}

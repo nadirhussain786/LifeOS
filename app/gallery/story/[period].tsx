@@ -170,6 +170,7 @@ export default function StoryPlayerScreen() {
         {/* Tap zones: left third = prev, right = next; hold to pause */}
         <View style={{ position: 'absolute', inset: 0, flexDirection: 'row' }}>
           <Pressable
+            accessibilityRole="button"
             style={{ width: '32%' }}
             onPress={goPrev}
             onLongPress={() => setPaused(true)}
@@ -177,6 +178,7 @@ export default function StoryPlayerScreen() {
             delayLongPress={180}
           />
           <Pressable
+            accessibilityRole="button"
             style={{ flex: 1 }}
             onPress={goNext}
             onLongPress={() => setPaused(true)}
@@ -210,6 +212,7 @@ export default function StoryPlayerScreen() {
               {format(current.takenAt, 'EEEE, MMM d, yyyy')}
             </Text>
             <Pressable
+              accessibilityRole="button"
               onPress={() => router.back()}
               hitSlop={10}
               accessibilityLabel={t('common.close')}

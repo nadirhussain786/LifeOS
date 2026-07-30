@@ -79,6 +79,7 @@ export default function SleepSettingsScreen() {
           <Text variant="micro">{t('sleep.nightlyGoal')}</Text>
           <View className="flex-row items-center gap-6">
             <Pressable
+              accessibilityRole="button"
               onPress={() => adjust(-STEP)}
               className="h-12 w-12 items-center justify-center rounded-2xl border border-border bg-surface"
               accessibilityLabel={t('sleep.decreaseGoal')}
@@ -92,6 +93,7 @@ export default function SleepSettingsScreen() {
               {formatDuration(goal)}
             </Text>
             <Pressable
+              accessibilityRole="button"
               onPress={() => adjust(STEP)}
               className="h-12 w-12 items-center justify-center rounded-2xl bg-sleep"
               accessibilityLabel={t('sleep.increaseGoal')}

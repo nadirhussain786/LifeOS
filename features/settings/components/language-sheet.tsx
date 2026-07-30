@@ -38,12 +38,14 @@ export function LanguageSheet({ visible, current, onClose, onSelect }: Props) {
       statusBarTranslucent
     >
       <Pressable
+        accessibilityRole="button"
         className="flex-1"
         style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
         onPress={onClose}
       >
         <View className="flex-1 justify-end">
           <Pressable
+            accessibilityRole="button"
             onPress={(e) => e.stopPropagation()}
             style={{ paddingBottom: insets.bottom + 12 }}
             className="gap-1 rounded-t-3xl bg-card px-5 pt-3"

@@ -30,7 +30,13 @@
     "all": "All",
     "saveChanges": "Save changes",
     "viewPhoto": "View photo",
-    "removeAttachment": "Remove attachment"
+    "removeAttachment": "Remove attachment",
+    "archiveNamed": "Archive “{{name}}”",
+    "deleteNamed": "Delete “{{name}}”",
+    "markDone": "Mark “{{name}}” as done",
+    "markNotDone": "Mark “{{name}}” as not done",
+    "more": "More actions",
+    "undo": "Undo"
   },
   "reminder": {
     "in1Hour": "In 1 hour",
@@ -167,7 +173,9 @@
     "emptyArchived": "No archived tasks",
     "notifyAtDueTime": "Notify me at the due time",
     "notifyAtNineAm": "Notify me at 9:00 AM that day",
-    "addNotes": "Add notes…"
+    "addNotes": "Add notes…",
+    "deletedToast": "“{{title}}” deleted.",
+    "archivedToast": "“{{title}}” archived."
   },
   "buckets": {
     "overdue": "Overdue",
@@ -232,7 +240,12 @@
     "routineNextHint": "You'll add habits to this routine next, in the order you want them done.",
     "todayCount": "{{done}}/{{total}} today",
     "loggedToday": "Logged {{amount}} today · tap to edit",
-    "doneToday": "Done today ✓"
+    "doneToday": "Done today ✓",
+    "streakDays_one": "{{count}}d streak",
+    "streakDays_other": "{{count}}d streak",
+    "withoutDays_one": "{{count}}d without",
+    "withoutDays_other": "{{count}}d without",
+    "quickLog": "Log “{{name}}”"
   },
   "habitType": {
     "boolean": "Yes / No",
@@ -270,7 +283,8 @@
     "dayTimeline": "Day timeline",
     "enableNotifBody": "Enable notifications for LifeOS in your device settings to get a journal reminder.",
     "reminderSummary": "You'll get a nudge to write today's entry every day at {{time}}.",
-    "writeAFewWords": "Write a few words…"
+    "writeAFewWords": "Write a few words…",
+    "reminderSettings": "Reminder settings"
   },
   "mood": {
     "notSet": "Not set",
@@ -354,7 +368,10 @@
     "deleteTagBody": "\"{{name}}\" will be removed from every note.",
     "tagName": "Tag name",
     "addTag": "Tag",
-    "writeSomething": "Write something…"
+    "writeSomething": "Write something…",
+    "unarchive": "Unarchive",
+    "unarchiveNamed": "Unarchive “{{name}}”",
+    "deletedToast": "“{{title}}” deleted."
   },
   "budget": {
     "title": "Budget",
@@ -534,7 +551,19 @@
     "restartBody": "Close and reopen LifeOS to apply the new layout direction.",
     "rtlRestartNote": "Choosing اردو or العربية switches LifeOS to a right-to-left layout and restarts the app.",
     "setUpBiometricsTitle": "Set up biometrics first",
-    "setUpBiometricsBody": "Add Face ID or a fingerprint in your device settings, then turn on App lock here."
+    "setUpBiometricsBody": "Add Face ID or a fingerprint in your device settings, then turn on App lock here.",
+    "importData": "Restore from backup",
+    "importSubtitle": "Merge an exported file back in — nothing newer is overwritten",
+    "importing": "Restoring…",
+    "importTitle": "Restore from backup",
+    "importBody": "Pick a lifeos-export JSON file. Existing entries with the same id are refreshed from it; anything you have created since is left alone.",
+    "chooseFile": "Choose file",
+    "importDone": "Restored {{rows}} records.",
+    "import_unreadable": "That file could not be read.",
+    "import_notabackup": "That is not a LifeOS backup file.",
+    "import_failed": "The restore failed and nothing was changed.",
+    "importMissingMedia_one": "{{count}} photo or audio file is missing — media is not stored in the backup.",
+    "importMissingMedia_other": "{{count}} photo and audio files are missing — media is not stored in the backup."
   },
   "auth": {
     "welcomeBack": "Welcome back",
@@ -915,7 +944,8 @@
     "dragToMove": "Drag to move",
     "openNowPlaying": "Open now playing",
     "nextTrack": "Next track",
-    "hidePlayer": "Hide player"
+    "hidePlayer": "Hide player",
+    "playHint": "Plays this song"
   },
   "albumCategory": {
     "gym": "Gym Progress",
@@ -1254,7 +1284,8 @@
     "buildConfig": "Build configuration",
     "notConfiguredTitle": "This build has no Supabase credentials",
     "notConfiguredBody": "Accounts and cloud sync are switched off — everything still works offline. For an EAS build, set these in the environment the build profile uses, then rebuild.",
-    "envMissing": "missing"
+    "envMissing": "missing",
+    "failedToast": "Sync didn’t finish. Your data is safe on this device."
   },
   "syncModule": {
     "tasks": "Tasks",
@@ -1349,7 +1380,10 @@
       "expense_edited": "{{actor}} edited {{description}}",
       "expense_deleted": "{{actor}} deleted {{description}}",
       "settlement_added": "{{actor}} recorded a payment",
-      "settlement_deleted": "{{actor}} removed a payment"
+      "settlement_deleted": "{{actor}} removed a payment",
+      "group_deleted": "{{actor}} deleted the group",
+      "member_removed": "{{actor}} removed {{name}}",
+      "group_renamed": "{{actor}} renamed the group"
     },
     "notifyTitle": "{{actor}} in your group",
     "notifySettlement": "Recorded a payment",
@@ -1373,6 +1407,57 @@
       "already_accepted": "This invitation has already been used.",
       "member_unavailable": "Your place in the group is no longer available. Ask to be added again.",
       "error": "Something went wrong. Try again in a moment."
-    }
+    },
+    "groupCreated": "“{{name}}” created.",
+    "currencyNote": "This group settles in {{currency}}.",
+    "notConfiguredTitle": "Shared groups need cloud setup",
+    "expenseCount_one": "{{count}} expense",
+    "expenseCount_other": "{{count}} expenses",
+    "expenseAdded": "Expense added.",
+    "expenseDeleted": "Expense deleted.",
+    "memberRemoved": "{{name}} removed.",
+    "settlementRecorded": "Payment recorded.",
+    "undo": "Undo",
+    "inviteLinkCopied": "Invitation link ready to share.",
+    "refresh": "Refresh",
+    "settleEmptyHint": "Add an expense first — there is nothing to settle yet.",
+    "date": "Date",
+    "memberAdded": "{{name}} added to the group.",
+    "mode": {
+      "equal": "Equally",
+      "exact": "Exactly"
+    },
+    "splitBalanced": "The split adds up.",
+    "splitRemaining": "{{amount}} still to assign",
+    "splitOver": "{{amount}} over the total",
+    "spreadRemainder": "Spread the rest",
+    "settleA11y": "Record that {{from}} paid {{to}} {{amount}}",
+    "deleteGroup": "Delete group",
+    "deleteGroupTitle": "Delete “{{name}}”?",
+    "deleteGroupBody": "This removes the group for everyone in it. The expenses and balances are kept, not erased — but nobody will see the group any more.",
+    "groupDeleted": "“{{name}}” deleted.",
+    "leave": "Leave group",
+    "leaveTitle": "Leave this group?",
+    "leaveBody": "Your past expenses stay in the group so everyone else’s balances still add up. You just won’t be part of new ones.",
+    "leaveUnsettledBody": "You are not settled up yet. Your past expenses and what you owe or are owed stay in the group — leaving does not clear them.",
+    "leftGroup": "You have left the group.",
+    "removedMember": "No longer in the group",
+    "removeMemberUnsettledBody": "{{name}} is not settled up — {{amount}} outstanding. Their past expenses and balance stay in the group; they just won’t be part of new ones.",
+    "formerMembers": "No longer in the group",
+    "formerMembersHint": "Their expenses stay in the ledger, so everyone else’s balances still add up.",
+    "removedSettled": "Settled up",
+    "removedOutstanding": "{{amount}} outstanding"
+  },
+  "errors": {
+    "offline": "You appear to be offline. This one needs a connection — it will go through once you are back.",
+    "not-configured": "This build has no cloud account set up, so shared features are unavailable. Everything else keeps working offline.",
+    "signed-out": "Your session has expired. Sign in again to carry on.",
+    "backend-missing": "Cloud setup for this account is incomplete, so shared features cannot run yet.",
+    "permission": "You do not have access to this. If somebody shared it with you, ask them to add you again.",
+    "conflict": "That already exists.",
+    "server": "Something broke on our side. It has been logged — try again in a moment.",
+    "unknown": "That did not work. Please try again.",
+    "title": "That did not work",
+    "detail": "Details: {{code}}"
   }
 }

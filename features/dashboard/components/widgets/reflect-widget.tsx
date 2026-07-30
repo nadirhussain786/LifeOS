@@ -53,6 +53,7 @@ export function ReflectWidget() {
           <View className="flex-row justify-between">
             {MOODS.map((mood) => (
               <Pressable
+                accessibilityRole="button"
                 key={mood.value}
                 onPress={() => selectMood(mood.value)}
                 className="h-11 w-11 items-center justify-center rounded-full"

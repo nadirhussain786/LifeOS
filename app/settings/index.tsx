@@ -10,6 +10,7 @@ import {
   FileText,
   Info,
   Languages,
+  Upload,
   Laptop,
   LockKeyhole,
   Moon,
@@ -26,8 +27,10 @@ import { SettingsRow } from '@/components/ui/settings-row';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import { exportAllData } from '@/lib/data-export';
+import { importDataFromFile } from '@/lib/data-import';
 import { clearAllData } from '@/lib/data-management';
 import { queryClient } from '@/lib/query-client';
+import { toast } from '@/lib/toast-store';
 import { useProfileStore } from '@/features/profile/store/profile-store';
 import {
   authenticate,
@@ -76,6 +79,7 @@ export default function SettingsScreen() {
   const [bioLabel, setBioLabel] = useState('Biometrics');
 
   const [isExporting, setIsExporting] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
   const [languageSheetOpen, setLanguageSheetOpen] = useState(false);
 
   useEffect(() => {
@@ -108,6 +112,43 @@ export default function SettingsScreen() {
     }
   };
 
+  /**
+   * Restores an exported backup. Merges rather than replaces, so importing an
+   * older file can never destroy newer work — see lib/data-import.ts.
+   */
+  const handleImport = () => {
+    Alert.alert(t('settings.importTitle'), t('settings.importBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('settings.chooseFile'),
+        onPress: async () => {
+          setIsImporting(true);
+          try {
+            const result = await importDataFromFile();
+            if (!result.ok) {
+              if (result.reason === 'cancelled') return;
+              // Reasons are kebab-case; the i18n keys can't be.
+              toast.error(t('settings.import_' + result.reason.replace(/-/g, '')));
+              return;
+            }
+            queryClient.clear();
+            toast.success(t('settings.importDone', { rows: result.rows }));
+            // Media files were never in the JSON, so say so plainly rather than
+            // letting it surface later as broken thumbnails.
+            if (result.missingMedia > 0) {
+              setTimeout(
+                () => toast.info(t('settings.importMissingMedia', { count: result.missingMedia })),
+                3400,
+              );
+            }
+          } finally {
+            setIsImporting(false);
+          }
+        },
+      },
+    ]);
+  };
+
   const handleClearData = () => {
     Alert.alert(t('settings.clearTitle'), t('settings.clearBody'), [
       { text: t('common.cancel'), style: 'cancel' },
@@ -117,8 +158,8 @@ export default function SettingsScreen() {
         onPress: () => {
           clearAllData();
           queryClient.clear();
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-          Alert.alert(t('settings.clearedTitle'), t('settings.clearedBody'));
+          void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+          toast.success(t('settings.clearedBody'));
         },
       },
     ]);
@@ -153,6 +194,7 @@ export default function SettingsScreen() {
               const Icon = option.icon;
               return (
                 <Pressable
+                  accessibilityRole="button"
                   key={option.value}
                   onPress={() => {
                     Haptics.selectionAsync();
@@ -256,6 +298,14 @@ export default function SettingsScreen() {
               isFirst
               disabled={isExporting}
               onPress={handleExport}
+              chevron={false}
+            />
+            <SettingsRow
+              icon={Upload}
+              label={isImporting ? t('settings.importing') : t('settings.importData')}
+              subtitle={t('settings.importSubtitle')}
+              disabled={isImporting}
+              onPress={handleImport}
               chevron={false}
             />
             <SettingsRow

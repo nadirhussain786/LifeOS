@@ -48,6 +48,7 @@ function NotificationRow({
 
   return (
     <Pressable
+      accessibilityRole="button"
       onPress={onPress}
       onLongPress={onDelete}
       className="flex-row items-start gap-3 rounded-2xl border border-border p-3.5"
@@ -157,6 +158,7 @@ export default function NotificationsInboxScreen() {
       >
         <View className="flex-row gap-2">
           <Pressable
+            accessibilityRole="button"
             onPress={() => markAllRead.mutate()}
             disabled={!hasUnread}
             className="flex-1 flex-row items-center justify-center gap-2 rounded-xl border border-border py-2.5"
@@ -166,6 +168,7 @@ export default function NotificationsInboxScreen() {
             <Text className="font-sora-medium text-foreground">{t('notif.markAllRead')}</Text>
           </Pressable>
           <Pressable
+            accessibilityRole="button"
             onPress={confirmClear}
             className="flex-row items-center justify-center gap-2 rounded-xl border border-border px-4 py-2.5"
           >

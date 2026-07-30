@@ -105,6 +105,7 @@ export default function StudyLogScreen() {
           <Text variant="micro">{t('study.howLong')}</Text>
           <View className="flex-row items-center gap-6">
             <Pressable
+              accessibilityRole="button"
               onPress={() => adjust(-5)}
               className="h-11 w-11 items-center justify-center rounded-2xl border border-border bg-surface"
               accessibilityLabel={t('study.less')}
@@ -123,6 +124,7 @@ export default function StudyLogScreen() {
               {formatStudyDuration(minutes * 60)}
             </Text>
             <Pressable
+              accessibilityRole="button"
               onPress={() => adjust(5)}
               className="h-11 w-11 items-center justify-center rounded-2xl bg-study"
               accessibilityLabel={t('study.more')}
@@ -133,6 +135,7 @@ export default function StudyLogScreen() {
           <View className="flex-row flex-wrap justify-center gap-2">
             {QUICK_MINUTES.map((m) => (
               <Pressable
+                accessibilityRole="button"
                 key={m}
                 onPress={() => setMinutes(m)}
                 className="rounded-full border border-border px-3.5 py-1.5"
@@ -165,7 +168,7 @@ export default function StudyLogScreen() {
                 onChange={handleDate}
               />
             ) : (
-              <Pressable onPress={() => setShowDate(true)}>
+              <Pressable accessibilityRole="button" onPress={() => setShowDate(true)}>
                 <Text className="font-sora-semibold text-foreground">{format(date, 'MMM d')}</Text>
               </Pressable>
             )}
@@ -180,7 +183,7 @@ export default function StudyLogScreen() {
                 onChange={handleTime}
               />
             ) : (
-              <Pressable onPress={() => setShowTime(true)}>
+              <Pressable accessibilityRole="button" onPress={() => setShowTime(true)}>
                 <Text className="font-sora-semibold text-foreground">
                   {format(startTime, 'h:mm a')}
                 </Text>
