@@ -58,6 +58,70 @@ Verified each step with `tsc --noEmit` + `jest` (18 tests) + `expo export` (all 
 
 ---
 
+## ✅ Split group lifecycle (2026-07-30, third)
+
+`tsc` · `eslint` · 65 jest tests · 48 SQL tests · 8 migrations — all green.
+
+**A member could be removed, and it silently lost money.** Removal set `deleted_at`, `listMembers` filtered those rows out, and balances are computed only over the members it returned — so everything a removed person had PAID left the ledger while everything they were OWED for stayed in it. Reproduced: a £100 dinner paid by Alice and split four ways left Bob, Carol and Dave owing £25 each, nobody owed anything, the nets summing to **−£75**, and `simplifyDebts` returning **no transfers at all** — "Settle up" declaring the group square over three live debts.
+
+Removal is now a tombstone throughout. `listMembers` returns everyone who has ever been in the group; `useGroupDetail` exposes `activeMembers` alongside for the pickers; balances compute over the full set. Five tests in `split-math.test.ts` pin it, including one that keeps the old broken arithmetic as an executable description of why the filter must not come back.
+
+**Groups could never be deleted.** `expense_groups.deleted_at` existed and every read filtered on it, but nothing set it — and the only alternative on offer, the `expense_groups_delete` policy, is a HARD delete that cascades away the whole ledger including other members' history.
+
+**`0008_split_group_lifecycle.sql`**
+
+- `delete_expense_group()` — owner-only, soft, and logs `group_deleted` _before_ marking the row (once deleted it is gone from every read, and the entry explaining why would have nowhere to be written from).
+- `remove_group_member()` — owner removes, anyone may leave, the owner can never be removed (a group with no owner can never be administered again). Distinguishes `member_removed` from `member_left`, and writes the activity entry before the tombstone, since leaving revokes the membership the activity insert policy requires.
+- A `before update` trigger on `expense_groups` guarding `deleted_at`. `expense_groups_update` is `using (is_expense_group_member(id))` — any member may write any column — so without this, every member could make the group vanish for everybody else. It has to be a trigger, not a policy: only OLD/NEW can see _which_ column changed.
+- The activity action check constraint gains `group_deleted`, `group_renamed`, `member_removed`.
+
+10 SQL tests cover it, including the one that matters most: a member cannot soft-delete the group by writing the column directly, bypassing the RPC.
+
+**UI** — owners get "Delete group" in the header, everyone else "Leave group"; a members screen section for people no longer in the group showing whether they are settled or still owed; removal now warns with the outstanding amount rather than a bare "are you sure"; the expense form offers only current members, but keeps former ones visible and ticked on an expense they were actually part of, so editing an old dinner can't quietly move their share onto everyone else.
+
+---
+
+## ✅ Data-safety pass (2026-07-30, second)
+
+Three field reports, three separate causes. `tsc` · `eslint` · 60 jest tests · 38 SQL tests all green.
+
+**1. Sentry `42501` on `expense_group_activity`** — the failure 0007 fixes, from a build talking to a project that has not had 0007 applied. Migrations are applied by hand to the hosted database, so shipping the fix is not the same as deploying it. Added a client-side repair that works against _every_ deployed schema version: `ensureProfileRow()` upserts the caller's own `profiles` row (allowed by the existing `profiles_own` policy — no new SQL), called before `create_expense_group` and again on every `loadProfile`. Group creation now succeeds whether or not 0007 has been run.
+
+**2. "Clear all data" left most of the data** — `clearAllData()` was a hand-written list of 23 `db.delete()` calls against a 38-table schema. Missing: `budget_transactions`, `budget_debts`, `savings_goals`, `budget_settings`, `goals`, `goal_milestones`, `goal_progress_logs`, `sleep_sessions`, `sleep_settings`, `study_subjects`, `study_sessions`, `study_settings`, `gallery_albums`, `gallery_photos`, `notification_log` — the finances, the sleep record and the photographs, i.e. the worst possible subset to leave on a device being handed on. Gallery media files were never deleted either, only the rows pointing at them.
+Rewritten to enumerate `sqlite_master` at call time, so a table cannot be forgotten; runs in one transaction, `VACUUM`s afterwards, and removes the `songs`/`gallery`/`attachments` directories. `lib/data-coverage.test.ts` fails the build if the export drops a table or if a hardcoded delete list reappears.
+
+**3. Local DB reset after installing a new APK** — Android clears an app's private storage when the replacing APK is signed with a different certificate (switching EAS build profile, or regenerated credentials), which takes SQLite and AsyncStorage with it. Environmental, not a code path — but two code-level risks in the same area were real and are fixed:
+
+- `reconcileAccountOnSignIn()` read `lastUserId` from a store whose AsyncStorage rehydration nothing waited for, racing `onAuthStateChange`. Losing that race both **missed genuine account switches** (silently reinstating the cross-account bleed this function exists to prevent) and **clobbered the persisted sync cursors** via a pre-hydration persist write. `useSyncStore` now exposes `hydrated` and the reconcile defers until it flips; the wipe fails safe — it fires only when a _different_ prior account is positively identified, and a failed wipe now reports and rethrows instead of proceeding to push the previous user's rows under the new uid.
+- The export had no counterpart, so it was a file you could produce and never use. `lib/data-import.ts` restores it: merge semantics via `INSERT OR REPLACE` (an older backup can never destroy newer work), columns intersected with `PRAGMA table_info` so a backup predating a schema change still restores, one transaction with rollback, and it counts and reports media files the JSON never contained rather than leaving them to surface as broken thumbnails. Wired into Settings → Data as "Restore from backup".
+
+---
+
+## ✅ UX pass + Split fix (2026-07-30)
+
+Verified with `tsc --noEmit`, `eslint .`, `jest` (55 tests) and `npm run test:sql` (38 tests) — all green.
+
+**The Split "connection error" was not a connection error.**
+`create_expense_group` (0004) added the group owner with `INSERT … SELECT … FROM profiles WHERE id = auth.uid()`, which inserts nothing when the caller has no `profiles` row. The creator therefore wasn't a member, the following activity insert was refused by `expense_group_activity_insert`, the whole transaction rolled back, and the client rendered `split.saveFailed` — _"check your connection and try again"_ — for a 42501. Reproduced against real Postgres via PGlite before fixing.
+
+- **`0007_split_group_creation_fix.sql`** — `ensure_profile()` (SECURITY DEFINER, self-scoped) self-heals the row from `auth.users`; the owner insert became `VALUES` with fallbacks so "no profile" can no longer mean "no member"; a post-insert assertion raises a named error rather than letting a regression masquerade as a network fault; existing accounts backfilled and member-less stranded groups cleared. 3 regression tests added.
+- **`lib/supabase-error.ts`** — PostgREST/SQLSTATE codes now survive the throw (`SupabaseError`) and classify into `offline · not-configured · signed-out · backend-missing · permission · conflict · server · unknown`, each with its own copy in all 4 locales. `QueryError` derives its icon, message and whether Retry is even offered from the kind; `InlineError` puts form failures next to the button instead of taking the screen over.
+
+**Split, feature-complete:** group cards now priced with your actual balance (batched ledger fetch, no N+1, same tested math as the detail screen), stacked member avatars, pull-to-refresh, unequal/exact splits with a live remaining-to-assign readout, back-dating an expense, RTL-correct settle arrows, one-sentence a11y labels, and a Supabase-not-configured gate. Success haptics moved from tap to `onSuccess` — four screens were confirming writes that hadn't happened yet.
+
+**App-wide UX:**
+
+- **Toast + undo layer** (`lib/toast-store.ts`, `components/ui/toast.tsx`) — the app had no transient-feedback channel at all; every confirmation, including purely informational ones, was a blocking `Alert`. Success alerts replaced; delete on tasks/notes is now immediate with a 6s undo (`restoreTask`/`restoreNote` clear the tombstone and bump `updatedAt` so the restore propagates through sync). Shared-ledger deletes keep their confirmation deliberately.
+- **Contrast** — `readableOn()` derives a legible text form of any tint instead of hand-picking pairs that drift. Found and fixed: habit/water/fitness light tints failed even the 3:1 _graphics_ bar on a white card; **study and journal were the identical hex in dark mode** (`#a78bfa`), the exact failure the tokens file warns about; the journal streak label ran at 2.06:1. 17 tests now hold every module tint, category swatch and priority color to WCAG AA in both themes.
+- **One palette** — `constants/theme.ts` (137 importers) now derives from `design-tokens.ts` (65 importers) instead of being a second hand-maintained copy that disagreed on background, card and border.
+- **Reduced motion** — `useReducedMotion()`; the confetti burst, card entrances and empty-state pop are gated. The tokens file had required this since day one and nothing read it.
+- **Accessibility** — `accessibilityRole` on 286 of 289 pressables (was 43/279); swipe-only archive/delete now reachable via `accessibilityActions` on habit, note and song rows (was task only); a11y labels moved off hardcoded English onto i18n keys.
+- **Sync visibility** — `SyncStatusBridge` toasts a failed sync with Retry wherever the user is; previously only Settings → Sync ever showed it, so a silently-failing sync looked exactly like a working one.
+- **Pull-to-refresh** on 6 screens (was 1) and `tintColor` set so the spinner is visible on dark.
+- `React.memo` on task/habit/note/song rows; the expense form's setState-during-render seeding moved into an effect.
+
+---
+
 ## 🔴 Critical
 
 - 🔴 **[DATA] Soft-deletes never sync → deleted data resurrects.** _(verified)_ Nearly every repo delete does `.set({ deletedAt, syncStatus:'pending' })` but **not** `updatedAt` (e.g. `features/tasks/services/tasks-repository.ts:156`, `notes:98`, `journal:114`, `budget:95`, `sleep:156`, `goals:214`, `habits:142`). The sync push is `WHERE updated_at > cursor` (`features/sync/services/sync-engine.ts:30`) and pull LWW compares `updated_at` (`:66`) — so a delete of an already-synced row is invisible to both sides and never propagates. Only `habitRoutines` (`habits-repository.ts:288`) does it right. **Impact:** delete on one device, data stays alive on server + other devices; reinstall re-pulls "deleted" data. Correctness + GDPR "right to delete" failure. **Fix:** bump `updatedAt` on every delete; treat `deleted_at` as an always-propagated tombstone.

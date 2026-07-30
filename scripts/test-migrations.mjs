@@ -175,6 +175,79 @@ await test('creating a group makes the creator an owner member, atomically', asy
   expectEqual(role, 'owner', "creator's role");
 });
 
+await test('0007 a user with no profile row can still create a group', async () => {
+  // The bug 0007 fixes. 0004 added the owner with INSERT..SELECT FROM profiles,
+  // which inserts nothing when there is no profile row — so the creator was not
+  // a member, the activity insert was then refused by RLS, and the whole
+  // transaction rolled back with an opaque 42501 that the app reported to the
+  // user as a connection failure.
+  const GHOST = '44444444-4444-4444-4444-444444444444';
+  await db.exec(`alter table auth.users disable trigger on_auth_user_created;`);
+  await db.query(`insert into auth.users (id, email) values ($1::uuid, 'ghost@example.com')`, [
+    GHOST,
+  ]);
+  await db.exec(`alter table auth.users enable trigger on_auth_user_created;`);
+  expectEqual(
+    await count(`select count(*)::int n from public.profiles where id = $1::uuid`, [GHOST]),
+    0,
+    'profile rows before',
+  );
+
+  await asUser(db, GHOST, async () => {
+    const r = await one(
+      `select public.create_expense_group('g-ghost','Flat 3B','home','$','m-ghost',null,'act-ghost',$1) as id`,
+      [Date.now()],
+    );
+    expectEqual(r.id, 'g-ghost', 'returned group id');
+  });
+
+  expectEqual(
+    await count(`select count(*)::int n from public.profiles where id = $1::uuid`, [GHOST]),
+    1,
+    'profile self-healed',
+  );
+  expectEqual(
+    await count(
+      `select count(*)::int n from public.expense_group_members
+        where group_id = 'g-ghost' and role = 'owner'`,
+    ),
+    1,
+    'owner member row',
+  );
+  // And the creator can actually see what they made.
+  await asUser(db, GHOST, async () => {
+    expectEqual(
+      await count(`select count(*)::int n from public.expense_groups where id = 'g-ghost'`),
+      1,
+      'group visible to its creator',
+    );
+  });
+});
+
+await test('0007 ensure_profile is idempotent and never clobbers an existing name', async () => {
+  await asUser(db, ALICE, async () => {
+    await db.query(`select public.ensure_profile()`);
+    await db.query(`select public.ensure_profile()`);
+  });
+  expectEqual(
+    await count(`select count(*)::int n from public.profiles where id = $1::uuid`, [ALICE]),
+    1,
+    'profile rows for Alice',
+  );
+  expectEqual(
+    (await one(`select display_name from public.profiles where id = $1::uuid`, [ALICE]))
+      .display_name,
+    'alice',
+    "Alice's display name",
+  );
+});
+
+await test('0007 ensure_profile refuses an anonymous caller', async () => {
+  await asAnon(db, async () => {
+    await expectRejection(() => db.query(`select public.ensure_profile()`), 'permission denied');
+  });
+});
+
 await test('a member can read their group', async () => {
   await asUser(db, ALICE, async () => {
     expectEqual(
@@ -496,6 +569,175 @@ await test('re-registering the same device updates rather than duplicates', asyn
   });
   expectEqual(await count(`select count(*)::int n from public.push_tokens`), 1, 'total token rows');
   expectEqual((await one(`select user_id from public.push_tokens`)).user_id, BOB, 'new owner');
+});
+
+// ---------------------------------------------------------------------------
+console.log('\ngroup lifecycle (0008)');
+// ---------------------------------------------------------------------------
+
+await test('0008 removing a member tombstones them rather than deleting the row', async () => {
+  // The row has to survive: expenses, shares and settlements all reference it,
+  // and the balances only add up while every party still resolves.
+  await asUser(db, ALICE, async () => {
+    await db.query(
+      `insert into public.expense_group_members (id, group_id, user_id, email, display_name, role, created_at, updated_at)
+       values ('m-temp', $1, null, 'temp@example.com', 'Temp', 'member', $2, $2)`,
+      [groupId, Date.now()],
+    );
+    await db.query(`select public.remove_group_member('m-temp','act-rm',$1)`, [Date.now()]);
+  });
+
+  expectEqual(
+    await count(`select count(*)::int n from public.expense_group_members where id = 'm-temp'`),
+    1,
+    'member row still present',
+  );
+  expectEqual(
+    await count(
+      `select count(*)::int n from public.expense_group_members
+        where id = 'm-temp' and deleted_at is not null`,
+    ),
+    1,
+    'member tombstoned',
+  );
+});
+
+await test('0008 a removed member is still readable, so balances stay complete', async () => {
+  await asUser(db, ALICE, async () => {
+    expectEqual(
+      await count(`select count(*)::int n from public.expense_group_members where id = 'm-temp'`),
+      1,
+      'removed member visible to the group',
+    );
+  });
+});
+
+await test('0008 removing somebody is recorded in the activity feed', async () => {
+  expectEqual(
+    await count(
+      `select count(*)::int n from public.expense_group_activity
+        where id = 'act-rm' and action = 'member_removed'`,
+    ),
+    1,
+    'member_removed entries',
+  );
+});
+
+await test('0008 a member cannot remove another member', async () => {
+  await asUser(db, ALICE, async () => {
+    await db.query(
+      `insert into public.expense_group_members (id, group_id, user_id, email, display_name, role, created_at, updated_at)
+       values ('m-victim', $1, null, 'victim@example.com', 'Victim', 'member', $2, $2)`,
+      [groupId, Date.now()],
+    );
+  });
+  await asUser(db, BOB, async () => {
+    await expectRejection(
+      () => db.query(`select public.remove_group_member('m-victim','act-bad',$1)`, [Date.now()]),
+      'only the group owner',
+    );
+  });
+});
+
+await test('0008 anybody may remove themselves, and it reads as leaving', async () => {
+  const bobMember = await one(
+    `select id from public.expense_group_members
+      where group_id = $1 and user_id = $2::uuid and deleted_at is null`,
+    [groupId, BOB],
+  );
+  await asUser(db, BOB, async () => {
+    await db.query(`select public.remove_group_member($1,'act-left',$2)`, [
+      bobMember.id,
+      Date.now(),
+    ]);
+  });
+  expectEqual(
+    await count(
+      `select count(*)::int n from public.expense_group_activity
+        where id = 'act-left' and action = 'member_left'`,
+    ),
+    1,
+    'member_left entries',
+  );
+});
+
+await test('0008 the owner cannot be removed, which would orphan the group', async () => {
+  await asUser(db, ALICE, async () => {
+    await expectRejection(
+      () => db.query(`select public.remove_group_member('m-alice','act-owner',$1)`, [Date.now()]),
+      'owner cannot be removed',
+    );
+  });
+});
+
+await test('0008 a non-owner cannot delete the group', async () => {
+  await asUser(db, ALICE, async () => {
+    await db.query(
+      `insert into public.expense_group_members (id, group_id, user_id, email, display_name, role, created_at, updated_at)
+       values ('m-carol', $1, $2::uuid, 'stranger@example.com', 'Carol', 'member', $3, $3)`,
+      [groupId, STRANGER, Date.now()],
+    );
+  });
+  await asUser(db, STRANGER, async () => {
+    await expectRejection(
+      () =>
+        db.query(`select public.delete_expense_group($1,'act-del-bad',$2)`, [groupId, Date.now()]),
+      'only the group owner',
+    );
+  });
+});
+
+await test('0008 a member cannot soft-delete the group by writing the column directly', async () => {
+  // expense_groups_update lets any member write any column, so the narrowing
+  // has to be a trigger — a policy cannot see which column changed.
+  await asUser(db, STRANGER, async () => {
+    await expectRejection(
+      () =>
+        db.query(`update public.expense_groups set deleted_at = $1 where id = $2`, [
+          Date.now(),
+          groupId,
+        ]),
+      'only the group owner',
+    );
+  });
+});
+
+await test('0008 the owner can delete the group, and it is a tombstone', async () => {
+  await asUser(db, ALICE, async () => {
+    await db.query(`select public.delete_expense_group($1,'act-del',$2)`, [groupId, Date.now()]);
+  });
+  expectEqual(
+    await count(`select count(*)::int n from public.expense_groups where id = $1`, [groupId]),
+    1,
+    'group row survives',
+  );
+  expectEqual(
+    await count(
+      `select count(*)::int n from public.expense_groups where id = $1 and deleted_at is not null`,
+      [groupId],
+    ),
+    1,
+    'group tombstoned',
+  );
+  // The whole point of soft-deleting: the ledger is still there for everyone.
+  expectEqual(
+    (await count(`select count(*)::int n from public.expense_group_expenses where group_id = $1`, [
+      groupId,
+    ])) > 0,
+    true,
+    'expenses preserved',
+  );
+});
+
+await test('0008 deleting the group is recorded before it disappears from reads', async () => {
+  expectEqual(
+    await count(
+      `select count(*)::int n from public.expense_group_activity
+        where id = 'act-del' and action = 'group_deleted'`,
+    ),
+    1,
+    'group_deleted entries',
+  );
 });
 
 summary();

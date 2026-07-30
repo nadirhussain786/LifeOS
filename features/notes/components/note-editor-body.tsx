@@ -35,6 +35,7 @@ export function NoteEditorBody({ value, onChangeText, placeholder }: Props) {
           Note
         </Text>
         <Pressable
+          accessibilityRole="button"
           onPress={() => setMode((current) => (current === 'edit' ? 'read' : 'edit'))}
           className="flex-row items-center gap-1.5 rounded-full border border-border px-2.5 py-1"
         >

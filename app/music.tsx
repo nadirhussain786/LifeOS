@@ -49,6 +49,7 @@ export default function MusicScreen() {
         tint={tint}
         right={
           <Pressable
+            accessibilityRole="button"
             onPress={handleAddSongs}
             disabled={importFromDevice.isPending}
             className="flex-row items-center gap-1.5 rounded-full px-3 py-1.5"
@@ -89,6 +90,7 @@ export default function MusicScreen() {
               {/* Now playing banner */}
               {currentSong && (
                 <Pressable
+                  accessibilityRole="button"
                   onPress={() => router.push('/music/now-playing')}
                   className="mx-4 mt-1 flex-row items-center gap-3 overflow-hidden rounded-2xl border border-border bg-card p-3"
                   style={{ borderColor: alpha(tint, 0.4) }}
@@ -113,6 +115,7 @@ export default function MusicScreen() {
               {/* Play all / Shuffle */}
               <View className="mx-4 flex-row gap-3">
                 <Pressable
+                  accessibilityRole="button"
                   onPress={() => playQueue(songs, 0)}
                   className="flex-1 overflow-hidden rounded-full"
                 >
@@ -135,6 +138,7 @@ export default function MusicScreen() {
                   </LinearGradient>
                 </Pressable>
                 <Pressable
+                  accessibilityRole="button"
                   onPress={() => shuffleAll(songs)}
                   className="flex-1 flex-row items-center justify-center gap-2 rounded-full border py-3.5"
                   style={{ borderColor: tint }}
@@ -158,7 +162,11 @@ export default function MusicScreen() {
               <View className="gap-2.5">
                 <View className="flex-row items-center justify-between px-4">
                   <Text variant="subheading">{t('music.playlists')}</Text>
-                  <Pressable onPress={() => router.push('/music/playlist/new')} hitSlop={8}>
+                  <Pressable
+                    accessibilityRole="button"
+                    onPress={() => router.push('/music/playlist/new')}
+                    hitSlop={8}
+                  >
                     <Text variant="caption" className="font-sora-semibold" style={{ color: tint }}>
                       {t('music.newPlaylist')}
                     </Text>
@@ -171,6 +179,7 @@ export default function MusicScreen() {
                 >
                   {playlists.length === 0 ? (
                     <Pressable
+                      accessibilityRole="button"
                       onPress={() => router.push('/music/playlist/new')}
                       className="h-40 w-40 items-center justify-center gap-1.5 rounded-3xl border border-dashed border-border"
                     >

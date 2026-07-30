@@ -26,6 +26,7 @@ import {
   isBiometricAvailable,
 } from '@/features/security/lib/biometrics';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { alpha } from '@/lib/color';
 
 const TOTAL_STEPS = 4;
@@ -35,6 +36,7 @@ export default function OnboardingScreen() {
   const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
   const { t } = useTranslation();
+  const reducedMotion = useReducedMotion();
   const completeOnboarding = useProfileStore((s) => s.completeOnboarding);
 
   const [step, setStep] = useState(0);
@@ -67,6 +69,7 @@ export default function OnboardingScreen() {
       <View className="h-12 flex-row items-center justify-center px-5">
         {step > 0 ? (
           <Pressable
+            accessibilityRole="button"
             onPress={() => setStep((s) => s - 1)}
             hitSlop={10}
             className="absolute start-5"
@@ -93,7 +96,11 @@ export default function OnboardingScreen() {
         className="flex-1"
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <Animated.View key={step} entering={FadeIn.duration(260)} className="flex-1 px-6">
+        <Animated.View
+          key={step}
+          entering={reducedMotion ? undefined : FadeIn.duration(260)}
+          className="flex-1 px-6"
+        >
           {step === 0 ? (
             <View className="flex-1 justify-center gap-6">
               <View
@@ -156,6 +163,7 @@ export default function OnboardingScreen() {
                   const Icon = area.icon;
                   return (
                     <Pressable
+                      accessibilityRole="button"
                       key={area.id}
                       onPress={() => toggleFocus(area.id)}
                       className="flex-row items-center gap-2 rounded-full border px-4 py-2.5"

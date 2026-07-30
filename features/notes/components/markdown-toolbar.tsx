@@ -77,6 +77,7 @@ export function MarkdownToolbar({ value, selection, onChange }: Props) {
     <View className="flex-row gap-1 border-t border-border bg-card px-2 py-1.5">
       {buttons.map((button) => (
         <Pressable
+          accessibilityRole="button"
           key={button.label}
           onPress={() => {
             Haptics.selectionAsync();

@@ -180,6 +180,7 @@ function CategoryChips({
         const selected = categoryFilter === item.id;
         return (
           <Pressable
+            accessibilityRole="button"
             key={item.id}
             onPress={() => setCategoryFilter(item.id as never)}
             style={selected ? { backgroundColor: item.tint, borderColor: item.tint } : undefined}

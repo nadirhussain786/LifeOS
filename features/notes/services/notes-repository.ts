@@ -124,6 +124,16 @@ export function deleteNote(id: string) {
     .run();
 }
 
+/** Undoes a soft delete. See restoreTask — `updatedAt` must move so the
+ *  restore propagates through the same `updated_at > cursor` sync push. */
+export function restoreNote(id: string) {
+  getDb()
+    .update(notes)
+    .set({ deletedAt: null, updatedAt: Date.now(), syncStatus: 'pending' })
+    .where(eq(notes.id, id))
+    .run();
+}
+
 export function listNoteCategories(): NoteCategory[] {
   return getDb()
     .select()

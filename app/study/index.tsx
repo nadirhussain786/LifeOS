@@ -136,6 +136,7 @@ export default function StudyScreen() {
         >
           {timerActive && (
             <Pressable
+              accessibilityRole="button"
               onPress={() => router.push('/study/timer')}
               className="flex-row items-center gap-3 rounded-2xl bg-study p-4"
             >
@@ -199,6 +200,7 @@ export default function StudyScreen() {
                 <Text variant="muted">{t('study.focusLength')}</Text>
                 <View className="flex-row items-center gap-4">
                   <Pressable
+                    accessibilityRole="button"
                     onPress={() => setCustomMinutes((m) => Math.max(5, m - 5))}
                     hitSlop={6}
                   >
@@ -211,6 +213,7 @@ export default function StudyScreen() {
                     {t('study.minutesShort', { minutes: customMinutes })}
                   </Text>
                   <Pressable
+                    accessibilityRole="button"
                     onPress={() => setCustomMinutes((m) => Math.min(180, m + 5))}
                     hitSlop={6}
                   >

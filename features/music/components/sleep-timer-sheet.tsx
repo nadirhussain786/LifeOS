@@ -42,12 +42,14 @@ export function SleepTimerSheet({ visible, onClose, remainingMs, active, onSelec
       statusBarTranslucent
     >
       <Pressable
+        accessibilityRole="button"
         className="flex-1"
         style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
         onPress={onClose}
       >
         <View className="flex-1 justify-end">
           <Pressable
+            accessibilityRole="button"
             onPress={(e) => e.stopPropagation()}
             style={{ paddingBottom: insets.bottom + 12 }}
             className="gap-2 rounded-t-3xl bg-card px-5 pt-3"
@@ -70,6 +72,7 @@ export function SleepTimerSheet({ visible, onClose, remainingMs, active, onSelec
                   {t('music.pausingIn', { duration: formatDuration(remainingMs) })}
                 </Text>
                 <Pressable
+                  accessibilityRole="button"
                   onPress={() => pick(null)}
                   hitSlop={8}
                   className="flex-row items-center gap-1.5"
@@ -85,6 +88,7 @@ export function SleepTimerSheet({ visible, onClose, remainingMs, active, onSelec
             <View className="flex-row flex-wrap gap-2.5">
               {OPTIONS.map((minutes) => (
                 <Pressable
+                  accessibilityRole="button"
                   key={minutes}
                   onPress={() => pick(minutes)}
                   className="flex-1 items-center rounded-2xl border border-border py-4"

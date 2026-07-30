@@ -51,6 +51,7 @@ export function TagPicker({ tags, selectedTagIds, onToggle, onCreateTag, onDelet
         const isSelected = selected.has(tag.id);
         return (
           <Pressable
+            accessibilityRole="button"
             key={tag.id}
             onPress={() => {
               Haptics.selectionAsync();
@@ -89,6 +90,7 @@ export function TagPicker({ tags, selectedTagIds, onToggle, onCreateTag, onDelet
         </View>
       ) : (
         <Pressable
+          accessibilityRole="button"
           onPress={() => setIsAdding(true)}
           className="flex-row items-center gap-1 rounded-full border border-dashed border-border px-3 py-1.5"
         >

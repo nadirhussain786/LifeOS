@@ -141,6 +141,7 @@ export function MiniPlayerBar() {
 
           {/* Tap target → Now Playing */}
           <Pressable
+            accessibilityRole="button"
             onPress={() => router.push('/music/now-playing')}
             className="flex-1 flex-row items-center gap-2.5"
             accessibilityLabel={t('music.openNowPlaying')}
@@ -170,6 +171,7 @@ export function MiniPlayerBar() {
           </Pressable>
 
           <Pressable
+            accessibilityRole="button"
             onPress={togglePlayPause}
             hitSlop={6}
             className="h-9 w-9 items-center justify-center"
@@ -182,6 +184,7 @@ export function MiniPlayerBar() {
             )}
           </Pressable>
           <Pressable
+            accessibilityRole="button"
             onPress={playNext}
             hitSlop={6}
             className="h-9 w-9 items-center justify-center"
@@ -194,6 +197,7 @@ export function MiniPlayerBar() {
             />
           </Pressable>
           <Pressable
+            accessibilityRole="button"
             onPress={() => setHidden(true)}
             hitSlop={6}
             className="h-9 w-9 items-center justify-center"

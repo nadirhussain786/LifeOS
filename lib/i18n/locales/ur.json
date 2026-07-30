@@ -30,7 +30,13 @@
     "all": "سب",
     "saveChanges": "تبدیلیاں محفوظ کریں",
     "viewPhoto": "تصویر دیکھیں",
-    "removeAttachment": "منسلک فائل ہٹائیں"
+    "removeAttachment": "منسلک فائل ہٹائیں",
+    "archiveNamed": "“{{name}}” کو محفوظ کریں",
+    "deleteNamed": "“{{name}}” حذف کریں",
+    "markDone": "“{{name}}” کو مکمل نشان زد کریں",
+    "markNotDone": "“{{name}}” کو نامکمل نشان زد کریں",
+    "more": "مزید اختیارات",
+    "undo": "واپس"
   },
   "reminder": {
     "in1Hour": "ایک گھنٹے میں",
@@ -167,7 +173,9 @@
     "emptyArchived": "کوئی آرکائیو شدہ کام نہیں",
     "notifyAtDueTime": "مقررہ وقت پر مجھے مطلع کریں",
     "notifyAtNineAm": "اس دن صبح 9:00 بجے مجھے مطلع کریں",
-    "addNotes": "نوٹس شامل کریں…"
+    "addNotes": "نوٹس شامل کریں…",
+    "deletedToast": "“{{title}}” حذف ہو گیا۔",
+    "archivedToast": "“{{title}}” محفوظ ہو گیا۔"
   },
   "buckets": {
     "overdue": "مدت گزر گئی",
@@ -232,7 +240,12 @@
     "routineNextHint": "آپ اگلے مرحلے میں اس معمول میں عادات شامل کریں گے، اُسی ترتیب میں جس میں آپ انہیں کرنا چاہتے ہیں۔",
     "todayCount": "{{done}}/{{total}} آج",
     "loggedToday": "آج {{amount}} لاگ ہوا · ترمیم کے لیے ٹیپ کریں",
-    "doneToday": "آج مکمل ✓"
+    "doneToday": "آج مکمل ✓",
+    "streakDays_one": "{{count}} دن کا تسلسل",
+    "streakDays_other": "{{count}} دن کا تسلسل",
+    "withoutDays_one": "{{count}} دن سے نہیں",
+    "withoutDays_other": "{{count}} دن سے نہیں",
+    "quickLog": "“{{name}}” درج کریں"
   },
   "habitType": {
     "boolean": "ہاں / نہیں",
@@ -270,7 +283,8 @@
     "dayTimeline": "دن کی ٹائم لائن",
     "enableNotifBody": "جرنل یاد دہانی حاصل کرنے کے لیے اپنی ڈیوائس کی ترتیبات میں LifeOS کے لیے اطلاعات فعال کریں۔",
     "reminderSummary": "آپ کو ہر روز {{time}} پر آج کی انٹری لکھنے کی یاد دہانی ملے گی۔",
-    "writeAFewWords": "چند الفاظ لکھیں…"
+    "writeAFewWords": "چند الفاظ لکھیں…",
+    "reminderSettings": "یاد دہانی کی ترتیبات"
   },
   "mood": {
     "notSet": "مقرر نہیں",
@@ -354,7 +368,10 @@
     "deleteTagBody": "\"{{name}}\" ہر نوٹ سے ہٹا دیا جائے گا۔",
     "tagName": "ٹیگ کا نام",
     "addTag": "ٹیگ",
-    "writeSomething": "کچھ لکھیں…"
+    "writeSomething": "کچھ لکھیں…",
+    "unarchive": "محفوظ شدہ سے نکالیں",
+    "unarchiveNamed": "“{{name}}” کو محفوظ شدہ سے نکالیں",
+    "deletedToast": "“{{title}}” حذف ہو گیا۔"
   },
   "budget": {
     "title": "بجٹ",
@@ -534,7 +551,19 @@
     "restartBody": "نئی ترتیبِ سمت لاگو کرنے کے لیے LifeOS بند کر کے دوبارہ کھولیں۔",
     "rtlRestartNote": "اردو یا العربية منتخب کرنے پر LifeOS دائیں سے بائیں ترتیب میں بدل جائے گا اور ایپ دوبارہ شروع ہوگی۔",
     "setUpBiometricsTitle": "پہلے بایومیٹرکس ترتیب دیں",
-    "setUpBiometricsBody": "اپنی ڈیوائس کی ترتیبات میں Face ID یا فنگر پرنٹ شامل کریں، پھر یہاں ایپ لاک آن کریں۔"
+    "setUpBiometricsBody": "اپنی ڈیوائس کی ترتیبات میں Face ID یا فنگر پرنٹ شامل کریں، پھر یہاں ایپ لاک آن کریں۔",
+    "importData": "بیک اپ سے بحال کریں",
+    "importSubtitle": "برآمد کردہ فائل واپس شامل کریں — نیا کچھ ضائع نہیں ہوگا",
+    "importing": "بحال ہو رہا ہے…",
+    "importTitle": "بیک اپ سے بحال کریں",
+    "importBody": "کوئی lifeos-export JSON فائل منتخب کریں۔ ایک ہی id والی اندراجات اس سے تازہ ہوں گی؛ اس کے بعد بنائی گئی چیزیں ویسی ہی رہیں گی۔",
+    "chooseFile": "فائل منتخب کریں",
+    "importDone": "{{rows}} ریکارڈ بحال ہوئے۔",
+    "import_unreadable": "وہ فائل پڑھی نہیں جا سکی۔",
+    "import_notabackup": "یہ LifeOS بیک اپ فائل نہیں ہے۔",
+    "import_failed": "بحالی ناکام رہی اور کچھ تبدیل نہیں ہوا۔",
+    "importMissingMedia_one": "{{count}} میڈیا فائل غائب ہے — بیک اپ میں میڈیا محفوظ نہیں ہوتا۔",
+    "importMissingMedia_other": "{{count}} میڈیا فائلیں غائب ہیں — بیک اپ میں میڈیا محفوظ نہیں ہوتا۔"
   },
   "auth": {
     "welcomeBack": "خوش آمدید",
@@ -915,7 +944,8 @@
     "dragToMove": "منتقل کرنے کے لیے کھینچیں",
     "openNowPlaying": "ابھی چل رہا ہے کھولیں",
     "nextTrack": "اگلا ٹریک",
-    "hidePlayer": "پلیئر چھپائیں"
+    "hidePlayer": "پلیئر چھپائیں",
+    "playHint": "یہ گانا چلاتا ہے"
   },
   "albumCategory": {
     "gym": "جم کی پیش رفت",
@@ -1254,7 +1284,8 @@
     "buildConfig": "بلڈ کنفیگریشن",
     "notConfiguredTitle": "اس بلڈ میں Supabase کی اسناد نہیں ہیں",
     "notConfiguredBody": "اکاؤنٹس اور کلاؤڈ سنک بند ہیں — آف لائن سب کچھ پھر بھی کام کرتا ہے۔ EAS بلڈ کے لیے یہ اقدار اُس ماحول میں سیٹ کریں جو بلڈ پروفائل استعمال کرتا ہے، پھر دوبارہ بلڈ کریں۔",
-    "envMissing": "موجود نہیں"
+    "envMissing": "موجود نہیں",
+    "failedToast": "سِنک مکمل نہیں ہوا۔ آپ کا ڈیٹا اس ڈیوائس پر محفوظ ہے۔"
   },
   "syncModule": {
     "tasks": "کام",
@@ -1349,7 +1380,10 @@
       "expense_edited": "{{actor}} نے {{description}} میں تبدیلی کی",
       "expense_deleted": "{{actor}} نے {{description}} حذف کیا",
       "settlement_added": "{{actor}} نے ادائیگی درج کی",
-      "settlement_deleted": "{{actor}} نے ادائیگی ہٹائی"
+      "settlement_deleted": "{{actor}} نے ادائیگی ہٹائی",
+      "group_deleted": "{{actor}} نے گروپ حذف کیا",
+      "member_removed": "{{actor}} نے {{name}} کو ہٹایا",
+      "group_renamed": "{{actor}} نے گروپ کا نام بدلا"
     },
     "notifyTitle": "آپ کے گروپ میں {{actor}}",
     "notifySettlement": "ادائیگی درج کی",
@@ -1373,6 +1407,57 @@
       "already_accepted": "یہ دعوت پہلے استعمال ہو چکی ہے۔",
       "member_unavailable": "گروپ میں آپ کی جگہ اب دستیاب نہیں۔ دوبارہ شامل کرنے کو کہیں۔",
       "error": "کچھ غلط ہو گیا۔ ذرا دیر بعد کوشش کریں۔"
-    }
+    },
+    "groupCreated": "“{{name}}” بن گیا۔",
+    "currencyNote": "یہ گروپ {{currency}} میں حساب کرتا ہے۔",
+    "notConfiguredTitle": "مشترکہ گروپس کے لیے کلاؤڈ سیٹ اپ درکار ہے",
+    "expenseCount_one": "{{count}} خرچ",
+    "expenseCount_other": "{{count}} اخراجات",
+    "expenseAdded": "خرچ شامل ہو گیا۔",
+    "expenseDeleted": "خرچ حذف ہو گیا۔",
+    "memberRemoved": "{{name}} کو ہٹا دیا گیا۔",
+    "settlementRecorded": "ادائیگی درج ہو گئی۔",
+    "undo": "واپس کریں",
+    "inviteLinkCopied": "دعوتی لنک شیئر کرنے کے لیے تیار ہے۔",
+    "refresh": "تازہ کریں",
+    "settleEmptyHint": "پہلے کوئی خرچ شامل کریں — ابھی حساب کرنے کو کچھ نہیں۔",
+    "date": "تاریخ",
+    "memberAdded": "{{name}} گروپ میں شامل ہو گئے۔",
+    "mode": {
+      "equal": "برابر",
+      "exact": "بالکل درست"
+    },
+    "splitBalanced": "حصے پورے مل رہے ہیں۔",
+    "splitRemaining": "{{amount}} ابھی تقسیم ہونا باقی",
+    "splitOver": "{{amount}} کل سے زیادہ",
+    "spreadRemainder": "باقی تقسیم کریں",
+    "settleA11y": "درج کریں کہ {{from}} نے {{to}} کو {{amount}} ادا کیے",
+    "deleteGroup": "گروپ حذف کریں",
+    "deleteGroupTitle": "“{{name}}” حذف کریں؟",
+    "deleteGroupBody": "یہ گروپ سب کے لیے ہٹ جائے گا۔ اخراجات اور حساب مٹتے نہیں، محفوظ رہتے ہیں — مگر گروپ اب کسی کو نظر نہیں آئے گا۔",
+    "groupDeleted": "“{{name}}” حذف ہو گیا۔",
+    "leave": "گروپ چھوڑیں",
+    "leaveTitle": "یہ گروپ چھوڑ دیں؟",
+    "leaveBody": "آپ کے پرانے اخراجات گروپ میں رہیں گے تاکہ باقی سب کا حساب درست رہے۔ بس نئے اخراجات میں آپ شامل نہیں ہوں گے۔",
+    "leaveUnsettledBody": "آپ کا حساب ابھی برابر نہیں۔ آپ کے پرانے اخراجات اور لین دین گروپ میں رہیں گے — چھوڑنے سے وہ ختم نہیں ہوتے۔",
+    "leftGroup": "آپ نے گروپ چھوڑ دیا۔",
+    "removedMember": "اب گروپ میں نہیں",
+    "removeMemberUnsettledBody": "{{name}} کا حساب برابر نہیں — {{amount}} باقی۔ اُن کے پرانے اخراجات اور حساب گروپ میں رہیں گے؛ بس نئے اخراجات میں شامل نہیں ہوں گے۔",
+    "formerMembers": "اب گروپ میں نہیں",
+    "formerMembersHint": "اُن کے اخراجات حساب میں رہتے ہیں، تاکہ باقی سب کا حساب درست رہے۔",
+    "removedSettled": "حساب برابر",
+    "removedOutstanding": "{{amount}} باقی"
+  },
+  "errors": {
+    "offline": "ایسا لگتا ہے آپ آف لائن ہیں۔ اس کے لیے کنکشن درکار ہے — واپس آتے ہی یہ ہو جائے گا۔",
+    "not-configured": "اس بلڈ میں کوئی کلاؤڈ اکاؤنٹ ترتیب نہیں دیا گیا، اس لیے مشترکہ خصوصیات دستیاب نہیں۔ باقی سب کچھ آف لائن چلتا رہے گا۔",
+    "signed-out": "آپ کا سیشن ختم ہو گیا ہے۔ جاری رکھنے کے لیے دوبارہ سائن اِن کریں۔",
+    "backend-missing": "اس اکاؤنٹ کا کلاؤڈ سیٹ اپ نامکمل ہے، اس لیے مشترکہ خصوصیات ابھی نہیں چل سکتیں۔",
+    "permission": "آپ کو اس تک رسائی نہیں۔ اگر کسی نے یہ آپ کے ساتھ شیئر کیا تھا تو اُن سے دوبارہ شامل کرنے کو کہیں۔",
+    "conflict": "یہ پہلے سے موجود ہے۔",
+    "server": "ہماری طرف سے کچھ خرابی ہوئی۔ اسے ریکارڈ کر لیا گیا ہے — تھوڑی دیر بعد دوبارہ کوشش کریں۔",
+    "unknown": "یہ نہیں ہو سکا۔ براہِ کرم دوبارہ کوشش کریں۔",
+    "title": "یہ نہیں ہو سکا",
+    "detail": "تفصیلات: {{code}}"
   }
 }

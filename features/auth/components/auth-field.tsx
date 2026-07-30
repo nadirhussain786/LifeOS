@@ -60,7 +60,12 @@ export function AuthField({
           style={{ fontSize: 16, fontFamily: 'Sora_500Medium', color: theme.foreground }}
         />
         {secure && (
-          <Pressable onPress={() => setHidden((h) => !h)} hitSlop={10} className="ps-2">
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => setHidden((h) => !h)}
+            hitSlop={10}
+            className="ps-2"
+          >
             {hidden ? (
               <EyeOff size={18} color={theme.mutedForeground} />
             ) : (

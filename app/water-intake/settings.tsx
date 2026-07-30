@@ -45,6 +45,7 @@ function HourStepper({
       <Text variant="caption">{label}</Text>
       <View className="flex-row items-center gap-2">
         <Pressable
+          accessibilityRole="button"
           onPress={() => onChange(Math.max(0, hour - 1))}
           className="h-8 w-8 items-center justify-center rounded-full border border-border"
         >
@@ -52,6 +53,7 @@ function HourStepper({
         </Pressable>
         <Text className="w-20 text-center font-sora-semibold">{formatHour(hour)}</Text>
         <Pressable
+          accessibilityRole="button"
           onPress={() => onChange(Math.min(23, hour + 1))}
           className="h-8 w-8 items-center justify-center rounded-full border border-border"
         >
@@ -118,6 +120,7 @@ export default function WaterSettingsScreen() {
                 const selected = ml === goalMl;
                 return (
                   <Pressable
+                    accessibilityRole="button"
                     key={ml}
                     onPress={() => {
                       Haptics.selectionAsync();
@@ -167,6 +170,7 @@ export default function WaterSettingsScreen() {
                     const selected = draft.intervalMinutes === minutes;
                     return (
                       <Pressable
+                        accessibilityRole="button"
                         key={minutes}
                         onPress={() => {
                           Haptics.selectionAsync();

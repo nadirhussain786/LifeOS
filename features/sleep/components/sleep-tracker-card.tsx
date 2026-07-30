@@ -58,7 +58,12 @@ export function SleepTrackerCard() {
             </Text>
           </View>
           <GradientButton label={t('sleep.imAwake')} tint="#f59e0b" icon={Sunrise} onPress={wake} />
-          <Pressable onPress={cancelSleep} hitSlop={8} className="items-center">
+          <Pressable
+            accessibilityRole="button"
+            onPress={cancelSleep}
+            hitSlop={8}
+            className="items-center"
+          >
             <Text
               style={{ color: alpha('#ffffff', 0.8), fontSize: 12 }}
               className="font-sora-medium"

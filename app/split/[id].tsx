@@ -1,8 +1,9 @@
 import { format } from 'date-fns';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { HandCoins, Plus, Receipt, UserPlus } from 'lucide-react-native';
+import { HandCoins, LogOut, Plus, Receipt, Trash2, UserPlus } from 'lucide-react-native';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Alert, Pressable, RefreshControl, ScrollView, View } from 'react-native';
 
 import { EmptyState } from '@/components/ui/empty-state';
 import { QueryError } from '@/components/ui/query-error';
@@ -13,9 +14,17 @@ import { Text } from '@/components/ui/text';
 import { moduleTint, colors as dsColors } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { formatMoney } from '@/features/budget/services/money';
-import { useGroupBalances, useGroupDetail } from '@/features/split/hooks/use-split';
+import { MemberAvatars } from '@/features/split/components/member-avatars';
+import {
+  useGroupBalances,
+  useGroupDetail,
+  useMyMembership,
+  useSplitMutations,
+} from '@/features/split/hooks/use-split';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { alpha } from '@/lib/color';
+import { errorMessageKey } from '@/lib/supabase-error';
+import { toast } from '@/lib/toast-store';
 
 export default function SplitGroupScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -23,24 +32,96 @@ export default function SplitGroupScreen() {
   const scheme = useColorScheme() ?? 'light';
   const { t } = useTranslation();
   const tint = moduleTint('budget', scheme);
+  const c = dsColors[scheme];
+  const [refreshing, setRefreshing] = useState(false);
 
-  const { data, isLoading, isError, refetch } = useGroupDetail(id);
+  const { data, isLoading, isError, error, refetch } = useGroupDetail(id);
   const { balances, spendCents, mine } = useGroupBalances(data);
+  const { me, isOwner } = useMyMembership(data);
+  const { deleteGroup, removeMember } = useSplitMutations(id);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  }, [refetch]);
 
   const currency = data?.group?.currency ?? 'USD';
+  const memberOf = (memberId: string) => data?.members.find((x) => x.id === memberId) ?? null;
   const memberName = (memberId: string) => {
-    const m = data?.members.find((x) => x.id === memberId);
+    const m = memberOf(memberId);
     return m?.displayName || m?.email || t('split.someone');
+  };
+
+  /**
+   * Retiring the group is soft, but it is still shared history — everybody
+   * else loses it from their list too, so it asks first and says as much.
+   */
+  const confirmDeleteGroup = () => {
+    Alert.alert(
+      t('split.deleteGroupTitle', { name: data?.group?.name ?? '' }),
+      t('split.deleteGroupBody'),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: () =>
+            deleteGroup.mutate(undefined, {
+              onSuccess: () => {
+                toast.success(t('split.groupDeleted', { name: data?.group?.name ?? '' }));
+                router.replace('/split');
+              },
+              onError: (e) => toast.error(t(errorMessageKey(e))),
+            }),
+        },
+      ],
+    );
+  };
+
+  /** Leaving keeps your history in the group — the member row is tombstoned,
+   *  never removed, so the balances still add up for everyone left behind. */
+  const confirmLeave = () => {
+    if (!me) return;
+    const settled = (mine?.netCents ?? 0) === 0;
+    Alert.alert(
+      t('split.leaveTitle'),
+      settled ? t('split.leaveBody') : t('split.leaveUnsettledBody'),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('split.leave'),
+          style: 'destructive',
+          onPress: () =>
+            removeMember.mutate(me.id, {
+              onSuccess: () => {
+                toast.success(t('split.leftGroup'));
+                router.replace('/split');
+              },
+              onError: (e) => toast.error(t(errorMessageKey(e))),
+            }),
+        },
+      ],
+    );
   };
 
   if (isError) {
     return (
       <View className="flex-1 bg-background">
         <ScreenHeader eyebrow={t('split.title')} tint={tint} />
-        <QueryError onRetry={() => refetch()} />
+        <QueryError error={error} onRetry={() => refetch()} />
       </View>
     );
   }
+
+  const settled = !mine || mine.netCents === 0;
+  const owed = (mine?.netCents ?? 0) > 0;
+  const myColor = settled ? colors[scheme].foreground : owed ? c.success : c.error;
+  const myStatus = settled
+    ? t('split.allSquare')
+    : owed
+      ? t('split.youAreOwed')
+      : t('split.youOwe');
 
   return (
     <View className="flex-1 bg-background">
@@ -54,6 +135,20 @@ export default function SplitGroupScreen() {
             label: t('split.addPeople'),
             onPress: () => router.push(`/split/${id}/members`),
           },
+          // The owner retires the group; everyone else can only leave it.
+          isOwner
+            ? {
+                icon: Trash2,
+                label: t('split.deleteGroup'),
+                onPress: confirmDeleteGroup,
+                tint: c.error,
+              }
+            : {
+                icon: LogOut,
+                label: t('split.leave'),
+                onPress: confirmLeave,
+                tint: c.error,
+              },
         ]}
       />
 
@@ -66,33 +161,30 @@ export default function SplitGroupScreen() {
         <ScrollView
           contentContainerClassName="gap-6 px-5 pb-28 pt-1"
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              // Without a tint the spinner is invisible on the dark ground.
+              tintColor={colors[scheme].mutedForeground}
+              colors={[tint]}
+            />
+          }
         >
           {/* Your position first — the question people open this for — with
               total spend beside it. */}
           <View className="gap-3 rounded-2xl border border-border bg-card p-4">
             <View className="flex-row">
-              <View className="flex-1 gap-0.5">
+              <View
+                className="flex-1 gap-0.5"
+                accessible
+                accessibilityLabel={`${myStatus} ${formatMoney(Math.abs(mine?.netCents ?? 0), currency)}`}
+              >
                 <Text variant="micro">{t('split.yourPosition')}</Text>
-                <Text
-                  className="font-sora-extrabold text-2xl"
-                  style={{
-                    color:
-                      !mine || mine.netCents === 0
-                        ? colors[scheme].foreground
-                        : mine.netCents > 0
-                          ? dsColors[scheme].success
-                          : dsColors[scheme].error,
-                  }}
-                >
+                <Text className="font-sora-extrabold text-2xl" style={{ color: myColor }}>
                   {formatMoney(Math.abs(mine?.netCents ?? 0), currency)}
                 </Text>
-                <Text variant="caption">
-                  {!mine || mine.netCents === 0
-                    ? t('split.allSquare')
-                    : mine.netCents > 0
-                      ? t('split.youAreOwed')
-                      : t('split.youOwe')}
-                </Text>
+                <Text variant="caption">{myStatus}</Text>
               </View>
               <View className="w-px bg-border" />
               <View className="flex-1 gap-0.5 ps-4">
@@ -101,7 +193,7 @@ export default function SplitGroupScreen() {
                   {formatMoney(spendCents, currency)}
                 </Text>
                 <Text variant="caption">
-                  {t('split.membersCount', { count: data.members.length })}
+                  {t('split.membersCount', { count: data.activeMembers.length })}
                 </Text>
               </View>
             </View>
@@ -109,6 +201,8 @@ export default function SplitGroupScreen() {
             <View className="flex-row gap-2.5">
               <Pressable
                 onPress={() => router.push(`/split/${id}/expense`)}
+                accessibilityRole="button"
+                accessibilityLabel={t('split.addExpense')}
                 className="flex-1 flex-row items-center justify-center gap-2 rounded-xl py-3"
                 style={{ backgroundColor: alpha(tint, 0.12) }}
               >
@@ -119,6 +213,8 @@ export default function SplitGroupScreen() {
               </Pressable>
               <Pressable
                 onPress={() => router.push(`/split/${id}/settle`)}
+                accessibilityRole="button"
+                accessibilityLabel={t('split.settleUp')}
                 className="flex-1 flex-row items-center justify-center gap-2 rounded-xl border border-border py-3"
               >
                 <HandCoins size={16} color={colors[scheme].foreground} />
@@ -131,35 +227,51 @@ export default function SplitGroupScreen() {
           <View className="gap-2">
             <SectionHeader title={t('split.balances')} />
             <View className="rounded-2xl border border-border bg-card px-4">
-              {balances.map((b, index) => (
-                <View
-                  key={b.memberId}
-                  className={
-                    index === 0
-                      ? 'flex-row items-center justify-between py-3'
-                      : 'flex-row items-center justify-between border-t border-border py-3'
-                  }
-                >
-                  <Text className="flex-1 text-foreground" numberOfLines={1}>
-                    {memberName(b.memberId)}
-                  </Text>
-                  <Text
-                    className="font-sora-semibold"
-                    style={{
-                      color:
-                        b.netCents === 0
-                          ? colors[scheme].mutedForeground
-                          : b.netCents > 0
-                            ? dsColors[scheme].success
-                            : dsColors[scheme].error,
-                    }}
+              {balances.map((b, index) => {
+                const name = memberName(b.memberId);
+                const removed = memberOf(b.memberId)?.removedAt !== null;
+                const isSettled = b.netCents === 0;
+                const isOwed = b.netCents > 0;
+                // Somebody who has left but is still owed money has to stay
+                // visible, or the column silently stops adding up.
+                if (removed && isSettled) return null;
+                return (
+                  <View
+                    key={b.memberId}
+                    accessible
+                    accessibilityLabel={
+                      isSettled
+                        ? `${name}: ${t('split.settled')}`
+                        : `${name}: ${isOwed ? t('split.youAreOwed') : t('split.youOwe')} ${formatMoney(Math.abs(b.netCents), currency)}`
+                    }
+                    className={
+                      index === 0
+                        ? 'flex-row items-center gap-3 py-3'
+                        : 'flex-row items-center gap-3 border-t border-border py-3'
+                    }
                   >
-                    {b.netCents === 0
-                      ? t('split.settled')
-                      : formatMoney(Math.abs(b.netCents), currency)}
-                  </Text>
-                </View>
-              ))}
+                    <MemberAvatars names={[name]} total={1} size={28} />
+                    <View className="flex-1">
+                      <Text className="text-foreground" numberOfLines={1}>
+                        {name}
+                      </Text>
+                      {removed ? <Text variant="caption">{t('split.removedMember')}</Text> : null}
+                    </View>
+                    <Text
+                      className="font-sora-semibold"
+                      style={{
+                        color: isSettled
+                          ? colors[scheme].mutedForeground
+                          : isOwed
+                            ? c.success
+                            : c.error,
+                      }}
+                    >
+                      {isSettled ? t('split.settled') : formatMoney(Math.abs(b.netCents), currency)}
+                    </Text>
+                  </View>
+                );
+              })}
             </View>
           </View>
 
@@ -179,30 +291,33 @@ export default function SplitGroupScreen() {
               </View>
             ) : (
               <View className="rounded-2xl border border-border bg-card px-4">
-                {data.expenses.map((expense, index) => (
-                  <Pressable
-                    key={expense.id}
-                    onPress={() => router.push(`/split/${id}/expense?expense=${expense.id}`)}
-                    className={
-                      index === 0
-                        ? 'flex-row items-center gap-3 py-3'
-                        : 'flex-row items-center gap-3 border-t border-border py-3'
-                    }
-                  >
-                    <View className="flex-1 gap-0.5">
-                      <Text className="font-sora-medium text-foreground" numberOfLines={1}>
-                        {expense.description}
-                      </Text>
-                      <Text variant="caption">
-                        {t('split.paidBy', { name: memberName(expense.paidByMemberId) })} ·{' '}
-                        {format(expense.spentAt, 'MMM d')}
-                      </Text>
-                    </View>
-                    <Text className="font-sora-semibold text-foreground">
-                      {formatMoney(expense.amountCents, currency)}
-                    </Text>
-                  </Pressable>
-                ))}
+                {data.expenses.map((expense, index) => {
+                  const payer = memberName(expense.paidByMemberId);
+                  const money = formatMoney(expense.amountCents, currency);
+                  return (
+                    <Pressable
+                      key={expense.id}
+                      onPress={() => router.push(`/split/${id}/expense?expense=${expense.id}`)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${expense.description}, ${money}, ${t('split.paidBy', { name: payer })}, ${format(expense.spentAt, 'PPP')}`}
+                      className={
+                        index === 0
+                          ? 'flex-row items-center gap-3 py-3'
+                          : 'flex-row items-center gap-3 border-t border-border py-3'
+                      }
+                    >
+                      <View className="flex-1 gap-0.5">
+                        <Text className="font-sora-medium text-foreground" numberOfLines={1}>
+                          {expense.description}
+                        </Text>
+                        <Text variant="caption">
+                          {t('split.paidBy', { name: payer })} · {format(expense.spentAt, 'MMM d')}
+                        </Text>
+                      </View>
+                      <Text className="font-sora-semibold text-foreground">{money}</Text>
+                    </Pressable>
+                  );
+                })}
               </View>
             )}
           </View>
@@ -218,6 +333,9 @@ export default function SplitGroupScreen() {
                       {t(`split.action.${entry.action}`, {
                         actor: entry.actorName ?? t('split.someone'),
                         description: String(entry.meta?.description ?? ''),
+                        // member_added / member_removed / group_deleted record
+                        // the subject's name rather than a description.
+                        name: String(entry.meta?.name ?? t('split.someone')),
                       })}
                     </Text>
                     <Text variant="caption">{format(entry.createdAt, 'MMM d')}</Text>

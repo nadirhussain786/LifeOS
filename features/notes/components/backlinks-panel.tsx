@@ -29,6 +29,7 @@ export function BacklinksPanel({ backlinks }: Props) {
       <View className="gap-1 rounded-2xl border border-border bg-card px-4">
         {backlinks.map((backlink, index) => (
           <Pressable
+            accessibilityRole="button"
             key={backlink.id}
             onPress={() => router.push(`/note/${backlink.id}`)}
             className={index === 0 ? 'py-3' : 'border-t border-border py-3'}

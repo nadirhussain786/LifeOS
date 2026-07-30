@@ -31,7 +31,12 @@ export function RoutineCard({ routine, onEdit, onToggleHabit, onOpenHabit }: Pro
             {t('habits.doneCount', { done: doneCount, total: routine.habits.length })}
           </Text>
         </View>
-        <Pressable onPress={onEdit} hitSlop={8} accessibilityLabel={t('habits.editRoutine')}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={onEdit}
+          hitSlop={8}
+          accessibilityLabel={t('habits.editRoutine')}
+        >
           <Pencil size={16} color={colors[scheme].mutedForeground} />
         </Pressable>
       </View>
@@ -50,6 +55,7 @@ export function RoutineCard({ routine, onEdit, onToggleHabit, onOpenHabit }: Pro
             const isQuantified = QUANTIFIED_TYPES.has(habit.type);
             return (
               <Pressable
+                accessibilityRole="button"
                 key={habit.id}
                 onPress={() => onOpenHabit(habit.id)}
                 className="flex-row items-center gap-3 py-2"

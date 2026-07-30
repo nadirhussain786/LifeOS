@@ -1,6 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { useEffect, useRef, useState } from 'react';
 import { Dimensions, StyleSheet, View } from 'react-native';
+import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -78,19 +79,23 @@ type Props = {
 export function CelebrationOverlay({ visible, onDone }: Props) {
   const [play, setPlay] = useState(0);
   const wasVisible = useRef(false);
+  // 28 pieces falling across the whole screen is exactly the motion the OS
+  // setting exists to suppress. The haptic and the completion callback still
+  // fire — the achievement is still acknowledged, just not thrown at you.
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     if (visible && !wasVisible.current) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setPlay((count) => count + 1);
-      const timer = setTimeout(() => onDone?.(), 1700);
+      const timer = setTimeout(() => onDone?.(), reducedMotion ? 300 : 1700);
       wasVisible.current = true;
       return () => clearTimeout(timer);
     }
     if (!visible) wasVisible.current = false;
-  }, [visible, onDone]);
+  }, [visible, onDone, reducedMotion]);
 
-  if (!visible) return null;
+  if (!visible || reducedMotion) return null;
 
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill}>

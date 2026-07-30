@@ -34,7 +34,7 @@ export function DevErrorBanner() {
         <Text className="flex-1 text-sm" style={{ color: '#ffffff' }}>
           {message}
         </Text>
-        <Pressable onPress={clear} hitSlop={8}>
+        <Pressable accessibilityRole="button" onPress={clear} hitSlop={8}>
           <X size={16} color="#ffffff" />
         </Pressable>
       </View>

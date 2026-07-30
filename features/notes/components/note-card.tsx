@@ -1,10 +1,12 @@
 import { Archive, ArchiveRestore, Star, Trash2 } from 'lucide-react-native';
+import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 import { SwipeableRow } from '@/components/ui/swipeable-row';
 import { Text } from '@/components/ui/text';
+import { readableTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { stripMarkdown } from '@/features/notes/services/markdown';
 import { useRelativeTime } from '@/hooks/use-relative-time';
@@ -18,20 +20,32 @@ type Props = {
   onToggleArchive: () => void;
 };
 
-export function NoteCard({ note, categoryColor, onPress, onDelete, onToggleArchive }: Props) {
+function NoteCardComponent({ note, categoryColor, onPress, onDelete, onToggleArchive }: Props) {
   const scheme = useColorScheme() ?? 'light';
   const { t } = useTranslation();
   const relativeTime = useRelativeTime(new Date(note.updatedAt));
 
   return (
     <SwipeableRow
+      // Swipe-only actions are unreachable by screen readers without these.
+      accessibilityActions={[
+        { name: 'archive', label: note.isArchived ? t('notes.unarchive') : t('common.archive') },
+        { name: 'delete', label: t('common.delete') },
+      ]}
+      onAccessibilityAction={(name) =>
+        name === 'archive' ? onToggleArchive() : name === 'delete' ? onDelete() : undefined
+      }
       actions={
         <>
           <Pressable
             onPress={onToggleArchive}
-            accessibilityLabel={
-              note.isArchived ? `Unarchive "${note.title}"` : `Archive "${note.title}"`
-            }
+            accessibilityRole="button"
+            accessibilityLabel={t(
+              note.isArchived ? 'notes.unarchiveNamed' : 'common.archiveNamed',
+              {
+                name: note.title || t('notes.untitled'),
+              },
+            )}
             className="flex-1 items-center justify-center bg-secondary"
           >
             {note.isArchived ? (
@@ -42,7 +56,10 @@ export function NoteCard({ note, categoryColor, onPress, onDelete, onToggleArchi
           </Pressable>
           <Pressable
             onPress={onDelete}
-            accessibilityLabel={`Delete "${note.title}"`}
+            accessibilityRole="button"
+            accessibilityLabel={t('common.deleteNamed', {
+              name: note.title || t('notes.untitled'),
+            })}
             className="flex-1 items-center justify-center bg-destructive"
           >
             <Trash2 color={colors[scheme].primaryForeground} size={18} />
@@ -50,11 +67,16 @@ export function NoteCard({ note, categoryColor, onPress, onDelete, onToggleArchi
         </>
       }
     >
-      <Pressable onPress={onPress} className="gap-1.5 px-4 py-3.5">
+      <Pressable
+        onPress={onPress}
+        accessibilityRole="button"
+        accessibilityLabel={note.title || t('notes.untitled')}
+        className="gap-1.5 px-4 py-3.5"
+      >
         {categoryColor && (
           <View
             className="absolute bottom-2 start-0 top-2 w-1 rounded-full"
-            style={{ backgroundColor: categoryColor }}
+            style={{ backgroundColor: readableTint(categoryColor, scheme, 3) }}
           />
         )}
         <View className="flex-row items-center justify-between gap-2">
@@ -75,3 +97,6 @@ export function NoteCard({ note, categoryColor, onPress, onDelete, onToggleArchi
     </SwipeableRow>
   );
 }
+
+/** Memoised — re-rendered for every keystroke in the notes search field. */
+export const NoteCard = memo(NoteCardComponent);

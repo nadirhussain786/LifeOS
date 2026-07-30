@@ -126,6 +126,7 @@ export default function JournalEntryScreen() {
             {format(date, 'EEEE')}
           </Text>
           <Pressable
+            accessibilityRole="button"
             onPress={() => router.push(`/timeline/${entryDate}`)}
             className="flex-row items-center gap-1.5 rounded-full border border-border px-3 py-1"
           >
@@ -180,6 +181,7 @@ export default function JournalEntryScreen() {
 
         <View className="flex-row flex-wrap items-center gap-2">
           <Pressable
+            accessibilityRole="button"
             onPress={tagLocation}
             className="flex-row items-center gap-1.5 rounded-full border border-border px-3 py-2"
           >

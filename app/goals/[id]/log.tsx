@@ -100,6 +100,7 @@ export default function LogProgressScreen() {
           <View className="gap-4 rounded-2xl border border-border bg-card p-5 shadow-e1">
             <View className="flex-row items-center justify-center gap-6">
               <Pressable
+                accessibilityRole="button"
                 onPress={() => setAddCount((a) => a - countStep)}
                 className="h-12 w-12 items-center justify-center rounded-2xl border border-border bg-surface"
               >
@@ -120,6 +121,7 @@ export default function LogProgressScreen() {
                 </Text>
               </View>
               <Pressable
+                accessibilityRole="button"
                 onPress={() => setAddCount((a) => a + countStep)}
                 className="h-12 w-12 items-center justify-center rounded-2xl"
                 style={{ backgroundColor: meta.tint }}
@@ -130,6 +132,7 @@ export default function LogProgressScreen() {
             <View className="flex-row justify-center gap-2">
               {[1, 5, 10].map((n) => (
                 <Pressable
+                  accessibilityRole="button"
                   key={n}
                   onPress={() => setAddCount((a) => a + n)}
                   className="rounded-full border border-border px-3 py-1.5"
@@ -160,6 +163,7 @@ export default function LogProgressScreen() {
             <View className="flex-row justify-center gap-2">
               {[5, 10, 25].map((n) => (
                 <Pressable
+                  accessibilityRole="button"
                   key={n}
                   onPress={() => setPct(Math.min(100, targetPct + n))}
                   className="rounded-full border border-border px-3 py-1.5"
@@ -168,6 +172,7 @@ export default function LogProgressScreen() {
                 </Pressable>
               ))}
               <Pressable
+                accessibilityRole="button"
                 onPress={() => setPct(100)}
                 className="rounded-full px-3 py-1.5"
                 style={{ backgroundColor: alpha(meta.tint, 0.15) }}

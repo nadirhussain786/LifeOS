@@ -47,6 +47,7 @@ export function SubjectPicker({ subjects, value, onChange, onCreate }: Props) {
       contentContainerClassName="items-center gap-2"
     >
       <Pressable
+        accessibilityRole="button"
         onPress={() => select(null)}
         className={cn(
           'rounded-full border px-3 py-1.5',
@@ -62,6 +63,7 @@ export function SubjectPicker({ subjects, value, onChange, onCreate }: Props) {
         const selected = subject.id === value;
         return (
           <Pressable
+            accessibilityRole="button"
             key={subject.id}
             onPress={() => select(subject.id)}
             style={
@@ -103,6 +105,7 @@ export function SubjectPicker({ subjects, value, onChange, onCreate }: Props) {
         </View>
       ) : (
         <Pressable
+          accessibilityRole="button"
           onPress={() => setIsAdding(true)}
           className="flex-row items-center gap-1 rounded-full border border-dashed border-border px-3 py-1.5"
         >

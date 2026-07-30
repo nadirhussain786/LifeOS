@@ -1,5 +1,7 @@
+import { ensureProfileRow } from '@/features/auth/services/ensure-profile';
 import { supabase } from '@/lib/supabase';
 import { generateId } from '@/lib/id';
+import { toSupabaseError } from '@/lib/supabase-error';
 import type {
   ExpenseShare,
   ExpenseGroup,
@@ -48,6 +50,7 @@ const toMember = (r: Row): GroupMember => ({
   displayName: str(r.display_name),
   role: (str(r.role) ?? 'member') as GroupMember['role'],
   joinedAt: typeof r.joined_at === 'number' ? r.joined_at : null,
+  removedAt: typeof r.deleted_at === 'number' ? r.deleted_at : null,
 });
 
 const toExpense = (r: Row): GroupExpense => ({
@@ -95,11 +98,23 @@ const toActivity = (r: Row): GroupActivity => ({
   createdAt: num(r.created_at),
 });
 
-/** Supabase returns `{ data, error }`; make the error a throw so react-query
- *  surfaces it instead of silently rendering an empty list. */
-function unwrap<T>(result: { data: T | null; error: { message: string } | null }): T {
-  if (result.error) throw new Error(result.error.message);
+/**
+ * Supabase returns `{ data, error }`; make the error a throw so react-query
+ * surfaces it instead of silently rendering an empty list.
+ *
+ * Rethrown through toSupabaseError so the PostgREST/SQLSTATE code survives —
+ * `new Error(error.message)` discarded it, which left every screen with nothing
+ * to distinguish "you're offline" from "this project never ran the migrations"
+ * and so telling everyone to check their connection.
+ */
+function unwrap<T>(result: { data: T | null; error: unknown }): T {
+  if (result.error) throw toSupabaseError(result.error);
   return (result.data ?? []) as T;
+}
+
+/** Same, for calls that care about a single row or a void result. */
+function assertOk(error: unknown): void {
+  if (error) throw toSupabaseError(error);
 }
 
 // --- reads -----------------------------------------------------------------
@@ -120,16 +135,25 @@ export async function getGroup(id: string): Promise<ExpenseGroup | null> {
     .eq('id', id)
     .is('deleted_at', null)
     .maybeSingle();
-  if (res.error) throw new Error(res.error.message);
+  assertOk(res.error);
   return res.data ? toGroup(res.data as Row) : null;
 }
 
+/**
+ * Everyone who has ever been in the group, removed members included.
+ *
+ * This used to filter `deleted_at is null`, and the balances are computed over
+ * whatever it returns — so removing somebody took everything they had PAID out
+ * of the ledger while leaving everything they were OWED for in it. A £100
+ * dinner paid by one person and split four ways became three people owing £25
+ * each and nobody being owed anything, with "Settle up" reporting the group as
+ * square. Callers that need only the current line-up filter on `removedAt`.
+ */
 export async function listMembers(groupId: string): Promise<GroupMember[]> {
   const res = await supabase
     .from('expense_group_members')
     .select('*')
     .eq('group_id', groupId)
-    .is('deleted_at', null)
     .order('created_at');
   return unwrap<Row[]>(res).map(toMember);
 }
@@ -162,6 +186,53 @@ export async function listSettlements(groupId: string): Promise<Settlement[]> {
   return unwrap<Row[]>(res).map(toSettlement);
 }
 
+/**
+ * Every group plus the ledger rows needed to price them, in five requests
+ * regardless of how many groups there are.
+ *
+ * The groups list is the screen people open to answer one question — "am I up
+ * or down, and by how much?" — and it could not answer it, because a balance
+ * needs members, expenses, shares and settlements and fetching those per group
+ * is an N+1. Batching by `in(group_id, ids)` keeps it flat, and the arithmetic
+ * stays in split-math.ts rather than being reimplemented in SQL, so the numbers
+ * on this screen and the numbers inside a group can never disagree.
+ */
+export async function listGroupLedgers(): Promise<{
+  groups: ExpenseGroup[];
+  members: GroupMember[];
+  expenses: GroupExpense[];
+  shares: ExpenseShare[];
+  settlements: Settlement[];
+}> {
+  const groups = await listGroups();
+  const ids = groups.map((g) => g.id);
+  if (ids.length === 0) {
+    return { groups, members: [], expenses: [], shares: [], settlements: [] };
+  }
+
+  const [membersRes, expensesRes, settlementsRes] = await Promise.all([
+    // Removed members included, for the same reason listMembers includes them.
+    supabase.from('expense_group_members').select('*').in('group_id', ids),
+    supabase.from('expense_group_expenses').select('*').in('group_id', ids).is('deleted_at', null),
+    supabase
+      .from('expense_group_settlements')
+      .select('*')
+      .in('group_id', ids)
+      .is('deleted_at', null),
+  ]);
+
+  const expenses = unwrap<Row[]>(expensesRes).map(toExpense);
+  const shares = await listShares(expenses.map((e) => e.id));
+
+  return {
+    groups,
+    members: unwrap<Row[]>(membersRes).map(toMember),
+    expenses,
+    shares,
+    settlements: unwrap<Row[]>(settlementsRes).map(toSettlement),
+  };
+}
+
 export async function listActivity(groupId: string, limit = 50): Promise<GroupActivity[]> {
   const res = await supabase
     .from('expense_group_activity')
@@ -180,6 +251,13 @@ export async function createGroup(input: {
   currency: string;
   displayName: string | null;
 }): Promise<string> {
+  // The RPC reads `profiles` to build the owner's member row, and on a project
+  // that has not had migration 0007 applied it does so with INSERT..SELECT —
+  // which silently inserts nothing if that row is missing, leaving the group
+  // memberless and failing the next statement with an RLS violation. Repairing
+  // the row first makes group creation work on every deployed schema version.
+  await ensureProfileRow();
+
   const groupId = generateId();
   const { error } = await supabase.rpc('create_expense_group', {
     p_group_id: groupId,
@@ -191,7 +269,7 @@ export async function createGroup(input: {
     p_activity_id: generateId(),
     p_now: Date.now(),
   });
-  if (error) throw new Error(error.message);
+  assertOk(error);
   return groupId;
 }
 
@@ -213,7 +291,7 @@ export async function addMemberByEmail(input: {
     created_at: now,
     updated_at: now,
   });
-  if (error) throw new Error(error.message);
+  assertOk(error);
 }
 
 /**
@@ -231,7 +309,7 @@ export async function sendInvite(input: {
   groupName: string;
 }): Promise<{ link: string; emailed: boolean }> {
   const { data, error } = await supabase.functions.invoke('send-invite', { body: input });
-  if (error) throw new Error(error.message);
+  assertOk(error);
   return { link: String(data?.link ?? ''), emailed: data?.emailed === true };
 }
 
@@ -243,7 +321,7 @@ export async function peekInvitation(
     p_token: token,
     p_now: Date.now(),
   });
-  if (error) throw new Error(error.message);
+  assertOk(error);
   const row = Array.isArray(data) ? data[0] : data;
   return { groupName: row?.group_name ?? null, status: String(row?.status ?? 'invalid') };
 }
@@ -253,16 +331,36 @@ export async function acceptInvitation(token: string): Promise<string> {
     p_token: token,
     p_now: Date.now(),
   });
-  if (error) throw new Error(error.message);
+  assertOk(error);
   return String(data);
 }
 
+/**
+ * Removes a member, or leaves the group when it is your own membership.
+ *
+ * Goes through the RPC so the removal is authorised (owner, or yourself) and
+ * recorded in the activity feed in one transaction — the direct update it
+ * replaces could be issued by any member and left no trace of who did it, in a
+ * feature whose whole safety model is "anyone can edit, and the log says who".
+ */
 export async function removeMember(memberId: string): Promise<void> {
-  const { error } = await supabase
-    .from('expense_group_members')
-    .update({ deleted_at: Date.now(), updated_at: Date.now() })
-    .eq('id', memberId);
-  if (error) throw new Error(error.message);
+  const { error } = await supabase.rpc('remove_group_member', {
+    p_member_id: memberId,
+    p_activity_id: generateId(),
+    p_now: Date.now(),
+  });
+  assertOk(error);
+}
+
+/** Retires a group. Owner only, and soft — the ledger stays intact for
+ *  everybody who was in it. */
+export async function deleteGroup(groupId: string): Promise<void> {
+  const { error } = await supabase.rpc('delete_expense_group', {
+    p_group_id: groupId,
+    p_activity_id: generateId(),
+    p_now: Date.now(),
+  });
+  assertOk(error);
 }
 
 export async function createExpense(input: {
@@ -289,7 +387,7 @@ export async function createExpense(input: {
     p_activity_id: generateId(),
     p_now: Date.now(),
   });
-  if (error) throw new Error(error.message);
+  assertOk(error);
   return expenseId;
 }
 
@@ -313,7 +411,7 @@ export async function updateExpense(input: {
     p_activity_id: generateId(),
     p_now: Date.now(),
   });
-  if (error) throw new Error(error.message);
+  assertOk(error);
 }
 
 export async function deleteExpense(expenseId: string): Promise<void> {
@@ -322,7 +420,7 @@ export async function deleteExpense(expenseId: string): Promise<void> {
     p_activity_id: generateId(),
     p_now: Date.now(),
   });
-  if (error) throw new Error(error.message);
+  assertOk(error);
 }
 
 export async function recordSettlement(input: {
@@ -346,5 +444,5 @@ export async function recordSettlement(input: {
     p_activity_id: generateId(),
     p_now: now,
   });
-  if (error) throw new Error(error.message);
+  assertOk(error);
 }

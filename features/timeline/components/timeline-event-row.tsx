@@ -51,6 +51,7 @@ export function TimelineEventRow({ event, onDeleteCalendarEvent }: Props) {
 
   return (
     <Pressable
+      accessibilityRole="button"
       onPress={() => router.push(event.linkHref)}
       onLongPress={isCalendarEvent && onDeleteCalendarEvent ? confirmDelete : undefined}
       className="flex-row items-center gap-3 py-2.5"

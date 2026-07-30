@@ -42,9 +42,15 @@ export function ReflectionSheet({ visible, focusSeconds, onSave }: Props) {
       onRequestClose={commit}
       statusBarTranslucent
     >
-      <Pressable className="flex-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} onPress={commit}>
+      <Pressable
+        accessibilityRole="button"
+        className="flex-1"
+        style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+        onPress={commit}
+      >
         <View className="flex-1 justify-end">
           <Pressable
+            accessibilityRole="button"
             onPress={(e) => e.stopPropagation()}
             style={{ paddingBottom: insets.bottom + 14 }}
             className="gap-4 rounded-t-3xl bg-card px-5 pt-3"

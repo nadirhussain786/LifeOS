@@ -248,3 +248,71 @@ describe('totalSpend', () => {
     expect(totalSpend([])).toBe(0);
   });
 });
+
+/**
+ * Removing somebody from a group is a tombstone, not a deletion — and the
+ * balances have to keep counting them.
+ *
+ * The bug these lock down: `listMembers` filtered `deleted_at is null`, and
+ * balances are computed only for the members it returned. So a removed member's
+ * spending left the ledger while everything they had paid FOR stayed in it.
+ * A £100 dinner paid by Alice and split four ways became Bob, Carol and Dave
+ * owing £25 each, nobody owed anything, the nets summing to −£75, and
+ * `simplifyDebts` returning NO transfers at all — "Settle up" declaring the
+ * group square over three live debts.
+ */
+describe('members who have left the group', () => {
+  const dinner = [expense('e1', 'alice', 10000)];
+  const shares = [
+    share('e1', 'alice', 2500),
+    share('e1', 'bob', 2500),
+    share('e1', 'carol', 2500),
+    share('e1', 'dave', 2500),
+  ];
+  const everyone = ['alice', 'bob', 'carol', 'dave'];
+
+  it('still balances to zero when the payer has been removed', () => {
+    const balances = computeBalances(everyone, dinner, shares, []);
+    expect(balances.reduce((sum, b) => sum + b.netCents, 0)).toBe(0);
+  });
+
+  it('keeps what a removed member is owed', () => {
+    const balances = computeBalances(everyone, dinner, shares, []);
+    expect(balances.find((b) => b.memberId === 'alice')?.netCents).toBe(7500);
+  });
+
+  it('still produces the transfers that clear the group', () => {
+    const transfers = simplifyDebts(computeBalances(everyone, dinner, shares, []));
+    expect(transfers).toHaveLength(3);
+    expect(transfers.every((t) => t.toMemberId === 'alice')).toBe(true);
+    expect(transfers.reduce((sum, t) => sum + t.amountCents, 0)).toBe(7500);
+  });
+
+  it('loses money if the removed member is dropped from the list — the old bug', () => {
+    // Kept as an executable description of WHY the member list must include
+    // tombstoned rows. If this ever stops holding, the filter came back.
+    const withoutAlice = computeBalances(['bob', 'carol', 'dave'], dinner, shares, []);
+    expect(withoutAlice.reduce((sum, b) => sum + b.netCents, 0)).toBe(-7500);
+    expect(simplifyDebts(withoutAlice)).toEqual([]);
+  });
+
+  it('settles a removed member the same way as anyone else', () => {
+    const settlements: Settlement[] = [
+      {
+        id: 's1',
+        groupId: 'g1',
+        fromMemberId: 'bob',
+        toMemberId: 'alice',
+        amountCents: 2500,
+        currency: 'USD',
+        settledAt: 0,
+        note: null,
+        createdBy: null,
+      },
+    ];
+    const balances = computeBalances(everyone, dinner, shares, settlements);
+    expect(balances.find((b) => b.memberId === 'bob')?.netCents).toBe(0);
+    expect(balances.find((b) => b.memberId === 'alice')?.netCents).toBe(5000);
+    expect(balances.reduce((sum, b) => sum + b.netCents, 0)).toBe(0);
+  });
+});

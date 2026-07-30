@@ -18,7 +18,12 @@ export function SectionHeader({ title, actionLabel, onAction, actionTint }: Prop
     <View className="flex-row items-center justify-between">
       <Text variant="subheading">{title}</Text>
       {actionLabel && onAction ? (
-        <Pressable onPress={onAction} hitSlop={8} className="flex-row items-center gap-0.5">
+        <Pressable
+          accessibilityRole="button"
+          onPress={onAction}
+          hitSlop={8}
+          className="flex-row items-center gap-0.5"
+        >
           <Text
             variant="caption"
             className="font-sora-semibold"

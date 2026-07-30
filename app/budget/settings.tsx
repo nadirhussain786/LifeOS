@@ -64,6 +64,7 @@ export default function BudgetSettingsScreen() {
             {t('budget.currency')}
           </Text>
           <Pressable
+            accessibilityRole="button"
             onPress={() => router.push('/budget/currency')}
             className="flex-row items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3.5"
           >

@@ -34,6 +34,7 @@ export function HabitTypePicker({
         const Icon = option.icon;
         return (
           <Pressable
+            accessibilityRole="button"
             key={option.value}
             onPress={() => {
               Haptics.selectionAsync();

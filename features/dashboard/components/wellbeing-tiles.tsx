@@ -54,6 +54,7 @@ export function WaterTile() {
 
   return (
     <Pressable
+      accessibilityRole="button"
       onPress={addGlass}
       className={tileClass()}
       accessibilityLabel={t('dashboard.addGlassOfWater')}
@@ -124,6 +125,7 @@ export function MoodTile() {
       <View className="flex-row">
         {MOODS.map((mood) => (
           <Pressable
+            accessibilityRole="button"
             key={mood.value}
             onPress={() => selectMood(mood.value)}
             hitSlop={6}

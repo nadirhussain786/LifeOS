@@ -62,6 +62,7 @@ export default function NewAlbumScreen() {
               const Icon = item.icon;
               return (
                 <Pressable
+                  accessibilityRole="button"
                   key={item.id}
                   onPress={() => setCategory(item.id)}
                   style={selected ? { backgroundColor: tint, borderColor: tint } : undefined}

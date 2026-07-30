@@ -38,6 +38,7 @@ export function TimeField({ icon: Icon, label, value, onChange, tint }: Props) {
         <DateTimePicker value={value} mode="time" display="compact" onChange={handleChange} />
       ) : (
         <Pressable
+          accessibilityRole="button"
           onPress={() => setShow(true)}
           className="rounded-lg border border-border bg-surface px-3 py-1.5"
         >

@@ -1,9 +1,9 @@
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import { Archive, Search, StickyNote } from 'lucide-react-native';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, TextInput, View } from 'react-native';
+import { Pressable, RefreshControl, TextInput, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 import { EmptyState } from '@/components/ui/empty-state';
@@ -15,6 +15,7 @@ import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import { NoteCard } from '@/features/notes/components/note-card';
 import { useNoteMutations } from '@/features/notes/hooks/use-note-mutations';
+import { toast } from '@/lib/toast-store';
 import { useArchivedNotes, useNoteCategories, useNotes } from '@/features/notes/hooks/use-notes';
 import { useNotesFilterStore } from '@/features/notes/store/notes-filter-store';
 import type { Note } from '@/features/notes/types/note.types';
@@ -31,9 +32,18 @@ export default function NotesScreen() {
   const activeNotes = useNotes();
   const archivedNotes = useArchivedNotes();
   const { data: categories = [] } = useNoteCategories();
-  const { remove, archive, unarchive } = useNoteMutations();
+  const { remove, restore, archive, unarchive } = useNoteMutations();
 
-  const { data: notes = [], isLoading } = showArchived ? archivedNotes : activeNotes;
+  const { data: notes = [], isLoading, refetch } = showArchived ? archivedNotes : activeNotes;
+
+  // Pull-to-refresh existed on the dashboard and nowhere else, so the reflex
+  // gesture did nothing on every list in the app.
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  }, [refetch]);
   const categoryColorById = useMemo(
     () => new Map(categories.map((category) => [category.id, category.colorToken])),
     [categories],
@@ -65,6 +75,7 @@ export default function NotesScreen() {
         tint="#eab308"
         right={
           <Pressable
+            accessibilityRole="button"
             onPress={() => setShowArchived((current) => !current)}
             className="flex-row items-center gap-1.5 rounded-full border border-border px-3 py-1.5"
           >
@@ -104,6 +115,15 @@ export default function NotesScreen() {
           data={items}
           keyExtractor={(item) => (item.type === 'header' ? `header-${item.label}` : item.note.id)}
           contentContainerStyle={{ paddingTop: 4, paddingBottom: 120 }}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              // Without an explicit tint the spinner is invisible on dark.
+              tintColor={colors[scheme].mutedForeground}
+              colors={[colors[scheme].accent]}
+            />
+          }
           renderItem={({ item }) =>
             item.type === 'header' ? (
               <ListSectionHeader label={item.label} count={item.count} />
@@ -114,7 +134,17 @@ export default function NotesScreen() {
                   item.note.categoryId ? categoryColorById.get(item.note.categoryId) : undefined
                 }
                 onPress={() => router.push(`/note/${item.note.id}`)}
-                onDelete={() => remove.mutate(item.note.id)}
+                onDelete={() => {
+                  const { id, title } = item.note;
+                  remove.mutate(id, {
+                    onSuccess: () =>
+                      toast.undo(
+                        t('notes.deletedToast', { title: title || t('notes.untitled') }),
+                        t('common.undo'),
+                        () => restore.mutate(id),
+                      ),
+                  });
+                }}
                 onToggleArchive={() =>
                   item.note.isArchived
                     ? unarchive.mutate(item.note.id)

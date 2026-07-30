@@ -44,13 +44,14 @@ export function MilestoneEditor({ value, onChange }: Props) {
             className="flex-1 py-1 text-foreground"
             maxLength={100}
           />
-          <Pressable onPress={() => removeAt(index)} hitSlop={8}>
+          <Pressable accessibilityRole="button" onPress={() => removeAt(index)} hitSlop={8}>
             <X size={16} color={colors[scheme].mutedForeground} />
           </Pressable>
         </View>
       ))}
 
       <Pressable
+        accessibilityRole="button"
         onPress={add}
         className="flex-row items-center justify-center gap-1.5 rounded-lg border border-dashed border-border py-2.5"
       >

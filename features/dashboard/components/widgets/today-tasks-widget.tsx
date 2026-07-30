@@ -59,6 +59,7 @@ export function TodayTasksWidget() {
             <View className="gap-2">
               {data.upcoming.map((task) => (
                 <Pressable
+                  accessibilityRole="button"
                   key={task.id}
                   onPress={() => completeTask(task.id)}
                   className="flex-row items-center gap-3 rounded-xl bg-surface px-3 py-2.5"

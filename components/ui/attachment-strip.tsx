@@ -92,6 +92,7 @@ export function AttachmentStrip({ attachments, onAddImage, onRemove }: Props) {
           <View key={attachment.id} className="relative">
             {attachment.kind === 'image' ? (
               <Pressable
+                accessibilityRole="button"
                 onPress={() => setViewerUri(attachment.uri)}
                 accessibilityLabel={t('common.viewPhoto')}
               >
@@ -101,6 +102,7 @@ export function AttachmentStrip({ attachments, onAddImage, onRemove }: Props) {
               <AudioAttachmentTile uri={attachment.uri} durationMs={attachment.durationMs} />
             )}
             <Pressable
+              accessibilityRole="button"
               onPress={() => onRemove(attachment.id)}
               hitSlop={8}
               accessibilityLabel={t('common.removeAttachment')}
@@ -112,6 +114,7 @@ export function AttachmentStrip({ attachments, onAddImage, onRemove }: Props) {
         ))}
 
         <Pressable
+          accessibilityRole="button"
           onPress={pickImage}
           className="h-20 w-20 items-center justify-center gap-1 rounded-xl border border-dashed border-border"
         >
@@ -128,6 +131,7 @@ export function AttachmentStrip({ attachments, onAddImage, onRemove }: Props) {
       >
         <View className="flex-1 bg-black/95">
           <Pressable
+            accessibilityRole="button"
             onPress={() => setViewerUri(null)}
             hitSlop={10}
             accessibilityLabel={t('common.close')}
@@ -137,6 +141,7 @@ export function AttachmentStrip({ attachments, onAddImage, onRemove }: Props) {
             <X size={20} color="#ffffff" />
           </Pressable>
           <Pressable
+            accessibilityRole="button"
             className="flex-1 items-center justify-center"
             onPress={() => setViewerUri(null)}
           >

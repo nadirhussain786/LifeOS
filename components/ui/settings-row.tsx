@@ -68,7 +68,7 @@ export function SettingsRow({
 
   if (!onPress) return content;
   return (
-    <Pressable onPress={onPress} disabled={disabled}>
+    <Pressable accessibilityRole="button" onPress={onPress} disabled={disabled}>
       {content}
     </Pressable>
   );

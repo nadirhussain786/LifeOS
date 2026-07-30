@@ -62,6 +62,7 @@ export function SchedulePicker({
           const selected = option.value === scheduleType;
           return (
             <Pressable
+              accessibilityRole="button"
               key={option.value}
               onPress={() => {
                 Haptics.selectionAsync();
@@ -95,6 +96,7 @@ export function SchedulePicker({
             const selected = selectedDays.has(day.value);
             return (
               <Pressable
+                accessibilityRole="button"
                 key={day.value}
                 onPress={() => toggleDay(day.value)}
                 className="h-9 w-9 items-center justify-center rounded-full border"

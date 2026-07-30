@@ -50,6 +50,7 @@ export default function AllPhotosScreen() {
         right={
           <View className="flex-row items-center gap-4">
             <Pressable
+              accessibilityRole="button"
               onPress={() => setShowSearch((s) => !s)}
               hitSlop={8}
               accessibilityLabel={t('common.search')}
@@ -57,6 +58,7 @@ export default function AllPhotosScreen() {
               <Search size={20} color={colors[scheme].foreground} />
             </Pressable>
             <Pressable
+              accessibilityRole="button"
               onPress={() => setFavoritesOnly((f) => !f)}
               hitSlop={8}
               accessibilityLabel={t('gallery.toggleFavorites')}
@@ -68,6 +70,7 @@ export default function AllPhotosScreen() {
               />
             </Pressable>
             <Pressable
+              accessibilityRole="button"
               onPress={() => setTimeline((t) => !t)}
               hitSlop={8}
               accessibilityLabel={t('gallery.toggleTimeline')}
@@ -79,6 +82,7 @@ export default function AllPhotosScreen() {
               )}
             </Pressable>
             <Pressable
+              accessibilityRole="button"
               onPress={() => setAddOpen(true)}
               hitSlop={8}
               accessibilityLabel={t('gallery.addMedia')}

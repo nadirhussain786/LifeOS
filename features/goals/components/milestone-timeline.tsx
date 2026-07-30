@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, TextInput, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
+import { useReducedMotion } from '@/hooks/use-reduced-motion';
 
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
@@ -28,6 +29,7 @@ type Props = {
 export function MilestoneTimeline({ milestones, tint, onToggle, onAdd, onRemove }: Props) {
   const scheme = useColorScheme() ?? 'light';
   const { t } = useTranslation();
+  const reducedMotion = useReducedMotion();
   const [draft, setDraft] = useState('');
 
   const submitDraft = () => {
@@ -41,7 +43,11 @@ export function MilestoneTimeline({ milestones, tint, onToggle, onAdd, onRemove 
       {milestones.map((milestone, index) => {
         const isLast = index === milestones.length - 1;
         return (
-          <Animated.View key={milestone.id} entering={FadeIn} className="flex-row gap-3">
+          <Animated.View
+            key={milestone.id}
+            entering={reducedMotion ? undefined : FadeIn}
+            className="flex-row gap-3"
+          >
             <View className="items-center">
               <Pressable
                 onPress={() => {

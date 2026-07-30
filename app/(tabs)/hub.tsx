@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text } from '@/components/ui/text';
 import { ModuleCard } from '@/features/hub/components/module-card';
 import { HUB_SECTIONS, type HubModule } from '@/features/hub/config/modules';
+import { useReducedMotion } from '@/hooks/use-reduced-motion';
 
 /** Splits a section's modules into rows of two so the grid stays aligned even
  * when a section holds an odd count (the gap is filled with an invisible
@@ -26,6 +27,7 @@ export default function HubScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
+  const reducedMotion = useReducedMotion();
 
   const sections = useMemo(
     () => HUB_SECTIONS.map((section) => ({ ...section, rows: toRows(section.modules) })),
@@ -64,7 +66,11 @@ export default function HubScreen() {
               {section.rows.map((row, rowIndex) => (
                 <Animated.View
                   key={rowIndex}
-                  entering={FadeInDown.delay(80 * sectionIndex + 40 * rowIndex).duration(320)}
+                  entering={
+                    reducedMotion
+                      ? undefined
+                      : FadeInDown.delay(80 * sectionIndex + 40 * rowIndex).duration(320)
+                  }
                   className="flex-row gap-3"
                 >
                   {row.map((module, cellIndex) =>

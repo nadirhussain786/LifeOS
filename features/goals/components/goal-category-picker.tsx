@@ -37,6 +37,7 @@ export function GoalCategoryPicker({ value, customLabel, onChange, onChangeLabel
           const Icon = category.icon;
           return (
             <Pressable
+              accessibilityRole="button"
               key={category.id}
               onPress={() => select(category.id)}
               style={

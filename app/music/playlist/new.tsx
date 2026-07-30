@@ -53,6 +53,7 @@ export default function NewPlaylistScreen() {
               const selected = swatch === colorToken;
               return (
                 <Pressable
+                  accessibilityRole="button"
                   key={swatch}
                   onPress={() => {
                     Haptics.selectionAsync();

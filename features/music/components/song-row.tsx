@@ -1,6 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { Pause, Play, Trash2, X } from 'lucide-react-native';
+import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
@@ -27,7 +28,7 @@ type Props = {
   onRemove?: () => void;
 };
 
-export function SongRow({
+function SongRowComponent({
   song,
   isActive,
   isPlaying,
@@ -44,10 +45,14 @@ export function SongRow({
   const row = (
     <Pressable
       onPress={() => {
-        Haptics.selectionAsync();
+        void Haptics.selectionAsync();
         onPress();
       }}
       onLongPress={onLongPress}
+      accessibilityRole="button"
+      accessibilityState={{ selected: isActive }}
+      accessibilityLabel={`${song.title}, ${song.artist ?? t('music.unknownArtist')}`}
+      accessibilityHint={t('music.playHint')}
       className="flex-row items-center gap-3 px-4 py-2.5"
     >
       {/* Generative art thumbnail */}
@@ -94,10 +99,19 @@ export function SongRow({
 
   return (
     <SwipeableRow
+      accessibilityActions={[
+        onDelete
+          ? { name: 'delete', label: t('common.delete') }
+          : { name: 'remove', label: t('common.remove') },
+      ]}
+      onAccessibilityAction={(name) =>
+        name === 'delete' ? onDelete?.() : name === 'remove' ? onRemove?.() : undefined
+      }
       actions={
         onDelete ? (
           <Pressable
             onPress={onDelete}
+            accessibilityRole="button"
             accessibilityLabel={t('music.deleteSongA11y', { title: song.title })}
             className="flex-1 items-center justify-center bg-destructive"
           >
@@ -106,6 +120,7 @@ export function SongRow({
         ) : (
           <Pressable
             onPress={onRemove}
+            accessibilityRole="button"
             accessibilityLabel={t('music.removeFromPlaylistA11y', { title: song.title })}
             className="flex-1 items-center justify-center bg-secondary"
           >
@@ -118,3 +133,6 @@ export function SongRow({
     </SwipeableRow>
   );
 }
+
+/** Memoised — library and playlist screens re-render the full song list often. */
+export const SongRow = memo(SongRowComponent);

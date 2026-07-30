@@ -18,6 +18,8 @@
  * per-module `MODULE_TINTS` below.
  */
 
+import { readableOn } from '@/lib/color';
+
 // ---------------------------------------------------------------------------
 // PRIMITIVES — the raw hex ramps. Never reference these from screens directly;
 // they exist so the semantic tokens below stay coherent and easy to retune.
@@ -141,16 +143,26 @@ export type ThemeName = keyof typeof colors;
 // the semantic colors above, or two modules start reading as the same thing.
 // ---------------------------------------------------------------------------
 
+// The light column additionally has to clear 3:1 against a white card, because
+// these are drawn as rings, dots and icons on one. Habit (2.54:1), water
+// (2.43:1) and fitness (2.80:1) did not, and were darkened one step to 3.77,
+// 3.68 and 3.56 — same hue, same family, now actually visible. Their dark
+// counterparts sit on a near-black card and were already fine.
 export const moduleTints = {
-  habit: { light: '#10b981', dark: '#34d399' }, // emerald — growth, streaks
+  habit: { light: '#059669', dark: '#34d399' }, // emerald — growth, streaks
   calendar: { light: '#3b82f6', dark: '#60a5fa' }, // blue — structure, time
-  water: { light: '#06b6d4', dark: '#22d3ee' }, // cyan — hydration, clarity
+  water: { light: '#0891b2', dark: '#22d3ee' }, // cyan — hydration, clarity
   sleep: { light: '#6366f1', dark: '#818cf8' }, // indigo — night, rest
   journal: { light: '#8b5cf6', dark: '#a78bfa' }, // violet — reflection
-  fitness: { light: '#f97316', dark: '#fb923c' }, // orange — exertion, energy
+  fitness: { light: '#ea580c', dark: '#fb923c' }, // orange — exertion, energy
   goals: { light: '#f43f5e', dark: '#fb7185' }, // rose — aspiration, achievement
   budget: { light: '#0d9488', dark: '#2dd4bf' }, // teal — balance, ledgers
-  study: { light: '#7c3aed', dark: '#a78bfa' }, // deep violet — focus
+  // Deep violet — focus. Journal and Study share the violet family by design
+  // (reflection and concentration are neighbours), so they are separated by
+  // lightness instead of hue: two full steps apart in both themes. They used to
+  // be *identical* in dark mode — both #a78bfa — which is exactly the failure
+  // the note above warns about, hiding in the one theme nobody compared.
+  study: { light: '#6d28d9', dark: '#8b5cf6' },
   gallery: { light: '#a21caf', dark: '#e879f9' }, // plum — visible change over time
   music: { light: '#4d7c0f', dark: '#a3e635' }, // lime — the one gap left on the wheel
 } as const;
@@ -160,6 +172,48 @@ export type ModuleName = keyof typeof moduleTints;
 /** Resolve a module tint for the active theme in one call. */
 export function moduleTint(name: ModuleName, theme: ThemeName): string {
   return moduleTints[name][theme];
+}
+
+/**
+ * The same tint, adjusted until it is legible as TEXT on that theme's card.
+ *
+ * `moduleTint` is a fill color and is judged against the 3:1 bar for graphics —
+ * correctly, for rings, tiles and chart series. Used for a label on a card it
+ * has to clear 4.5:1 instead, and on light grounds most of these did not come
+ * close (water 2.43:1, habit 2.54:1, fitness 2.80:1). Derived rather than
+ * hand-tuned so the pair can't drift, and so a twelfth module can't be added
+ * without a readable variant. See lib/color.ts → readableOn.
+ *
+ * Rule of thumb: `moduleTint` for anything you fill, `moduleTintText` for
+ * anything you read.
+ */
+export function moduleTintText(name: ModuleName, theme: ThemeName): string {
+  return moduleTintsOnCard[theme][name];
+}
+
+/** Precomputed at module load — this is called from render paths. */
+const moduleTintsOnCard: Record<ThemeName, Record<ModuleName, string>> = {
+  light: Object.fromEntries(
+    (Object.keys(moduleTints) as ModuleName[]).map((name) => [
+      name,
+      readableOn(moduleTints[name].light, colors.light.card, 4.5),
+    ]),
+  ) as Record<ModuleName, string>,
+  dark: Object.fromEntries(
+    (Object.keys(moduleTints) as ModuleName[]).map((name) => [
+      name,
+      readableOn(moduleTints[name].dark, colors.dark.card, 4.5),
+    ]),
+  ) as Record<ModuleName, string>,
+};
+
+/**
+ * Any one-off tint made legible on the current card — for colors that come from
+ * user data (task categories, habit categories) rather than the module table,
+ * and so cannot be precomputed.
+ */
+export function readableTint(hex: string, theme: ThemeName, minRatio = 4.5): string {
+  return readableOn(hex, colors[theme].card, minRatio);
 }
 
 /** Categorical chart palette — ordered so adjacent series stay distinct.

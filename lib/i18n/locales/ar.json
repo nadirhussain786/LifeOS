@@ -30,7 +30,13 @@
     "all": "الكل",
     "saveChanges": "حفظ التغييرات",
     "viewPhoto": "عرض الصورة",
-    "removeAttachment": "إزالة المرفق"
+    "removeAttachment": "إزالة المرفق",
+    "archiveNamed": "أرشفة «{{name}}»",
+    "deleteNamed": "حذف «{{name}}»",
+    "markDone": "وضع علامة مكتمل على «{{name}}»",
+    "markNotDone": "إلغاء علامة الإكمال عن «{{name}}»",
+    "more": "إجراءات أخرى",
+    "undo": "تراجع"
   },
   "reminder": {
     "in1Hour": "خلال ساعة",
@@ -171,7 +177,9 @@
     "emptyArchived": "لا مهام مؤرشفة",
     "notifyAtDueTime": "أبلغني في وقت الاستحقاق",
     "notifyAtNineAm": "أبلغني الساعة 9:00 صباحًا في ذلك اليوم",
-    "addNotes": "أضف ملاحظات…"
+    "addNotes": "أضف ملاحظات…",
+    "deletedToast": "تم حذف «{{title}}».",
+    "archivedToast": "تمت أرشفة «{{title}}»."
   },
   "buckets": {
     "overdue": "متأخرة",
@@ -236,7 +244,20 @@
     "routineNextHint": "ستضيف العادات إلى هذا الروتين تاليًا، بالترتيب الذي تريد تنفيذها به.",
     "todayCount": "{{done}}/{{total}} اليوم",
     "loggedToday": "تم تسجيل {{amount}} اليوم · انقر للتعديل",
-    "doneToday": "تم اليوم ✓"
+    "doneToday": "تم اليوم ✓",
+    "streakDays_zero": "لا تسلسل",
+    "streakDays_one": "يوم واحد متتابع",
+    "streakDays_two": "يومان متتابعان",
+    "streakDays_few": "{{count}} أيام متتابعة",
+    "streakDays_many": "{{count}} يومًا متتابعًا",
+    "streakDays_other": "{{count}} يوم متتابع",
+    "withoutDays_zero": "لا أيام",
+    "withoutDays_one": "يوم واحد بدون",
+    "withoutDays_two": "يومان بدون",
+    "withoutDays_few": "{{count}} أيام بدون",
+    "withoutDays_many": "{{count}} يومًا بدون",
+    "withoutDays_other": "{{count}} يوم بدون",
+    "quickLog": "تسجيل «{{name}}»"
   },
   "habitType": {
     "boolean": "نعم / لا",
@@ -274,7 +295,8 @@
     "dayTimeline": "الجدول الزمني لليوم",
     "enableNotifBody": "فعّل الإشعارات لـ LifeOS في إعدادات جهازك للحصول على تذكير اليوميات.",
     "reminderSummary": "ستصلك تذكير لكتابة مدخل اليوم كل يوم في {{time}}.",
-    "writeAFewWords": "اكتب بضع كلمات…"
+    "writeAFewWords": "اكتب بضع كلمات…",
+    "reminderSettings": "إعدادات التذكير"
   },
   "mood": {
     "notSet": "غير محدد",
@@ -358,7 +380,10 @@
     "deleteTagBody": "ستتم إزالة \"{{name}}\" من كل ملاحظة.",
     "tagName": "اسم الوسم",
     "addTag": "وسم",
-    "writeSomething": "اكتب شيئًا…"
+    "writeSomething": "اكتب شيئًا…",
+    "unarchive": "إلغاء الأرشفة",
+    "unarchiveNamed": "إلغاء أرشفة «{{name}}»",
+    "deletedToast": "تم حذف «{{title}}»."
   },
   "budget": {
     "title": "الميزانية",
@@ -550,7 +575,23 @@
     "restartBody": "أغلق LifeOS وأعد فتحه لتطبيق اتجاه التخطيط الجديد.",
     "rtlRestartNote": "اختيار اردو أو العربية يحوّل LifeOS إلى تخطيط من اليمين إلى اليسار ويعيد تشغيل التطبيق.",
     "setUpBiometricsTitle": "أعدّ القياسات الحيوية أولًا",
-    "setUpBiometricsBody": "أضف Face ID أو بصمة إصبع في إعدادات جهازك، ثم فعّل قفل التطبيق هنا."
+    "setUpBiometricsBody": "أضف Face ID أو بصمة إصبع في إعدادات جهازك، ثم فعّل قفل التطبيق هنا.",
+    "importData": "استعادة من نسخة احتياطية",
+    "importSubtitle": "ادمج ملفًا مُصدَّرًا — لن يُستبدل أي شيء أحدث",
+    "importing": "جارٍ الاستعادة…",
+    "importTitle": "استعادة من نسخة احتياطية",
+    "importBody": "اختر ملف lifeos-export بصيغة JSON. تُحدَّث السجلات ذات المعرّف نفسه منه، ويبقى كل ما أنشأته بعد ذلك كما هو.",
+    "chooseFile": "اختيار ملف",
+    "importDone": "تمت استعادة {{rows}} سجلًا.",
+    "import_unreadable": "تعذّرت قراءة هذا الملف.",
+    "import_notabackup": "هذا ليس ملف نسخة احتياطية لـ LifeOS.",
+    "import_failed": "فشلت الاستعادة ولم يتغيّر شيء.",
+    "importMissingMedia_zero": "لا ملفات وسائط مفقودة.",
+    "importMissingMedia_one": "ملف وسائط واحد مفقود — الوسائط غير مخزّنة في النسخة الاحتياطية.",
+    "importMissingMedia_two": "ملفا وسائط مفقودان — الوسائط غير مخزّنة في النسخة الاحتياطية.",
+    "importMissingMedia_few": "{{count}} ملفات وسائط مفقودة — الوسائط غير مخزّنة في النسخة الاحتياطية.",
+    "importMissingMedia_many": "{{count}} ملف وسائط مفقود — الوسائط غير مخزّنة في النسخة الاحتياطية.",
+    "importMissingMedia_other": "{{count}} ملف وسائط مفقود — الوسائط غير مخزّنة في النسخة الاحتياطية."
   },
   "auth": {
     "welcomeBack": "مرحبًا بعودتك",
@@ -963,7 +1004,8 @@
     "dragToMove": "اسحب للتحريك",
     "openNowPlaying": "فتح ما يُشغّل الآن",
     "nextTrack": "المقطع التالي",
-    "hidePlayer": "إخفاء المشغّل"
+    "hidePlayer": "إخفاء المشغّل",
+    "playHint": "يشغّل هذه الأغنية"
   },
   "albumCategory": {
     "gym": "تقدّم الجيم",
@@ -1326,7 +1368,8 @@
     "buildConfig": "إعداد الإصدار",
     "notConfiguredTitle": "لا يحتوي هذا الإصدار على بيانات اعتماد Supabase",
     "notConfiguredBody": "الحسابات والمزامنة السحابية معطّلة — ويظل كل شيء يعمل دون اتصال. لإصدار EAS، اضبط هذه القيم في البيئة التي يستخدمها ملف الإصدار ثم أعد البناء.",
-    "envMissing": "مفقود"
+    "envMissing": "مفقود",
+    "failedToast": "لم تكتمل المزامنة. بياناتك محفوظة على هذا الجهاز."
   },
   "syncModule": {
     "tasks": "المهام",
@@ -1425,7 +1468,10 @@
       "expense_edited": "عدّل {{actor}} {{description}}",
       "expense_deleted": "حذف {{actor}} {{description}}",
       "settlement_added": "سجّل {{actor}} دفعة",
-      "settlement_deleted": "أزال {{actor}} دفعة"
+      "settlement_deleted": "أزال {{actor}} دفعة",
+      "group_deleted": "حذف {{actor}} المجموعة",
+      "member_removed": "أزال {{actor}} {{name}}",
+      "group_renamed": "غيّر {{actor}} اسم المجموعة"
     },
     "notifyTitle": "{{actor}} في مجموعتك",
     "notifySettlement": "سجّل دفعة",
@@ -1449,6 +1495,61 @@
       "already_accepted": "استُخدمت هذه الدعوة بالفعل.",
       "member_unavailable": "مكانك في المجموعة لم يعد متاحًا. اطلب إضافتك مرة أخرى.",
       "error": "حدث خطأ ما. حاول بعد قليل."
-    }
+    },
+    "groupCreated": "تم إنشاء «{{name}}».",
+    "currencyNote": "تتم التسوية في هذه المجموعة بـ {{currency}}.",
+    "notConfiguredTitle": "المجموعات المشتركة تحتاج إلى إعداد سحابي",
+    "expenseCount_zero": "لا مصروفات",
+    "expenseCount_one": "مصروف واحد",
+    "expenseCount_two": "مصروفان",
+    "expenseCount_few": "{{count}} مصروفات",
+    "expenseCount_many": "{{count}} مصروفًا",
+    "expenseCount_other": "{{count}} مصروف",
+    "expenseAdded": "تمت إضافة المصروف.",
+    "expenseDeleted": "تم حذف المصروف.",
+    "memberRemoved": "تمت إزالة {{name}}.",
+    "settlementRecorded": "تم تسجيل الدفعة.",
+    "undo": "تراجع",
+    "inviteLinkCopied": "رابط الدعوة جاهز للمشاركة.",
+    "refresh": "تحديث",
+    "settleEmptyHint": "أضف مصروفًا أولًا — لا يوجد ما تتم تسويته بعد.",
+    "date": "التاريخ",
+    "memberAdded": "تمت إضافة {{name}} إلى المجموعة.",
+    "mode": {
+      "equal": "بالتساوي",
+      "exact": "بالتحديد"
+    },
+    "splitBalanced": "المجموع مطابق.",
+    "splitRemaining": "يتبقى {{amount}} للتوزيع",
+    "splitOver": "{{amount}} فوق الإجمالي",
+    "spreadRemainder": "وزّع الباقي",
+    "settleA11y": "سجّل أن {{from}} دفع {{amount}} إلى {{to}}",
+    "deleteGroup": "حذف المجموعة",
+    "deleteGroupTitle": "حذف «{{name}}»؟",
+    "deleteGroupBody": "ستُزال المجموعة لدى جميع أعضائها. المصروفات والأرصدة تُحفظ ولا تُمحى — لكن لن يراها أحد بعد الآن.",
+    "groupDeleted": "تم حذف «{{name}}».",
+    "leave": "مغادرة المجموعة",
+    "leaveTitle": "مغادرة هذه المجموعة؟",
+    "leaveBody": "تبقى مصروفاتك السابقة في المجموعة كي تظل أرصدة الآخرين صحيحة. لن تُدرج في المصروفات الجديدة فقط.",
+    "leaveUnsettledBody": "حسابك غير مُسوّى بعد. تبقى مصروفاتك السابقة وما لك أو عليك في المجموعة — المغادرة لا تلغيها.",
+    "leftGroup": "لقد غادرت المجموعة.",
+    "removedMember": "لم يعد في المجموعة",
+    "removeMemberUnsettledBody": "{{name}} غير مُسوّى — {{amount}} مستحقة. تبقى مصروفاته ورصيده في المجموعة؛ لن يُدرج في المصروفات الجديدة فقط.",
+    "formerMembers": "لم يعودوا في المجموعة",
+    "formerMembersHint": "تبقى مصروفاتهم في السجل كي تظل أرصدة الجميع صحيحة.",
+    "removedSettled": "مُسوّى",
+    "removedOutstanding": "{{amount}} مستحقة"
+  },
+  "errors": {
+    "offline": "يبدو أنك غير متصل بالإنترنت. هذا الإجراء يحتاج إلى اتصال — وسيتم بمجرد عودتك.",
+    "not-configured": "لا يوجد حساب سحابي في هذه النسخة، لذلك الميزات المشتركة غير متاحة. كل شيء آخر يعمل دون اتصال.",
+    "signed-out": "انتهت جلستك. سجّل الدخول مرة أخرى للمتابعة.",
+    "backend-missing": "إعداد السحابة لهذا الحساب غير مكتمل، لذلك لا يمكن تشغيل الميزات المشتركة بعد.",
+    "permission": "ليس لديك صلاحية الوصول إلى هذا. إذا شاركه معك أحدهم، فاطلب منه إضافتك مجددًا.",
+    "conflict": "هذا موجود بالفعل.",
+    "server": "حدث خطأ من جانبنا. تم تسجيله — حاول مرة أخرى بعد قليل.",
+    "unknown": "لم ينجح ذلك. حاول مرة أخرى من فضلك.",
+    "title": "لم ينجح ذلك",
+    "detail": "التفاصيل: {{code}}"
   }
 }

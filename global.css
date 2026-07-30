@@ -53,15 +53,15 @@
     --info-foreground: 0 0% 100%;
 
     /* module signature tints */
-    --habit: 160 84% 39%;
+    --habit: 161 94% 30%;
     --calendar: 217 91% 60%;
-    --water: 189 94% 43%;
+    --water: 192 91% 36%;
     --sleep: 239 84% 67%;
     --journal: 258 90% 66%;
-    --fitness: 25 95% 53%;
+    --fitness: 21 90% 48%;
     --goals: 350 89% 60%;
     --budget: 175 84% 32%;
-    --study: 262 83% 58%;
+    --study: 263 70% 50%;
 
     --border: 156 13% 90%;
     --input: 156 13% 90%;
@@ -106,7 +106,7 @@
     --fitness: 27 96% 61%;
     --goals: 351 95% 71%;
     --budget: 172 66% 50%;
-    --study: 255 92% 76%;
+    --study: 258 90% 66%;
 
     --border: 156 9% 20%;
     --input: 156 9% 20%;

@@ -8,6 +8,7 @@ import {
   deleteTask,
   getTask,
   reopenTask,
+  restoreTask,
   updateTask,
 } from '@/features/tasks/services/tasks-repository';
 import { useTasksFilterStore } from '@/features/tasks/store/tasks-filter-store';
@@ -109,5 +110,15 @@ export function useTaskMutations() {
     onSuccess: invalidate,
   });
 
-  return { create, update, complete, reopen, archive, remove };
+  /** Puts back a task the user just deleted, from the undo toast. */
+  const restore = useMutation({
+    mutationFn: async (id: string) => {
+      restoreTask(id);
+      const task = getTask(id);
+      if (task) await syncTaskReminder(task);
+    },
+    onSuccess: invalidate,
+  });
+
+  return { create, update, complete, reopen, archive, remove, restore };
 }

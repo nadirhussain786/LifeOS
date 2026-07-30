@@ -34,6 +34,7 @@ import {
   type NotificationDiagnostics,
 } from '@/lib/notifications';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { toast } from '@/lib/toast-store';
 
 function SectionLabel({ children }: { children: string }) {
   return (
@@ -83,6 +84,7 @@ function TimeRow({
       ) : (
         <>
           <Pressable
+            accessibilityRole="button"
             onPress={() => setShowPicker(true)}
             className="rounded-full border border-border px-3 py-1.5"
           >
@@ -138,7 +140,9 @@ export default function NotificationSettingsScreen() {
     await refreshDiagnostics();
 
     if (result.ok) {
-      Alert.alert(t('notif.testSentTitle'), t('notif.testSentBody'));
+      // A modal to confirm the thing the user just asked for, which they can
+      // also see arrive in the shade, was pure interruption.
+      toast.success(t('notif.testSentBody'));
       return;
     }
     Alert.alert(

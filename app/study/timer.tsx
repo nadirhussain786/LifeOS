@@ -256,6 +256,7 @@ export default function StudyTimerScreen() {
         <View className="w-full flex-row items-center justify-center gap-4">
           {isFocus ? null : (
             <Pressable
+              accessibilityRole="button"
               onPress={() => useStudyTimerStore.getState().completeBreak()}
               className="h-14 w-14 items-center justify-center rounded-full border border-border"
               accessibilityLabel={t('study.skipBreak')}
@@ -265,6 +266,7 @@ export default function StudyTimerScreen() {
           )}
 
           <Pressable
+            accessibilityRole="button"
             onPress={() => (store.running ? store.pause() : store.resume())}
             className="h-20 w-20 items-center justify-center rounded-full"
             style={{ backgroundColor: tint }}
@@ -278,6 +280,7 @@ export default function StudyTimerScreen() {
           </Pressable>
 
           <Pressable
+            accessibilityRole="button"
             onPress={requestFinish}
             className="h-14 w-14 items-center justify-center rounded-full border border-border"
             accessibilityLabel={t('study.endSession')}

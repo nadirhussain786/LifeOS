@@ -49,6 +49,7 @@ export default function NewNoteScreen() {
         title={t('notes.newNote')}
         right={
           <Pressable
+            accessibilityRole="button"
             onPress={() => setIsPinned((pinned) => !pinned)}
             hitSlop={10}
             className="h-9 w-9 items-center justify-center"

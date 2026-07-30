@@ -41,6 +41,7 @@ export function FocusShortcuts() {
           const Icon = area.icon;
           return (
             <Pressable
+              accessibilityRole="button"
               key={area.id}
               onPress={() => router.push(area.route as never)}
               className="flex-row items-center gap-2.5 rounded-2xl border border-border bg-card py-2.5 pe-4 ps-2.5 shadow-e1"

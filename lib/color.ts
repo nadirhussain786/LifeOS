@@ -64,6 +64,64 @@ export function alpha(hex: string, a: number): string {
   return `${hex}${value}`;
 }
 
+// ---------------------------------------------------------------------------
+// Contrast
+//
+// The module tints are chosen to look right as *fills* — a progress ring, a
+// gradient tile, a chart series — where the bar is 3:1 and they clear it
+// comfortably. Several of them then got reused as the color of small text on a
+// white card, where the bar is 4.5:1 and they were nowhere near it: the journal
+// streak label ran at 2.06:1, the notes tint at 1.92:1, habit-done green at
+// 2.19:1. All three are legible to the person who picked them and hard work for
+// everybody else.
+//
+// Rather than hand-pick a second hex per module and hope the pairs stay in step,
+// derive it: keep the tint for fills and darken (or lighten, on dark grounds)
+// a copy of it until it actually clears the ratio. A new module tint then gets a
+// legible text variant for free, and cannot ship without one.
+// ---------------------------------------------------------------------------
+
+/** WCAG relative luminance. */
+export function relativeLuminance(hex: string): number {
+  const { r, g, b } = hexToRgb(hex);
+  const channel = (v: number) => {
+    const s = v / 255;
+    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+  };
+  return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+}
+
+/** WCAG contrast ratio between two opaque colors: 1 (identical) to 21. */
+export function contrastRatio(a: string, b: string): number {
+  const la = relativeLuminance(a);
+  const lb = relativeLuminance(b);
+  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
+}
+
+/**
+ * The nearest version of `hex` that reads at `minRatio` against `background`.
+ *
+ * Moves toward black on light grounds and toward white on dark ones, in small
+ * steps, and stops at the first shade that clears — so the result keeps as much
+ * of the original hue and saturation as legibility allows rather than collapsing
+ * to a safe grey. Falls back to plain black/white in the rare case where even a
+ * full mix cannot reach the target.
+ *
+ * 4.5:1 is the WCAG AA bar for body text; pass 3 for large text and icons.
+ */
+export function readableOn(hex: string, background: string, minRatio = 4.5): string {
+  if (contrastRatio(hex, background) >= minRatio) return hex;
+
+  const backgroundIsDark = relativeLuminance(background) < 0.5;
+  const target = backgroundIsDark ? '#ffffff' : '#000000';
+
+  for (let amount = 0.05; amount <= 1; amount += 0.05) {
+    const candidate = mix(hex, target, amount);
+    if (contrastRatio(candidate, background) >= minRatio) return candidate;
+  }
+  return target;
+}
+
 /** Shared soft-glow shadow for elevated colored surfaces. */
 export function glowShadow(hex: string, opacity = 0.35) {
   return {

@@ -39,6 +39,7 @@ export function PriorityPicker({
 
         return (
           <Pressable
+            accessibilityRole="button"
             key={option.value}
             onPress={() => {
               Haptics.selectionAsync();

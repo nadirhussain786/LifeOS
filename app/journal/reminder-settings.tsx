@@ -105,6 +105,7 @@ export default function JournalReminderSettingsScreen() {
                 />
               ) : (
                 <Pressable
+                  accessibilityRole="button"
                   onPress={() => setShowPicker(true)}
                   className="flex-row items-center gap-1.5 self-start rounded-full border border-border px-3 py-1.5"
                 >

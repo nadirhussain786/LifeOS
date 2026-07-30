@@ -44,6 +44,7 @@ function GlassChip({
 }) {
   return (
     <Pressable
+      accessibilityRole="button"
       onPress={onPress}
       hitSlop={10}
       accessibilityLabel={label}
@@ -168,15 +169,26 @@ export default function NowPlayingScreen() {
 
         {/* Transport */}
         <View className="mt-5 flex-row items-center justify-between">
-          <Pressable onPress={toggleShuffle} hitSlop={12} accessibilityLabel={t('music.shuffle')}>
+          <Pressable
+            accessibilityRole="button"
+            onPress={toggleShuffle}
+            hitSlop={12}
+            accessibilityLabel={t('music.shuffle')}
+          >
             <Shuffle size={20} color={shuffle ? accent : alpha(WHITE, 0.55)} />
           </Pressable>
 
           <View className="flex-row items-center gap-7">
-            <Pressable onPress={playPrevious} hitSlop={12} accessibilityLabel={t('music.previous')}>
+            <Pressable
+              accessibilityRole="button"
+              onPress={playPrevious}
+              hitSlop={12}
+              accessibilityLabel={t('music.previous')}
+            >
               <SkipBack size={28} color={WHITE} fill={WHITE} />
             </Pressable>
             <Pressable
+              accessibilityRole="button"
               onPress={togglePlayPause}
               accessibilityLabel={isPlaying ? t('music.pause') : t('music.play')}
               className="h-[72px] w-[72px] items-center justify-center rounded-full"
@@ -188,12 +200,18 @@ export default function NowPlayingScreen() {
                 <Play size={30} color="#0b0b10" fill="#0b0b10" style={{ marginLeft: 3 }} />
               )}
             </Pressable>
-            <Pressable onPress={playNext} hitSlop={12} accessibilityLabel={t('music.next')}>
+            <Pressable
+              accessibilityRole="button"
+              onPress={playNext}
+              hitSlop={12}
+              accessibilityLabel={t('music.next')}
+            >
               <SkipForward size={28} color={WHITE} fill={WHITE} />
             </Pressable>
           </View>
 
           <Pressable
+            accessibilityRole="button"
             onPress={() => setRepeatMode(REPEAT_CYCLE[repeatMode])}
             hitSlop={12}
             accessibilityLabel={t('music.repeat')}
@@ -205,6 +223,7 @@ export default function NowPlayingScreen() {
         {/* Sleep + Up Next */}
         <View className="mt-6 flex-row gap-3">
           <Pressable
+            accessibilityRole="button"
             onPress={() => setSleepOpen(true)}
             className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl py-3.5"
             style={{
@@ -219,6 +238,7 @@ export default function NowPlayingScreen() {
             </Text>
           </Pressable>
           <Pressable
+            accessibilityRole="button"
             onPress={() => setQueueOpen(true)}
             className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl py-3.5"
             style={{
