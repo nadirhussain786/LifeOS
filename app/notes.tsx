@@ -2,6 +2,7 @@ import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import { Archive, Search, StickyNote } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, TextInput, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -23,6 +24,7 @@ type ListItem = { type: 'header'; label: string; count: number } | { type: 'note
 export default function NotesScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const [showArchived, setShowArchived] = useState(false);
 
   const { searchQuery, setSearchQuery } = useNotesFilterStore();
@@ -44,22 +46,22 @@ export default function NotesScreen() {
     const rest = notes.filter((note) => !note.isPinned);
     const sections: ListItem[] = [];
     if (pinned.length > 0) {
-      sections.push({ type: 'header', label: 'Pinned', count: pinned.length });
+      sections.push({ type: 'header', label: t('notes.pinned'), count: pinned.length });
       sections.push(...pinned.map((note) => ({ type: 'note', note }) as const));
     }
     if (rest.length > 0) {
       if (pinned.length > 0)
-        sections.push({ type: 'header', label: 'All Notes', count: rest.length });
+        sections.push({ type: 'header', label: t('notes.allNotes'), count: rest.length });
       sections.push(...rest.map((note) => ({ type: 'note', note }) as const));
     }
     return sections;
-  }, [notes, showArchived]);
+  }, [notes, showArchived, t]);
 
   return (
     <View className="flex-1 bg-background">
       <ScreenHeader
-        title="Notes"
-        eyebrow="Capture"
+        title={t('notes.title')}
+        eyebrow={t('notes.capture')}
         tint="#eab308"
         right={
           <Pressable
@@ -67,7 +69,7 @@ export default function NotesScreen() {
             className="flex-row items-center gap-1.5 rounded-full border border-border px-3 py-1.5"
           >
             <Archive size={13} color={colors[scheme].mutedForeground} />
-            <Text variant="caption">{showArchived ? 'Active' : 'Archived'}</Text>
+            <Text variant="caption">{showArchived ? t('notes.active') : t('notes.archived')}</Text>
           </Pressable>
         }
       />
@@ -77,7 +79,8 @@ export default function NotesScreen() {
           <TextInput
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholder="Search notes"
+            accessibilityLabel={t('notes.searchNotes')}
+            placeholder={t('notes.searchNotes')}
             placeholderTextColor={colors[scheme].mutedForeground}
             className="flex-1 text-foreground"
           />
@@ -93,10 +96,8 @@ export default function NotesScreen() {
       ) : items.length === 0 ? (
         <EmptyState
           icon={StickyNote}
-          title={showArchived ? 'No archived notes' : 'No notes yet'}
-          description={
-            showArchived ? 'Notes you archive show up here.' : 'Capture ideas and quick notes here.'
-          }
+          title={showArchived ? t('notes.emptyArchived') : t('notes.emptyTitle')}
+          description={showArchived ? t('notes.emptyArchivedBody') : t('notes.emptyBody')}
         />
       ) : (
         <FlashList
@@ -125,7 +126,7 @@ export default function NotesScreen() {
         />
       )}
 
-      <Fab onPress={() => router.push('/note/new')} accessibilityLabel="Add note" />
+      <Fab onPress={() => router.push('/note/new')} accessibilityLabel={t('notes.addNote')} />
     </View>
   );
 }

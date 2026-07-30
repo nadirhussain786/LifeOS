@@ -1,8 +1,9 @@
 import { Clock, Star, Sunrise, TrendingDown, TrendingUp } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { Text } from '@/components/ui/text';
-import { formatStudyDuration, timeOfDayLabel } from '@/features/study/services/study-stats';
+import { formatStudyDuration, timeOfDayLabelKey } from '@/features/study/services/study-stats';
 import { alpha } from '@/lib/color';
 import type { StudyInsights } from '@/features/study/types/study.types';
 
@@ -11,6 +12,7 @@ const STUDY_TINT = '#8b5cf6';
 /** A 2×2 grid of "how to improve" signals: when you focus best, typical
  * session length, focus quality, and momentum vs last week. */
 export function StudyInsightsCard({ insights }: { insights: StudyInsights }) {
+  const { t } = useTranslation();
   const wow = insights.weekOverWeek;
   const wowUp = wow != null && wow >= 0;
 
@@ -19,38 +21,38 @@ export function StudyInsightsCard({ insights }: { insights: StudyInsights }) {
       key: 'best',
       icon: Sunrise,
       tint: '#f59e0b',
-      label: 'You focus best in',
-      value: insights.bestTimeOfDay ? timeOfDayLabel(insights.bestTimeOfDay) : '—',
+      label: t('study.youFocusBestIn'),
+      value: insights.bestTimeOfDay ? t(timeOfDayLabelKey(insights.bestTimeOfDay)) : '—',
     },
     {
       key: 'avg',
       icon: Clock,
       tint: STUDY_TINT,
-      label: 'Typical session',
+      label: t('study.typicalSession'),
       value: insights.avgSessionSeconds > 0 ? formatStudyDuration(insights.avgSessionSeconds) : '—',
     },
     {
       key: 'focus',
       icon: Star,
       tint: '#eab308',
-      label: 'Avg focus',
+      label: t('study.avgFocus'),
       value:
         insights.avgFocusRating != null
           ? `${insights.avgFocusRating.toFixed(1)}★`
-          : 'Rate sessions',
+          : t('study.rateSessions'),
     },
     {
       key: 'wow',
       icon: wowUp ? TrendingUp : TrendingDown,
       tint: wow == null ? '#6b7280' : wowUp ? '#22c55e' : '#ef4444',
-      label: 'vs last week',
-      value: wow == null ? 'New' : `${wowUp ? '+' : ''}${Math.round(wow * 100)}%`,
+      label: t('study.vsLastWeek'),
+      value: wow == null ? t('study.new') : `${wowUp ? '+' : ''}${Math.round(wow * 100)}%`,
     },
   ];
 
   return (
     <View className="gap-3 rounded-2xl border border-border bg-card p-4">
-      <Text variant="subheading">Insights</Text>
+      <Text variant="subheading">{t('study.insights')}</Text>
       <View className="flex-row flex-wrap gap-2.5">
         {tiles.map((tile) => {
           const Icon = tile.icon;

@@ -1,5 +1,7 @@
 import * as LocalAuthentication from 'expo-local-authentication';
 
+import i18n from '@/lib/i18n';
+
 /**
  * Thin wrapper around expo-local-authentication for the optional app lock.
  * Everything degrades gracefully: on a device with no hardware or no enrolled
@@ -21,12 +23,12 @@ export async function isBiometricAvailable(): Promise<boolean> {
 
 /** Prompt the biometric sheet (with device-passcode fallback). Resolves to
  *  whether authentication succeeded — never throws. */
-export async function authenticate(reason = 'Unlock LifeOS'): Promise<boolean> {
+export async function authenticate(reason = i18n.t('security.unlockPrompt')): Promise<boolean> {
   try {
     const result = await LocalAuthentication.authenticateAsync({
       promptMessage: reason,
-      fallbackLabel: 'Use passcode',
-      cancelLabel: 'Cancel',
+      fallbackLabel: i18n.t('security.usePasscode'),
+      cancelLabel: i18n.t('common.cancel'),
       // Let the OS fall back to the device passcode if biometrics fail.
       disableDeviceFallback: false,
     });
@@ -40,11 +42,13 @@ export async function authenticate(reason = 'Unlock LifeOS'): Promise<boolean> {
 export async function getBiometricLabel(): Promise<string> {
   try {
     const types = await LocalAuthentication.supportedAuthenticationTypesAsync();
-    if (types.includes(LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION)) return 'Face ID';
-    if (types.includes(LocalAuthentication.AuthenticationType.FINGERPRINT)) return 'Fingerprint';
-    if (types.includes(LocalAuthentication.AuthenticationType.IRIS)) return 'Iris';
+    if (types.includes(LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION))
+      return i18n.t('security.faceId');
+    if (types.includes(LocalAuthentication.AuthenticationType.FINGERPRINT))
+      return i18n.t('security.fingerprint');
+    if (types.includes(LocalAuthentication.AuthenticationType.IRIS)) return i18n.t('security.iris');
   } catch {
     // fall through
   }
-  return 'Biometrics';
+  return i18n.t('security.biometrics');
 }

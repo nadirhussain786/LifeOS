@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import { X } from 'lucide-react-native';
 import { type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -26,6 +27,7 @@ type Props = {
  * `bg-surface` vs `bg-muted`, `px-4` vs `px-5`).
  */
 export function SheetHeader({ title, onClose, right }: Props) {
+  const { t } = useTranslation();
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
   const insets = useSafeAreaInsets();
@@ -42,7 +44,7 @@ export function SheetHeader({ title, onClose, right }: Props) {
         onPress={handleClose}
         hitSlop={10}
         accessibilityRole="button"
-        accessibilityLabel="Close"
+        accessibilityLabel={t('common.close')}
         className="h-9 w-9 items-center justify-center rounded-full border border-border bg-surface"
       >
         <X size={18} color={c.foreground} />

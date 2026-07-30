@@ -1,4 +1,5 @@
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, View } from 'react-native';
 
 import { Text } from '@/components/ui/text';
@@ -17,6 +18,7 @@ import { alpha } from '@/lib/color';
 export function FocusShortcuts() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const focusAreas = useProfileStore((s) => s.focusAreas);
 
   if (focusAreas.length === 0) return null;
@@ -27,7 +29,7 @@ export function FocusShortcuts() {
   return (
     <View className="gap-3">
       <Text variant="micro" className="px-1">
-        Your focus
+        {t('dashboard.yourFocus')}
       </Text>
       <ScrollView
         horizontal
@@ -41,7 +43,7 @@ export function FocusShortcuts() {
             <Pressable
               key={area.id}
               onPress={() => router.push(area.route as never)}
-              className="flex-row items-center gap-2.5 rounded-2xl border border-border bg-card py-2.5 pl-2.5 pr-4 shadow-e1"
+              className="flex-row items-center gap-2.5 rounded-2xl border border-border bg-card py-2.5 pe-4 ps-2.5 shadow-e1"
             >
               <View
                 className="h-8 w-8 items-center justify-center rounded-xl"
@@ -49,7 +51,7 @@ export function FocusShortcuts() {
               >
                 <Icon size={17} color={tint} />
               </View>
-              <Text className="font-sora-semibold">{area.label}</Text>
+              <Text className="font-sora-semibold">{t(area.labelKey)}</Text>
             </Pressable>
           );
         })}

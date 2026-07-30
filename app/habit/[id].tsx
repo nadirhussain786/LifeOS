@@ -2,6 +2,7 @@ import { format, parseISO } from 'date-fns';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Archive, Clock3, Pencil, Trash2 } from 'lucide-react-native';
 import { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
@@ -23,6 +24,7 @@ export default function HabitDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const quickLogRef = useRef<BottomSheetModal>(null);
 
   const { data: habit } = useHabit(id);
@@ -52,7 +54,7 @@ export default function HabitDetailScreen() {
       <Stack.Screen options={{ headerShown: false }} />
 
       <ScreenHeader
-        eyebrow="Habit"
+        eyebrow={t('habits.detailTitle')}
         tint={moduleTint('habit', scheme)}
         right={
           <View className="flex-row gap-4">
@@ -105,7 +107,7 @@ export default function HabitDetailScreen() {
               {streaks.currentStreak}
             </Text>
             <Text variant="caption">
-              {habit.type === 'negative' ? 'Days without' : 'Current streak'}
+              {habit.type === 'negative' ? t('habits.daysWithout') : t('habits.currentStreak')}
             </Text>
           </View>
           <View className="flex-1 items-center gap-1 rounded-2xl border border-border bg-card py-4 shadow-e1">
@@ -119,7 +121,7 @@ export default function HabitDetailScreen() {
             >
               {streaks.bestStreak}
             </Text>
-            <Text variant="caption">Best streak</Text>
+            <Text variant="caption">{t('habits.bestStreak')}</Text>
           </View>
           <View className="flex-1 items-center gap-1 rounded-2xl border border-border bg-card py-4 shadow-e1">
             <Text
@@ -132,7 +134,7 @@ export default function HabitDetailScreen() {
             >
               {Math.round(streaks.completionRate30d * 100)}%
             </Text>
-            <Text variant="caption">Last 30 days</Text>
+            <Text variant="caption">{t('habits.last30Days')}</Text>
           </View>
         </View>
 
@@ -143,8 +145,10 @@ export default function HabitDetailScreen() {
           >
             <Text className="font-sora-semibold" style={{ color: '#ffffff' }}>
               {todayLog
-                ? `Logged ${todayLog.value}${habit.unit ? ` ${habit.unit}` : ''} today · tap to edit`
-                : 'Log today'}
+                ? t('habits.loggedToday', {
+                    amount: `${todayLog.value}${habit.unit ? ` ${habit.unit}` : ''}`,
+                  })
+                : t('habits.logToday')}
             </Text>
           </Pressable>
         ) : (
@@ -158,21 +162,19 @@ export default function HabitDetailScreen() {
               className="font-sora-semibold"
               style={{ color: todayLog ? '#ffffff' : colors[scheme].foreground }}
             >
-              {todayLog ? 'Done today ✓' : 'Mark done today'}
+              {todayLog ? t('habits.doneToday') : t('habits.markDoneToday')}
             </Text>
           </Pressable>
         )}
 
         <View className="gap-3">
-          <Text variant="subheading">Consistency</Text>
+          <Text variant="subheading">{t('habits.consistency')}</Text>
           <StreakHeatmap habit={habit} logs={logs} skips={skips} />
         </View>
 
         <View className="gap-2">
-          <Text variant="subheading">Recent history</Text>
-          {recentLogs.length === 0 && (
-            <Text variant="muted">No logs yet — mark today done to start the streak.</Text>
-          )}
+          <Text variant="subheading">{t('habits.recentHistory')}</Text>
+          {recentLogs.length === 0 && <Text variant="muted">{t('habits.noLogsYet')}</Text>}
           {recentLogs.map((log) => (
             <Pressable
               key={log.id}

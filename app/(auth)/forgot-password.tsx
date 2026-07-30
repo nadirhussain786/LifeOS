@@ -1,8 +1,9 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
-import { ChevronLeft } from 'lucide-react-native';
 
+import { ChevronBack } from '@/components/ui/directional-icon';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
@@ -13,6 +14,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 export default function ForgotPasswordScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const resetPassword = useAuthStore((s) => s.resetPassword);
 
   const [email, setEmail] = useState('');
@@ -22,7 +24,7 @@ export default function ForgotPasswordScreen() {
 
   const handleReset = async () => {
     if (!email.trim()) {
-      setError('Enter your email.');
+      setError(t('auth.enterEmail'));
       return;
     }
     setBusy(true);
@@ -47,21 +49,19 @@ export default function ForgotPasswordScreen() {
           hitSlop={10}
           className="h-9 w-9 items-center justify-center rounded-full bg-muted"
         >
-          <ChevronLeft size={20} color={colors[scheme].foreground} />
+          <ChevronBack size={20} color={colors[scheme].foreground} />
         </Pressable>
 
         <View className="gap-2">
-          <Text variant="heading">Reset password</Text>
-          <Text variant="muted">We&apos;ll email you a link to set a new password.</Text>
+          <Text variant="heading">{t('auth.resetPassword')}</Text>
+          <Text variant="muted">{t('auth.resetSubtitle')}</Text>
         </View>
 
         {sent ? (
           <View className="gap-4">
-            <Text>
-              If an account exists for {email.trim()}, a reset link is on its way. Check your inbox.
-            </Text>
+            <Text>{t('auth.resetSent', { email: email.trim() })}</Text>
             <Button
-              label="Back to sign in"
+              label={t('auth.backToSignIn')}
               variant="accent"
               size="lg"
               onPress={() => router.replace('/(auth)/login')}
@@ -70,7 +70,7 @@ export default function ForgotPasswordScreen() {
         ) : (
           <View className="gap-4">
             <AuthField
-              label="Email"
+              label={t('auth.email')}
               value={email}
               onChangeText={setEmail}
               placeholder="you@example.com"
@@ -84,7 +84,7 @@ export default function ForgotPasswordScreen() {
               </Text>
             )}
             <Button
-              label={busy ? 'Sending…' : 'Send reset link'}
+              label={busy ? t('auth.sendingLink') : t('auth.sendResetLink')}
               variant="accent"
               size="lg"
               disabled={busy}

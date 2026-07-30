@@ -7,6 +7,7 @@ import {
 import * as Haptics from 'expo-haptics';
 import { Minus, Plus } from 'lucide-react-native';
 import { forwardRef, useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, TextInput, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -25,6 +26,7 @@ export const QuickLogSheet = forwardRef<BottomSheetModal, Props>(function QuickL
   ref,
 ) {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const [value, setValue] = useState(1);
 
   useEffect(() => {
@@ -77,7 +79,7 @@ export const QuickLogSheet = forwardRef<BottomSheetModal, Props>(function QuickL
                 const parsed = parseFloat(text);
                 setValue(Number.isFinite(parsed) ? parsed : 0);
               }}
-              accessibilityLabel="Amount"
+              accessibilityLabel={t('habits.amount')}
               keyboardType="decimal-pad"
               className="min-w-10 text-center font-sora-extrabold text-2xl text-foreground"
               style={{ fontVariant: ['tabular-nums'] }}
@@ -93,7 +95,7 @@ export const QuickLogSheet = forwardRef<BottomSheetModal, Props>(function QuickL
           </Pressable>
         </View>
 
-        <Button label="Log" variant="accent" onPress={confirm} />
+        <Button label={t('habits.log')} variant="accent" onPress={confirm} />
       </BottomSheetView>
     </BottomSheetModal>
   );

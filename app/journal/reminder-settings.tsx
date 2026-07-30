@@ -4,6 +4,7 @@ import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { Bell, Clock } from 'lucide-react-native';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, Platform, Pressable, ScrollView, Switch, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -24,6 +25,7 @@ import { notificationsAvailable } from '@/lib/notifications';
 export default function JournalReminderSettingsScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
 
   const settings = useJournalReminderStore((state) => state.settings);
   const scheduledNotificationId = useJournalReminderStore((state) => state.scheduledNotificationId);
@@ -55,10 +57,10 @@ export default function JournalReminderSettingsScreen() {
 
     if (draft.enabled && !newId) {
       Alert.alert(
-        notificationsAvailable ? 'Notifications disabled' : 'Notifications unavailable',
         notificationsAvailable
-          ? 'Enable notifications for LifeOS in your device settings to get a journal reminder.'
-          : "Reminders aren't available on this device.",
+          ? t('reminders.notificationsDisabled')
+          : t('reminders.notificationsUnavailable'),
+        notificationsAvailable ? t('journal.enableNotifBody') : t('reminders.notAvailable'),
       );
     }
 
@@ -70,8 +72,8 @@ export default function JournalReminderSettingsScreen() {
   return (
     <View className="flex-1 bg-background">
       <ScreenHeader
-        title="Journal Reminder"
-        eyebrow="Journal"
+        title={t('journal.reminderTitle')}
+        eyebrow={t('tabs.journal')}
         tint={moduleTint('journal', scheme)}
       />
 
@@ -81,9 +83,9 @@ export default function JournalReminderSettingsScreen() {
       >
         <CategoryOffNotice category="journal" />
         <View className="rounded-2xl border border-border bg-card px-4 shadow-e1">
-          <AttributeRow icon={Bell} label="Daily reminder" isFirst>
+          <AttributeRow icon={Bell} label={t('reminders.dailyReminder')} isFirst>
             <View className="flex-row items-center justify-between">
-              <Text variant="muted">Nudge me to write</Text>
+              <Text variant="muted">{t('journal.nudgeToWrite')}</Text>
               <Switch
                 value={draft.enabled}
                 onValueChange={(enabled) => setDraft((prev) => ({ ...prev, enabled }))}
@@ -93,7 +95,7 @@ export default function JournalReminderSettingsScreen() {
           </AttributeRow>
 
           {draft.enabled && (
-            <AttributeRow icon={Clock} label="Time">
+            <AttributeRow icon={Clock} label={t('reminders.time')}>
               {Platform.OS === 'ios' ? (
                 <DateTimePicker
                   value={time}
@@ -116,8 +118,7 @@ export default function JournalReminderSettingsScreen() {
 
         {draft.enabled && (
           <Text variant="muted">
-            You&apos;ll get a nudge to write today&apos;s entry every day at{' '}
-            {format(time, 'h:mm a')}.
+            {t('journal.reminderSummary', { time: format(time, 'h:mm a') })}
           </Text>
         )}
 
@@ -126,7 +127,7 @@ export default function JournalReminderSettingsScreen() {
         ) : null}
 
         <Button
-          label={saving ? 'Saving…' : 'Save'}
+          label={saving ? t('common.saving') : t('common.save')}
           onPress={handleSave}
           disabled={saving}
           size="lg"

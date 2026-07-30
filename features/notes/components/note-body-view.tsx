@@ -1,5 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { Check } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Platform, Pressable, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -32,11 +33,12 @@ type Props = {
 
 export function NoteBodyView({ body, onToggleChecklist }: Props) {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const lines = parseMarkdownLines(body);
   let checklistIndex = -1;
 
   if (!body.trim()) {
-    return <Text variant="muted">Nothing written yet.</Text>;
+    return <Text variant="muted">{t('notes.nothingWritten')}</Text>;
   }
 
   return (
@@ -92,7 +94,7 @@ export function NoteBodyView({ body, onToggleChecklist }: Props) {
         }
         if (line.type === 'bullet') {
           return (
-            <View key={index} className="flex-row gap-2 pl-1">
+            <View key={index} className="flex-row gap-2 ps-1">
               <Text variant="muted">•</Text>
               <InlineText text={line.text} className="flex-1" />
             </View>
@@ -100,7 +102,7 @@ export function NoteBodyView({ body, onToggleChecklist }: Props) {
         }
         if (line.type === 'quote') {
           return (
-            <View key={index} className="border-l-2 border-border pl-3">
+            <View key={index} className="border-l-2 border-border ps-3">
               <InlineText text={line.text} className="italic text-muted-foreground" />
             </View>
           );

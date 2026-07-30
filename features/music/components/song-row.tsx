@@ -1,20 +1,18 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { Pause, Play, Trash2, X } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
 import { SwipeableRow } from '@/components/ui/swipeable-row';
 import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { Equalizer } from '@/features/music/components/equalizer';
 import { songGradient } from '@/features/music/utils/song-art';
 import { formatDuration } from '@/features/music/utils/format-duration';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import type { Song } from '@/features/music/types/music.types';
-
-/** Music's signature chrome tint — teal, matching the Hub tile. Per-song art
- *  (song-art.ts) supplies the color variety; this is only for controls/labels. */
-export const MUSIC_TINT = '#14b8a6';
 
 type Props = {
   song: Song;
@@ -39,6 +37,8 @@ export function SongRow({
   onRemove,
 }: Props) {
   const scheme = useColorScheme() ?? 'light';
+  const tint = moduleTint('music', scheme);
+  const { t } = useTranslation();
   const [c1, c2, c3] = songGradient(song.id);
 
   const row = (
@@ -48,7 +48,7 @@ export function SongRow({
         onPress();
       }}
       onLongPress={onLongPress}
-      className="flex-row items-center gap-3 py-2.5 pl-4 pr-4"
+      className="flex-row items-center gap-3 px-4 py-2.5"
     >
       {/* Generative art thumbnail */}
       <View className="h-11 w-11 overflow-hidden rounded-xl">
@@ -77,12 +77,12 @@ export function SongRow({
         <Text
           className="font-sora-medium"
           numberOfLines={1}
-          style={{ color: isActive ? MUSIC_TINT : colors[scheme].foreground }}
+          style={{ color: isActive ? tint : colors[scheme].foreground }}
         >
           {song.title}
         </Text>
         <Text variant="caption" numberOfLines={1}>
-          {song.artist ?? 'Unknown artist'}
+          {song.artist ?? t('music.unknownArtist')}
         </Text>
       </View>
 
@@ -98,7 +98,7 @@ export function SongRow({
         onDelete ? (
           <Pressable
             onPress={onDelete}
-            accessibilityLabel={`Delete "${song.title}"`}
+            accessibilityLabel={t('music.deleteSongA11y', { title: song.title })}
             className="flex-1 items-center justify-center bg-destructive"
           >
             <Trash2 color={colors[scheme].primaryForeground} size={18} />
@@ -106,7 +106,7 @@ export function SongRow({
         ) : (
           <Pressable
             onPress={onRemove}
-            accessibilityLabel={`Remove "${song.title}" from playlist`}
+            accessibilityLabel={t('music.removeFromPlaylistA11y', { title: song.title })}
             className="flex-1 items-center justify-center bg-secondary"
           >
             <X color={colors[scheme].foreground} size={18} />

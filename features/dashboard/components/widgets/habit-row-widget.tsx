@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { Repeat } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -19,6 +20,7 @@ export function HabitRowWidget() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const { data, isLoading } = useHabitRow();
   const { logToday, unlogToday } = useHabitMutations();
   const habitTint = moduleTint('habit', scheme);
@@ -33,9 +35,9 @@ export function HabitRowWidget() {
   return (
     <WidgetCard
       icon={Repeat}
-      title="Habits"
+      title={t('tabs.habits')}
       tint={moduleTint('habit', scheme)}
-      actionLabel="View all"
+      actionLabel={t('dashboard.viewAll')}
       onActionPress={() => router.push('/(tabs)/habits')}
     >
       {isLoading || !data ? (
@@ -46,8 +48,8 @@ export function HabitRowWidget() {
         </View>
       ) : data.habits.length === 0 ? (
         <WidgetEmptyState
-          message="No habits yet — start one today"
-          actionLabel="Add habit"
+          message={t('dashboard.noHabitsYet')}
+          actionLabel={t('dashboard.addHabit')}
           onAction={() => router.push('/(tabs)/habits')}
         />
       ) : (

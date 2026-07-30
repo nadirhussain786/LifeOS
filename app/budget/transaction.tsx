@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { CalendarDays, Trash2 } from 'lucide-react-native';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
@@ -26,11 +27,6 @@ import {
 import type { BudgetAccount, TransactionType } from '@/features/budget/types/budget.types';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
-const TYPE_OPTIONS = [
-  { value: 'expense' as const, label: 'Expense' },
-  { value: 'income' as const, label: 'Income' },
-  { value: 'savings' as const, label: 'Savings' },
-];
 const ACCOUNT_OPTIONS = ACCOUNTS.map((a) => ({ value: a.id, label: a.label }));
 const TYPE_TINT: Record<TransactionType, string> = {
   income: '#22c55e',
@@ -45,6 +41,12 @@ export default function TransactionScreen() {
   }>();
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
+  const typeOptions = [
+    { value: 'expense' as const, label: t('budget.expense') },
+    { value: 'income' as const, label: t('budget.income') },
+    { value: 'savings' as const, label: t('budget.savings') },
+  ];
   const { addTransaction, editTransaction, removeTransaction } = useBudgetMutations();
   const { data: settings } = useBudgetSettings();
   const { data: savingsGoals = [] } = useSavingsGoals();
@@ -120,10 +122,10 @@ export default function TransactionScreen() {
 
   const confirmDelete = () => {
     if (!existing) return;
-    Alert.alert('Delete transaction?', 'This entry will be removed.', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('budget.deleteTransactionTitle'), t('budget.deleteEntryBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Delete',
+        text: t('common.delete'),
         style: 'destructive',
         onPress: () => (removeTransaction.mutate(existing.id), router.back()),
       },
@@ -135,14 +137,14 @@ export default function TransactionScreen() {
   return (
     <View className="flex-1 bg-background">
       <SheetHeader
-        title={isEdit ? 'Edit Transaction' : 'New Transaction'}
+        title={isEdit ? t('budget.editTransaction') : t('budget.newTransaction')}
         right={
           isEdit ? (
             <Pressable
               onPress={confirmDelete}
               hitSlop={10}
               className="h-9 w-9 items-center justify-center"
-              accessibilityLabel="Delete"
+              accessibilityLabel={t('common.delete')}
             >
               <Trash2 size={18} color={colors[scheme].destructive} />
             </Pressable>
@@ -155,7 +157,7 @@ export default function TransactionScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <Segmented options={TYPE_OPTIONS} value={type} onChange={changeType} activeColor={tint} />
+        <Segmented options={typeOptions} value={type} onChange={changeType} activeColor={tint} />
 
         <View className="items-center gap-1 py-2">
           <View className="flex-row items-end">
@@ -184,12 +186,10 @@ export default function TransactionScreen() {
         {type === 'savings' ? (
           <View className="gap-2.5">
             <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-              Toward a goal (optional)
+              {t('budget.towardGoal')}
             </Text>
             {savingsGoals.length === 0 ? (
-              <Text variant="muted">
-                Create a savings goal to earmark this. It still counts as savings without one.
-              </Text>
+              <Text variant="muted">{t('budget.savingsGoalHint')}</Text>
             ) : (
               <View className="flex-row flex-wrap gap-2">
                 {savingsGoals.map((goal) => {
@@ -221,7 +221,7 @@ export default function TransactionScreen() {
         ) : (
           <View className="gap-2.5">
             <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-              Category
+              {t('fields.category')}
             </Text>
             <CategoryGrid
               items={type === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES}
@@ -233,7 +233,7 @@ export default function TransactionScreen() {
 
         <View className="gap-2.5">
           <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-            Account
+            {t('budget.account')}
           </Text>
           <Segmented
             options={ACCOUNT_OPTIONS}
@@ -246,7 +246,7 @@ export default function TransactionScreen() {
         <View className="flex-row items-center justify-between rounded-2xl border border-border bg-card px-4 py-3">
           <View className="flex-row items-center gap-2">
             <CalendarDays size={16} color={colors[scheme].mutedForeground} />
-            <Text className="font-sora-medium text-foreground">Date</Text>
+            <Text className="font-sora-medium text-foreground">{t('budget.date')}</Text>
           </View>
           {Platform.OS === 'ios' ? (
             <DateTimePicker
@@ -278,13 +278,13 @@ export default function TransactionScreen() {
         <TextInput
           value={note}
           onChangeText={setNote}
-          placeholder="Note (optional)"
+          placeholder={t('budget.noteOptional')}
           placeholderTextColor={colors[scheme].mutedForeground}
           className="rounded-2xl border border-border bg-card px-4 py-3 text-foreground"
         />
 
         <Button
-          label={isEdit ? 'Save changes' : 'Add transaction'}
+          label={isEdit ? t('budget.saveChanges') : t('budget.addTransaction')}
           onPress={save}
           disabled={!canSave}
           size="lg"

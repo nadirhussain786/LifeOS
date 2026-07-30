@@ -4,10 +4,16 @@
  * guest mode with no backend at all. Auth and sync check `isSupabaseConfigured`
  * and stay disabled (guest-only) until real values are present.
  *
- * EXPO_PUBLIC_ vars are inlined by Expo at build time. For local dev they come
- * from `.env`; for EAS builds they come from eas.json's per-profile `env` (or
- * EAS environment variables). The anon key is safe to expose client-side — it
- * only grants what your Row Level Security policies allow.
+ * EXPO_PUBLIC_ vars are inlined by Metro at build time. For local dev they come
+ * from `.env`; for an EAS build they come from the EAS environment that eas.json
+ * links the build profile to — and app.config.js now fails a release build
+ * outright when the required ones are absent, rather than letting a
+ * credential-less APK ship silently. The anon key is safe to expose client-side:
+ * it only grants what your Row Level Security policies allow.
+ *
+ * Note that `process.env` must be indexed with a literal here. Metro's inlining
+ * is a compile-time text substitution, so a computed key like `process.env[name]`
+ * resolves to nothing at runtime.
  */
 
 const read = (v: string | undefined) => (v ?? '').trim();
@@ -28,3 +34,35 @@ export const env = {
 export const isSupabaseConfigured =
   /^https?:\/\/[^\s]+\.[^\s]+$/.test(env.EXPO_PUBLIC_SUPABASE_URL) &&
   env.EXPO_PUBLIC_SUPABASE_ANON_KEY.length > 20;
+
+/** Truncated, non-reversible preview of a credential — enough to tell "wrong
+ * value" from "no value" on a device, without putting the key on screen. */
+function preview(value: string): string {
+  if (!value) return '—';
+  return value.length <= 12 ? value : `${value.slice(0, 8)}…${value.slice(-4)}`;
+}
+
+export type EnvDiagnostics = {
+  supabaseConfigured: boolean;
+  /** Which values survived into this build. Shown on the sync screen so an EAS
+   * credential problem can be identified from the phone — the alternative is
+   * rebuilding blind, because a missing variable leaves no other trace. */
+  entries: { key: keyof typeof env; present: boolean; preview: string }[];
+};
+
+export function envDiagnostics(): EnvDiagnostics {
+  const describe = (key: keyof typeof env) => ({
+    key,
+    present: !!env[key],
+    preview: preview(env[key]),
+  });
+
+  return {
+    supabaseConfigured: isSupabaseConfigured,
+    entries: [
+      describe('EXPO_PUBLIC_SUPABASE_URL'),
+      describe('EXPO_PUBLIC_SUPABASE_ANON_KEY'),
+      describe('EXPO_PUBLIC_SENTRY_DSN'),
+    ],
+  };
+}

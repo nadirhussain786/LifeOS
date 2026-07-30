@@ -1,0 +1,136 @@
+name: Release
+
+# Bumps the user-facing app version on every merge into main, then tags it.
+#
+# The bump is the whole point: EAS auto-increments android.versionCode and
+# ios.buildNumber for us (eas.json: appVersionSource remote + autoIncrement),
+# but it never touches the semver in app.json. Without this workflow that number
+# is frozen at whatever it was last hand-edited to, and every store release
+# claims to be the same version.
+#
+# Loop safety. This workflow pushes to the branch that triggers it, which is
+# normally how you build an infinite loop. It cannot happen here: pushes
+# authenticated with the built-in GITHUB_TOKEN do not trigger workflow runs.
+# `[skip ci]` in the bump commit message is a second, independent guard, and the
+# `if:` on the version job is a third — one of them holding is enough.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      level:
+        description: 'Which part of the version to bump'
+        type: choice
+        default: minor
+        options: [major, minor, patch]
+      build:
+        description: 'Also start a production EAS build after bumping'
+        type: boolean
+        default: false
+
+# One release at a time. Two concurrent runs would each compute the next version
+# from the same starting point, and the loser's push would be rejected.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  # Never version code that does not build. Reuses ci.yml rather than repeating
+  # its steps, so the checks that gate a release cannot drift from the checks
+  # that gate a pull request.
+  checks:
+    uses: ./.github/workflows/ci.yml
+
+  version:
+    needs: checks
+    runs-on: ubuntu-latest
+    # Skip our own bump commits, and give humans an opt-out for merges that
+    # should not produce a new version (docs, CI tweaks, reverts).
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (!contains(github.event.head_commit.message, '[skip version]') &&
+       !startsWith(github.event.head_commit.message, 'chore(release):'))
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.bump.outputs.version }}
+      tag: ${{ steps.bump.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Tags are needed so the push below fails loudly on a collision
+          # instead of silently doing nothing.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Bump version
+        id: bump
+        run: node scripts/bump-version.mjs ${{ inputs.level || 'minor' }}
+
+      - name: Commit and tag
+        env:
+          VERSION: ${{ steps.bump.outputs.version }}
+          PREVIOUS: ${{ steps.bump.outputs.previous }}
+          TAG: ${{ steps.bump.outputs.tag }}
+        run: |
+          set -euo pipefail
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+          git add app.json package.json
+          git commit -m "chore(release): v${VERSION} [skip ci]" \
+                     -m "Bumped from v${PREVIOUS} by .github/workflows/release.yml."
+          git tag -a "${TAG}" -m "v${VERSION}"
+
+          # Atomic: the commit and the tag land together or neither does, so a
+          # tag can never point at a version that is not on main.
+          git push --atomic origin HEAD:main "refs/tags/${TAG}"
+
+      - name: Summary
+        env:
+          VERSION: ${{ steps.bump.outputs.version }}
+          PREVIOUS: ${{ steps.bump.outputs.previous }}
+        run: |
+          echo "### Released v${VERSION}" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Bumped from \`v${PREVIOUS}\`. EAS assigns the Android versionCode" \
+               "and iOS buildNumber at build time." >> "$GITHUB_STEP_SUMMARY"
+
+  # Opt-in, because every run of this costs an EAS build. Trigger it from the
+  # Actions tab with "Also start a production EAS build" ticked. To build on
+  # every merge instead, change the `if:` below to `needs.version.result ==
+  # 'success'`.
+  build:
+    needs: version
+    if: github.event_name == 'workflow_dispatch' && inputs.build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The bump commit was pushed after this workflow started, so the
+          # default checkout would build the *previous* version.
+          ref: ${{ needs.version.outputs.tag }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          packager: npm
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - run: npm ci
+
+      # --no-wait returns as soon as the build is queued; follow it on
+      # expo.dev. Credentials come from the EAS "production" environment, not
+      # from this workflow — see the comment block in app.config.js.
+      - name: EAS build
+        run: eas build --platform all --profile production --non-interactive --no-wait

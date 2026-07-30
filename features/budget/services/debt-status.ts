@@ -1,4 +1,5 @@
 import { differenceInCalendarDays } from 'date-fns';
+import type { TFunction } from 'i18next';
 
 import { colors } from '@/constants/design-tokens';
 import type { Debt, DebtStatus, DebtWithStatus } from '@/features/budget/types/budget.types';
@@ -36,15 +37,12 @@ export function withStatus(debt: Debt, now = Date.now()): DebtWithStatus {
 
 /** Short human label for a debt's timing, e.g. "3 days left", "Overdue by 2
  * days", "Due today", "Settled". */
-export function statusLabel(d: DebtWithStatus): string {
-  if (d.isSettled) return 'Settled';
-  if (d.daysLeft == null) return 'No deadline';
-  if (d.daysLeft < 0) {
-    const n = Math.abs(d.daysLeft);
-    return `Overdue by ${n} day${n === 1 ? '' : 's'}`;
-  }
-  if (d.daysLeft === 0) return 'Due today';
-  return `${d.daysLeft} day${d.daysLeft === 1 ? '' : 's'} left`;
+export function statusLabel(d: DebtWithStatus, t: TFunction): string {
+  if (d.isSettled) return t('debtStatus.settled');
+  if (d.daysLeft == null) return t('debtStatus.noDeadline');
+  if (d.daysLeft < 0) return t('debtStatus.overdueByDays', { count: Math.abs(d.daysLeft) });
+  if (d.daysLeft === 0) return t('debtStatus.dueToday');
+  return t('debtStatus.daysLeft', { count: d.daysLeft });
 }
 
 /** Status → accent colour (semantic tokens for the traffic-light states; the

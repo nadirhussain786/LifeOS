@@ -1,5 +1,6 @@
 import { format, parseISO } from 'date-fns';
 import { BookOpen, Star } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
 import { Text } from '@/components/ui/text';
@@ -8,10 +9,10 @@ import type { StudySession, StudySubject } from '@/features/study/types/study.ty
 
 const STUDY_TINT = '#8b5cf6';
 
-const MODE_LABEL: Record<StudySession['mode'], string> = {
-  pomodoro: 'Pomodoro',
-  custom: 'Custom',
-  stopwatch: 'Stopwatch',
+const MODE_LABEL_KEY: Record<StudySession['mode'], string> = {
+  pomodoro: 'study.modePomodoro',
+  custom: 'study.modeCustom',
+  stopwatch: 'study.modeStopwatch',
 };
 
 type Props = {
@@ -21,13 +22,14 @@ type Props = {
 };
 
 export function StudySessionCard({ session, subject, onLongPress }: Props) {
+  const { t } = useTranslation();
   const color = subject?.colorToken ?? STUDY_TINT;
 
   return (
     <Pressable
       onLongPress={() => onLongPress(session)}
       className="flex-row items-center gap-3 rounded-2xl border border-border bg-card p-4"
-      accessibilityHint="Long-press to delete"
+      accessibilityHint={t('study.longPressDelete')}
     >
       <View
         className="h-11 w-11 items-center justify-center rounded-xl"
@@ -37,11 +39,11 @@ export function StudySessionCard({ session, subject, onLongPress }: Props) {
       </View>
       <View className="flex-1 gap-0.5">
         <Text className="font-sora-semibold text-foreground" numberOfLines={1}>
-          {subject?.name ?? 'General'}
+          {subject?.name ?? t('study.general')}
           {session.note ? ` · ${session.note}` : ''}
         </Text>
         <Text variant="caption">
-          {format(parseISO(session.logDate), 'EEE, MMM d')} · {MODE_LABEL[session.mode]}
+          {format(parseISO(session.logDate), 'EEE, MMM d')} · {t(MODE_LABEL_KEY[session.mode])}
         </Text>
       </View>
       <View className="items-end gap-1">

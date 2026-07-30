@@ -8,6 +8,7 @@ import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { Repeat, Plus as PlusIcon } from 'lucide-react-native';
 import { forwardRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -17,6 +18,7 @@ import { colors } from '@/constants/theme';
 export const HabitsFabSheet = forwardRef<BottomSheetModal>(function HabitsFabSheet(_props, ref) {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
 
   const renderBackdrop = useCallback(
     (props: BottomSheetBackdropProps) => (
@@ -45,14 +47,14 @@ export const HabitsFabSheet = forwardRef<BottomSheetModal>(function HabitsFabShe
           className="flex-row items-center gap-3 rounded-md px-2 py-3 active:bg-muted"
         >
           <PlusIcon color={colors[scheme].foreground} size={20} />
-          <Text>New habit</Text>
+          <Text>{t('habits.newHabit')}</Text>
         </Pressable>
         <Pressable
           onPress={() => go('/routine/new')}
           className="flex-row items-center gap-3 rounded-md px-2 py-3 active:bg-muted"
         >
           <Repeat color={colors[scheme].foreground} size={20} />
-          <Text>New routine</Text>
+          <Text>{t('habits.newRoutine')}</Text>
         </Pressable>
       </BottomSheetView>
     </BottomSheetModal>

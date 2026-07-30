@@ -1,6 +1,7 @@
 import { format } from 'date-fns';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Plus, Trash2 } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Alert, ScrollView, View } from 'react-native';
 
 import { GradientButton } from '@/components/ui/gradient-button';
@@ -23,6 +24,7 @@ export default function SavingsGoalDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const { data: goals = [] } = useSavingsGoals();
   const { data: transactions = [] } = useTransactions();
   const { data: settings } = useBudgetSettings();
@@ -37,12 +39,12 @@ export default function SavingsGoalDetailScreen() {
 
   const confirmDelete = () => {
     Alert.alert(
-      'Delete savings goal?',
-      `"${goal.name}" will be removed. Your savings transactions are kept.`,
+      t('budget.deleteSavingsTitle'),
+      t('budget.deleteSavingsBody', { name: goal.name }),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: () => (removeSavingsGoal.mutate(goal.id), router.back()),
         },
@@ -53,12 +55,12 @@ export default function SavingsGoalDetailScreen() {
   return (
     <View className="flex-1 bg-background">
       <ScreenHeader
-        eyebrow="Savings"
+        eyebrow={t('budget.savings')}
         tint={moduleTint('budget', scheme)}
         actions={[
           {
             icon: Trash2,
-            label: 'Delete goal',
+            label: t('budget.deleteGoal'),
             onPress: confirmDelete,
             tint: colors[scheme].destructive,
           },
@@ -81,30 +83,35 @@ export default function SavingsGoalDetailScreen() {
               <Text className="font-sora-extrabold text-2xl text-foreground">
                 {formatMoney(goal.savedCents, currency)}
               </Text>
-              <Text variant="caption">of {formatMoney(goal.targetCents, currency)}</Text>
+              <Text variant="caption">
+                {t('budget.ofAmount', { amount: formatMoney(goal.targetCents, currency) })}
+              </Text>
             </View>
           </ProgressRing>
           <View className="items-center gap-1">
             <Text className="font-sora-bold text-2xl text-foreground">{goal.name}</Text>
             <Text variant="muted">
               {goal.progress >= 1
-                ? 'Goal reached 🎉'
-                : `${formatMoney(remaining, currency)} to go${goal.deadline ? ` · by ${format(goal.deadline, 'MMM yyyy')}` : ''}`}
+                ? t('budget.goalReached')
+                : t('budget.amountToGo', { amount: formatMoney(remaining, currency) }) +
+                  (goal.deadline
+                    ? ` · ${t('budget.byDate', { date: format(goal.deadline, 'MMM yyyy') })}`
+                    : '')}
             </Text>
           </View>
         </View>
 
         <GradientButton
-          label="Add to this goal"
+          label={t('budget.addToGoal')}
           tint={goal.colorToken}
           icon={Plus}
           onPress={() => router.push(`/budget/transaction?savingsGoalId=${goal.id}`)}
         />
 
         <View className="gap-3">
-          <Text variant="subheading">Contributions</Text>
+          <Text variant="subheading">{t('budget.contributions')}</Text>
           {contributions.length === 0 ? (
-            <Text variant="muted">No contributions yet — add your first deposit above.</Text>
+            <Text variant="muted">{t('budget.noContributions')}</Text>
           ) : (
             <View className="gap-2.5">
               {contributions.map((transaction) => (

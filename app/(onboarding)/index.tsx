@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
-import { ArrowLeft, Leaf, ShieldCheck } from 'lucide-react-native';
+import { Leaf, ShieldCheck } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -12,6 +13,7 @@ import {
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ArrowBack } from '@/components/ui/directional-icon';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
@@ -32,6 +34,7 @@ export default function OnboardingScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const completeOnboarding = useProfileStore((s) => s.completeOnboarding);
 
   const [step, setStep] = useState(0);
@@ -66,10 +69,10 @@ export default function OnboardingScreen() {
           <Pressable
             onPress={() => setStep((s) => s - 1)}
             hitSlop={10}
-            className="absolute left-5"
-            accessibilityLabel="Back"
+            className="absolute start-5"
+            accessibilityLabel={t('common.back')}
           >
-            <ArrowLeft size={22} color={colors[scheme].foreground} />
+            <ArrowBack size={22} color={colors[scheme].foreground} />
           </Pressable>
         ) : null}
         <View className="flex-row gap-1.5">
@@ -101,11 +104,10 @@ export default function OnboardingScreen() {
               </View>
               <View className="gap-3">
                 <Text className="font-sora-extrabold text-4xl tracking-tight text-foreground">
-                  Welcome to LifeOS
+                  {t('onboarding.welcomeTitle')}
                 </Text>
                 <Text className="text-muted-foreground" style={{ fontSize: 17, lineHeight: 26 }}>
-                  A calm, private home for your habits, tasks, journal, and everything you&rsquo;re
-                  working toward. Let&rsquo;s set it up in a few taps.
+                  {t('onboarding.welcomeBody')}
                 </Text>
               </View>
             </View>
@@ -114,18 +116,17 @@ export default function OnboardingScreen() {
           {step === 1 ? (
             <View className="flex-1 gap-6 pt-8">
               <View className="gap-2">
-                <Text variant="micro">About you</Text>
+                <Text variant="micro">{t('onboarding.aboutYou')}</Text>
                 <Text className="font-sora-extrabold text-3xl tracking-tight text-foreground">
-                  What should we call you?
+                  {t('onboarding.whatToCallYou')}
                 </Text>
-                <Text variant="muted">
-                  We&rsquo;ll use it to greet you — nothing leaves your device.
-                </Text>
+                <Text variant="muted">{t('onboarding.nameHint')}</Text>
               </View>
               <TextInput
                 value={name}
                 onChangeText={setName}
-                placeholder="Your name"
+                accessibilityLabel={t('onboarding.yourName')}
+                placeholder={t('onboarding.yourName')}
                 placeholderTextColor={colors[scheme].mutedForeground}
                 autoFocus
                 returnKeyType="next"
@@ -139,11 +140,11 @@ export default function OnboardingScreen() {
           {step === 2 ? (
             <View className="flex-1 gap-5 pt-8">
               <View className="gap-2">
-                <Text variant="micro">Your focus</Text>
+                <Text variant="micro">{t('dashboard.yourFocus')}</Text>
                 <Text className="font-sora-extrabold text-3xl tracking-tight text-foreground">
-                  What matters most right now?
+                  {t('onboarding.whatMatters')}
                 </Text>
-                <Text variant="muted">Pick a few. You can always change what you track later.</Text>
+                <Text variant="muted">{t('onboarding.pickAFew')}</Text>
               </View>
               <ScrollView
                 showsVerticalScrollIndicator={false}
@@ -168,7 +169,7 @@ export default function OnboardingScreen() {
                         className="font-sora-medium"
                         style={{ color: selected ? tint : colors[scheme].foreground }}
                       >
-                        {area.label}
+                        {t(area.labelKey)}
                       </Text>
                     </Pressable>
                   );
@@ -184,12 +185,12 @@ export default function OnboardingScreen() {
               </View>
               <View className="gap-3">
                 <Text className="font-sora-extrabold text-3xl tracking-tight text-foreground">
-                  Keep LifeOS private?
+                  {t('onboarding.keepPrivate')}
                 </Text>
                 <Text className="text-muted-foreground" style={{ fontSize: 17, lineHeight: 26 }}>
                   {bioAvailable
-                    ? `Lock the app with ${bioLabel} so only you can open it. It's optional — you can turn it on or off anytime in Settings.`
-                    : "Biometric lock isn't set up on this device. You can enable it later from Settings once you've added Face ID or a fingerprint."}
+                    ? t('onboarding.lockBody', { method: bioLabel })
+                    : t('onboarding.noBiometrics')}
                 </Text>
               </View>
             </View>
@@ -200,13 +201,18 @@ export default function OnboardingScreen() {
       {/* footer — one primary action per step */}
       <View className="gap-3 px-6" style={{ paddingBottom: insets.bottom + 16, paddingTop: 12 }}>
         {step === 0 ? (
-          <Button variant="accent" size="lg" label="Get started" onPress={() => setStep(1)} />
+          <Button
+            variant="accent"
+            size="lg"
+            label={t('onboarding.getStarted')}
+            onPress={() => setStep(1)}
+          />
         ) : null}
         {step === 1 ? (
           <Button
             variant="accent"
             size="lg"
-            label="Continue"
+            label={t('common.continue')}
             disabled={!name.trim()}
             onPress={() => setStep(2)}
           />
@@ -215,7 +221,7 @@ export default function OnboardingScreen() {
           <Button
             variant="accent"
             size="lg"
-            label={focus.length ? 'Continue' : 'Skip for now'}
+            label={focus.length ? t('common.continue') : t('onboarding.skipForNow')}
             onPress={() => setStep(3)}
           />
         ) : null}
@@ -225,13 +231,23 @@ export default function OnboardingScreen() {
               <Button
                 variant="accent"
                 size="lg"
-                label={`Enable ${bioLabel}`}
+                label={t('onboarding.enableMethod', { method: bioLabel })}
                 onPress={enableLock}
               />
-              <Button variant="ghost" size="lg" label="Not now" onPress={() => finish(false)} />
+              <Button
+                variant="ghost"
+                size="lg"
+                label={t('onboarding.notNow')}
+                onPress={() => finish(false)}
+              />
             </>
           ) : (
-            <Button variant="accent" size="lg" label="Finish setup" onPress={() => finish(false)} />
+            <Button
+              variant="accent"
+              size="lg"
+              label={t('onboarding.finishSetup')}
+              onPress={() => finish(false)}
+            />
           )
         ) : null}
       </View>

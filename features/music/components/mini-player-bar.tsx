@@ -1,7 +1,8 @@
 import { usePathname, useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { GripVertical, Pause, Play, SkipForward, X } from 'lucide-react-native';
+import { ChevronDown, GripVertical, Pause, Play, SkipForward } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, useWindowDimensions, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
@@ -13,9 +14,9 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { Equalizer } from '@/features/music/components/equalizer';
-import { MUSIC_TINT } from '@/features/music/components/song-row';
 import { useNowPlaying } from '@/features/music/hooks/use-player';
 import { usePlayerUiStore } from '@/features/music/store/player-ui-store';
 import { songGradient } from '@/features/music/utils/song-art';
@@ -28,21 +29,26 @@ const ESTIMATED_HEIGHT = 60;
  * Persistent, freely-draggable "now playing" widget. Mounted once at the app
  * root (app/_layout.tsx) so it floats over EVERY screen like a true top-level
  * player. Drag it to drop it anywhere on screen (position persisted); tap it to
- * open Now Playing; tap ✕ to stop and dismiss. Hidden on the Now Playing screen
- * itself.
+ * open Now Playing; tap ⌄ to tuck it away — playback continues in the
+ * background, and the bar returns when the next track starts. Hidden on the
+ * Now Playing screen itself.
  */
 export function MiniPlayerBar() {
   const router = useRouter();
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
+  const tint = moduleTint('music', scheme);
+  const { t } = useTranslation();
   const { width: screenW, height: screenH } = useWindowDimensions();
-  const { currentSong, isPlaying, positionMs, durationMs, togglePlayPause, playNext, clearPlayer } =
+  const { currentSong, isPlaying, positionMs, durationMs, togglePlayPause, playNext } =
     useNowPlaying();
 
   const storeX = usePlayerUiStore((s) => s.x);
   const storeY = usePlayerUiStore((s) => s.y);
   const setPosition = usePlayerUiStore((s) => s.setPosition);
+  const hidden = usePlayerUiStore((s) => s.hidden);
+  const setHidden = usePlayerUiStore((s) => s.setHidden);
 
   const [barH, setBarH] = useState(ESTIMATED_HEIGHT);
   const barW = screenW - SIDE_MARGIN * 2;
@@ -77,6 +83,8 @@ export function MiniPlayerBar() {
   }));
 
   if (!currentSong) return null;
+  // Dismissed by the user — playback carries on in the background.
+  if (hidden) return null;
   // The full Now Playing screen is the player — don't overlay the mini bar on it.
   if (pathname === '/music/now-playing') return null;
 
@@ -110,7 +118,7 @@ export function MiniPlayerBar() {
           { position: 'absolute', left: 0, top: 0, width: barW },
           animatedStyle,
           {
-            shadowColor: MUSIC_TINT,
+            shadowColor: tint,
             shadowOpacity: 0.28,
             shadowRadius: 14,
             shadowOffset: { width: 0, height: 6 },
@@ -120,14 +128,14 @@ export function MiniPlayerBar() {
         className="overflow-hidden rounded-2xl border border-border bg-card"
       >
         <View className="h-[2px] w-full bg-muted">
-          <View
-            className="h-full"
-            style={{ width: `${progress * 100}%`, backgroundColor: MUSIC_TINT }}
-          />
+          <View className="h-full" style={{ width: `${progress * 100}%`, backgroundColor: tint }} />
         </View>
-        <View className="flex-row items-center gap-1.5 py-2 pl-1.5 pr-2.5">
+        <View className="flex-row items-center gap-1.5 py-2 pe-2.5 ps-1.5">
           {/* Drag handle */}
-          <View className="items-center justify-center px-0.5" accessibilityLabel="Drag to move">
+          <View
+            className="items-center justify-center px-0.5"
+            accessibilityLabel={t('music.dragToMove')}
+          >
             <GripVertical size={16} color={colors[scheme].mutedForeground} />
           </View>
 
@@ -135,7 +143,7 @@ export function MiniPlayerBar() {
           <Pressable
             onPress={() => router.push('/music/now-playing')}
             className="flex-1 flex-row items-center gap-2.5"
-            accessibilityLabel="Open now playing"
+            accessibilityLabel={t('music.openNowPlaying')}
           >
             <LinearGradient
               colors={[c1, c2, c3]}
@@ -156,7 +164,7 @@ export function MiniPlayerBar() {
                 {currentSong.title}
               </Text>
               <Text variant="caption" numberOfLines={1}>
-                {currentSong.artist ?? 'Unknown artist'}
+                {currentSong.artist ?? t('music.unknownArtist')}
               </Text>
             </View>
           </Pressable>
@@ -165,7 +173,7 @@ export function MiniPlayerBar() {
             onPress={togglePlayPause}
             hitSlop={6}
             className="h-9 w-9 items-center justify-center"
-            accessibilityLabel={isPlaying ? 'Pause' : 'Play'}
+            accessibilityLabel={isPlaying ? t('music.pause') : t('music.play')}
           >
             {isPlaying ? (
               <Pause size={20} color={colors[scheme].foreground} fill={colors[scheme].foreground} />
@@ -177,7 +185,7 @@ export function MiniPlayerBar() {
             onPress={playNext}
             hitSlop={6}
             className="h-9 w-9 items-center justify-center"
-            accessibilityLabel="Next track"
+            accessibilityLabel={t('music.nextTrack')}
           >
             <SkipForward
               size={18}
@@ -186,12 +194,12 @@ export function MiniPlayerBar() {
             />
           </Pressable>
           <Pressable
-            onPress={clearPlayer}
+            onPress={() => setHidden(true)}
             hitSlop={6}
             className="h-9 w-9 items-center justify-center"
-            accessibilityLabel="Stop and dismiss"
+            accessibilityLabel={t('music.hidePlayer')}
           >
-            <X size={18} color={colors[scheme].mutedForeground} />
+            <ChevronDown size={18} color={colors[scheme].mutedForeground} />
           </Pressable>
         </View>
       </Animated.View>

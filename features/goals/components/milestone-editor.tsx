@@ -1,4 +1,5 @@
 import { GripVertical, Plus, X } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Pressable, TextInput, View } from 'react-native';
 
 import { Text } from '@/components/ui/text';
@@ -15,6 +16,7 @@ type Props = {
  * append to the end. */
 export function MilestoneEditor({ value, onChange }: Props) {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
 
   const setAt = (index: number, text: string) => {
     const next = [...value];
@@ -36,8 +38,8 @@ export function MilestoneEditor({ value, onChange }: Props) {
           <TextInput
             value={milestone}
             onChangeText={(text) => setAt(index, text)}
-            accessibilityLabel={`Milestone ${index + 1}`}
-            placeholder={`Milestone ${index + 1}`}
+            accessibilityLabel={t('goals.milestoneN', { index: index + 1 })}
+            placeholder={t('goals.milestoneN', { index: index + 1 })}
             placeholderTextColor={colors[scheme].mutedForeground}
             className="flex-1 py-1 text-foreground"
             maxLength={100}
@@ -54,7 +56,7 @@ export function MilestoneEditor({ value, onChange }: Props) {
       >
         <Plus size={15} color={colors[scheme].accent} />
         <Text className="font-sora-medium" style={{ color: colors[scheme].accent }}>
-          Add milestone
+          {t('goals.addMilestone')}
         </Text>
       </Pressable>
     </View>

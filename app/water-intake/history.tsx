@@ -1,6 +1,7 @@
 import { format, isToday, parseISO } from 'date-fns';
 import { useRouter } from 'expo-router';
 import { GlassWater, Settings2 } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -19,6 +20,7 @@ const HISTORY_DAYS = 14;
 export default function WaterHistoryScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const waterTint = moduleTint('water', scheme);
   const goalMl = useWaterSettingsStore((state) => state.goalMl);
   const { data: history, isLoading, isError, refetch } = useWaterHistory(HISTORY_DAYS);
@@ -28,13 +30,13 @@ export default function WaterHistoryScreen() {
   return (
     <View className="flex-1 bg-background">
       <ScreenHeader
-        title="Water"
-        eyebrow="Wellbeing"
+        title={t('water.title')}
+        eyebrow={t('water.eyebrow')}
         tint={waterTint}
         actions={[
           {
             icon: Settings2,
-            label: 'Water settings',
+            label: t('water.settingsAction'),
             onPress: () => router.push('/water-intake/settings'),
           },
         ]}
@@ -49,8 +51,8 @@ export default function WaterHistoryScreen() {
       ) : !hasAnyData ? (
         <EmptyState
           icon={GlassWater}
-          title="No history yet"
-          description="Log some water today and it'll show up here."
+          title={t('water.emptyTitle')}
+          description={t('water.emptyBody')}
           tint={waterTint}
         />
       ) : (
@@ -60,7 +62,7 @@ export default function WaterHistoryScreen() {
         >
           <View className="gap-3 rounded-2xl border border-border bg-card p-4 shadow-e1">
             <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-              Last {HISTORY_DAYS} days
+              {t('water.lastNDays', { days: HISTORY_DAYS })}
             </Text>
             <View className="h-32 flex-row items-end gap-1.5">
               {history.map((day) => {
@@ -108,7 +110,7 @@ export default function WaterHistoryScreen() {
                   className="font-sora-medium"
                   style={day.totalMl >= goalMl && goalMl > 0 ? { color: waterTint } : undefined}
                 >
-                  {day.totalMl} ml
+                  {t('water.milliliters', { amount: day.totalMl })}
                 </Text>
               </View>
             ))}

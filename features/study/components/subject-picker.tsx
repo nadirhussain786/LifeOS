@@ -1,6 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { Plus } from 'lucide-react-native';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { Text } from '@/components/ui/text';
@@ -20,6 +21,7 @@ type Props = {
  * subjects cycle through the shared category palette so colors stay on-brand. */
 export function SubjectPicker({ subjects, value, onChange, onCreate }: Props) {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const [isAdding, setIsAdding] = useState(false);
   const [name, setName] = useState('');
 
@@ -52,7 +54,7 @@ export function SubjectPicker({ subjects, value, onChange, onCreate }: Props) {
         )}
       >
         <Text className={value === null ? 'text-background' : 'text-muted-foreground'}>
-          General
+          {t('study.general')}
         </Text>
       </Pressable>
 
@@ -90,8 +92,8 @@ export function SubjectPicker({ subjects, value, onChange, onCreate }: Props) {
           <TextInput
             value={name}
             onChangeText={setName}
-            accessibilityLabel="Subject name"
-            placeholder="Subject"
+            accessibilityLabel={t('study.subjectName')}
+            placeholder={t('study.subjectPlaceholder')}
             placeholderTextColor={colors[scheme].mutedForeground}
             autoFocus
             onSubmitEditing={confirm}
@@ -105,7 +107,7 @@ export function SubjectPicker({ subjects, value, onChange, onCreate }: Props) {
           className="flex-row items-center gap-1 rounded-full border border-dashed border-border px-3 py-1.5"
         >
           <Plus size={14} color={colors[scheme].mutedForeground} />
-          <Text variant="muted">New</Text>
+          <Text variant="muted">{t('study.new')}</Text>
         </Pressable>
       )}
     </ScrollView>

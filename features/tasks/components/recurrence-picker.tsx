@@ -1,4 +1,5 @@
 import * as Haptics from 'expo-haptics';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -7,12 +8,12 @@ import { colors } from '@/constants/theme';
 import { cn } from '@/lib/utils';
 import type { TaskRecurrenceFrequency } from '@/features/tasks/types/task.types';
 
-const OPTIONS: { value: TaskRecurrenceFrequency; label: string }[] = [
-  { value: 'none', label: 'One-time' },
-  { value: 'daily', label: 'Daily' },
-  { value: 'weekly', label: 'Weekly' },
-  { value: 'monthly', label: 'Monthly' },
-  { value: 'yearly', label: 'Yearly' },
+const OPTIONS: { value: TaskRecurrenceFrequency; labelKey: string }[] = [
+  { value: 'none', labelKey: 'recurrence.oneTime' },
+  { value: 'daily', labelKey: 'recurrence.daily' },
+  { value: 'weekly', labelKey: 'recurrence.weekly' },
+  { value: 'monthly', labelKey: 'recurrence.monthly' },
+  { value: 'yearly', labelKey: 'recurrence.yearly' },
 ];
 
 type Props = {
@@ -22,6 +23,7 @@ type Props = {
 
 export function RecurrencePicker({ value, onChange }: Props) {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
 
   return (
     <ScrollView
@@ -49,7 +51,7 @@ export function RecurrencePicker({ value, onChange }: Props) {
               className={cn('font-sora-medium', !selected && 'text-muted-foreground')}
               style={selected ? { color: colors[scheme].accentForeground } : undefined}
             >
-              {option.label}
+              {t(option.labelKey)}
             </Text>
           </Pressable>
         );

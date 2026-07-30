@@ -1,12 +1,13 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Trash2 } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { TextInput, View } from 'react-native';
 
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
-import { MUSIC_TINT } from '@/features/music/components/song-row';
 import { formatDuration } from '@/features/music/utils/format-duration';
 import { useSongMutations, useSongs } from '@/features/music/hooks/use-songs';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -17,6 +18,8 @@ export default function SongDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const tint = moduleTint('music', scheme);
+  const { t } = useTranslation();
 
   const { data: songs = [] } = useSongs();
   const song = songs.find((item) => item.id === id) ?? null;
@@ -57,12 +60,12 @@ export default function SongDetailScreen() {
       <Stack.Screen options={{ headerShown: false }} />
 
       <ScreenHeader
-        eyebrow="Song"
-        tint={MUSIC_TINT}
+        eyebrow={t('music.songEyebrow')}
+        tint={tint}
         actions={[
           {
             icon: Trash2,
-            label: 'Delete song',
+            label: t('music.deleteSong'),
             onPress: () => {
               remove.mutate(song.id);
               router.back();
@@ -75,7 +78,7 @@ export default function SongDetailScreen() {
       <View className="gap-5 px-5 pt-2">
         <View className="gap-1.5">
           <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-            Title
+            {t('music.songTitle')}
           </Text>
           <TextInput
             value={title}
@@ -87,19 +90,21 @@ export default function SongDetailScreen() {
 
         <View className="gap-1.5">
           <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-            Artist
+            {t('music.artist')}
           </Text>
           <TextInput
             value={artist}
             onChangeText={setArtist}
-            accessibilityLabel="Artist"
-            placeholder="Unknown artist"
+            accessibilityLabel={t('music.artist')}
+            placeholder={t('music.unknownArtist')}
             placeholderTextColor={colors[scheme].mutedForeground}
             className="text-lg text-foreground"
           />
         </View>
 
-        <Text variant="muted">Duration: {formatDuration(song.durationMs)}</Text>
+        <Text variant="muted">
+          {t('music.duration', { duration: formatDuration(song.durationMs) })}
+        </Text>
       </View>
     </View>
   );

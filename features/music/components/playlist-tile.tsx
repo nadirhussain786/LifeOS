@@ -1,5 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { Music2 } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
 import { Text } from '@/components/ui/text';
@@ -15,6 +16,7 @@ type Props = {
 /** A rich gradient playlist card — its own color (from the playlist's tint) or a
  *  generative gradient when untinted, with the name + count laid over it. */
 export function PlaylistTile({ playlist, onPress }: Props) {
+  const { t } = useTranslation();
   const gradient = playlist.colorToken
     ? tintGradientTriple(playlist.colorToken)
     : songGradient(playlist.id);
@@ -55,7 +57,7 @@ export function PlaylistTile({ playlist, onPress }: Props) {
               {playlist.name}
             </Text>
             <Text style={{ color: alpha('#ffffff', 0.85), fontSize: 11 }}>
-              {playlist.songCount} song{playlist.songCount === 1 ? '' : 's'}
+              {t('music.songsCount', { count: playlist.songCount })}
             </Text>
           </View>
         </LinearGradient>

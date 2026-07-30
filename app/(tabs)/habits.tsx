@@ -2,6 +2,7 @@ import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import { Repeat, Search } from 'lucide-react-native';
 import { useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { TextInput, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -35,6 +36,7 @@ export default function HabitsScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   const quickLogRef = useRef<BottomSheetModal>(null);
   const fabSheetRef = useRef<BottomSheetModal>(null);
   const [quickLogHabit, setQuickLogHabit] = useState<HabitWithToday | null>(null);
@@ -83,7 +85,7 @@ export default function HabitsScreen() {
         groupedItems.push({
           type: 'header',
           key: 'other',
-          label: 'Other',
+          label: t('habits.other'),
           count: uncategorized.length,
         });
       }
@@ -91,7 +93,7 @@ export default function HabitsScreen() {
     }
 
     return [...routineItems, ...groupedItems];
-  }, [routines, habits, categories]);
+  }, [routines, habits, categories, t]);
 
   const openQuickLog = (habit: HabitWithToday) => {
     setQuickLogHabit(habit);
@@ -102,10 +104,10 @@ export default function HabitsScreen() {
     <View className="flex-1 bg-background">
       <View style={{ paddingTop: insets.top + 8 }} className="gap-5 px-5 pb-2">
         <View className="flex-row items-center justify-between">
-          <Text variant="heading">Habits</Text>
+          <Text variant="heading">{t('tabs.habits')}</Text>
           {progress.total > 0 && (
             <Text variant="muted" className="font-sora-medium">
-              {progress.done}/{progress.total} today
+              {t('habits.todayCount', { done: progress.done, total: progress.total })}
             </Text>
           )}
         </View>
@@ -124,7 +126,8 @@ export default function HabitsScreen() {
           <TextInput
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholder="Search habits"
+            accessibilityLabel={t('habits.searchHabits')}
+            placeholder={t('habits.searchHabits')}
             placeholderTextColor={colors[scheme].mutedForeground}
             className="flex-1 text-foreground"
           />
@@ -132,7 +135,7 @@ export default function HabitsScreen() {
       </View>
 
       {isError ? (
-        <QueryError onRetry={() => refetch()} message="Couldn't load your habits." />
+        <QueryError onRetry={() => refetch()} message={t('habits.loadError')} />
       ) : isLoading ? (
         <View className="gap-2.5 px-5">
           <Skeleton className="h-16 w-full rounded-2xl" />
@@ -142,8 +145,8 @@ export default function HabitsScreen() {
       ) : items.length === 0 ? (
         <EmptyState
           icon={Repeat}
-          title="No habits yet"
-          description="Build routines you can actually keep — start with one habit."
+          title={t('habits.emptyTitle')}
+          description={t('habits.emptyBody')}
           tint={moduleTint('habit', scheme)}
         />
       ) : (
@@ -205,7 +208,7 @@ export default function HabitsScreen() {
       <HabitsFabSheet ref={fabSheetRef} />
       <Fab
         onPress={() => fabSheetRef.current?.present()}
-        accessibilityLabel="Add habit or routine"
+        accessibilityLabel={t('habits.addHabitOrRoutine')}
       />
     </View>
   );

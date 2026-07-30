@@ -30,8 +30,8 @@ export type NotificationsState = {
   /** Quiet window as minutes-from-midnight. Wraps past midnight when start > end. */
   quietStartMinutes: number;
   quietEndMinutes: number;
-  /** 'digest' = one morning summary + urgent-only pings (the smart default);
-   * 'individual' = every reminder fires on its own. */
+  /** 'individual' (the default) = every reminder fires at its own time;
+   * 'digest' = opt-in, folding non-urgent nudges into one morning summary. */
   deliveryMode: DeliveryMode;
   digestHour: number;
   digestMinute: number;
@@ -56,7 +56,13 @@ export const useNotificationsStore = create<NotificationsState>()(
       quietHoursEnabled: true,
       quietStartMinutes: 22 * 60,
       quietEndMinutes: 7 * 60,
-      deliveryMode: 'digest',
+      // Individual, not digest. Digest reads like a considerate default but it
+      // silently cancels every water/habit/journal/goal reminder the user set up
+      // (see CONSOLIDATED_CATEGORIES in services/delivery.ts) and replaces them
+      // with one 8am summary. Nothing in the setup flows says so, so the honest
+      // reading of "I set a reminder" is that the reminder fires. Digest is
+      // still there, one tap away in Notification Settings.
+      deliveryMode: 'individual',
       digestHour: 8,
       digestMinute: 0,
       digestNotificationId: null,
@@ -74,6 +80,19 @@ export const useNotificationsStore = create<NotificationsState>()(
     {
       name: 'notifications-store',
       storage: createJSONStorage(() => AsyncStorage),
+      version: 1,
+      // Changing the default above only affects fresh installs — everyone who
+      // already ran the app has 'digest' written to disk and would keep losing
+      // their reminders. v1 clears that one-time: an install still sitting on
+      // the old default is moved to 'individual'. Anyone who chose digest
+      // deliberately after this ships is on version 1 already and is left alone.
+      migrate: (persisted, version) => {
+        const saved = (persisted ?? {}) as Partial<NotificationsState>;
+        if (version === 0 && saved.deliveryMode === 'digest') {
+          return { ...saved, deliveryMode: 'individual' as DeliveryMode };
+        }
+        return saved;
+      },
       // A category added in a later release won't exist in a persisted map read
       // back from an older install — backfill any missing ones to enabled.
       merge: (persisted, current) => {

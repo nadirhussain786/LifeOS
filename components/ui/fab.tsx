@@ -40,7 +40,8 @@ export function Fab({ onPress, accessibilityLabel = 'Quick actions' }: Props) {
         animatedStyle,
         {
           position: 'absolute',
-          right: 20,
+          // Trailing edge, so the FAB moves to the bottom-left in RTL.
+          insetInlineEnd: 20,
           bottom: insets.bottom + 20,
           height: 56,
           width: 56,

@@ -1,5 +1,6 @@
 import { useRouter } from 'expo-router';
 import { StickyNote } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
 import { Skeleton } from '@/components/ui/skeleton';
@@ -38,13 +39,14 @@ function NoteRow({
 
 export function RecentNotesWidget() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { data, isLoading } = useRecentNotes();
 
   return (
     <WidgetCard
       icon={StickyNote}
-      title="Recent notes"
-      actionLabel="View all"
+      title={t('dashboard.recentNotes')}
+      actionLabel={t('dashboard.viewAll')}
       onActionPress={() => router.push('/notes')}
     >
       {isLoading || !data ? (
@@ -54,8 +56,8 @@ export function RecentNotesWidget() {
         </View>
       ) : data.notes.length === 0 ? (
         <WidgetEmptyState
-          message="No notes yet"
-          actionLabel="Add note"
+          message={t('dashboard.noNotesYet')}
+          actionLabel={t('dashboard.addNote')}
           onAction={() => router.push('/note/new')}
         />
       ) : (

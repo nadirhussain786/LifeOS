@@ -11,6 +11,7 @@ import {
   waterIntakeLogs,
 } from '@/database/schema';
 import { listCalendarEventsBetween } from '@/features/timeline/services/calendar-events-repository';
+import i18n from '@/lib/i18n';
 import { LOCAL_USER_ID } from '@/lib/local-user';
 import type { TimelineEvent } from '@/features/timeline/types/timeline.types';
 
@@ -89,7 +90,9 @@ export function listTimelineForDate(dateKey: string): TimelineEvent[] {
       sourceId: log.habitId,
       type: 'habit_completed',
       time: log.loggedAt,
-      title: habit ? `${habit.name} completed` : 'Habit completed',
+      title: habit
+        ? i18n.t('timeline.habitNamedCompleted', { name: habit.name })
+        : i18n.t('timeline.habitCompleted'),
       emoji: habit?.emoji ?? '💪',
       linkHref: `/habit/${log.habitId}`,
     });
@@ -113,7 +116,7 @@ export function listTimelineForDate(dateKey: string): TimelineEvent[] {
       sourceId: note.id,
       type: 'note_created',
       time: note.createdAt,
-      title: note.title || 'Untitled note',
+      title: note.title || i18n.t('notes.untitled'),
       emoji: '📝',
       linkHref: `/note/${note.id}`,
     });
@@ -136,7 +139,7 @@ export function listTimelineForDate(dateKey: string): TimelineEvent[] {
       sourceId: entry.id,
       type: 'journal_written',
       time: entry.updatedAt,
-      title: 'Journal written',
+      title: i18n.t('timeline.journalWritten'),
       emoji: '📖',
       linkHref: `/journal/${dateKey}`,
     });
@@ -153,7 +156,7 @@ export function listTimelineForDate(dateKey: string): TimelineEvent[] {
       sourceId: log.id,
       type: 'water_logged',
       time: log.loggedAt,
-      title: `Drank ${log.amountMl}ml of water`,
+      title: i18n.t('timeline.drankWater', { amount: log.amountMl }),
       emoji: '💧',
       linkHref: '/water-intake/history',
     });

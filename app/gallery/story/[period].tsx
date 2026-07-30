@@ -3,6 +3,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import { X } from 'lucide-react-native';
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, useWindowDimensions, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
@@ -19,6 +20,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text } from '@/components/ui/text';
 import { displayUri, type GalleryPhoto } from '@/features/gallery/types/gallery.types';
 import { usePhotos } from '@/features/gallery/hooks/use-gallery';
+import { moduleTint } from '@/constants/design-tokens';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { alpha } from '@/lib/color';
 
 const SLIDE_MS = 3800;
@@ -42,17 +45,21 @@ function Segment({ progress }: { progress: SharedValue<number> }) {
 }
 
 export default function StoryPlayerScreen() {
-  const { period } = useLocalSearchParams<{ period: string }>();
+  const { period, album } = useLocalSearchParams<{ period: string; album?: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
+  const scheme = useColorScheme() ?? 'light';
+  const tint = moduleTint('gallery', scheme);
   const { width, height } = useWindowDimensions();
   const { data: photos = [] } = usePhotos();
 
   const story = useMemo<GalleryPhoto[]>(() => {
-    const sorted = [...photos].sort((a, b) => a.takenAt - b.takenAt); // oldest → newest
+    const scoped = album ? photos.filter((p) => p.albumId === album) : photos;
+    const sorted = [...scoped].sort((a, b) => a.takenAt - b.takenAt); // oldest → newest
     if (period === 'all' || !period) return sorted;
     return sorted.filter((p) => format(p.takenAt, 'yyyy-MM') === period);
-  }, [photos, period]);
+  }, [photos, period, album]);
 
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -202,7 +209,11 @@ export default function StoryPlayerScreen() {
             <Text style={{ color: '#ffffff', fontSize: 13 }} className="font-sora-semibold">
               {format(current.takenAt, 'EEEE, MMM d, yyyy')}
             </Text>
-            <Pressable onPress={() => router.back()} hitSlop={10} accessibilityLabel="Close">
+            <Pressable
+              onPress={() => router.back()}
+              hitSlop={10}
+              accessibilityLabel={t('common.close')}
+            >
               <X size={22} color="#ffffff" />
             </Pressable>
           </View>
@@ -229,7 +240,7 @@ export default function StoryPlayerScreen() {
                 {current.tags.map((tag) => (
                   <Text
                     key={tag}
-                    style={{ color: '#ec4899', fontSize: 13 }}
+                    style={{ color: tint, fontSize: 13 }}
                     className="font-sora-semibold"
                   >
                     #{tag}

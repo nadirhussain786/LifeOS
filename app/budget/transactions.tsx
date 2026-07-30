@@ -1,8 +1,10 @@
 import { FlashList } from '@shopify/flash-list';
 import { format, isToday, isYesterday, parseISO } from 'date-fns';
 import { useRouter } from 'expo-router';
+import type { TFunction } from 'i18next';
 import { Receipt, Search } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { TextInput, View } from 'react-native';
 
 import { EmptyState } from '@/components/ui/empty-state';
@@ -20,23 +22,23 @@ import { useBudgetSettings, useTransactions } from '@/features/budget/hooks/use-
 import type { BudgetTransaction, TransactionType } from '@/features/budget/types/budget.types';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
-const FILTER_OPTIONS = [
-  { value: 'all' as const, label: 'All' },
-  { value: 'expense' as const, label: 'Expense' },
-  { value: 'income' as const, label: 'Income' },
-  { value: 'savings' as const, label: 'Savings' },
-];
-
-function dayLabel(logDate: string): string {
+function dayLabel(logDate: string, t: TFunction): string {
   const date = parseISO(logDate);
-  if (isToday(date)) return 'Today';
-  if (isYesterday(date)) return 'Yesterday';
+  if (isToday(date)) return t('common.today');
+  if (isYesterday(date)) return t('common.yesterday');
   return format(date, 'EEE, MMM d');
 }
 
 export default function TransactionsScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
+  const filterOptions = [
+    { value: 'all' as const, label: t('budget.all') },
+    { value: 'expense' as const, label: t('budget.expense') },
+    { value: 'income' as const, label: t('budget.income') },
+    { value: 'savings' as const, label: t('budget.savings') },
+  ];
   const [filter, setFilter] = useState<'all' | TransactionType>('all');
   const [query, setQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
@@ -85,23 +87,25 @@ export default function TransactionsScreen() {
   return (
     <View className="flex-1 bg-background">
       <ScreenHeader
-        title="Transactions"
-        eyebrow="Budget"
+        title={t('budget.transactions')}
+        eyebrow={t('budget.title')}
         tint={moduleTint('budget', scheme)}
-        actions={[{ icon: Search, label: 'Search', onPress: () => setShowSearch((s) => !s) }]}
+        actions={[
+          { icon: Search, label: t('common.search'), onPress: () => setShowSearch((s) => !s) },
+        ]}
       />
 
       <View className="gap-3 px-4 pb-2">
-        <Segmented options={FILTER_OPTIONS} value={filter} onChange={setFilter} />
+        <Segmented options={filterOptions} value={filter} onChange={setFilter} />
         {showSearch && (
           <View className="flex-row items-center gap-2 rounded-full bg-muted px-4 py-2.5">
             <Search size={16} color={colors[scheme].mutedForeground} />
             <TextInput
               value={query}
               onChangeText={setQuery}
-              placeholder="Search notes & categories"
+              placeholder={t('budget.searchNotesCategories')}
               placeholderTextColor={colors[scheme].mutedForeground}
-              accessibilityLabel="Search transactions"
+              accessibilityLabel={t('budget.searchTransactions')}
               autoFocus
               className="flex-1 text-foreground"
             />
@@ -110,7 +114,7 @@ export default function TransactionsScreen() {
       </View>
 
       {isError ? (
-        <QueryError onRetry={() => refetch()} message="Couldn't load your transactions." />
+        <QueryError onRetry={() => refetch()} message={t('budget.loadError')} />
       ) : isLoading ? (
         <View className="gap-2 px-4 pt-1">
           {Array.from({ length: 6 }).map((_, i) => (
@@ -120,11 +124,11 @@ export default function TransactionsScreen() {
       ) : groups.length === 0 ? (
         <EmptyState
           icon={Receipt}
-          title="Nothing here"
+          title={t('budget.nothingHere')}
           description={
             query || filter !== 'all'
-              ? 'No transactions match this filter.'
-              : 'Your transactions will appear here.'
+              ? t('budget.noMatchFilter')
+              : t('budget.transactionsAppearHere')
           }
           tint="#22c55e"
         />
@@ -137,7 +141,7 @@ export default function TransactionsScreen() {
             item.type === 'header' ? (
               <View className="flex-row items-center justify-between px-5 pb-1 pt-3">
                 <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-                  {dayLabel(item.logDate)}
+                  {dayLabel(item.logDate, t)}
                 </Text>
                 <Text
                   variant="caption"

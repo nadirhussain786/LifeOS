@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { BarChart3, Droplet, GlassWater, Settings2 } from 'lucide-react-native';
 import { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import Animated, {
@@ -26,6 +27,7 @@ const GLASS_ML = 250;
 const QUICK_ADD_ML = [500, 1000] as const;
 
 export function WaterIntakeWidget() {
+  const { t } = useTranslation();
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
   const waterTint = moduleTint('water', scheme);
@@ -64,9 +66,9 @@ export function WaterIntakeWidget() {
   return (
     <WidgetCard
       icon={GlassWater}
-      title="Water intake"
+      title={t('dashboard.waterIntake')}
       tint={waterTint}
-      actionLabel="History"
+      actionLabel={t('dashboard.history')}
       onActionPress={() => router.push('/water-intake/history')}
     >
       {isLoading || currentMl === undefined ? (

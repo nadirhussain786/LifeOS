@@ -32,6 +32,10 @@ import { applyDeliveryMode } from '@/features/notifications/services/delivery';
 import { syncTodayWidget } from '@/features/widgets/services/widget-data';
 import { useWidgetSync } from '@/features/widgets/hooks/use-widget-sync';
 import { useProfileStore } from '@/features/profile/store/profile-store';
+import {
+  registerPushToken,
+  unregisterPushToken,
+} from '@/features/split/services/push-registration';
 import { useLanguageStore } from '@/features/settings/store/language-store';
 import { AppLockOverlay } from '@/features/security/components/app-lock-overlay';
 import { useAppLock } from '@/features/security/hooks/use-app-lock';
@@ -54,9 +58,12 @@ initSentry();
 // while the app is foregrounded — water reminders should still show even if
 // the app happens to be open at the time.
 configureNotificationHandler();
-// Create the Android notification channels (heads-up for time-critical, quiet
-// for nudges). No-ops off Android / in Expo Go Android.
-configureAndroidChannels();
+// Start creating the Android notification channels. The schedulers await the
+// same promise before posting anything, so a reminder can't land on Android's
+// generic fallback channel by racing this. Caught here because the promise
+// rejects on failure (so the next caller retries rather than inheriting a
+// permanently-failed cache) and this call site has nowhere to report it.
+void configureAndroidChannels().catch(() => undefined);
 
 /** Lives inside the router + query provider so it can deep-link on notification
  * taps and mark inbox rows read. Renders nothing. */
@@ -85,6 +92,19 @@ function WidgetSync() {
 }
 
 /** Applies the persisted language to i18next once the store hydrates / changes. */
+/** Registers this device for group push once there is a session, and releases
+ *  it on sign-out so a shared phone stops receiving a previous account's
+ *  group notifications. Only shared features need a server-side token — every
+ *  other reminder is scheduled locally. */
+function PushRegistrationBridge() {
+  const session = useAuthStore((s) => s.session);
+  useEffect(() => {
+    if (session) void registerPushToken();
+    else void unregisterPushToken();
+  }, [session]);
+  return null;
+}
+
 function LanguageBridge() {
   const language = useLanguageStore((s) => s.language);
   useEffect(() => {
@@ -173,8 +193,14 @@ export default function RootLayout() {
                 <Stack.Screen name="budget/savings/[id]" />
                 <Stack.Screen name="budget/debts/index" />
                 <Stack.Screen name="budget/debts/[id]" />
+                <Stack.Screen name="join/[token]" />
+                <Stack.Screen name="split/index" />
+                <Stack.Screen name="split/[id]" />
+                <Stack.Screen name="split/new" options={{ presentation: 'modal' }} />
+                <Stack.Screen name="split/[id]/expense" options={{ presentation: 'modal' }} />
+                <Stack.Screen name="split/[id]/settle" options={{ presentation: 'modal' }} />
+                <Stack.Screen name="split/[id]/members" options={{ presentation: 'modal' }} />
                 <Stack.Screen name="gallery/index" />
-                <Stack.Screen name="gallery/feed" />
                 <Stack.Screen name="gallery/all" />
                 <Stack.Screen name="gallery/compare" />
                 <Stack.Screen name="gallery/album/[id]" />
@@ -206,6 +232,7 @@ export default function RootLayout() {
               <SyncTrigger />
               <WidgetSync />
               <LanguageBridge />
+              <PushRegistrationBridge />
               <AppLockController />
               <NotificationNavigationBridge />
               <MiniPlayerBar />

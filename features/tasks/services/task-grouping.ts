@@ -2,11 +2,12 @@ import { isPast, isToday, startOfDay } from 'date-fns';
 
 import type { Task, TaskDueBucket } from '@/features/tasks/types/task.types';
 
-const BUCKET_LABEL: Record<TaskDueBucket, string> = {
-  overdue: 'Overdue',
-  today: 'Today',
-  upcoming: 'Upcoming',
-  'no-date': 'No date',
+/** i18n keys (see the `buckets` namespace) — the screen resolves them with t(). */
+const BUCKET_LABEL_KEY: Record<TaskDueBucket, string> = {
+  overdue: 'buckets.overdue',
+  today: 'buckets.today',
+  upcoming: 'buckets.upcoming',
+  'no-date': 'buckets.noDate',
 };
 
 export function getDueBucket(task: Task): TaskDueBucket {
@@ -17,7 +18,7 @@ export function getDueBucket(task: Task): TaskDueBucket {
   return 'upcoming';
 }
 
-export type TaskSection = { bucket: TaskDueBucket; label: string; tasks: Task[] };
+export type TaskSection = { bucket: TaskDueBucket; labelKey: string; tasks: Task[] };
 
 const BUCKET_ORDER: TaskDueBucket[] = ['overdue', 'today', 'upcoming', 'no-date'];
 
@@ -30,7 +31,7 @@ export function groupTasksByDueDate(tasks: Task[]): TaskSection[] {
   }
   return BUCKET_ORDER.filter((bucket) => buckets.has(bucket)).map((bucket) => ({
     bucket,
-    label: BUCKET_LABEL[bucket],
+    labelKey: BUCKET_LABEL_KEY[bucket],
     tasks: buckets.get(bucket)!,
   }));
 }

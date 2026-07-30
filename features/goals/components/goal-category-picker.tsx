@@ -1,4 +1,5 @@
 import * as Haptics from 'expo-haptics';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { Text } from '@/components/ui/text';
@@ -17,6 +18,7 @@ type Props = {
 
 export function GoalCategoryPicker({ value, customLabel, onChange, onChangeLabel }: Props) {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
 
   const select = (category: GoalCategory) => {
     Haptics.selectionAsync();
@@ -49,7 +51,7 @@ export function GoalCategoryPicker({ value, customLabel, onChange, onChangeLabel
             >
               <Icon size={14} color={selected ? '#ffffff' : category.tint} strokeWidth={2.2} />
               <Text className={selected ? 'font-sora-medium text-white' : 'text-muted-foreground'}>
-                {category.label}
+                {t(category.labelKey)}
               </Text>
             </Pressable>
           );
@@ -60,8 +62,8 @@ export function GoalCategoryPicker({ value, customLabel, onChange, onChangeLabel
         <TextInput
           value={customLabel ?? ''}
           onChangeText={(text) => onChangeLabel(text || null)}
-          accessibilityLabel="Category name"
-          placeholder="Name your category"
+          accessibilityLabel={t('category.name')}
+          placeholder={t('goals.categoryPlaceholder')}
           placeholderTextColor={colors[scheme].mutedForeground}
           maxLength={30}
           className="rounded-lg border border-border px-3 py-2 text-foreground"

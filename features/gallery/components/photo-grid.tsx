@@ -2,6 +2,7 @@ import { format } from 'date-fns';
 import { Image } from 'expo-image';
 import { Heart, Play } from 'lucide-react-native';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Dimensions, Pressable, View } from 'react-native';
 
 import { Text } from '@/components/ui/text';
@@ -30,13 +31,14 @@ export function PhotoTile({
   size: number;
   onPress: (p: GalleryPhoto) => void;
 }) {
+  const { t } = useTranslation();
   const isVideo = photo.mediaType === 'video';
   return (
     <Pressable
       onPress={() => onPress(photo)}
       style={{ width: size, height: size }}
       accessibilityRole="imagebutton"
-      accessibilityLabel={photo.caption ?? (isVideo ? 'Video' : 'Photo')}
+      accessibilityLabel={photo.caption ?? (isVideo ? t('gallery.video') : t('gallery.photo'))}
     >
       <Image
         source={{ uri: displayUri(photo) }}
@@ -56,7 +58,7 @@ export function PhotoTile({
             </View>
           </View>
           <View
-            className="absolute bottom-1 right-1 rounded-md px-1.5 py-0.5"
+            className="absolute bottom-1 end-1 rounded-md px-1.5 py-0.5"
             style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}
           >
             <Text className="font-sora-semibold text-[10px] text-white">
@@ -67,7 +69,7 @@ export function PhotoTile({
       )}
       {photo.isFavorite && (
         <View
-          className="absolute left-1 top-1 h-5 w-5 items-center justify-center rounded-full"
+          className="absolute start-1 top-1 h-5 w-5 items-center justify-center rounded-full"
           style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
         >
           <Heart size={11} color="#ffffff" fill="#ffffff" />

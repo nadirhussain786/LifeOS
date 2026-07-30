@@ -1,11 +1,13 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { CalendarClock, Grid3x3, Heart, Images, Plus, Search } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, TextInput, View } from 'react-native';
 
 import { EmptyState } from '@/components/ui/empty-state';
 import { Fab } from '@/components/ui/fab';
 import { ScreenHeader } from '@/components/ui/screen-header';
+import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { AddMediaSheet } from '@/features/gallery/components/add-media-sheet';
 import { PhotoGridList } from '@/features/gallery/components/photo-grid-list';
@@ -16,6 +18,8 @@ export default function AllPhotosScreen() {
   const { favorites: favoritesParam } = useLocalSearchParams<{ favorites?: string }>();
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
+  const tint = moduleTint('gallery', scheme);
 
   const { data: photos = [] } = usePhotos();
   const [timeline, setTimeline] = useState(true);
@@ -40,33 +44,33 @@ export default function AllPhotosScreen() {
   return (
     <View className="flex-1 bg-background">
       <ScreenHeader
-        title={favoritesOnly ? 'Favorites' : 'All Photos'}
-        eyebrow="Progress"
-        tint="#ec4899"
+        title={favoritesOnly ? t('gallery.favorites') : t('gallery.allPhotos')}
+        eyebrow={t('gallery.title')}
+        tint={tint}
         right={
           <View className="flex-row items-center gap-4">
             <Pressable
               onPress={() => setShowSearch((s) => !s)}
               hitSlop={8}
-              accessibilityLabel="Search"
+              accessibilityLabel={t('common.search')}
             >
               <Search size={20} color={colors[scheme].foreground} />
             </Pressable>
             <Pressable
               onPress={() => setFavoritesOnly((f) => !f)}
               hitSlop={8}
-              accessibilityLabel="Toggle favorites"
+              accessibilityLabel={t('gallery.toggleFavorites')}
             >
               <Heart
                 size={20}
-                color={favoritesOnly ? '#ef4444' : colors[scheme].foreground}
-                fill={favoritesOnly ? '#ef4444' : 'transparent'}
+                color={favoritesOnly ? tint : colors[scheme].foreground}
+                fill={favoritesOnly ? tint : 'transparent'}
               />
             </Pressable>
             <Pressable
               onPress={() => setTimeline((t) => !t)}
               hitSlop={8}
-              accessibilityLabel="Toggle timeline"
+              accessibilityLabel={t('gallery.toggleTimeline')}
             >
               {timeline ? (
                 <Grid3x3 size={20} color={colors[scheme].foreground} />
@@ -74,7 +78,11 @@ export default function AllPhotosScreen() {
                 <CalendarClock size={20} color={colors[scheme].foreground} />
               )}
             </Pressable>
-            <Pressable onPress={() => setAddOpen(true)} hitSlop={8} accessibilityLabel="Add media">
+            <Pressable
+              onPress={() => setAddOpen(true)}
+              hitSlop={8}
+              accessibilityLabel={t('gallery.addMedia')}
+            >
               <Plus size={22} color={colors[scheme].foreground} />
             </Pressable>
           </View>
@@ -87,7 +95,7 @@ export default function AllPhotosScreen() {
           <TextInput
             value={query}
             onChangeText={setQuery}
-            placeholder="Search captions & tags"
+            placeholder={t('gallery.searchCaptionsTags')}
             placeholderTextColor={colors[scheme].mutedForeground}
             autoFocus
             className="flex-1 text-foreground"
@@ -98,16 +106,22 @@ export default function AllPhotosScreen() {
       {filtered.length === 0 ? (
         <EmptyState
           icon={favoritesOnly ? Heart : Images}
-          title={favoritesOnly ? 'No favorites yet' : query ? 'No matches' : 'No photos yet'}
+          title={
+            favoritesOnly
+              ? t('gallery.noFavoritesTitle')
+              : query
+                ? t('gallery.noMatchesTitle')
+                : t('gallery.noPhotosTitle')
+          }
           description={
             favoritesOnly
-              ? 'Tap the heart on any photo to keep it here.'
+              ? t('gallery.noFavoritesBody')
               : query
-                ? 'Try a different caption or tag.'
-                : 'Add your first photo or video to get started.'
+                ? t('gallery.noMatchesBody')
+                : t('gallery.noPhotosBody')
           }
-          tint="#ec4899"
-          actionLabel={!favoritesOnly && !query ? 'Add media' : undefined}
+          tint={tint}
+          actionLabel={!favoritesOnly && !query ? t('gallery.addMedia') : undefined}
           onAction={!favoritesOnly && !query ? () => setAddOpen(true) : undefined}
         />
       ) : (
@@ -119,7 +133,7 @@ export default function AllPhotosScreen() {
       )}
 
       {filtered.length > 0 && (
-        <Fab onPress={() => setAddOpen(true)} accessibilityLabel="Add media" />
+        <Fab onPress={() => setAddOpen(true)} accessibilityLabel={t('gallery.addMedia')} />
       )}
 
       <AddMediaSheet visible={addOpen} onClose={() => setAddOpen(false)} albumId={null} />

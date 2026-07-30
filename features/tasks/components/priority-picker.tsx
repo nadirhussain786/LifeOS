@@ -1,4 +1,5 @@
 import * as Haptics from 'expo-haptics';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
 import { Text } from '@/components/ui/text';
@@ -6,11 +7,11 @@ import { priorityColors } from '@/constants/theme';
 import { cn } from '@/lib/utils';
 import type { TaskPriority } from '@/features/tasks/types/task.types';
 
-const OPTIONS: { value: TaskPriority; label: string }[] = [
-  { value: 'none', label: 'None' },
-  { value: 'low', label: 'Low' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'high', label: 'High' },
+const OPTIONS: { value: TaskPriority; labelKey: string }[] = [
+  { value: 'none', labelKey: 'fields.none' },
+  { value: 'low', labelKey: 'fields.low' },
+  { value: 'medium', labelKey: 'fields.medium' },
+  { value: 'high', labelKey: 'fields.high' },
 ];
 
 // Priority is its own traffic-light color system (calm blue → amber → red),
@@ -28,6 +29,7 @@ export function PriorityPicker({
   value: TaskPriority;
   onChange: (value: TaskPriority) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <View className="flex-row gap-2">
       {OPTIONS.map((option) => {
@@ -60,7 +62,7 @@ export function PriorityPicker({
               className={cn('font-sora-medium', !textIsWhite && 'text-muted-foreground')}
               style={textIsWhite ? { color: '#ffffff' } : undefined}
             >
-              {option.label}
+              {t(option.labelKey)}
             </Text>
           </Pressable>
         );

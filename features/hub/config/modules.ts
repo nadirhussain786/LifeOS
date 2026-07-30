@@ -8,6 +8,7 @@ import {
   Settings,
   StickyNote,
   Target,
+  Users,
   Wallet,
   type LucideIcon,
 } from 'lucide-react-native';
@@ -27,8 +28,8 @@ export type ModuleStatus = 'ready' | 'soon';
 
 export type HubModule = {
   id: string;
-  title: string;
-  subtitle: string;
+  titleKey: string;
+  subtitleKey: string;
   icon: LucideIcon;
   /** Per-module identity color — readable on both light and dark cards. */
   tint: string;
@@ -39,19 +40,19 @@ export type HubModule = {
 
 export type HubSection = {
   id: string;
-  label: string;
+  labelKey: string;
   modules: HubModule[];
 };
 
 export const HUB_SECTIONS: HubSection[] = [
   {
     id: 'growth',
-    label: 'Focus & Growth',
+    labelKey: 'hubSection.growth',
     modules: [
       {
         id: 'goals',
-        title: 'Goals',
-        subtitle: 'Ambitions & milestones',
+        titleKey: 'hubModule.goalsTitle',
+        subtitleKey: 'hubModule.goalsSubtitle',
         icon: Target,
         tint: moduleTints.goals.light,
         status: 'ready',
@@ -59,8 +60,8 @@ export const HUB_SECTIONS: HubSection[] = [
       },
       {
         id: 'study',
-        title: 'Study',
-        subtitle: 'Focus sessions & timer',
+        titleKey: 'hubModule.studyTitle',
+        subtitleKey: 'hubModule.studySubtitle',
         icon: GraduationCap,
         tint: moduleTints.study.light,
         status: 'ready',
@@ -68,8 +69,8 @@ export const HUB_SECTIONS: HubSection[] = [
       },
       {
         id: 'notes',
-        title: 'Notes',
-        subtitle: 'Ideas & quick capture',
+        titleKey: 'hubModule.notesTitle',
+        subtitleKey: 'hubModule.notesSubtitle',
         icon: StickyNote,
         tint: '#eab308',
         status: 'ready',
@@ -77,8 +78,8 @@ export const HUB_SECTIONS: HubSection[] = [
       },
       {
         id: 'timeline',
-        title: 'Timeline',
-        subtitle: 'Your day, hour by hour',
+        titleKey: 'hubModule.timelineTitle',
+        subtitleKey: 'hubModule.timelineSubtitle',
         icon: Clock3,
         tint: moduleTints.calendar.light,
         status: 'ready',
@@ -88,12 +89,12 @@ export const HUB_SECTIONS: HubSection[] = [
   },
   {
     id: 'wellbeing',
-    label: 'Wellbeing',
+    labelKey: 'hubSection.wellbeing',
     modules: [
       {
         id: 'sleep',
-        title: 'Sleep',
-        subtitle: 'Rest & consistency',
+        titleKey: 'hubModule.sleepTitle',
+        subtitleKey: 'hubModule.sleepSubtitle',
         icon: Moon,
         tint: moduleTints.sleep.light,
         status: 'ready',
@@ -101,8 +102,8 @@ export const HUB_SECTIONS: HubSection[] = [
       },
       {
         id: 'water',
-        title: 'Water',
-        subtitle: 'Daily hydration',
+        titleKey: 'hubModule.waterTitle',
+        subtitleKey: 'hubModule.waterSubtitle',
         icon: GlassWater,
         tint: moduleTints.water.light,
         status: 'ready',
@@ -112,38 +113,49 @@ export const HUB_SECTIONS: HubSection[] = [
   },
   {
     id: 'finance',
-    label: 'Finance',
+    labelKey: 'hubSection.finance',
     modules: [
       {
         id: 'budget',
-        title: 'Budget',
-        subtitle: 'Income, spending & savings',
+        titleKey: 'hubModule.budgetTitle',
+        subtitleKey: 'hubModule.budgetSubtitle',
         icon: Wallet,
         tint: moduleTints.budget.light,
         status: 'ready',
         getRoute: () => '/budget',
       },
+      {
+        id: 'split',
+        titleKey: 'hubModule.splitTitle',
+        subtitleKey: 'hubModule.splitSubtitle',
+        icon: Users,
+        // Shares Budget's teal deliberately: this is money, and the hue wheel
+        // has no room left for a 12th identity that clears the others by 30°.
+        tint: moduleTints.budget.light,
+        status: 'ready',
+        getRoute: () => '/split',
+      },
     ],
   },
   {
     id: 'memories',
-    label: 'Memories & Media',
+    labelKey: 'hubSection.memories',
     modules: [
       {
         id: 'gallery',
-        title: 'Progress',
-        subtitle: 'Visual transformation',
+        titleKey: 'hubModule.galleryTitle',
+        subtitleKey: 'hubModule.gallerySubtitle',
         icon: Images,
-        tint: '#ec4899',
+        tint: moduleTints.gallery.light,
         status: 'ready',
         getRoute: () => '/gallery',
       },
       {
         id: 'music',
-        title: 'Music',
-        subtitle: 'Your offline library',
+        titleKey: 'hubModule.musicTitle',
+        subtitleKey: 'hubModule.musicSubtitle',
         icon: Music2,
-        tint: '#14b8a6',
+        tint: moduleTints.music.light,
         status: 'ready',
         getRoute: () => '/music',
       },
@@ -151,12 +163,12 @@ export const HUB_SECTIONS: HubSection[] = [
   },
   {
     id: 'system',
-    label: 'System',
+    labelKey: 'hubSection.system',
     modules: [
       {
         id: 'settings',
-        title: 'Settings',
-        subtitle: 'Appearance & security',
+        titleKey: 'hubModule.settingsTitle',
+        subtitleKey: 'hubModule.settingsSubtitle',
         icon: Settings,
         tint: '#737373',
         status: 'ready',

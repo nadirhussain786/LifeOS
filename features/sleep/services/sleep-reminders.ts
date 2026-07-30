@@ -4,6 +4,7 @@ import {
   setSleepReminderNotificationId,
 } from '@/features/sleep/services/sleep-repository';
 import { formatClock } from '@/features/sleep/services/sleep-stats';
+import i18n from '@/lib/i18n';
 import { cancelNotification, scheduleDailyNotification } from '@/lib/notifications';
 
 function parseHHmm(value: string): { hour: number; minute: number } | null {
@@ -27,8 +28,10 @@ export async function syncBedtimeReminder(): Promise<void> {
   }
 
   const id = await scheduleDailyNotification({
-    title: 'Time to wind down 🌙',
-    body: `Bedtime is ${formatClock(time.hour * 60 + time.minute)} — start getting ready for a good night's sleep.`,
+    title: i18n.t('sleep.reminderNotifTitle'),
+    body: i18n.t('sleep.reminderNotifBody', {
+      time: formatClock(time.hour * 60 + time.minute),
+    }),
     hour: time.hour,
     minute: time.minute,
     data: { category: 'sleep', route: '/sleep' },

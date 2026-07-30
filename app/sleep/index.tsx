@@ -2,6 +2,7 @@ import { format, parseISO } from 'date-fns';
 import { useRouter } from 'expo-router';
 import { Hourglass, Moon, Settings2, Sun } from 'lucide-react-native';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 
 import { BarChart, type BarDatum } from '@/components/ui/bar-chart';
@@ -24,13 +25,14 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { alpha } from '@/lib/color';
 
 const RANGE_OPTIONS = [
-  { value: 'week' as const, label: 'Week' },
-  { value: 'month' as const, label: 'Month' },
+  { value: 'week' as const, labelKey: 'sleep.rangeWeek' },
+  { value: 'month' as const, labelKey: 'sleep.rangeMonth' },
 ];
 
 export default function SleepScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const [range, setRange] = useState<'week' | 'month'>('week');
   const sleepTint = moduleTint('sleep', scheme);
 
@@ -49,13 +51,13 @@ export default function SleepScreen() {
   return (
     <View className="flex-1 bg-background">
       <ScreenHeader
-        title="Sleep"
-        eyebrow="Wellbeing"
+        title={t('sleep.title')}
+        eyebrow={t('sleep.eyebrow')}
         tint={sleepTint}
         actions={[
           {
             icon: Settings2,
-            label: 'Sleep settings',
+            label: t('sleep.settingsAction'),
             onPress: () => router.push('/sleep/settings'),
           },
         ]}
@@ -80,10 +82,10 @@ export default function SleepScreen() {
             <View style={{ minHeight: 300 }}>
               <EmptyState
                 icon={Moon}
-                title="No nights logged yet"
-                description="Use the tracker above tonight, or log a past night to see your patterns and streaks."
+                title={t('sleep.emptyTitle')}
+                description={t('sleep.emptyBody')}
                 tint={sleepTint}
-                actionLabel="Log a past night"
+                actionLabel={t('sleep.logPastNight')}
                 onAction={() => router.push('/sleep/log')}
               />
             </View>
@@ -106,7 +108,7 @@ export default function SleepScreen() {
                         {latest ? formatDuration(latest.durationMinutes) : '—'}
                       </Text>
                       <Text style={{ color: alpha('#ffffff', 0.8), fontSize: 12 }}>
-                        of {formatDuration(goalMinutes)} goal
+                        {t('sleep.ofGoal', { duration: formatDuration(goalMinutes) })}
                       </Text>
                     </View>
                   </ProgressRing>
@@ -114,7 +116,9 @@ export default function SleepScreen() {
                     <View className="flex-row items-center gap-2">
                       <Moon size={14} color={alpha('#ffffff', 0.85)} />
                       <Text style={{ color: alpha('#ffffff', 0.9) }}>
-                        Last night · {format(parseISO(latest.logDate), 'EEE, MMM d')}
+                        {t('sleep.lastNight', {
+                          date: format(parseISO(latest.logDate), 'EEE, MMM d'),
+                        })}
                       </Text>
                     </View>
                   )}
@@ -125,10 +129,13 @@ export default function SleepScreen() {
 
               <View className="gap-3 rounded-2xl border border-border bg-card p-4 shadow-e1">
                 <View className="flex-row items-center justify-between">
-                  <Text variant="subheading">Trend</Text>
+                  <Text variant="subheading">{t('sleep.trend')}</Text>
                   <View style={{ width: 160 }}>
                     <Segmented
-                      options={RANGE_OPTIONS}
+                      options={RANGE_OPTIONS.map((option) => ({
+                        ...option,
+                        label: t(option.labelKey),
+                      }))}
                       value={range}
                       onChange={setRange}
                       activeColor={sleepTint}
@@ -137,7 +144,7 @@ export default function SleepScreen() {
                 </View>
                 {chartData.length === 0 ? (
                   <Text variant="muted" className="py-6 text-center">
-                    No nights tracked in this range yet.
+                    {t('sleep.noNightsInRange')}
                   </Text>
                 ) : (
                   <BarChart
@@ -157,7 +164,7 @@ export default function SleepScreen() {
                     <Text className="font-sora-bold text-foreground">
                       {formatClock(stats.avgBedtimeMinutes)}
                     </Text>
-                    <Text variant="caption">Typical bedtime</Text>
+                    <Text variant="caption">{t('sleep.typicalBedtime')}</Text>
                   </View>
                   <View className="h-10 w-px bg-border" />
                   <View className="items-center gap-1">
@@ -165,7 +172,7 @@ export default function SleepScreen() {
                     <Text className="font-sora-bold text-foreground">
                       {formatClock(stats.avgWakeMinutes)}
                     </Text>
-                    <Text variant="caption">Typical wake</Text>
+                    <Text variant="caption">{t('sleep.typicalWake')}</Text>
                   </View>
                   {stats.avgFellAsleepMinutes !== null && (
                     <>
@@ -175,7 +182,7 @@ export default function SleepScreen() {
                         <Text className="font-sora-bold text-foreground">
                           {formatDuration(stats.avgFellAsleepMinutes)}
                         </Text>
-                        <Text variant="caption">To fall asleep</Text>
+                        <Text variant="caption">{t('sleep.toFallAsleep')}</Text>
                       </View>
                     </>
                   )}
@@ -183,7 +190,7 @@ export default function SleepScreen() {
               )}
 
               <View className="gap-3">
-                <Text variant="subheading">History</Text>
+                <Text variant="subheading">{t('sleep.history')}</Text>
                 <View className="gap-2.5">
                   {sessions.slice(0, 14).map((session) => (
                     <SleepSessionCard
@@ -200,7 +207,7 @@ export default function SleepScreen() {
         </ScrollView>
       )}
 
-      <Fab onPress={() => router.push('/sleep/log')} accessibilityLabel="Log sleep" />
+      <Fab onPress={() => router.push('/sleep/log')} accessibilityLabel={t('sleep.logSleep')} />
     </View>
   );
 }

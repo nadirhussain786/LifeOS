@@ -2,6 +2,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { useRouter } from 'expo-router';
 import { BellOff, CheckCheck, Clock, Trash2 } from 'lucide-react-native';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
 
 import { ScreenHeader } from '@/components/ui/screen-header';
@@ -30,6 +31,7 @@ function NotificationRow({
   onDelete: () => void;
 }) {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const theme = colors[scheme];
   const meta = CATEGORY_META[item.category];
   const Icon = meta?.icon ?? FALLBACK_NOTIFICATION_ICON;
@@ -40,8 +42,8 @@ function NotificationRow({
   const timeLabel =
     status === 'scheduled'
       ? item.repeats === 'daily'
-        ? 'Daily reminder'
-        : `In ${formatDistanceToNow(item.scheduledAt)}`
+        ? t('notif.dailyReminder')
+        : t('notif.inTime', { time: formatDistanceToNow(item.scheduledAt) })
       : formatDistanceToNow(item.scheduledAt, { addSuffix: true });
 
   return (
@@ -89,6 +91,7 @@ function SectionLabel({ children }: { children: string }) {
 export default function NotificationsInboxScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const theme = colors[scheme];
   const { notifications } = useNotificationInbox();
   const { markRead, markAllRead, remove, clearAll } = useNotificationActions();
@@ -117,20 +120,16 @@ export default function NotificationsInboxScreen() {
   };
 
   const confirmClear = () => {
-    Alert.alert(
-      'Clear all notifications?',
-      'This removes everything from your inbox. Scheduled reminders still fire.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Clear', style: 'destructive', onPress: () => clearAll.mutate() },
-      ],
-    );
+    Alert.alert(t('notif.clearAllTitle'), t('notif.clearAllBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('notif.clear'), style: 'destructive', onPress: () => clearAll.mutate() },
+    ]);
   };
 
   if (notifications.length === 0) {
     return (
       <View className="flex-1 bg-background">
-        <ScreenHeader title="Notifications" eyebrow="Inbox" tint="#737373" />
+        <ScreenHeader title={t('notif.title')} eyebrow={t('notif.inboxEyebrow')} tint="#737373" />
         <View className="flex-1 items-center justify-center gap-3 p-8">
           <View
             className="h-16 w-16 items-center justify-center rounded-2xl"
@@ -139,11 +138,10 @@ export default function NotificationsInboxScreen() {
             <BellOff size={28} color={theme.mutedForeground} />
           </View>
           <Text className="font-sora-semibold text-lg text-foreground">
-            You&rsquo;re all caught up
+            {t('notif.emptyTitle')}
           </Text>
           <Text variant="muted" className="text-center">
-            Reminders you schedule across LifeOS show up here. Turn them on from any item or from
-            Settings → Notifications.
+            {t('notif.emptyBody')}
           </Text>
         </View>
       </View>
@@ -152,7 +150,7 @@ export default function NotificationsInboxScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <ScreenHeader title="Notifications" eyebrow="Inbox" tint="#737373" />
+      <ScreenHeader title={t('notif.title')} eyebrow={t('notif.inboxEyebrow')} tint="#737373" />
       <ScrollView
         contentContainerClassName="gap-5 px-5 py-4 pb-10"
         showsVerticalScrollIndicator={false}
@@ -165,7 +163,7 @@ export default function NotificationsInboxScreen() {
             style={{ opacity: hasUnread ? 1 : 0.45 }}
           >
             <CheckCheck size={16} color={theme.foreground} />
-            <Text className="font-sora-medium text-foreground">Mark all read</Text>
+            <Text className="font-sora-medium text-foreground">{t('notif.markAllRead')}</Text>
           </Pressable>
           <Pressable
             onPress={confirmClear}
@@ -173,14 +171,14 @@ export default function NotificationsInboxScreen() {
           >
             <Trash2 size={16} color={theme.destructive} />
             <Text className="font-sora-medium" style={{ color: theme.destructive }}>
-              Clear
+              {t('notif.clear')}
             </Text>
           </Pressable>
         </View>
 
         {upcoming.length > 0 && (
           <View className="gap-2">
-            <SectionLabel>Upcoming</SectionLabel>
+            <SectionLabel>{t('notif.upcoming')}</SectionLabel>
             {upcoming.map((item) => (
               <NotificationRow
                 key={item.id}
@@ -194,7 +192,7 @@ export default function NotificationsInboxScreen() {
 
         {recent.length > 0 && (
           <View className="gap-2">
-            <SectionLabel>Recent</SectionLabel>
+            <SectionLabel>{t('notif.recent')}</SectionLabel>
             {recent.map((item) => (
               <NotificationRow
                 key={item.id}
@@ -207,7 +205,7 @@ export default function NotificationsInboxScreen() {
         )}
 
         <Text variant="caption" className="px-1 text-center">
-          Long-press a notification to remove it.
+          {t('notif.longPressHint')}
         </Text>
       </ScrollView>
     </View>

@@ -1,8 +1,10 @@
 import { FlashList } from '@shopify/flash-list';
 import { addDays, format, parseISO, subDays } from 'date-fns';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ChevronLeft, ChevronRight, Clock3, Plus } from 'lucide-react-native';
+import { Clock3, Plus } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
+import { ChevronBack, ChevronForward } from '@/components/ui/directional-icon';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 import { EmptyState } from '@/components/ui/empty-state';
@@ -20,6 +22,7 @@ export default function TimelineScreen() {
   const { date: dateKey } = useLocalSearchParams<{ date: string }>();
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
 
   const date = parseISO(dateKey);
   const { data: events = [], isLoading } = useTimelineForDate(dateKey);
@@ -30,13 +33,13 @@ export default function TimelineScreen() {
   return (
     <View className="flex-1 bg-background">
       <ScreenHeader
-        title="Timeline"
-        eyebrow="Your day"
+        title={t('timeline.title')}
+        eyebrow={t('timeline.eyebrow')}
         tint={moduleTint('calendar', scheme)}
         actions={[
           {
             icon: Plus,
-            label: 'Add event',
+            label: t('timeline.addEvent'),
             onPress: () =>
               router.push({ pathname: '/timeline/event/new', params: { date: dateKey } }),
           },
@@ -49,7 +52,7 @@ export default function TimelineScreen() {
           hitSlop={10}
           className="h-9 w-9 items-center justify-center"
         >
-          <ChevronLeft size={18} color={colors[scheme].mutedForeground} />
+          <ChevronBack size={18} color={colors[scheme].mutedForeground} />
         </Pressable>
         <Text variant="subheading">{format(date, 'EEEE, MMM d')}</Text>
         <Pressable
@@ -57,7 +60,7 @@ export default function TimelineScreen() {
           hitSlop={10}
           className="h-9 w-9 items-center justify-center"
         >
-          <ChevronRight size={18} color={colors[scheme].mutedForeground} />
+          <ChevronForward size={18} color={colors[scheme].mutedForeground} />
         </Pressable>
       </View>
 
@@ -70,8 +73,8 @@ export default function TimelineScreen() {
       ) : events.length === 0 ? (
         <EmptyState
           icon={Clock3}
-          title="Nothing here yet"
-          description="What you do today will show up here automatically."
+          title={t('timeline.emptyTitle')}
+          description={t('timeline.emptyBody')}
         />
       ) : (
         <FlashList

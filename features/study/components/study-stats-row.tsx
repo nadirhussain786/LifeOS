@@ -1,4 +1,5 @@
 import { CalendarRange, Clock, Flame, Sigma } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { StatTile } from '@/components/ui/stat-tile';
@@ -8,18 +9,24 @@ import type { StudyStats } from '@/features/study/types/study.types';
 const STUDY_TINT = '#8b5cf6';
 
 export function StudyStatsRow({ stats }: { stats: StudyStats }) {
+  const { t } = useTranslation();
   const tiles = [
     {
       icon: CalendarRange,
-      label: 'This week',
+      label: t('study.thisWeek'),
       value: formatStudyDuration(stats.weekSeconds),
       tint: STUDY_TINT,
     },
-    { icon: Flame, label: 'Streak', value: `${stats.currentStreak}d`, tint: '#f97316' },
-    { icon: Clock, label: 'Sessions', value: `${stats.sessionCount}`, tint: '#0ea5e9' },
+    {
+      icon: Flame,
+      label: t('study.streak'),
+      value: t('study.streakDays', { count: stats.currentStreak }),
+      tint: '#f97316',
+    },
+    { icon: Clock, label: t('study.sessions'), value: `${stats.sessionCount}`, tint: '#0ea5e9' },
     {
       icon: Sigma,
-      label: 'All time',
+      label: t('study.allTime'),
       value: formatStudyDuration(stats.totalSeconds),
       tint: '#22c55e',
     },

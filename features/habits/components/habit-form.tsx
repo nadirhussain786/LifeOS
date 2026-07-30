@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as Haptics from 'expo-haptics';
 import { Bell, CalendarClock, Ruler, Sparkles, Tag } from 'lucide-react-native';
 import { Controller, useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { ScrollView, Switch, TextInput, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
@@ -26,6 +27,7 @@ type Props = {
 
 export function HabitForm({ defaultValues, submitLabel, onSubmit }: Props) {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const keyboardHeight = useKeyboardHeight();
   const focusProgress = useSharedValue(0);
   const underlineStyle = useAnimatedStyle(() => ({
@@ -67,7 +69,7 @@ export function HabitForm({ defaultValues, submitLabel, onSubmit }: Props) {
             <TextInput
               value={field.value ?? ''}
               onChangeText={(text) => field.onChange(text || null)}
-              accessibilityLabel="Habit emoji"
+              accessibilityLabel={t('habits.habitEmoji')}
               placeholder="🔥"
               placeholderTextColor={colors[scheme].mutedForeground}
               maxLength={2}
@@ -84,8 +86,8 @@ export function HabitForm({ defaultValues, submitLabel, onSubmit }: Props) {
               <TextInput
                 value={field.value}
                 onChangeText={field.onChange}
-                accessibilityLabel="Habit name"
-                placeholder="Name your habit"
+                accessibilityLabel={t('habits.habitName')}
+                placeholder={t('habits.nameYourHabit')}
                 placeholderTextColor={colors[scheme].mutedForeground}
                 autoFocus
                 onFocus={() => {
@@ -108,7 +110,7 @@ export function HabitForm({ defaultValues, submitLabel, onSubmit }: Props) {
       </View>
 
       <View className="rounded-2xl border border-border bg-card px-4 shadow-e1">
-        <AttributeRow icon={Sparkles} label="Type" isFirst>
+        <AttributeRow icon={Sparkles} label={t('habits.type')} isFirst>
           <Controller
             control={control}
             name="type"
@@ -119,7 +121,7 @@ export function HabitForm({ defaultValues, submitLabel, onSubmit }: Props) {
         </AttributeRow>
 
         {isQuantified && (
-          <AttributeRow icon={Ruler} label="Unit & target">
+          <AttributeRow icon={Ruler} label={t('habits.unitAndTarget')}>
             <View className="flex-row gap-2">
               <Controller
                 control={control}
@@ -128,8 +130,8 @@ export function HabitForm({ defaultValues, submitLabel, onSubmit }: Props) {
                   <TextInput
                     value={field.value ?? ''}
                     onChangeText={(text) => field.onChange(text || null)}
-                    accessibilityLabel="Unit"
-                    placeholder="glasses, min, km…"
+                    accessibilityLabel={t('fields.unit')}
+                    placeholder={t('habits.unitPlaceholder')}
                     placeholderTextColor={colors[scheme].mutedForeground}
                     className="flex-1 rounded-lg border border-border px-3 py-2 text-foreground"
                   />
@@ -145,8 +147,8 @@ export function HabitForm({ defaultValues, submitLabel, onSubmit }: Props) {
                       const parsed = parseFloat(text);
                       field.onChange(Number.isFinite(parsed) ? parsed : null);
                     }}
-                    accessibilityLabel="Target goal"
-                    placeholder="Goal"
+                    accessibilityLabel={t('habits.targetGoal')}
+                    placeholder={t('habits.goal')}
                     keyboardType="decimal-pad"
                     placeholderTextColor={colors[scheme].mutedForeground}
                     className="w-20 rounded-lg border border-border px-3 py-2 text-center text-foreground"
@@ -157,7 +159,7 @@ export function HabitForm({ defaultValues, submitLabel, onSubmit }: Props) {
           </AttributeRow>
         )}
 
-        <AttributeRow icon={CalendarClock} label="Schedule">
+        <AttributeRow icon={CalendarClock} label={t('habits.schedule')}>
           <Controller
             control={control}
             name="scheduleType"
@@ -186,7 +188,7 @@ export function HabitForm({ defaultValues, submitLabel, onSubmit }: Props) {
           />
         </AttributeRow>
 
-        <AttributeRow icon={Tag} label="Category">
+        <AttributeRow icon={Tag} label={t('fields.category')}>
           <Controller
             control={control}
             name="categoryId"
@@ -196,7 +198,7 @@ export function HabitForm({ defaultValues, submitLabel, onSubmit }: Props) {
           />
         </AttributeRow>
 
-        <AttributeRow icon={Bell} label="Reminder">
+        <AttributeRow icon={Bell} label={t('fields.reminder')}>
           <View className="flex-row items-center gap-3">
             <Controller
               control={control}
@@ -205,7 +207,7 @@ export function HabitForm({ defaultValues, submitLabel, onSubmit }: Props) {
                 <TextInput
                   value={field.value ?? ''}
                   onChangeText={(text) => field.onChange(text || null)}
-                  accessibilityLabel="Reminder time"
+                  accessibilityLabel={t('habits.reminderTime')}
                   placeholder="20:00"
                   placeholderTextColor={colors[scheme].mutedForeground}
                   className="w-20 rounded-lg border border-border px-3 py-2 text-center text-foreground"
@@ -222,7 +224,7 @@ export function HabitForm({ defaultValues, submitLabel, onSubmit }: Props) {
                     onValueChange={field.onChange}
                     trackColor={{ true: colors[scheme].accent, false: colors[scheme].border }}
                   />
-                  <Text variant="muted">Adapt to my routine</Text>
+                  <Text variant="muted">{t('schedule.adaptToRoutine')}</Text>
                 </View>
               )}
             />

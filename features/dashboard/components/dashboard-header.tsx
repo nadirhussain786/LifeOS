@@ -1,5 +1,6 @@
 import { useRouter } from 'expo-router';
 import { Bell, Settings } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -13,6 +14,7 @@ import { useProfileStore } from '@/features/profile/store/profile-store';
 export function DashboardHeader() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const name = useProfileStore((s) => s.name);
   const { greeting, dateLabel } = useGreeting(name || undefined);
   const insets = useSafeAreaInsets();
@@ -38,13 +40,13 @@ export function DashboardHeader() {
         <Pressable
           onPress={() => router.push('/notifications')}
           hitSlop={8}
-          accessibilityLabel="Notifications"
+          accessibilityLabel={t('settings.notifications')}
           className="h-11 w-11 items-center justify-center rounded-full border border-border bg-surface"
         >
           <Bell color={colors[scheme].foreground} size={20} />
           {unread > 0 && (
             <View
-              className="absolute right-1.5 top-1.5 h-4 min-w-4 items-center justify-center rounded-full px-1"
+              className="absolute end-1.5 top-1.5 h-4 min-w-4 items-center justify-center rounded-full px-1"
               style={{ backgroundColor: colors[scheme].destructive }}
             >
               <Text style={{ color: '#ffffff', fontSize: 9, fontFamily: 'Sora_700Bold' }}>
@@ -56,7 +58,7 @@ export function DashboardHeader() {
         <Pressable
           onPress={() => router.push('/settings')}
           hitSlop={8}
-          accessibilityLabel="Settings"
+          accessibilityLabel={t('settings.title')}
           className="h-11 w-11 items-center justify-center rounded-full border border-border bg-surface"
         >
           <Settings color={colors[scheme].foreground} size={20} />

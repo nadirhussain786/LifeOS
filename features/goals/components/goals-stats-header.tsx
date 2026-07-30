@@ -1,5 +1,6 @@
 import { format } from 'date-fns';
 import { CalendarClock, CheckCircle2, Target } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { HeroCard } from '@/components/ui/hero-card';
@@ -21,12 +22,15 @@ const WHITE = '#ffffff';
 
 export function GoalsStatsHeader({ activeCount, completedCount, avgProgress, nextDue }: Props) {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const rows = [
-    { icon: Target, text: `${activeCount} active ${activeCount === 1 ? 'goal' : 'goals'}` },
-    { icon: CheckCircle2, text: `${completedCount} completed` },
+    { icon: Target, text: t('goals.activeGoals', { count: activeCount }) },
+    { icon: CheckCircle2, text: t('goals.completedCount', { count: completedCount }) },
     {
       icon: CalendarClock,
-      text: nextDue ? `Next due ${format(nextDue, 'MMM d')}` : 'No deadlines set',
+      text: nextDue
+        ? t('goals.nextDue', { date: format(nextDue, 'MMM d') })
+        : t('goals.noDeadlines'),
     },
   ];
 
@@ -47,7 +51,7 @@ export function GoalsStatsHeader({ activeCount, completedCount, avgProgress, nex
             >
               {formatProgressPercent(avgProgress)}
             </Text>
-            <Text style={{ color: alpha(WHITE, 0.8), fontSize: 11 }}>avg</Text>
+            <Text style={{ color: alpha(WHITE, 0.8), fontSize: 11 }}>{t('goals.avg')}</Text>
           </View>
         </ProgressRing>
 

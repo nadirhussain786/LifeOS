@@ -1,7 +1,9 @@
 import { useRouter } from 'expo-router';
-import { BellOff, ChevronRight } from 'lucide-react-native';
+import { BellOff } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
+import { ChevronForward } from '@/components/ui/directional-icon';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import { useNotificationsStore } from '@/features/notifications/store/notifications-store';
@@ -21,6 +23,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 export function CategoryOffNotice({ category }: { category: NotificationCategory }) {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const theme = colors[scheme];
   const masterEnabled = useNotificationsStore((s) => s.masterEnabled);
   const categoryOn = useNotificationsStore((s) => s.categories[category] ?? true);
@@ -28,8 +31,8 @@ export function CategoryOffNotice({ category }: { category: NotificationCategory
   if (masterEnabled && categoryOn) return null;
 
   const title = !masterEnabled
-    ? 'All notifications are off'
-    : `${CATEGORY_META[category].label} are off`;
+    ? t('notif.allOff')
+    : t('notif.categoryOff', { category: t(CATEGORY_META[category].labelKey) });
 
   return (
     <Pressable
@@ -40,9 +43,9 @@ export function CategoryOffNotice({ category }: { category: NotificationCategory
       <BellOff size={18} color={theme.mutedForeground} />
       <View className="flex-1">
         <Text className="font-sora-medium text-foreground">{title}</Text>
-        <Text variant="caption">These reminders won&apos;t fire. Tap to turn them on.</Text>
+        <Text variant="caption">{t('notif.categoryOffBody')}</Text>
       </View>
-      <ChevronRight size={18} color={theme.mutedForeground} />
+      <ChevronForward size={18} color={theme.mutedForeground} />
     </Pressable>
   );
 }

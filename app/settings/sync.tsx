@@ -9,6 +9,7 @@ import {
   TriangleAlert,
   UserCircle,
 } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, ScrollView, Switch, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
@@ -21,6 +22,7 @@ import { useSyncStatus } from '@/features/sync/hooks/use-sync';
 import { syncNow } from '@/features/sync/services/sync-engine';
 import { useSyncStore } from '@/features/sync/store/sync-store';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { envDiagnostics, isSupabaseConfigured } from '@/lib/env';
 
 function SectionLabel({ children }: { children: string }) {
   return (
@@ -33,6 +35,7 @@ function SectionLabel({ children }: { children: string }) {
 export default function SyncSettingsScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const theme = colors[scheme];
 
   const session = useAuthStore((s) => s.session);
@@ -50,7 +53,7 @@ export default function SyncSettingsScreen() {
   if (!session) {
     return (
       <View className="flex-1 bg-background">
-        <ScreenHeader title="Sync & Account" eyebrow="Settings" tint="#737373" />
+        <ScreenHeader title={t('sync.title')} eyebrow={t('sync.eyebrow')} tint="#737373" />
         <ScrollView
           contentContainerClassName="gap-6 px-5 py-4 pb-12"
           showsVerticalScrollIndicator={false}
@@ -63,20 +66,54 @@ export default function SyncSettingsScreen() {
               <CloudOff size={26} color={theme.mutedForeground} />
             </View>
             <Text className="font-sora-semibold text-lg text-foreground">
-              You&apos;re in guest mode
+              {t('sync.guestTitle')}
             </Text>
             <Text variant="muted" className="text-center">
-              Your data lives only on this device. Create an account to back it up and sync across
-              your devices — your current data comes with you.
+              {t('sync.guestBody')}
             </Text>
             <Button
-              label="Sign in or create account"
+              label={t('sync.signInCreate')}
               variant="accent"
               size="lg"
               className="w-full"
               onPress={() => router.push('/(auth)/login')}
             />
           </View>
+
+          {/* A build with no Supabase credentials can only ever be a guest, and
+              until now said nothing about why — signing in simply failed. This
+              names the missing variables and where each value came from, so an
+              EAS credential problem is diagnosable from the phone rather than by
+              rebuilding blind. */}
+          {!isSupabaseConfigured && (
+            <View className="gap-2">
+              <SectionLabel>{t('sync.buildConfig')}</SectionLabel>
+              <View className="gap-2 rounded-2xl border border-border bg-card p-4">
+                <View className="flex-row items-center gap-2">
+                  <TriangleAlert size={16} color={theme.destructive} />
+                  <Text className="font-sora-semibold text-foreground">
+                    {t('sync.notConfiguredTitle')}
+                  </Text>
+                </View>
+                <Text variant="caption">{t('sync.notConfiguredBody')}</Text>
+                <View className="gap-1 pt-1">
+                  {envDiagnostics().entries.map((entry) => (
+                    <View key={entry.key} className="flex-row items-center justify-between gap-3">
+                      <Text variant="caption" className="flex-1 font-sora-medium" numberOfLines={1}>
+                        {entry.key.replace('EXPO_PUBLIC_', '')}
+                      </Text>
+                      <Text
+                        variant="caption"
+                        style={{ color: entry.present ? theme.success : theme.destructive }}
+                      >
+                        {entry.present ? entry.preview : t('sync.envMissing')}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            </View>
+          )}
         </ScrollView>
       </View>
     );
@@ -88,56 +125,50 @@ export default function SyncSettingsScreen() {
   };
 
   const handleSignOut = () => {
-    Alert.alert(
-      'Sign out?',
-      'Your synced data stays in your account. Data on this device remains available in guest mode.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Sign out', style: 'destructive', onPress: () => void signOut() },
-      ],
-    );
+    Alert.alert(t('sync.signOutTitle'), t('sync.signOutBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('sync.signOut'), style: 'destructive', onPress: () => void signOut() },
+    ]);
   };
 
   const handleDeleteAccount = () => {
-    Alert.alert(
-      'Delete account?',
-      'This permanently deletes your account and all your synced data from the cloud, and clears this device. This cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete account',
-          style: 'destructive',
-          onPress: async () => {
-            const result = await deleteAccount();
-            if (!result.ok) Alert.alert('Couldn’t delete account', result.error);
-          },
+    Alert.alert(t('sync.deleteAccountTitle'), t('sync.deleteAccountBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('sync.deleteAccount'),
+        style: 'destructive',
+        onPress: async () => {
+          const result = await deleteAccount();
+          if (!result.ok) Alert.alert(t('sync.deleteFailedTitle'), result.error);
         },
-      ],
-    );
+      },
+    ]);
   };
 
   const syncedLabel =
     status === 'syncing'
-      ? 'Syncing…'
+      ? t('sync.syncing')
       : status === 'error'
-        ? (lastError ?? 'Sync failed')
+        ? (lastError ?? t('sync.syncFailed'))
         : lastSyncedAt
-          ? `Last synced ${formatDistanceToNow(lastSyncedAt, { addSuffix: true })}`
-          : 'Not synced yet';
+          ? t('sync.lastSynced', {
+              time: formatDistanceToNow(lastSyncedAt, { addSuffix: true }),
+            })
+          : t('sync.notSyncedYet');
 
   const StatusIcon = status === 'error' ? TriangleAlert : CheckCircle2;
   const statusColor = status === 'error' ? theme.destructive : theme.accent;
 
   return (
     <View className="flex-1 bg-background">
-      <ScreenHeader title="Sync & Account" eyebrow="Settings" tint="#737373" />
+      <ScreenHeader title={t('sync.title')} eyebrow={t('sync.eyebrow')} tint="#737373" />
       <ScrollView
         contentContainerClassName="gap-6 px-5 py-4 pb-12"
         showsVerticalScrollIndicator={false}
       >
         {/* Account */}
         <View className="gap-2">
-          <SectionLabel>Account</SectionLabel>
+          <SectionLabel>{t('sync.account')}</SectionLabel>
           <View className="flex-row items-center gap-3 rounded-2xl border border-border bg-card p-4">
             <View
               className="h-11 w-11 items-center justify-center rounded-full"
@@ -147,7 +178,7 @@ export default function SyncSettingsScreen() {
             </View>
             <View className="flex-1">
               <Text className="font-sora-semibold text-foreground">
-                {profile?.displayName || 'Your account'}
+                {profile?.displayName || t('sync.yourAccount')}
               </Text>
               <Text variant="caption">{profile?.email ?? session.user.email}</Text>
             </View>
@@ -156,22 +187,22 @@ export default function SyncSettingsScreen() {
 
         {/* Sync status */}
         <View className="gap-2">
-          <SectionLabel>Sync</SectionLabel>
+          <SectionLabel>{t('sync.sync')}</SectionLabel>
           <View className="gap-3 rounded-2xl border border-border bg-card p-4">
             <View className="flex-row items-center gap-2">
               <StatusIcon size={16} color={statusColor} />
               <Text className="flex-1 font-sora-medium text-foreground">{syncedLabel}</Text>
             </View>
             <Button
-              label={status === 'syncing' ? 'Syncing…' : 'Sync now'}
+              label={status === 'syncing' ? t('sync.syncing') : t('sync.syncNow')}
               variant="secondary"
               onPress={handleSyncNow}
               disabled={status === 'syncing'}
             />
             <View className="flex-row items-center justify-between border-t border-border pt-3">
-              <View className="flex-1 pr-3">
-                <Text className="font-sora-medium text-foreground">Auto-sync</Text>
-                <Text variant="caption">Sync on launch and when the app reopens</Text>
+              <View className="flex-1 pe-3">
+                <Text className="font-sora-medium text-foreground">{t('sync.autoSync')}</Text>
+                <Text variant="caption">{t('sync.autoSyncDescription')}</Text>
               </View>
               <Switch
                 value={autoSync}
@@ -184,7 +215,7 @@ export default function SyncSettingsScreen() {
 
         {/* What syncs */}
         <View className="gap-2">
-          <SectionLabel>What syncs</SectionLabel>
+          <SectionLabel>{t('sync.whatSyncs')}</SectionLabel>
           <View className="rounded-2xl border border-border bg-card px-4">
             {SYNC_MODULES.map((mod, index) => (
               <View
@@ -196,7 +227,7 @@ export default function SyncSettingsScreen() {
                 }
               >
                 <View className="flex-1">
-                  <Text className="font-sora-medium text-foreground">{mod.label}</Text>
+                  <Text className="font-sora-medium text-foreground">{t(mod.labelKey)}</Text>
                 </View>
                 <Switch
                   value={modules[mod.key] ?? false}
@@ -207,8 +238,7 @@ export default function SyncSettingsScreen() {
             ))}
           </View>
           <Text variant="caption" className="px-1">
-            Turn off any module to keep it on this device only. Photos, audio, and reminders always
-            stay local for now.
+            {t('sync.whatSyncsNote')}
           </Text>
         </View>
 
@@ -220,7 +250,7 @@ export default function SyncSettingsScreen() {
         >
           <LogOut size={18} color={theme.destructive} />
           <Text className="font-sora-medium" style={{ color: theme.destructive }}>
-            Sign out
+            {t('sync.signOut')}
           </Text>
         </Pressable>
 
@@ -236,7 +266,7 @@ export default function SyncSettingsScreen() {
             className="font-sora-medium"
             style={{ color: theme.mutedForeground }}
           >
-            Delete account
+            {t('sync.deleteAccount')}
           </Text>
         </Pressable>
       </ScrollView>

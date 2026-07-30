@@ -21,26 +21,45 @@ import type { FocusArea } from '@/features/profile/store/profile-store';
  *  `module: null` = no dedicated module tint, falls back to the brand accent. */
 export const FOCUS_AREAS: {
   id: FocusArea;
-  label: string;
+  /** i18n key for the display label (see the `focus` namespace). */
+  labelKey: string;
   icon: LucideIcon;
   module: ModuleName | null;
   route: string;
 }[] = [
-  { id: 'habits', label: 'Habits', icon: Repeat, module: 'habit', route: '/(tabs)/habits' },
-  { id: 'tasks', label: 'Tasks', icon: CheckSquare, module: null, route: '/(tabs)/tasks' },
-  { id: 'journal', label: 'Journal', icon: BookHeart, module: 'journal', route: '/(tabs)/journal' },
+  {
+    id: 'habits',
+    labelKey: 'focus.habits',
+    icon: Repeat,
+    module: 'habit',
+    route: '/(tabs)/habits',
+  },
+  { id: 'tasks', labelKey: 'focus.tasks', icon: CheckSquare, module: null, route: '/(tabs)/tasks' },
+  {
+    id: 'journal',
+    labelKey: 'focus.journal',
+    icon: BookHeart,
+    module: 'journal',
+    route: '/(tabs)/journal',
+  },
   {
     id: 'water',
-    label: 'Hydration',
+    labelKey: 'focus.hydration',
     icon: GlassWater,
     module: 'water',
     route: '/water-intake/history',
   },
-  { id: 'sleep', label: 'Sleep', icon: Moon, module: 'sleep', route: '/sleep' },
-  { id: 'fitness', label: 'Fitness', icon: Dumbbell, module: 'fitness', route: '/gallery' },
-  { id: 'goals', label: 'Goals', icon: Target, module: 'goals', route: '/goals' },
-  { id: 'budget', label: 'Budget', icon: Wallet, module: 'budget', route: '/budget' },
-  { id: 'study', label: 'Study', icon: GraduationCap, module: 'study', route: '/study' },
+  { id: 'sleep', labelKey: 'focus.sleep', icon: Moon, module: 'sleep', route: '/sleep' },
+  {
+    id: 'fitness',
+    labelKey: 'focus.fitness',
+    icon: Dumbbell,
+    module: 'fitness',
+    route: '/gallery',
+  },
+  { id: 'goals', labelKey: 'focus.goals', icon: Target, module: 'goals', route: '/goals' },
+  { id: 'budget', labelKey: 'focus.budget', icon: Wallet, module: 'budget', route: '/budget' },
+  { id: 'study', labelKey: 'focus.study', icon: GraduationCap, module: 'study', route: '/study' },
 ];
 
 /** Resolve a focus area's tint for the active theme (accent when it has none). */

@@ -1,7 +1,9 @@
 import { format, parseISO } from 'date-fns';
-import { ArrowRight, Moon, Star, Sun } from 'lucide-react-native';
+import { Moon, Star, Sun } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
+import { ArrowForward } from '@/components/ui/directional-icon';
 import { Text } from '@/components/ui/text';
 import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
@@ -17,6 +19,7 @@ type Props = {
 
 export function SleepSessionCard({ session, goalMinutes, onPress }: Props) {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const sleepTint = moduleTint('sleep', scheme);
   const metGoal = session.durationMinutes >= goalMinutes;
 
@@ -25,7 +28,7 @@ export function SleepSessionCard({ session, goalMinutes, onPress }: Props) {
       onPress={() => onPress(session)}
       className="flex-row items-center gap-3 rounded-2xl border border-border bg-card p-4"
       accessibilityRole="button"
-      accessibilityLabel={`Sleep on ${session.logDate}`}
+      accessibilityLabel={t('sleep.sessionA11y', { date: session.logDate })}
     >
       <View
         className="h-11 w-11 items-center justify-center rounded-xl"
@@ -46,14 +49,16 @@ export function SleepSessionCard({ session, goalMinutes, onPress }: Props) {
         <View className="flex-row items-center gap-1.5">
           <Moon size={12} color={colors[scheme].mutedForeground} />
           <Text variant="caption">{formatClock(minutesOfDay(session.bedtime))}</Text>
-          <ArrowRight size={11} color={colors[scheme].mutedForeground} />
+          <ArrowForward size={11} color={colors[scheme].mutedForeground} />
           <Sun size={12} color={colors[scheme].mutedForeground} />
           <Text variant="caption">{formatClock(minutesOfDay(session.wakeTime))}</Text>
         </View>
         {session.fellAsleepMinutes != null && (
           <Text variant="caption">
-            {formatDuration(asleepMinutes(session))} asleep · {session.fellAsleepMinutes}m to nod
-            off
+            {t('sleep.asleepAndNodOff', {
+              duration: formatDuration(asleepMinutes(session)),
+              minutes: session.fellAsleepMinutes,
+            })}
           </Text>
         )}
       </View>

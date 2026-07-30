@@ -5,6 +5,7 @@ import { galleryAlbums, galleryPhotos } from '@/database/schema';
 import { deleteMediaFiles } from '@/features/gallery/services/gallery-storage';
 import { generateId } from '@/lib/id';
 import { LOCAL_USER_ID } from '@/lib/local-user';
+import { displayUri } from '@/features/gallery/types/gallery.types';
 import type {
   AlbumCategory,
   AlbumWithCover,
@@ -78,11 +79,18 @@ export function listAlbumsWithCover(): AlbumWithCover[] {
       ? (albumPhotos.find((p) => p.id === album.coverPhotoId) ?? albumPhotos[0])
       : albumPhotos[0];
     const videoCount = albumPhotos.reduce((n, p) => n + (p.mediaType === 'video' ? 1 : 0), 0);
+    // Sorted takenAt DESC, so the ends of the album are its ends in time.
+    const latest = albumPhotos[0] ?? null;
+    const first = albumPhotos[albumPhotos.length - 1] ?? null;
     return {
       ...album,
-      coverUri: cover ? (cover.thumbnailUri ?? cover.uri) : null,
+      coverUri: cover ? displayUri(cover) : null,
       photoCount: albumPhotos.length,
       videoCount,
+      firstUri: first ? displayUri(first) : null,
+      latestUri: latest ? displayUri(latest) : null,
+      firstTakenAt: first?.takenAt ?? null,
+      latestTakenAt: latest?.takenAt ?? null,
     };
   });
 }

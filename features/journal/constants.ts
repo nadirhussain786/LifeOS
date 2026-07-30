@@ -8,12 +8,13 @@ export const MOOD_EMOJI: Record<MoodOption, string> = {
   rough: '😣',
 };
 
-export const MOOD_LABEL: Record<MoodOption, string> = {
-  great: 'Great',
-  good: 'Good',
-  okay: 'Okay',
-  low: 'Low',
-  rough: 'Rough',
+/** i18n keys for each mood (see the `mood` namespace). */
+export const MOOD_LABEL_KEY: Record<MoodOption, string> = {
+  great: 'mood.moodGreat',
+  good: 'mood.moodGood',
+  okay: 'mood.moodOkay',
+  low: 'mood.moodLow',
+  rough: 'mood.moodRough',
 };
 
 // A calm, non-judgmental color per mood — never the app's destructive red,

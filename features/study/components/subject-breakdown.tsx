@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { ProgressBar } from '@/components/ui/progress-bar';
@@ -10,6 +11,7 @@ const NEUTRAL = '#8b5cf6';
 /** Proportional split of study time by subject over the window. Bars are
  * normalized to the largest subject so the leader always fills the track. */
 export function SubjectBreakdownList({ breakdown }: { breakdown: Breakdown[] }) {
+  const { t } = useTranslation();
   const max = breakdown.reduce((m, b) => Math.max(m, b.seconds), 0) || 1;
 
   return (
@@ -22,7 +24,7 @@ export function SubjectBreakdownList({ breakdown }: { breakdown: Breakdown[] }) 
               <View className="flex-row items-center gap-2">
                 <View className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: color }} />
                 <Text className="font-sora-medium text-foreground">
-                  {entry.subject?.name ?? 'General'}
+                  {entry.subject?.name ?? t('study.general')}
                 </Text>
               </View>
               <Text variant="caption">{formatStudyDuration(entry.seconds)}</Text>

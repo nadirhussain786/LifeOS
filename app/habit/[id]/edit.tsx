@@ -1,4 +1,5 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { SheetHeader } from '@/components/ui/sheet-header';
@@ -10,6 +11,7 @@ import type { HabitFormValues } from '@/features/habits/schemas/habit-form-schem
 export default function EditHabitScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const { t } = useTranslation();
   const { data: habit } = useHabit(id);
   const { update } = useHabitMutations();
 
@@ -33,11 +35,11 @@ export default function EditHabitScreen() {
     <View className="flex-1 bg-background">
       <Stack.Screen options={{ headerShown: false }} />
 
-      <SheetHeader title="Edit Habit" />
+      <SheetHeader title={t('habits.editHabit')} />
 
       <HabitForm
         defaultValues={defaultValues}
-        submitLabel="Save changes"
+        submitLabel={t('habits.saveChanges')}
         onSubmit={(values) => {
           update.mutate({ id: habit.id, input: values });
           router.back();

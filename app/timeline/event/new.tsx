@@ -5,6 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Bell, Clock, Palette, StickyNote } from 'lucide-react-native';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -17,24 +18,25 @@ import { useCalendarEventMutations } from '@/features/timeline/hooks/use-calenda
 import { useKeyboardHeight } from '@/hooks/use-keyboard-height';
 
 const DURATIONS = [
-  { label: 'None', minutes: null },
-  { label: '30m', minutes: 30 },
-  { label: '1h', minutes: 60 },
-  { label: '2h', minutes: 120 },
+  { key: 'none', labelKey: 'timeline.durationNone', minutes: null },
+  { key: '30m', labelKey: 'timeline.duration30m', minutes: 30 },
+  { key: '1h', labelKey: 'timeline.duration1h', minutes: 60 },
+  { key: '2h', labelKey: 'timeline.duration2h', minutes: 120 },
 ] as const;
 
 const REMINDER_OPTIONS = [
-  { label: 'None', minutesBefore: null },
-  { label: 'At time', minutesBefore: 0 },
-  { label: '10m before', minutesBefore: 10 },
-  { label: '30m before', minutesBefore: 30 },
-  { label: '1h before', minutesBefore: 60 },
+  { key: 'none', labelKey: 'timeline.reminderNone', minutesBefore: null },
+  { key: 'at', labelKey: 'timeline.reminderAtTime', minutesBefore: 0 },
+  { key: '10m', labelKey: 'timeline.reminder10m', minutesBefore: 10 },
+  { key: '30m', labelKey: 'timeline.reminder30m', minutesBefore: 30 },
+  { key: '1h', labelKey: 'timeline.reminder1h', minutesBefore: 60 },
 ] as const;
 
 export default function NewCalendarEventScreen() {
   const { date: dateKey } = useLocalSearchParams<{ date: string }>();
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const keyboardHeight = useKeyboardHeight();
   const { create } = useCalendarEventMutations();
 
@@ -86,7 +88,7 @@ export default function NewCalendarEventScreen() {
         style={[StyleSheet.absoluteFillObject, { height: 220 }]}
       />
 
-      <SheetHeader title="New Event" />
+      <SheetHeader title={t('timeline.newEvent')} />
 
       <ScrollView
         contentContainerClassName="gap-6 px-5 pt-3"
@@ -101,8 +103,8 @@ export default function NewCalendarEventScreen() {
           <TextInput
             value={title}
             onChangeText={setTitle}
-            accessibilityLabel="Event title"
-            placeholder="Team meeting, dentist appointment…"
+            accessibilityLabel={t('timeline.eventTitle')}
+            placeholder={t('timeline.titlePlaceholder')}
             placeholderTextColor={colors[scheme].mutedForeground}
             autoFocus
             multiline
@@ -117,7 +119,7 @@ export default function NewCalendarEventScreen() {
         </View>
 
         <View className="rounded-2xl border border-border bg-card px-4">
-          <AttributeRow icon={Clock} label="Time" isFirst>
+          <AttributeRow icon={Clock} label={t('timeline.time')} isFirst>
             {Platform.OS === 'ios' ? (
               <DateTimePicker
                 value={time}
@@ -136,13 +138,13 @@ export default function NewCalendarEventScreen() {
             )}
           </AttributeRow>
 
-          <AttributeRow icon={Clock} label="Duration">
+          <AttributeRow icon={Clock} label={t('timeline.duration')}>
             <View className="flex-row gap-2">
               {DURATIONS.map((option) => {
                 const selected = durationMinutes === option.minutes;
                 return (
                   <Pressable
-                    key={option.label}
+                    key={option.key}
                     onPress={() => {
                       Haptics.selectionAsync();
                       setDurationMinutes(option.minutes);
@@ -158,7 +160,7 @@ export default function NewCalendarEventScreen() {
                       className="font-sora-medium"
                       style={{ color: selected ? '#ffffff' : colors[scheme].mutedForeground }}
                     >
-                      {option.label}
+                      {t(option.labelKey)}
                     </Text>
                   </Pressable>
                 );
@@ -166,7 +168,7 @@ export default function NewCalendarEventScreen() {
             </View>
           </AttributeRow>
 
-          <AttributeRow icon={Palette} label="Color">
+          <AttributeRow icon={Palette} label={t('timeline.color')}>
             <View className="flex-row gap-2.5">
               {categoryColorPalette.map((swatch) => {
                 const selected = swatch === colorToken;
@@ -177,7 +179,7 @@ export default function NewCalendarEventScreen() {
                       Haptics.selectionAsync();
                       setColorToken(swatch);
                     }}
-                    accessibilityLabel={`Color ${swatch}`}
+                    accessibilityLabel={t('timeline.colorSwatch', { color: swatch })}
                     className="h-8 w-8 items-center justify-center rounded-full"
                     style={{
                       backgroundColor: swatch,
@@ -190,7 +192,7 @@ export default function NewCalendarEventScreen() {
             </View>
           </AttributeRow>
 
-          <AttributeRow icon={Bell} label="Reminder">
+          <AttributeRow icon={Bell} label={t('fields.reminder')}>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -200,7 +202,7 @@ export default function NewCalendarEventScreen() {
                 const selected = reminderMinutesBefore === option.minutesBefore;
                 return (
                   <Pressable
-                    key={option.label}
+                    key={option.key}
                     onPress={() => {
                       Haptics.selectionAsync();
                       setReminderMinutesBefore(option.minutesBefore);
@@ -216,7 +218,7 @@ export default function NewCalendarEventScreen() {
                       className="font-sora-medium"
                       style={{ color: selected ? '#ffffff' : colors[scheme].mutedForeground }}
                     >
-                      {option.label}
+                      {t(option.labelKey)}
                     </Text>
                   </Pressable>
                 );
@@ -229,15 +231,15 @@ export default function NewCalendarEventScreen() {
           <View className="flex-row items-center gap-1.5">
             <StickyNote size={13} color={colors[scheme].mutedForeground} />
             <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-              Notes
+              {t('timeline.notes')}
             </Text>
           </View>
           <TextInput
             value={notes}
             onChangeText={setNotes}
             multiline
-            accessibilityLabel="Event details"
-            placeholder="Add details…"
+            accessibilityLabel={t('timeline.eventDetails')}
+            placeholder={t('timeline.detailsPlaceholder')}
             placeholderTextColor={colors[scheme].mutedForeground}
             className="min-h-20 rounded-2xl border border-border bg-card p-4 text-base text-foreground"
             textAlignVertical="top"
@@ -249,7 +251,7 @@ export default function NewCalendarEventScreen() {
         ) : null}
 
         <Button
-          label="Add event"
+          label={t('timeline.addEvent')}
           onPress={handleAdd}
           disabled={!title.trim()}
           size="lg"

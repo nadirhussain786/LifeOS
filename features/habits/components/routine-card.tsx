@@ -1,5 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { Pencil } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -18,6 +19,7 @@ const QUANTIFIED_TYPES = new Set(['count', 'duration', 'distance', 'time']);
 
 export function RoutineCard({ routine, onEdit, onToggleHabit, onOpenHabit }: Props) {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const doneCount = routine.habits.filter((habit) => habit.todayStatus === 'done').length;
 
   return (
@@ -26,20 +28,16 @@ export function RoutineCard({ routine, onEdit, onToggleHabit, onOpenHabit }: Pro
         <View className="flex-1 gap-0.5">
           <Text className="font-sora-semibold">{routine.name}</Text>
           <Text variant="caption">
-            {doneCount}/{routine.habits.length} done
+            {t('habits.doneCount', { done: doneCount, total: routine.habits.length })}
           </Text>
         </View>
-        <Pressable
-          onPress={onEdit}
-          hitSlop={8}
-          accessibilityLabel={`Edit "${routine.name}" routine`}
-        >
+        <Pressable onPress={onEdit} hitSlop={8} accessibilityLabel={t('habits.editRoutine')}>
           <Pencil size={16} color={colors[scheme].mutedForeground} />
         </Pressable>
       </View>
 
       {routine.habits.length === 0 ? (
-        <Text variant="muted">No habits in this routine yet.</Text>
+        <Text variant="muted">{t('habits.noHabitsInRoutine')}</Text>
       ) : (
         <View>
           {/* Continuous connector line behind the icon column, from the first to the last habit. */}

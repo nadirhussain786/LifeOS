@@ -2,6 +2,7 @@ import { format } from 'date-fns';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Archive, Check, Pencil, Plus, RotateCcw, TrendingUp, Trash2 } from 'lucide-react-native';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
 
 import { CelebrationOverlay } from '@/components/ui/celebration-overlay';
@@ -25,11 +26,11 @@ import type { GoalPace } from '@/features/goals/types/goal.types';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { alpha } from '@/lib/color';
 
-const PACE_META: Record<GoalPace, { label: string; color: string }> = {
-  ahead: { label: 'Ahead of pace', color: '#22c55e' },
-  on_track: { label: 'On track', color: '#0ea5e9' },
-  behind: { label: 'Behind pace', color: '#f59e0b' },
-  none: { label: '', color: '#737373' },
+const PACE_META: Record<GoalPace, { labelKey: string; color: string }> = {
+  ahead: { labelKey: 'goals.paceAhead', color: '#22c55e' },
+  on_track: { labelKey: 'goals.paceOnTrack', color: '#0ea5e9' },
+  behind: { labelKey: 'goals.paceBehind', color: '#f59e0b' },
+  none: { labelKey: '', color: '#737373' },
 };
 
 const WHITE = '#ffffff';
@@ -38,6 +39,7 @@ export default function GoalDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const [celebrate, setCelebrate] = useState(false);
 
   const { data: goal } = useGoal(id);
@@ -52,7 +54,7 @@ export default function GoalDetailScreen() {
   const isCompleted = goal.status === 'completed';
   const isMilestones = goal.progressMode === 'milestones';
   const readyToComplete = !isCompleted && goal.progress >= 1;
-  const due = goal.dueDate && !isCompleted ? formatDueDate(goal.dueDate) : null;
+  const due = goal.dueDate && !isCompleted ? formatDueDate(goal.dueDate, t) : null;
 
   const timeline = goalTimeline(goal, goal.progress);
   const pace = PACE_META[timeline.pace];
@@ -62,10 +64,10 @@ export default function GoalDetailScreen() {
     timeline.hasDeadline || logs.length > 0 || milestones.some((m) => m.isCompleted);
 
   const confirmDelete = () => {
-    Alert.alert('Delete goal?', `"${goal.title}" and its history will be removed.`, [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('goals.deleteTitle'), t('goals.deleteBody', { title: goal.title }), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Delete',
+        text: t('common.delete'),
         style: 'destructive',
         onPress: () => (mutations.remove.mutate(goal.id), router.back()),
       },
@@ -88,14 +90,14 @@ export default function GoalDetailScreen() {
       <Stack.Screen options={{ headerShown: false }} />
 
       <ScreenHeader
-        eyebrow="Goals"
+        eyebrow={t('goals.title')}
         tint={moduleTint('goals', scheme)}
         right={
           <View className="flex-row gap-4">
             <Pressable
               onPress={() => router.push(`/goals/${goal.id}/edit`)}
               hitSlop={8}
-              accessibilityLabel="Edit"
+              accessibilityLabel={t('common.edit')}
             >
               <Pencil size={19} color={colors[scheme].foreground} />
             </Pressable>
@@ -103,12 +105,12 @@ export default function GoalDetailScreen() {
               <Pressable
                 onPress={() => (mutations.archive.mutate(goal.id), router.back())}
                 hitSlop={8}
-                accessibilityLabel="Archive"
+                accessibilityLabel={t('common.archive')}
               >
                 <Archive size={19} color={colors[scheme].foreground} />
               </Pressable>
             )}
-            <Pressable onPress={confirmDelete} hitSlop={8} accessibilityLabel="Delete">
+            <Pressable onPress={confirmDelete} hitSlop={8} accessibilityLabel={t('common.delete')}>
               <Trash2 size={19} color={colors[scheme].destructive} />
             </Pressable>
           </View>
@@ -142,7 +144,7 @@ export default function GoalDetailScreen() {
                     style={{ color: alpha(WHITE, 0.9), fontSize: 12 }}
                     className="font-sora-semibold"
                   >
-                    {goalCategoryLabel(goal.category, goal.categoryLabel)}
+                    {goalCategoryLabel(goal.category, goal.categoryLabel, t)}
                   </Text>
                 </View>
               </View>
@@ -154,14 +156,17 @@ export default function GoalDetailScreen() {
                 style={{ backgroundColor: alpha(WHITE, 0.15) }}
               >
                 {[
-                  { value: `Day ${timeline.dayNumber}`, label: `of ${timeline.totalDays}` },
                   {
-                    value: timeline.isOverdue ? 'Overdue' : `${timeline.remainingDays}`,
-                    label: timeline.isOverdue ? '' : 'days left',
+                    value: t('goals.dayN', { n: timeline.dayNumber }),
+                    label: t('goals.ofTotalDays', { total: timeline.totalDays }),
                   },
                   {
-                    value: pace.label.split(' ')[0],
-                    label: pace.label.split(' ').slice(1).join(' '),
+                    value: timeline.isOverdue ? t('goals.overdue') : `${timeline.remainingDays}`,
+                    label: timeline.isOverdue ? '' : t('goals.daysLeftCaption'),
+                  },
+                  {
+                    value: pace.labelKey ? t(pace.labelKey) : '',
+                    label: pace.labelKey ? t('goals.pace') : '',
                   },
                 ].map((stat, i) => (
                   <View key={i} className="flex-1 items-center gap-0.5">
@@ -174,7 +179,7 @@ export default function GoalDetailScreen() {
               </View>
             ) : (
               <Text style={{ color: alpha(WHITE, 0.9) }} className="font-sora-medium">
-                {isCompleted ? 'Completed 🎉' : 'No deadline set'}
+                {isCompleted ? t('goals.completedCelebrate') : t('goals.noDeadlineSet')}
               </Text>
             )}
           </View>
@@ -190,8 +195,8 @@ export default function GoalDetailScreen() {
                 className="h-2 w-2 rounded-full"
                 style={{ backgroundColor: goalPriorityColor(goal.priority) }}
               />
-              <Text variant="caption" className="capitalize">
-                {goal.priority} priority
+              <Text variant="caption">
+                {t('goals.priorityLabel', { priority: t(`fields.${goal.priority}`) })}
               </Text>
             </View>
             {due && (
@@ -217,7 +222,9 @@ export default function GoalDetailScreen() {
             <View className="flex-row items-center gap-2">
               <Check size={18} color={dsColors[scheme].success} />
               <Text className="font-sora-semibold text-foreground">
-                Completed{goal.completedAt ? ` on ${format(goal.completedAt, 'MMM d, yyyy')}` : ''}
+                {goal.completedAt
+                  ? t('goals.completedOn', { date: format(goal.completedAt, 'MMM d, yyyy') })
+                  : t('goals.completed')}
               </Text>
             </View>
             <Pressable
@@ -225,7 +232,7 @@ export default function GoalDetailScreen() {
               className="flex-row items-center justify-center gap-1.5 rounded-xl border border-border py-3"
             >
               <RotateCcw size={16} color={colors[scheme].foreground} />
-              <Text className="font-sora-medium">Reopen goal</Text>
+              <Text className="font-sora-medium">{t('goals.reopenGoal')}</Text>
             </Pressable>
           </View>
         )}
@@ -233,7 +240,7 @@ export default function GoalDetailScreen() {
         {/* Primary action: log progress (percent/count, active only) */}
         {!isCompleted && !isMilestones && (
           <GradientButton
-            label="Log progress"
+            label={t('goals.logProgress')}
             tint={meta.tint}
             icon={Plus}
             onPress={() => router.push(`/goals/${goal.id}/log`)}
@@ -245,14 +252,14 @@ export default function GoalDetailScreen() {
         {showChart && (
           <View className="gap-3 rounded-2xl border border-border bg-card p-4 shadow-e1">
             <View className="flex-row items-center justify-between">
-              <Text variant="subheading">Progress over time</Text>
+              <Text variant="subheading">{t('goals.progressOverTime')}</Text>
               {timeline.hasDeadline && !isCompleted && (
                 <View className="flex-row items-center gap-1.5">
                   <View
                     className="h-0.5 w-4"
                     style={{ backgroundColor: colors[scheme].mutedForeground }}
                   />
-                  <Text variant="caption">expected</Text>
+                  <Text variant="caption">{t('goals.expected')}</Text>
                 </View>
               )}
             </View>
@@ -271,8 +278,9 @@ export default function GoalDetailScreen() {
               >
                 <TrendingUp size={14} color={dsColors[scheme].warning} />
                 <Text variant="caption" className="text-warning">
-                  Aim for {Math.max(1, Math.round(timeline.requiredPerDay * 100))}% per day to
-                  finish on time.
+                  {t('goals.aimPerDay', {
+                    percent: Math.max(1, Math.round(timeline.requiredPerDay * 100)),
+                  })}
                 </Text>
               </View>
             )}
@@ -282,7 +290,7 @@ export default function GoalDetailScreen() {
         {/* Milestones */}
         {isMilestones && (
           <View className="gap-3">
-            <Text variant="subheading">Milestones</Text>
+            <Text variant="subheading">{t('goals.milestones')}</Text>
             <MilestoneTimeline
               milestones={milestones}
               tint={meta.tint}
@@ -298,14 +306,14 @@ export default function GoalDetailScreen() {
         {/* Activity feed */}
         {!isMilestones && activity.length > 0 && (
           <View className="gap-3">
-            <SectionHeader title="Activity" />
+            <SectionHeader title={t('goals.activity')} />
             <View className="gap-2.5">
               {activity.map((log) => (
                 <Pressable
                   key={log.id}
                   onLongPress={() => mutations.removeProgressLog.mutate(log.id)}
                   className="flex-row items-center gap-3 rounded-2xl border border-border bg-card p-3.5 shadow-e1"
-                  accessibilityHint="Long-press to delete this update"
+                  accessibilityHint={t('goals.longPressDeleteUpdate')}
                 >
                   <View
                     className="h-9 w-9 items-center justify-center rounded-full"
@@ -315,7 +323,7 @@ export default function GoalDetailScreen() {
                   </View>
                   <View className="flex-1 gap-0.5">
                     <Text className="font-sora-medium text-foreground">
-                      {log.note?.trim() || 'Progress update'}
+                      {log.note?.trim() || t('goals.progressUpdate')}
                     </Text>
                     <Text variant="caption">{format(log.loggedAt, 'EEE, MMM d · h:mm a')}</Text>
                   </View>
@@ -348,7 +356,7 @@ export default function GoalDetailScreen() {
         {!isCompleted &&
           (readyToComplete ? (
             <GradientButton
-              label="Complete goal 🎉"
+              label={t('goals.completeGoal')}
               tint={dsColors[scheme].success}
               icon={Check}
               onPress={handleComplete}
@@ -359,7 +367,7 @@ export default function GoalDetailScreen() {
               className="flex-row items-center justify-center gap-2 rounded-2xl border border-border py-4"
             >
               <Check size={18} color={colors[scheme].foreground} />
-              <Text className="font-sora-semibold text-foreground">Mark as complete</Text>
+              <Text className="font-sora-semibold text-foreground">{t('goals.markComplete')}</Text>
             </Pressable>
           ))}
       </ScrollView>

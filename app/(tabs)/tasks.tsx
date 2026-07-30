@@ -2,6 +2,7 @@ import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import { CheckCircle2, Search } from 'lucide-react-native';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, TextInput, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -21,19 +22,20 @@ import { useTasksFilterStore } from '@/features/tasks/store/tasks-filter-store';
 import type { Task, TaskDueBucket, TaskListFilter } from '@/features/tasks/types/task.types';
 
 type ListItem =
-  | { type: 'header'; bucket: TaskDueBucket; label: string; count: number }
+  | { type: 'header'; bucket: TaskDueBucket; labelKey: string; count: number }
   | { type: 'task'; task: Task };
 
-const FILTER_TABS: { value: TaskListFilter; label: string }[] = [
-  { value: 'active', label: 'Active' },
-  { value: 'completed', label: 'Completed' },
-  { value: 'archived', label: 'Archived' },
+const FILTER_TABS: { value: TaskListFilter; labelKey: string }[] = [
+  { value: 'active', labelKey: 'tasks.filterActive' },
+  { value: 'completed', labelKey: 'tasks.filterCompleted' },
+  { value: 'archived', labelKey: 'tasks.filterArchived' },
 ];
 
 export default function TasksScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
 
   const { filter, setFilter, searchQuery, setSearchQuery } = useTasksFilterStore();
   const { data: tasks = [], isLoading, isError, refetch } = useTasks();
@@ -54,7 +56,7 @@ export default function TasksScreen() {
       {
         type: 'header',
         bucket: section.bucket,
-        label: section.label,
+        labelKey: section.labelKey,
         count: section.tasks.length,
       } as const,
       ...section.tasks.map((task) => ({ type: 'task', task }) as const),
@@ -64,14 +66,15 @@ export default function TasksScreen() {
   return (
     <View className="flex-1 bg-background">
       <View style={{ paddingTop: insets.top + 8 }} className="gap-5 px-5 pb-2">
-        <Text variant="heading">Tasks</Text>
+        <Text variant="heading">{t('tabs.tasks')}</Text>
 
         <View className="flex-row items-center gap-2 rounded-full border border-border bg-surface px-4 py-2.5">
           <Search size={16} color={colors[scheme].mutedForeground} />
           <TextInput
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholder="Search tasks"
+            accessibilityLabel={t('tasks.searchTasks')}
+            placeholder={t('tasks.searchTasks')}
             placeholderTextColor={colors[scheme].mutedForeground}
             className="flex-1 text-foreground"
           />
@@ -97,7 +100,7 @@ export default function TasksScreen() {
                       : 'text-muted-foreground'
                   }
                 >
-                  {tab.label}
+                  {t(tab.labelKey)}
                 </Text>
               </Pressable>
             );
@@ -106,7 +109,7 @@ export default function TasksScreen() {
       </View>
 
       {isError ? (
-        <QueryError onRetry={() => refetch()} message="Couldn't load your tasks." />
+        <QueryError onRetry={() => refetch()} message={t('tasks.loadError')} />
       ) : isLoading ? (
         <View className="gap-2.5 px-5">
           <Skeleton className="h-16 w-full rounded-2xl" />
@@ -116,22 +119,26 @@ export default function TasksScreen() {
       ) : items.length === 0 ? (
         <EmptyState
           icon={CheckCircle2}
-          title={filter === 'active' ? 'Nothing to do' : `No ${filter} tasks`}
-          description={
+          title={
             filter === 'active'
-              ? 'Enjoy the calm, or add something new.'
-              : 'Tasks will show up here.'
+              ? t('tasks.emptyTitle')
+              : filter === 'completed'
+                ? t('tasks.emptyCompleted')
+                : t('tasks.emptyArchived')
           }
+          description={filter === 'active' ? t('tasks.emptyActive') : t('tasks.emptyOther')}
         />
       ) : (
         <FlashList
           data={items}
-          keyExtractor={(item) => (item.type === 'header' ? `header-${item.label}` : item.task.id)}
+          keyExtractor={(item) =>
+            item.type === 'header' ? `header-${item.labelKey}` : item.task.id
+          }
           contentContainerStyle={{ paddingTop: 4, paddingBottom: 120 }}
           renderItem={({ item }) =>
             item.type === 'header' ? (
               <ListSectionHeader
-                label={item.label}
+                label={t(item.labelKey)}
                 count={item.count}
                 dotColor={bucketDotColor[item.bucket]}
               />
@@ -152,7 +159,7 @@ export default function TasksScreen() {
         />
       )}
 
-      <Fab onPress={() => router.push('/task/new')} accessibilityLabel="Add task" />
+      <Fab onPress={() => router.push('/task/new')} accessibilityLabel={t('tasks.addTask')} />
     </View>
   );
 }

@@ -84,15 +84,16 @@ export function computeStudyStats(sessions: StudySession[]): StudyStats {
   };
 }
 
-const TIME_OF_DAY_LABEL: Record<TimeOfDay, string> = {
-  morning: 'Mornings',
-  afternoon: 'Afternoons',
-  evening: 'Evenings',
-  night: 'Late nights',
+const TIME_OF_DAY_LABEL_KEY: Record<TimeOfDay, string> = {
+  morning: 'study.morning',
+  afternoon: 'study.afternoon',
+  evening: 'study.evening',
+  night: 'study.night',
 };
 
-export function timeOfDayLabel(bucket: TimeOfDay): string {
-  return TIME_OF_DAY_LABEL[bucket];
+/** Translation key for a time-of-day bucket — resolved by the caller's `t`. */
+export function timeOfDayLabelKey(bucket: TimeOfDay): string {
+  return TIME_OF_DAY_LABEL_KEY[bucket];
 }
 
 function timeOfDayOf(timestamp: number): TimeOfDay {

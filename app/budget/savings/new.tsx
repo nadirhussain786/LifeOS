@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { useRouter } from 'expo-router';
 import { CalendarDays } from 'lucide-react-native';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
@@ -18,6 +19,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 export default function NewSavingsGoalScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const { addSavingsGoal } = useBudgetMutations();
   const { data: settings } = useBudgetSettings();
   const { data: goals = [] } = useSavingsGoals();
@@ -45,7 +47,7 @@ export default function NewSavingsGoalScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <SheetHeader title="New Savings Goal" />
+      <SheetHeader title={t('budget.newSavingsGoal')} />
 
       <ScrollView
         contentContainerClassName="gap-5 px-5 pt-3 pb-10"
@@ -54,8 +56,8 @@ export default function NewSavingsGoalScreen() {
         <TextInput
           value={name}
           onChangeText={setName}
-          accessibilityLabel="Goal name"
-          placeholder="Goal name (e.g. Emergency fund)"
+          accessibilityLabel={t('budget.goalName')}
+          placeholder={t('budget.goalNamePlaceholder')}
           placeholderTextColor={colors[scheme].mutedForeground}
           autoFocus
           style={{ fontSize: 22, fontFamily: 'Sora_700Bold', color: colors[scheme].foreground }}
@@ -63,7 +65,7 @@ export default function NewSavingsGoalScreen() {
 
         <View className="gap-2.5">
           <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-            Target amount
+            {t('budget.targetAmount')}
           </Text>
           <View className="flex-row items-center gap-2 rounded-2xl border border-border bg-card px-4 py-3">
             <Text className="font-sora-bold text-xl" style={{ color: '#22c55e' }}>
@@ -72,7 +74,7 @@ export default function NewSavingsGoalScreen() {
             <TextInput
               value={target}
               onChangeText={setTarget}
-              accessibilityLabel="Target amount"
+              accessibilityLabel={t('budget.targetAmount')}
               placeholder="0"
               keyboardType="decimal-pad"
               placeholderTextColor={colors[scheme].mutedForeground}
@@ -86,7 +88,7 @@ export default function NewSavingsGoalScreen() {
         <View className="flex-row items-center justify-between rounded-2xl border border-border bg-card px-4 py-3">
           <View className="flex-row items-center gap-2">
             <CalendarDays size={16} color={colors[scheme].mutedForeground} />
-            <Text className="font-sora-medium text-foreground">Deadline (optional)</Text>
+            <Text className="font-sora-medium text-foreground">{t('budget.deadlineOptional')}</Text>
           </View>
           {Platform.OS === 'ios' ? (
             <DateTimePicker
@@ -101,7 +103,7 @@ export default function NewSavingsGoalScreen() {
               className="rounded-lg bg-muted px-3 py-1.5"
             >
               <Text className="font-sora-semibold text-foreground">
-                {deadline ? format(deadline, 'MMM yyyy') : 'None'}
+                {deadline ? format(deadline, 'MMM yyyy') : t('fields.none')}
               </Text>
             </Pressable>
           )}
@@ -115,7 +117,13 @@ export default function NewSavingsGoalScreen() {
           />
         )}
 
-        <Button label="Create goal" onPress={save} disabled={!canSave} size="lg" variant="accent" />
+        <Button
+          label={t('budget.createGoal')}
+          onPress={save}
+          disabled={!canSave}
+          size="lg"
+          variant="accent"
+        />
       </ScrollView>
     </View>
   );

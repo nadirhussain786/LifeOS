@@ -2,6 +2,7 @@ import { set } from 'date-fns';
 import { useRouter } from 'expo-router';
 import { BellRing, Minus, Moon, Plus, Sun } from 'lucide-react-native';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, Switch, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
@@ -37,6 +38,7 @@ function toHHmm(date: Date): string {
 export default function SleepSettingsScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const sleepTint = moduleTint('sleep', scheme);
   const { data: settings } = useSleepSettings();
   const { saveSettings } = useSleepMutations();
@@ -70,16 +72,16 @@ export default function SleepSettingsScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <ScreenHeader title="Sleep Goal" eyebrow="Sleep" tint={sleepTint} />
+      <ScreenHeader title={t('sleep.goalTitle')} eyebrow={t('sleep.title')} tint={sleepTint} />
 
       <View className="gap-5 px-5 pt-3">
         <View className="items-center gap-4 rounded-2xl border border-border bg-card p-6 shadow-e1">
-          <Text variant="micro">Nightly goal</Text>
+          <Text variant="micro">{t('sleep.nightlyGoal')}</Text>
           <View className="flex-row items-center gap-6">
             <Pressable
               onPress={() => adjust(-STEP)}
               className="h-12 w-12 items-center justify-center rounded-2xl border border-border bg-surface"
-              accessibilityLabel="Decrease goal"
+              accessibilityLabel={t('sleep.decreaseGoal')}
             >
               <Minus size={20} color={colors[scheme].foreground} />
             </Pressable>
@@ -92,25 +94,31 @@ export default function SleepSettingsScreen() {
             <Pressable
               onPress={() => adjust(STEP)}
               className="h-12 w-12 items-center justify-center rounded-2xl bg-sleep"
-              accessibilityLabel="Increase goal"
+              accessibilityLabel={t('sleep.increaseGoal')}
             >
               <Plus size={20} color="#ffffff" />
             </Pressable>
           </View>
-          <Text variant="muted">Adults typically need 7–9 hours.</Text>
+          <Text variant="muted">{t('sleep.adultsHint')}</Text>
         </View>
 
         <View className="gap-3">
-          <Text variant="micro">Target schedule (optional)</Text>
+          <Text variant="micro">{t('sleep.targetSchedule')}</Text>
           <View className="flex-row gap-3">
             <TimeField
               icon={Moon}
-              label="Bedtime"
+              label={t('sleep.bedtime')}
               value={bedtime}
               onChange={setBedtime}
               tint={sleepTint}
             />
-            <TimeField icon={Sun} label="Wake up" value={wake} onChange={setWake} tint="#f59e0b" />
+            <TimeField
+              icon={Sun}
+              label={t('sleep.wakeUp')}
+              value={wake}
+              onChange={setWake}
+              tint="#f59e0b"
+            />
           </View>
         </View>
 
@@ -121,8 +129,10 @@ export default function SleepSettingsScreen() {
               <BellRing size={18} color={sleepTint} />
             </View>
             <View className="flex-1">
-              <Text className="font-sora-semibold text-foreground">Bedtime reminder</Text>
-              <Text variant="caption">Daily nudge at {toHHmm(bedtime)} to start winding down.</Text>
+              <Text className="font-sora-semibold text-foreground">
+                {t('sleep.bedtimeReminder')}
+              </Text>
+              <Text variant="caption">{t('sleep.reminderHint', { time: toHHmm(bedtime) })}</Text>
             </View>
             <Switch
               value={reminderEnabled}
@@ -132,11 +142,11 @@ export default function SleepSettingsScreen() {
             />
           </View>
           {reminderEnabled && !notificationsAvailable && (
-            <Text variant="caption">Reminders aren&apos;t available on this device.</Text>
+            <Text variant="caption">{t('reminders.notAvailable')}</Text>
           )}
         </View>
 
-        <Button label="Save goal" onPress={save} size="lg" variant="accent" />
+        <Button label={t('sleep.saveGoal')} onPress={save} size="lg" variant="accent" />
       </View>
     </View>
   );

@@ -1,5 +1,6 @@
 import { LockKeyhole } from 'lucide-react-native';
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -18,10 +19,11 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
  */
 export function AppLockOverlay() {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const isLocked = useAppLockStore((s) => s.isLocked);
   const unlock = useAppLockStore((s) => s.unlock);
-  const [label, setLabel] = useState('Biometrics');
+  const [label, setLabel] = useState(() => t('security.biometrics'));
   const [tried, setTried] = useState(false);
 
   useEffect(() => {
@@ -29,10 +31,10 @@ export function AppLockOverlay() {
   }, []);
 
   const tryUnlock = useCallback(async () => {
-    const ok = await authenticate('Unlock LifeOS');
+    const ok = await authenticate(t('security.unlockPrompt'));
     setTried(true);
     if (ok) unlock();
-  }, [unlock]);
+  }, [unlock, t]);
 
   // Auto-prompt as soon as the shield goes up.
   useEffect(() => {
@@ -54,15 +56,15 @@ export function AppLockOverlay() {
           <LockKeyhole size={34} color={colors[scheme].accent} strokeWidth={1.8} />
         </View>
         <View className="items-center gap-1">
-          <Text variant="heading">LifeOS is locked</Text>
+          <Text variant="heading">{t('security.locked')}</Text>
           <Text variant="muted" className="text-center">
-            {tried ? 'Authentication needed to continue.' : `Unlock with ${label} to continue.`}
+            {tried ? t('security.authNeeded') : t('security.unlockToContinue', { method: label })}
           </Text>
         </View>
         <Button
           variant="accent"
           size="lg"
-          label={`Unlock with ${label}`}
+          label={t('security.unlockWith', { method: label })}
           onPress={tryUnlock}
           className="mt-2 px-8"
         />

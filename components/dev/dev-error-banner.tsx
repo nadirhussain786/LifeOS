@@ -28,7 +28,7 @@ export function DevErrorBanner() {
       entering={FadeInUp.duration(200)}
       exiting={FadeOutUp.duration(150)}
       style={{ paddingTop: insets.top + 8 }}
-      className="absolute left-0 right-0 top-0 z-50 bg-destructive px-4 pb-3"
+      className="absolute inset-x-0 top-0 z-50 bg-destructive px-4 pb-3"
     >
       <View className="flex-row items-start gap-2">
         <Text className="flex-1 text-sm" style={{ color: '#ffffff' }}>

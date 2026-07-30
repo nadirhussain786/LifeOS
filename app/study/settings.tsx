@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import { Minus, Plus, Trash2 } from 'lucide-react-native';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
@@ -57,6 +58,7 @@ function Stepper({ label, value, onDecrease, onIncrease }: StepperProps) {
 export default function StudySettingsScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const { data: settings } = useStudySettings();
   const { data: subjects = [] } = useStudySubjects();
   const { saveSettings, addSubject, removeSubject } = useStudyMutations();
@@ -90,19 +92,19 @@ export default function StudySettingsScreen() {
   };
 
   const confirmRemove = (id: string, name: string) => {
-    Alert.alert(
-      'Delete subject?',
-      `"${name}" will no longer be selectable. Past sessions keep their time.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: () => removeSubject.mutate(id) },
-      ],
-    );
+    Alert.alert(t('study.deleteSubjectTitle'), t('study.deleteSubjectBody', { name }), [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('common.delete'), style: 'destructive', onPress: () => removeSubject.mutate(id) },
+    ]);
   };
 
   return (
     <View className="flex-1 bg-background">
-      <ScreenHeader title="Study Settings" eyebrow="Study" tint={moduleTint('study', scheme)} />
+      <ScreenHeader
+        title={t('study.settingsTitle')}
+        eyebrow={t('study.title')}
+        tint={moduleTint('study', scheme)}
+      />
 
       <ScrollView
         contentContainerClassName="gap-5 px-5 pt-3 pb-10"
@@ -111,23 +113,23 @@ export default function StudySettingsScreen() {
       >
         <View className="gap-3">
           <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-            Goals & timer
+            {t('study.goalsAndTimer')}
           </Text>
           <Stepper
-            label="Daily goal"
+            label={t('study.dailyGoal')}
             value={formatStudyDuration(goal * 60)}
             onDecrease={() => setGoal((g) => Math.max(15, g - 15))}
             onIncrease={() => setGoal((g) => Math.min(600, g + 15))}
           />
           <Stepper
-            label="Focus length"
-            value={`${focus}m`}
+            label={t('study.focusLength')}
+            value={t('study.minutesShort', { minutes: focus })}
             onDecrease={() => setFocus((f) => Math.max(5, f - 5))}
             onIncrease={() => setFocus((f) => Math.min(90, f + 5))}
           />
           <Stepper
-            label="Break length"
-            value={`${brk}m`}
+            label={t('study.breakLength')}
+            value={t('study.minutesShort', { minutes: brk })}
             onDecrease={() => setBrk((b) => Math.max(1, b - 1))}
             onIncrease={() => setBrk((b) => Math.min(30, b + 1))}
           />
@@ -135,7 +137,7 @@ export default function StudySettingsScreen() {
 
         <View className="gap-3">
           <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-            Subjects
+            {t('study.subjects')}
           </Text>
           {subjects.map((subject) => (
             <View
@@ -156,8 +158,8 @@ export default function StudySettingsScreen() {
             <TextInput
               value={newSubject}
               onChangeText={setNewSubject}
-              accessibilityLabel="Add a subject"
-              placeholder="Add a subject"
+              accessibilityLabel={t('study.addSubject')}
+              placeholder={t('study.addSubject')}
               placeholderTextColor={colors[scheme].mutedForeground}
               onSubmitEditing={addNewSubject}
               returnKeyType="done"
@@ -169,7 +171,7 @@ export default function StudySettingsScreen() {
           </View>
         </View>
 
-        <Button label="Save settings" onPress={save} size="lg" variant="accent" />
+        <Button label={t('study.saveSettings')} onPress={save} size="lg" variant="accent" />
       </ScrollView>
     </View>
   );

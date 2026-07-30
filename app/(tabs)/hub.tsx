@@ -1,5 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -24,6 +25,7 @@ function toRows(modules: HubModule[]): (HubModule | null)[][] {
 export default function HubScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
 
   const sections = useMemo(
     () => HUB_SECTIONS.map((section) => ({ ...section, rows: toRows(section.modules) })),
@@ -49,14 +51,14 @@ export default function HubScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View className="gap-1">
-          <Text variant="heading">More</Text>
-          <Text variant="muted">{readyCount} modules ready · everything in one place</Text>
+          <Text variant="heading">{t('hub.title')}</Text>
+          <Text variant="muted">{t('hub.modulesReady', { count: readyCount })}</Text>
         </View>
 
         {sections.map((section, sectionIndex) => (
           <View key={section.id} className="gap-3">
             <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-              {section.label}
+              {t(section.labelKey)}
             </Text>
             <View className="gap-3">
               {section.rows.map((row, rowIndex) => (

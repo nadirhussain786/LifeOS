@@ -1,6 +1,7 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Archive, ArchiveRestore, Bell, Star, Tag, Tags, Trash2 } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -37,6 +38,7 @@ export default function NoteDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const keyboardHeight = useKeyboardHeight();
   const { data: note } = useNote(id);
   const { data: noteTags = [], refetch: refetchNoteTags } = useNoteTagsForNote(id);
@@ -104,7 +106,7 @@ export default function NoteDetailScreen() {
       <Stack.Screen options={{ headerShown: false }} />
 
       <ScreenHeader
-        eyebrow="Notes"
+        eyebrow={t('notes.title')}
         tint="#eab308"
         right={
           <View className="flex-row gap-4">
@@ -152,8 +154,8 @@ export default function NoteDetailScreen() {
           value={title}
           onChangeText={setTitle}
           multiline
-          accessibilityLabel="Note title"
-          placeholder="Note title"
+          accessibilityLabel={t('notes.noteTitle')}
+          placeholder={t('notes.noteTitle')}
           placeholderTextColor={colors[scheme].mutedForeground}
           style={{
             fontSize: 26,
@@ -164,13 +166,13 @@ export default function NoteDetailScreen() {
         />
 
         <View className="rounded-2xl border border-border bg-card px-4">
-          <AttributeRow icon={Tag} label="Category" isFirst>
+          <AttributeRow icon={Tag} label={t('fields.category')} isFirst>
             <NoteCategoryPicker
               value={note.categoryId}
               onChange={(categoryId) => update.mutate({ id: note.id, input: { categoryId } })}
             />
           </AttributeRow>
-          <AttributeRow icon={Tags} label="Tags">
+          <AttributeRow icon={Tags} label={t('notes.tags')}>
             <TagPicker
               tags={allTags}
               selectedTagIds={selectedTagIds}
@@ -179,7 +181,7 @@ export default function NoteDetailScreen() {
               onDeleteTag={handleDeleteTag}
             />
           </AttributeRow>
-          <AttributeRow icon={Bell} label="Reminder">
+          <AttributeRow icon={Bell} label={t('fields.reminder')}>
             <ReminderPicker
               value={note.reminderAt}
               onChange={(reminderAt) => update.mutate({ id: note.id, input: { reminderAt } })}
@@ -187,7 +189,11 @@ export default function NoteDetailScreen() {
           </AttributeRow>
         </View>
 
-        <NoteEditorBody value={body} onChangeText={setBody} placeholder="Write something…" />
+        <NoteEditorBody
+          value={body}
+          onChangeText={setBody}
+          placeholder={t('notes.writeSomething')}
+        />
 
         <View className="gap-2">
           <VoiceNoteRecorder

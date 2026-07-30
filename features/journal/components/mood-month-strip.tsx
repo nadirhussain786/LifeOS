@@ -1,4 +1,5 @@
 import { eachDayOfInterval, endOfMonth, format, getDay, isToday, startOfMonth } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -8,7 +9,15 @@ import { MOOD_TINT } from '@/features/journal/constants';
 import type { JournalEntry, MoodOption } from '@/features/journal/types/journal.types';
 import { toDateKey } from '@/lib/date';
 
-const WEEKDAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+const WEEKDAY_KEYS = [
+  'weekdayInitials.sun',
+  'weekdayInitials.mon',
+  'weekdayInitials.tue',
+  'weekdayInitials.wed',
+  'weekdayInitials.thu',
+  'weekdayInitials.fri',
+  'weekdayInitials.sat',
+];
 
 type Props = {
   monthAnchor: Date;
@@ -20,6 +29,7 @@ type Props = {
  * distinct from the day-by-day timeline list below it. */
 export function MoodMonthStrip({ monthAnchor, entries, onSelectDate }: Props) {
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const moodByDate = new Map(
     entries
       .filter((entry) => entry.mood)
@@ -39,9 +49,9 @@ export function MoodMonthStrip({ monthAnchor, entries, onSelectDate }: Props) {
       </Text>
 
       <View className="flex-row">
-        {WEEKDAY_LABELS.map((label, index) => (
-          <View key={`${label}-${index}`} className="flex-1 items-center">
-            <Text variant="caption">{label}</Text>
+        {WEEKDAY_KEYS.map((key, index) => (
+          <View key={`${key}-${index}`} className="flex-1 items-center">
+            <Text variant="caption">{t(key)}</Text>
           </View>
         ))}
       </View>

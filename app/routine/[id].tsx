@@ -2,6 +2,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { ChevronDown, ChevronUp, Plus, Trash2, X } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -19,6 +20,7 @@ export default function RoutineDetailScreen() {
   const { id: routineId } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
 
   const { data: routines = [] } = useRoutines();
   const { data: allHabits = [] } = useHabits();
@@ -58,13 +60,13 @@ export default function RoutineDetailScreen() {
   return (
     <View className="flex-1 bg-background">
       <ScreenHeader
-        title="Edit Routine"
-        eyebrow="Routine"
+        title={t('habits.editRoutine')}
+        eyebrow={t('habits.routine')}
         tint={moduleTint('habit', scheme)}
         actions={[
           {
             icon: Trash2,
-            label: 'Delete routine',
+            label: t('habits.deleteRoutine'),
             onPress: () => {
               remove.mutate(routine.id);
               router.back();
@@ -81,18 +83,18 @@ export default function RoutineDetailScreen() {
         <TextInput
           value={name}
           onChangeText={setName}
-          accessibilityLabel="Routine name"
-          placeholder="Routine name"
+          accessibilityLabel={t('habits.routineName')}
+          placeholder={t('habits.routineName')}
           placeholderTextColor={colors[scheme].mutedForeground}
           style={{ fontSize: 24, fontFamily: 'Sora_700Bold', color: colors[scheme].foreground }}
         />
 
         <View className="gap-2">
           <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-            In this routine
+            {t('habits.inThisRoutine')}
           </Text>
           {routine.habits.length === 0 ? (
-            <Text variant="muted">Add habits below to build the chain.</Text>
+            <Text variant="muted">{t('habits.addHabitsHint')}</Text>
           ) : (
             <View className="rounded-2xl border border-border bg-card px-4">
               {routine.habits.map((habit, index) => (
@@ -138,10 +140,10 @@ export default function RoutineDetailScreen() {
 
         <View className="gap-2">
           <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
-            Add a habit
+            {t('habits.addAHabit')}
           </Text>
           {availableHabits.length === 0 ? (
-            <Text variant="muted">Every habit is already in this routine.</Text>
+            <Text variant="muted">{t('habits.allHabitsInRoutine')}</Text>
           ) : (
             <View className="flex-row flex-wrap gap-2">
               {availableHabits.map((habit) => (

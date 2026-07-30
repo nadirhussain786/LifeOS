@@ -2,6 +2,7 @@ import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import { Check, Search } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, TextInput, View } from 'react-native';
 
 import { ScreenHeader } from '@/components/ui/screen-header';
@@ -18,6 +19,7 @@ const BUDGET_TINT = '#22c55e';
 export default function CurrencyPickerScreen() {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const { data: settings } = useBudgetSettings();
   const { saveSettings } = useBudgetMutations();
   const [query, setQuery] = useState('');
@@ -42,15 +44,19 @@ export default function CurrencyPickerScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <ScreenHeader title="Currency" eyebrow="Budget" tint={moduleTint('budget', scheme)} />
+      <ScreenHeader
+        title={t('budget.currency')}
+        eyebrow={t('budget.title')}
+        tint={moduleTint('budget', scheme)}
+      />
 
       <View className="mx-4 mb-2 flex-row items-center gap-2 rounded-full bg-muted px-4 py-2.5">
         <Search size={16} color={colors[scheme].mutedForeground} />
         <TextInput
           value={query}
           onChangeText={setQuery}
-          accessibilityLabel="Search currencies"
-          placeholder="Search 80+ currencies"
+          accessibilityLabel={t('budget.searchCurrencies')}
+          placeholder={t('budget.searchCurrencies')}
           placeholderTextColor={colors[scheme].mutedForeground}
           autoCapitalize="characters"
           className="flex-1 text-foreground"

@@ -1,17 +1,23 @@
 import { Link, useRouter } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { AuthField } from '@/features/auth/components/auth-field';
+import { UsernameField, type UsernameStatus } from '@/features/auth/components/username-field';
 import { useAuthStore } from '@/features/auth/services/auth-store';
 
 export default function SignUpScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const signUp = useAuthStore((s) => s.signUp);
+  const claimUsername = useAuthStore((s) => s.claimUsername);
 
   const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
+  const [usernameStatus, setUsernameStatus] = useState<UsernameStatus>('empty');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -19,28 +25,48 @@ export default function SignUpScreen() {
 
   const handleSignUp = async () => {
     if (!email.trim() || !password) {
-      setError('Enter your email and a password.');
+      setError(t('auth.enterEmailPassword'));
       return;
     }
     if (password.length < 6) {
-      setError('Password must be at least 6 characters.');
+      setError(t('auth.passwordMin'));
+      return;
+    }
+    // 'unavailable' means the availability probe couldn't run, which is not the
+    // user's problem and must not wall them out of signing up — claim_username
+    // still runs against the unique index afterwards, and that was always the
+    // real arbiter. Only a name that is genuinely taken, malformed or missing
+    // blocks submission.
+    if (usernameStatus !== 'available' && usernameStatus !== 'unavailable') {
+      setError(t('auth.usernameRequired'));
       return;
     }
     setBusy(true);
     setError(null);
     const result = await signUp(email, password, name);
-    setBusy(false);
     if (!result.ok) {
+      setBusy(false);
       setError(result.error);
       return;
     }
+
+    // The account exists now; the name is claimed separately so that losing a
+    // race for it can never roll back a successful sign-up. Only possible with
+    // a session — with email confirmation on, it's claimed after first log-in.
+    if (useAuthStore.getState().session) {
+      const claim = await claimUsername(username.trim());
+      if (claim !== 'ok') {
+        setBusy(false);
+        setError(claim === 'taken' ? t('auth.usernameJustTaken') : t('auth.usernameClaimFailed'));
+        return;
+      }
+    }
+    setBusy(false);
     // If the project requires email confirmation, there's no session yet.
     if (!useAuthStore.getState().session) {
-      Alert.alert(
-        'Check your inbox',
-        'We sent you a confirmation link. Confirm your email, then sign in.',
-        [{ text: 'OK', onPress: () => router.replace('/(auth)/login') }],
-      );
+      Alert.alert(t('auth.checkInbox'), t('auth.confirmationSent'), [
+        { text: 'OK', onPress: () => router.replace('/(auth)/login') },
+      ]);
     }
     // Otherwise the auth gate redirects into the app automatically.
   };
@@ -55,21 +81,29 @@ export default function SignUpScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View className="gap-2">
-          <Text variant="heading">Create your account</Text>
-          <Text variant="muted">Back up and sync your LifeOS across devices.</Text>
+          <Text variant="heading">{t('auth.createYourAccount')}</Text>
+          <Text variant="muted">{t('auth.backupSubtitle')}</Text>
         </View>
 
         <View className="gap-4">
           <AuthField
-            label="Name"
+            label={t('auth.name')}
             value={name}
             onChangeText={setName}
-            placeholder="What should we call you?"
+            placeholder={t('auth.namePlaceholder')}
             autoCapitalize="words"
             autoComplete="name"
           />
+          <View className="gap-1.5">
+            <Text variant="micro">{t('auth.username')}</Text>
+            <UsernameField
+              value={username}
+              onChangeText={setUsername}
+              onStatusChange={setUsernameStatus}
+            />
+          </View>
           <AuthField
-            label="Email"
+            label={t('auth.email')}
             value={email}
             onChangeText={setEmail}
             placeholder="you@example.com"
@@ -77,10 +111,10 @@ export default function SignUpScreen() {
             autoComplete="email"
           />
           <AuthField
-            label="Password"
+            label={t('auth.password')}
             value={password}
             onChangeText={setPassword}
-            placeholder="At least 6 characters"
+            placeholder={t('auth.atLeast6')}
             secure
             autoComplete="new-password"
           />
@@ -92,7 +126,7 @@ export default function SignUpScreen() {
           )}
 
           <Button
-            label={busy ? 'Creating account…' : 'Create account'}
+            label={busy ? t('auth.creatingAccount') : t('auth.createAccount')}
             variant="accent"
             size="lg"
             disabled={busy}
@@ -101,10 +135,10 @@ export default function SignUpScreen() {
         </View>
 
         <View className="flex-row items-center justify-center gap-1">
-          <Text variant="muted">Already have an account?</Text>
+          <Text variant="muted">{t('auth.alreadyHaveAccount')}</Text>
           <Link href="/(auth)/login" asChild>
             <Pressable hitSlop={8}>
-              <Text className="font-sora-semibold text-accent">Sign in</Text>
+              <Text className="font-sora-semibold text-accent">{t('auth.signIn')}</Text>
             </Pressable>
           </Link>
         </View>

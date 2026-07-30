@@ -2,6 +2,7 @@ import Slider from '@react-native-community/slider';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Minus, Plus } from 'lucide-react-native';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { GradientButton } from '@/components/ui/gradient-button';
@@ -19,6 +20,7 @@ export default function LogProgressScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const { data: goal } = useGoal(id);
   const { logProgress } = useGoalMutations();
 
@@ -64,7 +66,7 @@ export default function LogProgressScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <SheetHeader title="Log Progress" />
+      <SheetHeader title={t('goals.logProgressTitle')} />
 
       <ScrollView
         contentContainerClassName="gap-6 px-5 pt-3 pb-10"
@@ -111,7 +113,10 @@ export default function LogProgressScreen() {
                   {resultingCount}
                 </Text>
                 <Text variant="caption">
-                  of {goal.targetValue} {goal.unit ?? ''}
+                  {t('goals.ofTarget', {
+                    target: goal.targetValue,
+                    unit: goal.unit ?? '',
+                  }).trim()}
                 </Text>
               </View>
               <Pressable
@@ -176,19 +181,24 @@ export default function LogProgressScreen() {
         )}
 
         <View className="gap-2">
-          <Text variant="micro">Note (optional)</Text>
+          <Text variant="micro">{t('goals.noteOptional')}</Text>
           <TextInput
             value={note}
             onChangeText={setNote}
-            accessibilityLabel="Progress note"
-            placeholder="What did you get done?"
+            accessibilityLabel={t('goals.progressNote')}
+            placeholder={t('goals.notePlaceholder')}
             placeholderTextColor={colors[scheme].mutedForeground}
             multiline
             className="min-h-12 rounded-2xl border border-border bg-card px-4 py-3 text-foreground"
           />
         </View>
 
-        <GradientButton label="Save update" tint={meta.tint} onPress={save} disabled={!canSave} />
+        <GradientButton
+          label={t('goals.saveUpdate')}
+          tint={meta.tint}
+          onPress={save}
+          disabled={!canSave}
+        />
       </ScrollView>
     </View>
   );

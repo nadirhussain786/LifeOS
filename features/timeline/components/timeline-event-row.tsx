@@ -1,5 +1,6 @@
 import { format } from 'date-fns';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -29,18 +30,23 @@ type Props = {
 export function TimelineEventRow({ event, onDeleteCalendarEvent }: Props) {
   const router = useRouter();
   const scheme = useColorScheme() ?? 'light';
+  const { t } = useTranslation();
   const tint = event.colorToken ?? TYPE_TINT[event.type];
   const isCalendarEvent = event.type === 'calendar_event';
 
   const confirmDelete = () => {
-    Alert.alert('Delete event?', `"${event.title}" will be removed from your timeline.`, [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () => onDeleteCalendarEvent?.(event.sourceId),
-      },
-    ]);
+    Alert.alert(
+      t('timeline.deleteEventTitle'),
+      t('timeline.deleteEventBody', { title: event.title }),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: () => onDeleteCalendarEvent?.(event.sourceId),
+        },
+      ],
+    );
   };
 
   return (
@@ -49,7 +55,7 @@ export function TimelineEventRow({ event, onDeleteCalendarEvent }: Props) {
       onLongPress={isCalendarEvent && onDeleteCalendarEvent ? confirmDelete : undefined}
       className="flex-row items-center gap-3 py-2.5"
     >
-      <View className="w-14 items-end pr-1">
+      <View className="w-14 items-end pe-1">
         <Text
           variant="caption"
           className="font-sora-medium"
