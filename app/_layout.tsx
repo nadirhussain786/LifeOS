@@ -58,9 +58,12 @@ initSentry();
 // while the app is foregrounded — water reminders should still show even if
 // the app happens to be open at the time.
 configureNotificationHandler();
-// Create the Android notification channels (heads-up for time-critical, quiet
-// for nudges). No-ops off Android / in Expo Go Android.
-configureAndroidChannels();
+// Start creating the Android notification channels. The schedulers await the
+// same promise before posting anything, so a reminder can't land on Android's
+// generic fallback channel by racing this. Caught here because the promise
+// rejects on failure (so the next caller retries rather than inheriting a
+// permanently-failed cache) and this call site has nowhere to report it.
+void configureAndroidChannels().catch(() => undefined);
 
 /** Lives inside the router + query provider so it can deep-link on notification
  * taps and mark inbox rows read. Renders nothing. */

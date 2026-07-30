@@ -105,6 +105,22 @@ export async function asUser(db, userId, fn) {
   }
 }
 
+/**
+ * Runs `fn` as a signed-out visitor: role `anon`, no JWT subject, so auth.uid()
+ * returns NULL. This is the sign-up screen's actual identity, and the state in
+ * which the username probe was failing — assertions made through asUser() can
+ * never catch it, because by then the account already exists.
+ */
+export async function asAnon(db, fn) {
+  await db.exec(`set role anon;`);
+  await db.query(`select set_config('request.jwt.claim.sub', '', false)`);
+  try {
+    return await fn();
+  } finally {
+    await db.exec(`reset role;`);
+  }
+}
+
 /** Creates an auth user (as superuser — sign-up is not what we're testing). */
 export async function createUser(db, id, email) {
   await db.query(

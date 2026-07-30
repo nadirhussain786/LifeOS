@@ -14,6 +14,7 @@
  * Run with `npm run test:sql`.
  */
 import {
+  asAnon,
   asUser,
   bootDatabase,
   createUser,
@@ -102,6 +103,54 @@ await test('malformed names are rejected by shape', async () => {
       const r = await one(`select public.is_username_available($1) as v`, [bad]);
       expectEqual(r.v, false, `availability of ${JSON.stringify(bad)}`);
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+console.log('\nusernames from the sign-up screen (0006)');
+// ---------------------------------------------------------------------------
+
+// Sign-up is the only caller of the probe, and it runs BEFORE the account exists
+// — so the identity that matters is `anon` with a NULL auth.uid(). Every test
+// above runs through asUser() and so cannot see this path at all. 0002 granted
+// the function to `authenticated` only: anon got "permission denied", the client
+// read any error as a negative verdict, and every name on the sign-up form came
+// back "already taken" — which also made the form impossible to submit, since it
+// gates on a positive verdict.
+
+await test('an anonymous visitor may probe a name at all', async () => {
+  await asAnon(db, async () => {
+    expectEqual((await one(`select public.is_username_available('freename') as v`)).v, true);
+  });
+});
+
+await test('an anonymous visitor sees a taken name as taken', async () => {
+  // The null-safe self-exclusion is what this proves. With `id <> auth.uid()`,
+  // a NULL uid makes the comparison NULL for every row, the NOT EXISTS matches
+  // nothing, and 'alice' would come back free — the exact opposite failure.
+  await asAnon(db, async () => {
+    expectEqual((await one(`select public.is_username_available('alice') as v`)).v, false);
+    expectEqual((await one(`select public.is_username_available('ALICE') as v`)).v, false);
+  });
+});
+
+await test('an anonymous visitor still cannot read the profiles table', async () => {
+  // The grant widens exactly one boolean function, not the table behind it.
+  await asAnon(db, async () => {
+    expectEqual(
+      await count(`select count(*)::int n from public.profiles`),
+      0,
+      'profile rows visible to anon',
+    );
+  });
+});
+
+await test('claiming a name still requires a session', async () => {
+  await asAnon(db, async () => {
+    await expectRejection(
+      () => db.query(`select public.claim_username('freename')`),
+      'permission denied',
+    );
   });
 });
 

@@ -1,10 +1,11 @@
 import * as Haptics from 'expo-haptics';
 import { format } from 'date-fns';
+import { useKeepAwake } from 'expo-keep-awake';
 import { useRouter } from 'expo-router';
-import { Pause, Play, Square, SkipForward } from 'lucide-react-native';
-import { useEffect, useRef, useState } from 'react';
+import { BellOff, Moon, Pause, Play, Square, SkipForward } from 'lucide-react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, View } from 'react-native';
+import { Alert, BackHandler, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CelebrationOverlay } from '@/components/ui/celebration-overlay';
@@ -12,9 +13,16 @@ import { ProgressRing } from '@/components/ui/progress-ring';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import { ReflectionSheet } from '@/features/study/components/reflection-sheet';
+import {
+  canOpenSystemDoNotDisturb,
+  enterFocusMode,
+  exitFocusMode,
+  openSystemDoNotDisturb,
+} from '@/features/study/services/focus-mode';
 import { formatStudyDuration, formatTimer } from '@/features/study/services/study-stats';
 import { useStudyMutations } from '@/features/study/hooks/use-study-mutations';
 import { useStudySubjects } from '@/features/study/hooks/use-study';
+import { useFocusModeStore } from '@/features/study/store/focus-mode-store';
 import {
   elapsedInPhaseNow,
   focusSecondsNow,
@@ -41,6 +49,11 @@ export default function StudyTimerScreen() {
   const [reflectOpen, setReflectOpen] = useState(false);
   const [pendingFocusSecs, setPendingFocusSecs] = useState(0);
   const savedRef = useRef(false);
+  const heldCount = useFocusModeStore((s) => s.heldTitles.length);
+
+  // The countdown is only useful if it's visible — hold the screen on for as
+  // long as this screen is mounted.
+  useKeepAwake();
 
   // Bounce out if opened without an active session (mount-only).
   useEffect(() => {
@@ -51,6 +64,38 @@ export default function StudyTimerScreen() {
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 250);
     return () => clearInterval(interval);
+  }, []);
+
+  // Summary text for reminders held back during the block, so the notification
+  // layer doesn't have to reach into i18n. Held in a ref as well: `t` changes
+  // identity when the language does, and the effects below must not treat that
+  // as a reason to tear the shield down mid-session.
+  const summarizeHeld = useCallback(
+    (count: number) => ({
+      title: t('study.focusHeldTitle'),
+      body: t('study.focusHeldBody', { count }),
+    }),
+    [t],
+  );
+  const summarizeRef = useRef(summarizeHeld);
+  summarizeRef.current = summarizeHeld;
+
+  // The interruption shield is raised only while a focus block is actually
+  // running — a break, or a paused timer, is exactly when the user does want
+  // their reminders and their music back.
+  const shieldUp = store.active && store.running && store.phase === 'focus';
+  useEffect(() => {
+    if (shieldUp) enterFocusMode();
+    else void exitFocusMode(summarizeRef.current);
+  }, [shieldUp]);
+
+  // Leaving the screen by any route must drop the shield — without this, an
+  // abandoned session would keep swallowing reminders indefinitely. Empty deps
+  // so this runs on unmount and nothing else.
+  useEffect(() => {
+    return () => {
+      void exitFocusMode(summarizeRef.current);
+    };
   }, []);
 
   // Ends the session: sub-minute sessions are discarded, otherwise the timer
@@ -71,6 +116,24 @@ export default function StudyTimerScreen() {
     setReflectOpen(true);
   };
 
+  // Android's back button is the one way out that isn't a deliberate tap on
+  // "end session" — `gestureEnabled: false` covers the swipe, this covers the
+  // button, so a focus block can't be lost by reflex.
+  useEffect(() => {
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (savedRef.current || reflectOpen) return false;
+      if (!useStudyTimerStore.getState().active) return false;
+      Alert.alert(t('study.leaveFocusTitle'), t('study.leaveFocusBody'), [
+        { text: t('study.keepFocusing'), style: 'cancel' },
+        { text: t('study.endSession'), style: 'destructive', onPress: requestFinish },
+      ]);
+      return true; // handled — don't pop the screen
+    });
+    return () => subscription.remove();
+    // requestFinish closes over state that is re-read from the store when it runs.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reflectOpen, t]);
+
   const commitReflection = (focusRating: number | null, note: string) => {
     if (savedRef.current) return;
     savedRef.current = true;
@@ -88,6 +151,19 @@ export default function StudyTimerScreen() {
     setReflectOpen(false);
     store.reset();
     router.back();
+  };
+
+  const promptSystemDnd = () => {
+    Alert.alert(t('study.silencePhoneTitle'), t('study.silencePhoneBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('study.openDndSettings'),
+        onPress: async () => {
+          const opened = await openSystemDoNotDisturb();
+          if (!opened) Alert.alert(t('study.dndUnavailableTitle'), t('study.dndUnavailableBody'));
+        },
+      },
+    ]);
   };
 
   // Phase-completion handling.
@@ -221,6 +297,36 @@ export default function StudyTimerScreen() {
               ? t('study.hintFocus')
               : t('study.hintBreak')}
         </Text>
+
+        {/* Focus shield: what LifeOS is holding back, and the one thing it
+            can't do on its own (silence the phone). */}
+        {shieldUp && (
+          <View className="w-full items-center gap-2.5">
+            <View className="flex-row items-center gap-2">
+              <BellOff size={14} color={colors[scheme].mutedForeground} />
+              <Text variant="caption" className="text-center">
+                {heldCount > 0
+                  ? t('study.focusShieldHolding', { count: heldCount })
+                  : t('study.focusShieldOn')}
+              </Text>
+            </View>
+
+            {canOpenSystemDoNotDisturb() && (
+              <Pressable
+                onPress={promptSystemDnd}
+                hitSlop={8}
+                className="flex-row items-center gap-2 rounded-full border border-border px-3.5 py-2"
+                accessibilityRole="button"
+                accessibilityLabel={t('study.silencePhone')}
+              >
+                <Moon size={14} color={tint} />
+                <Text variant="caption" className="font-sora-semibold" style={{ color: tint }}>
+                  {t('study.silencePhone')}
+                </Text>
+              </Pressable>
+            )}
+          </View>
+        )}
       </View>
 
       <CelebrationOverlay visible={celebrate} onDone={() => setCelebrate(false)} />

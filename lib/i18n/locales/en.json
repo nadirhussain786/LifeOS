@@ -588,7 +588,8 @@
     "usernameTaken": "That name is already taken.",
     "usernameRequired": "Pick an available username first.",
     "usernameJustTaken": "Someone just took that name — try another.",
-    "usernameClaimFailed": "Your account was created, but the username couldn't be saved. You can set it in Settings."
+    "usernameClaimFailed": "Your account was created, but the username couldn't be saved. You can set it in Settings.",
+    "usernameCheckFailed": "Couldn't check that name right now — you can still continue."
   },
   "language": {
     "en": "English",
@@ -837,7 +838,22 @@
     "morning": "Mornings",
     "afternoon": "Afternoons",
     "evening": "Evenings",
-    "night": "Late nights"
+    "night": "Late nights",
+    "focusShieldOn": "Focus shield on · music paused, reminders held",
+    "focusShieldHolding_one": "Focus shield on · {{count}} reminder held",
+    "focusShieldHolding_other": "Focus shield on · {{count}} reminders held",
+    "focusHeldTitle": "Focus finished",
+    "focusHeldBody_one": "{{count}} reminder was held while you focused.",
+    "focusHeldBody_other": "{{count}} reminders were held while you focused.",
+    "leaveFocusTitle": "End this focus block?",
+    "leaveFocusBody": "You're mid-session. Going back now ends it.",
+    "keepFocusing": "Keep focusing",
+    "silencePhone": "Silence my phone",
+    "silencePhoneTitle": "Silence your phone",
+    "silencePhoneBody": "LifeOS already pauses your music and holds its own reminders. Calls and other apps are outside its reach — no app can switch Do Not Disturb on for you, so you'll need to flip it yourself.",
+    "openDndSettings": "Open Do Not Disturb",
+    "dndUnavailableTitle": "Couldn't open it",
+    "dndUnavailableBody": "Open Do Not Disturb from your phone settings instead."
   },
   "music": {
     "title": "Music",
@@ -1135,7 +1151,30 @@
     "categoryNote": "Turning a category off clears its queued reminders right away. They come back as you edit each item once it's on again.",
     "allOff": "All notifications are off",
     "categoryOff": "{{category}} are off",
-    "categoryOffBody": "These reminders won't fire. Tap to turn them on."
+    "categoryOffBody": "These reminders won't fire. Tap to turn them on.",
+    "troubleshoot": "Troubleshooting",
+    "sendTest": "Send a test notification",
+    "sendTestDescription": "Arrives in a couple of seconds. Confirms the whole path works.",
+    "testTitle": "LifeOS test notification",
+    "testBody": "If you can see this, reminders can reach you.",
+    "testSentTitle": "Test sent",
+    "testSentBody": "It should appear in a couple of seconds. If nothing arrives, check LifeOS's notification settings on your phone.",
+    "testFailedTitle": "Couldn't send it",
+    "testFailedDenied": "Your phone is blocking notifications for LifeOS. Turn them on in Settings.",
+    "testFailedError": "Something went wrong scheduling the test.",
+    "openSystemSettings": "Open phone settings",
+    "permissionBlockedNote": "Notifications are blocked and can only be re-enabled from Settings.",
+    "status": "Current status",
+    "statusPermission": "Permission",
+    "statusOn": "granted",
+    "statusOff": "not granted",
+    "statusQueued_one": "{{count}} reminder queued",
+    "statusQueued_other": "{{count}} reminders queued",
+    "statusChannelQuiet": "“{{name}}” is turned down on this phone — tap it in phone settings.",
+    "exactAlarm": "Allow exact reminder timing",
+    "exactAlarmDescription": "Android holds reminders back by up to 15 minutes unless LifeOS is allowed under “Alarms & reminders”.",
+    "exactAlarmFailedTitle": "Couldn't open it",
+    "exactAlarmFailedBody": "Find it under Settings › Apps › Special app access › Alarms & reminders."
   },
   "notifCategory": {
     "tasks": {
@@ -1211,7 +1250,11 @@
     "deleteAccount": "Delete account",
     "deleteAccountTitle": "Delete account?",
     "deleteAccountBody": "This permanently deletes your account and all your synced data from the cloud, and clears this device. This cannot be undone.",
-    "deleteFailedTitle": "Couldn’t delete account"
+    "deleteFailedTitle": "Couldn’t delete account",
+    "buildConfig": "Build configuration",
+    "notConfiguredTitle": "This build has no Supabase credentials",
+    "notConfiguredBody": "Accounts and cloud sync are switched off — everything still works offline. For an EAS build, set these in the environment the build profile uses, then rebuild.",
+    "envMissing": "missing"
   },
   "syncModule": {
     "tasks": "Tasks",

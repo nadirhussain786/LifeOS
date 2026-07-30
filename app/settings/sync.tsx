@@ -22,6 +22,7 @@ import { useSyncStatus } from '@/features/sync/hooks/use-sync';
 import { syncNow } from '@/features/sync/services/sync-engine';
 import { useSyncStore } from '@/features/sync/store/sync-store';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { envDiagnostics, isSupabaseConfigured } from '@/lib/env';
 
 function SectionLabel({ children }: { children: string }) {
   return (
@@ -78,6 +79,41 @@ export default function SyncSettingsScreen() {
               onPress={() => router.push('/(auth)/login')}
             />
           </View>
+
+          {/* A build with no Supabase credentials can only ever be a guest, and
+              until now said nothing about why — signing in simply failed. This
+              names the missing variables and where each value came from, so an
+              EAS credential problem is diagnosable from the phone rather than by
+              rebuilding blind. */}
+          {!isSupabaseConfigured && (
+            <View className="gap-2">
+              <SectionLabel>{t('sync.buildConfig')}</SectionLabel>
+              <View className="gap-2 rounded-2xl border border-border bg-card p-4">
+                <View className="flex-row items-center gap-2">
+                  <TriangleAlert size={16} color={theme.destructive} />
+                  <Text className="font-sora-semibold text-foreground">
+                    {t('sync.notConfiguredTitle')}
+                  </Text>
+                </View>
+                <Text variant="caption">{t('sync.notConfiguredBody')}</Text>
+                <View className="gap-1 pt-1">
+                  {envDiagnostics().entries.map((entry) => (
+                    <View key={entry.key} className="flex-row items-center justify-between gap-3">
+                      <Text variant="caption" className="flex-1 font-sora-medium" numberOfLines={1}>
+                        {entry.key.replace('EXPO_PUBLIC_', '')}
+                      </Text>
+                      <Text
+                        variant="caption"
+                        style={{ color: entry.present ? theme.success : theme.destructive }}
+                      >
+                        {entry.present ? entry.preview : t('sync.envMissing')}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            </View>
+          )}
         </ScrollView>
       </View>
     );

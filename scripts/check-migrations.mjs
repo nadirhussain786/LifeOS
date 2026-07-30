@@ -74,7 +74,11 @@ for (const file of files) {
     /create (?:or replace )?function public\.(\w+)\s*\([^)]*\)[\s\S]*?language sql([\s\S]*?)\$\$([\s\S]*?)\$\$/g,
   )) {
     const [fn, body, offset] = [m[1], m[3], m.index];
-    for (const r of body.matchAll(/(?:from|join)\s+(?:(\w+)\.)?(\w+)/g)) {
+    // `a is [not] distinct from b` is a comparison operator, not a FROM clause —
+    // without stripping it, `auth.uid() is distinct from id` reads as a query
+    // against a table named `id`.
+    const clauses = body.replace(/\bis\s+(?:not\s+)?distinct\s+from\b/gi, ' ');
+    for (const r of clauses.matchAll(/(?:from|join)\s+(?:(\w+)\.)?(\w+)/g)) {
       const [schema, table] = [r[1] ?? 'public', r[2]];
       if (EXTERNAL.has(schema)) continue;
       if (!definedBefore(table, offset)) {

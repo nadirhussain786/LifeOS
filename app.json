@@ -2,7 +2,7 @@
   "expo": {
     "name": "LifeOS",
     "slug": "LifeOS",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "lifeos",
@@ -45,7 +45,16 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.SCHEDULE_EXACT_ALARM"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -99,7 +108,9 @@
       [
         "expo-notifications",
         {
-          "color": "#6366f1"
+          "icon": "./assets/notification-icon.png",
+          "color": "#6366f1",
+          "defaultChannel": "lifeos-time-sensitive-v2"
         }
       ],
       "expo-video",
@@ -123,6 +134,13 @@
       "expo-localization",
       "@sentry/react-native",
       "expo-asset"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "09e67cd7-58a6-4a88-ad76-93463d25dc51"
+      }
+    },
+    "owner": "nadirhusaain"
   }
 }

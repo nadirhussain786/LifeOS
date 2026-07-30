@@ -32,7 +32,12 @@ export default function SignUpScreen() {
       setError(t('auth.passwordMin'));
       return;
     }
-    if (usernameStatus !== 'available') {
+    // 'unavailable' means the availability probe couldn't run, which is not the
+    // user's problem and must not wall them out of signing up — claim_username
+    // still runs against the unique index afterwards, and that was always the
+    // real arbiter. Only a name that is genuinely taken, malformed or missing
+    // blocks submission.
+    if (usernameStatus !== 'available' && usernameStatus !== 'unavailable') {
       setError(t('auth.usernameRequired'));
       return;
     }

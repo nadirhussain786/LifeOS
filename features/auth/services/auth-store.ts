@@ -36,6 +36,15 @@ export type AuthProfile = {
  *  people can pass the availability probe and race for the same name. */
 export type UsernameClaim = 'ok' | 'taken' | 'invalid' | 'error';
 
+/** Verdict from the availability probe.
+ *
+ *  'unavailable' is deliberately distinct from 'taken'. Collapsing the two (by
+ *  returning a bare boolean and answering `false` on error) is what made a
+ *  permission error on the RPC look identical to a name genuinely being in use:
+ *  every name on the sign-up form read as taken, with no way to tell that the
+ *  backend was the problem. A check that could not run must say so. */
+export type UsernameAvailability = 'available' | 'taken' | 'invalid' | 'unavailable';
+
 /** Mirrors the DB check constraint in 0002_username.sql. */
 export const USERNAME_PATTERN = /^[a-zA-Z][a-zA-Z0-9_]{2,19}$/;
 
@@ -60,8 +69,9 @@ type AuthState = {
   continueAsGuest: () => void;
   loadProfile: () => Promise<void>;
   updateDisplayName: (displayName: string) => Promise<AuthResult>;
-  /** True when `candidate` is well-formed and unclaimed by anyone else. */
-  isUsernameAvailable: (candidate: string) => Promise<boolean>;
+  /** Whether `candidate` is well-formed and unclaimed by anyone else — or
+   * whether the question could not be answered at all. */
+  isUsernameAvailable: (candidate: string) => Promise<UsernameAvailability>;
   claimUsername: (candidate: string) => Promise<UsernameClaim>;
 };
 
@@ -214,12 +224,18 @@ export const useAuthStore = create<AuthState>()(
       },
 
       isUsernameAvailable: async (candidate) => {
-        if (!USERNAME_PATTERN.test(candidate)) return false;
+        if (!USERNAME_PATTERN.test(candidate)) return 'invalid';
+        // Without credentials there is nothing to ask, and firing at the
+        // placeholder host just produces a confusing network error.
+        if (!isSupabaseConfigured) return 'unavailable';
         // RPC, not a select: `profiles_own` RLS hides other people's rows, so a
         // direct query would report every taken name as free.
         const { data, error } = await supabase.rpc('is_username_available', { candidate });
-        if (error) return false;
-        return data === true;
+        // An error means the probe failed, NOT that the name is spoken for. If
+        // this ever fires with "permission denied", migration 0006 has not been
+        // applied to the project — see supabase/migrations/0006_username_signup_probe.sql.
+        if (error) return 'unavailable';
+        return data === true ? 'available' : 'taken';
       },
 
       claimUsername: async (candidate) => {

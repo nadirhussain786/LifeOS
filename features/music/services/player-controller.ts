@@ -1,4 +1,5 @@
 import { createAudioPlayer, setAudioModeAsync, type AudioPlayer } from 'expo-audio';
+import { AppState, type AppStateStatus } from 'react-native';
 
 import { usePlayerStore } from '@/features/music/store/player-store';
 import { usePlayerUiStore } from '@/features/music/store/player-ui-store';
@@ -29,25 +30,80 @@ function ensurePlayer(): AudioPlayer {
         Math.round(status.currentTime * 1000),
         Math.round((status.duration || 0) * 1000),
       );
-    // Sleep timer: this listener keeps firing while audio plays (even in the
-    // background), so it's a reliable place to enforce the auto-stop.
-    if (sleepTimerEndsAt != null && Date.now() >= sleepTimerEndsAt) {
-      sleepTimerEndsAt = null;
-      usePlayerStore.getState().setSleepTimerEndsAt(null);
-      player?.pause();
-    }
+    // Backstop, not the mechanism — see enforceSleepTimer.
+    enforceSleepTimer();
     if (status.didJustFinish) handleTrackFinished();
   });
   return player;
 }
 
-let sleepTimerEndsAt: number | null = null;
+// ---------------------------------------------------------------------------
+// Sleep timer
+//
+// The deadline is enforced three ways, because no single one of them holds in
+// every state the phone can be in:
+//
+//  1. A real setTimeout armed for the deadline. This is the mechanism. It fires
+//     on the dot whether or not audio is still producing status events.
+//  2. A re-check whenever the app returns to the foreground. Android and iOS both
+//     throttle (and, once the process is suspended, stop) JS timers in the
+//     background, so a timer armed for 45 minutes' time may come due late or not
+//     at all — the deadline is a wall-clock timestamp precisely so a late check
+//     still reaches the right verdict.
+//  3. A re-check on every playback-status event, which is what the original
+//     implementation relied on alone. It's kept as a cheap extra net.
+//
+// (1) is the fix: relying only on (3) meant the timer could not fire unless the
+// native player happened to still be emitting — so pausing, a stalled buffer, or
+// a suspended JS thread all left the music playing straight past the deadline.
+// ---------------------------------------------------------------------------
 
-/** Arms (minutes > 0) or cancels (null) the sleep timer. Enforcement happens
- * in the playback-status listener so it fires even with the app backgrounded. */
+let sleepTimerEndsAt: number | null = null;
+let sleepTimerHandle: ReturnType<typeof setTimeout> | null = null;
+let appStateSubscription: { remove: () => void } | null = null;
+
+/** Pauses playback if the armed deadline has passed. Idempotent. */
+function enforceSleepTimer() {
+  if (sleepTimerEndsAt == null) return;
+  if (Date.now() < sleepTimerEndsAt) return;
+  clearSleepTimer();
+  player?.pause();
+}
+
+function clearSleepTimer() {
+  sleepTimerEndsAt = null;
+  if (sleepTimerHandle) {
+    clearTimeout(sleepTimerHandle);
+    sleepTimerHandle = null;
+  }
+  appStateSubscription?.remove();
+  appStateSubscription = null;
+  usePlayerStore.getState().setSleepTimerEndsAt(null);
+}
+
+function handleAppStateChange(state: AppStateStatus) {
+  if (state === 'active') enforceSleepTimer();
+}
+
+/** Arms (minutes > 0) or cancels (null) the sleep timer. */
 export function setSleepTimer(minutes: number | null) {
-  sleepTimerEndsAt = minutes ? Date.now() + minutes * 60_000 : null;
-  usePlayerStore.getState().setSleepTimerEndsAt(sleepTimerEndsAt);
+  // Always tear down first so re-arming can't leave an orphaned timer that
+  // pauses playback at the previous deadline.
+  clearSleepTimer();
+  if (!minutes) return;
+
+  const endsAt = Date.now() + minutes * 60_000;
+  sleepTimerEndsAt = endsAt;
+  usePlayerStore.getState().setSleepTimerEndsAt(endsAt);
+
+  sleepTimerHandle = setTimeout(
+    () => {
+      sleepTimerHandle = null;
+      enforceSleepTimer();
+    },
+    Math.max(0, endsAt - Date.now()),
+  );
+  appStateSubscription = AppState.addEventListener('change', handleAppStateChange);
 }
 
 async function configureAudioMode() {
@@ -200,8 +256,20 @@ export function clearPlayer() {
   }
   player = null;
   lockScreenActive = false;
-  sleepTimerEndsAt = null;
+  clearSleepTimer();
   usePlayerStore.getState().clear();
+}
+
+/** Pauses playback if anything is playing, and reports whether it did.
+ *
+ * Used by study Focus Mode, which must not leave music running into a focus
+ * block. Deliberately only pauses: the queue, position and lock-screen controls
+ * all survive, so the user can pick the track back up after the session rather
+ * than having to find it again. */
+export function pauseForFocus(): boolean {
+  if (!player?.playing) return false;
+  player.pause();
+  return true;
 }
 
 export function setRepeatMode(mode: RepeatMode) {

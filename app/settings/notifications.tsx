@@ -1,10 +1,10 @@
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { format, set } from 'date-fns';
 import * as Haptics from 'expo-haptics';
-import { BellRing } from 'lucide-react-native';
-import { useEffect, useState } from 'react';
+import { AlarmClock, BellRing, Send, Stethoscope } from 'lucide-react-native';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Platform, Pressable, ScrollView, Switch, View } from 'react-native';
+import { Alert, Linking, Platform, Pressable, ScrollView, Switch, View } from 'react-native';
 
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Segmented } from '@/components/ui/segmented';
@@ -24,9 +24,14 @@ import {
 import {
   cancelAllScheduled,
   cancelScheduledInCategory,
+  exactAlarmSettingsAvailable,
+  getNotificationDiagnostics,
   hasNotificationPermission,
   notificationsAvailable,
+  openExactAlarmSettings,
   requestNotificationPermission,
+  sendTestNotification,
+  type NotificationDiagnostics,
 } from '@/lib/notifications';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -104,10 +109,53 @@ export default function NotificationSettingsScreen() {
 
   const store = useNotificationsStore();
   const [permissionGranted, setPermissionGranted] = useState(false);
+  const [diagnostics, setDiagnostics] = useState<NotificationDiagnostics | null>(null);
+  const [testing, setTesting] = useState(false);
 
   useEffect(() => {
     hasNotificationPermission().then(setPermissionGranted);
   }, []);
+
+  const refreshDiagnostics = useCallback(async () => {
+    setDiagnostics(await getNotificationDiagnostics());
+  }, []);
+
+  useEffect(() => {
+    void refreshDiagnostics();
+  }, [refreshDiagnostics]);
+
+  /** Posts a real notification through the real pipeline. When reminders aren't
+   * arriving this is the one check that separates "LifeOS never scheduled it"
+   * from "Android is dropping it", which look identical from the outside. */
+  const handleTest = async () => {
+    setTesting(true);
+    Haptics.selectionAsync();
+    const result = await sendTestNotification({
+      title: t('notif.testTitle'),
+      body: t('notif.testBody'),
+    });
+    setTesting(false);
+    await refreshDiagnostics();
+
+    if (result.ok) {
+      Alert.alert(t('notif.testSentTitle'), t('notif.testSentBody'));
+      return;
+    }
+    Alert.alert(
+      t('notif.testFailedTitle'),
+      result.reason === 'denied'
+        ? t('notif.testFailedDenied')
+        : result.reason === 'unavailable'
+          ? t('notif.notAvailable')
+          : t('notif.testFailedError'),
+      result.reason === 'denied'
+        ? [
+            { text: t('common.cancel'), style: 'cancel' },
+            { text: t('notif.openSystemSettings'), onPress: () => void Linking.openSettings() },
+          ]
+        : undefined,
+    );
+  };
 
   // Any change to delivery mode, digest time, quiet hours or the master switch
   // can change which reminders should be queued and whether/when the morning
@@ -312,6 +360,112 @@ export default function NotificationSettingsScreen() {
           <Text variant="caption" className="px-1">
             {t('notif.categoryNote')}
           </Text>
+        </View>
+
+        {/* Troubleshooting. Reminders can fail in three places the user can't
+            see — permission, the Android channel's importance, and whether
+            anything is actually queued — so each is surfaced directly rather
+            than left to guesswork. */}
+        <View className="gap-2">
+          <SectionLabel>{t('notif.troubleshoot')}</SectionLabel>
+          <View className="rounded-2xl border border-border bg-card px-4">
+            <Pressable
+              onPress={handleTest}
+              disabled={testing || !notificationsAvailable}
+              className="flex-row items-center gap-3 py-3.5"
+              accessibilityRole="button"
+              accessibilityLabel={t('notif.sendTest')}
+              style={{ opacity: testing || !notificationsAvailable ? 0.5 : 1 }}
+            >
+              <View
+                className="h-9 w-9 items-center justify-center rounded-xl"
+                style={{ backgroundColor: theme.muted }}
+              >
+                <Send size={17} color={theme.accent} />
+              </View>
+              <View className="flex-1">
+                <Text className="font-sora-medium text-foreground">{t('notif.sendTest')}</Text>
+                <Text variant="caption">{t('notif.sendTestDescription')}</Text>
+              </View>
+            </Pressable>
+
+            <View className="flex-row items-center gap-3 border-t border-border py-3.5">
+              <View
+                className="h-9 w-9 items-center justify-center rounded-xl"
+                style={{ backgroundColor: theme.muted }}
+              >
+                <Stethoscope size={17} color={theme.mutedForeground} />
+              </View>
+              <View className="flex-1 gap-0.5">
+                <Text className="font-sora-medium text-foreground">{t('notif.status')}</Text>
+                <Text variant="caption">
+                  {t('notif.statusPermission')}:{' '}
+                  {diagnostics?.permissionGranted ? t('notif.statusOn') : t('notif.statusOff')}
+                </Text>
+                <Text variant="caption">
+                  {t('notif.statusQueued', { count: diagnostics?.scheduledCount ?? 0 })}
+                </Text>
+                {/* An Android channel the user (or an OEM battery optimiser) has
+                    turned down reports importance < 3, which silences it no
+                    matter what the app asks for. */}
+                {diagnostics?.channels
+                  .filter((channel) => channel.importance < 3)
+                  .map((channel) => (
+                    <Text key={channel.id} variant="caption" style={{ color: theme.destructive }}>
+                      {t('notif.statusChannelQuiet', { name: channel.name })}
+                    </Text>
+                  ))}
+              </View>
+            </View>
+
+            {/* Android 12+ only. Without the "Alarms & reminders" grant,
+                expo-notifications silently downgrades timed reminders to inexact
+                alarms and Doze can hold them back by a quarter of an hour. The
+                grant state isn't readable from JS, so this offers the route
+                rather than asserting whether it's currently on. */}
+            {exactAlarmSettingsAvailable && (
+              <Pressable
+                onPress={() => {
+                  Haptics.selectionAsync();
+                  void openExactAlarmSettings().then((opened) => {
+                    if (!opened)
+                      Alert.alert(
+                        t('notif.exactAlarmFailedTitle'),
+                        t('notif.exactAlarmFailedBody'),
+                      );
+                  });
+                }}
+                className="flex-row items-center gap-3 border-t border-border py-3.5"
+                accessibilityRole="button"
+                accessibilityLabel={t('notif.exactAlarm')}
+              >
+                <View
+                  className="h-9 w-9 items-center justify-center rounded-xl"
+                  style={{ backgroundColor: theme.muted }}
+                >
+                  <AlarmClock size={17} color={theme.mutedForeground} />
+                </View>
+                <View className="flex-1">
+                  <Text className="font-sora-medium text-foreground">{t('notif.exactAlarm')}</Text>
+                  <Text variant="caption">{t('notif.exactAlarmDescription')}</Text>
+                </View>
+              </Pressable>
+            )}
+
+            {diagnostics?.permissionBlocked && (
+              <Pressable
+                onPress={() => void Linking.openSettings()}
+                className="border-t border-border py-3.5"
+                accessibilityRole="button"
+                accessibilityLabel={t('notif.openSystemSettings')}
+              >
+                <Text className="font-sora-semibold" style={{ color: theme.accent }}>
+                  {t('notif.openSystemSettings')}
+                </Text>
+                <Text variant="caption">{t('notif.permissionBlockedNote')}</Text>
+              </Pressable>
+            )}
+          </View>
         </View>
       </ScrollView>
     </View>

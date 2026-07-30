@@ -1,9 +1,10 @@
-import { AtSign, Check, LoaderCircle, X } from 'lucide-react-native';
+import { AtSign, Check, LoaderCircle, TriangleAlert, X } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TextInput, View } from 'react-native';
 
 import { Text } from '@/components/ui/text';
+import { colors as semanticColors } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { USERNAME_PATTERN, useAuthStore } from '@/features/auth/services/auth-store';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -11,7 +12,11 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 /** Long enough that a fast typist isn't firing a request per keystroke. */
 const DEBOUNCE_MS = 450;
 
-export type UsernameStatus = 'empty' | 'invalid' | 'checking' | 'available' | 'taken';
+/** 'unavailable' — the check itself failed — is its own state rather than being
+ * folded into 'taken'. Reporting a backend problem as "that name is taken" sends
+ * the user off inventing new names against a check that can never pass. */
+export type UsernameStatus =
+  'empty' | 'invalid' | 'checking' | 'available' | 'taken' | 'unavailable';
 
 type Props = {
   value: string;
@@ -52,9 +57,9 @@ export function UsernameField({ value, onChangeText, onStatusChange }: Props) {
 
     setStatus('checking');
     const timer = setTimeout(async () => {
-      const free = await isUsernameAvailable(trimmed);
+      const verdict = await isUsernameAvailable(trimmed);
       if (requestRef.current !== next) return; // superseded
-      setStatus(free ? 'available' : 'taken');
+      setStatus(verdict);
     }, DEBOUNCE_MS);
 
     return () => clearTimeout(timer);
@@ -70,6 +75,7 @@ export function UsernameField({ value, onChangeText, onStatusChange }: Props) {
     checking: t('auth.usernameChecking'),
     available: t('auth.usernameAvailable'),
     taken: t('auth.usernameTaken'),
+    unavailable: t('auth.usernameCheckFailed'),
   }[status];
 
   const hintColor =
@@ -77,7 +83,11 @@ export function UsernameField({ value, onChangeText, onStatusChange }: Props) {
       ? colors[scheme].success
       : status === 'taken' || status === 'invalid'
         ? colors[scheme].destructive
-        : colors[scheme].mutedForeground;
+        : status === 'unavailable'
+          ? // Amber, not red: the name may well be fine — it's the check that
+            // couldn't run, and the user has nothing to fix.
+            semanticColors[scheme].warning
+          : colors[scheme].mutedForeground;
 
   return (
     <View className="gap-1.5">
@@ -97,6 +107,9 @@ export function UsernameField({ value, onChangeText, onStatusChange }: Props) {
         {status === 'available' ? <Check size={16} color={colors[scheme].success} /> : null}
         {status === 'taken' || status === 'invalid' ? (
           <X size={16} color={colors[scheme].destructive} />
+        ) : null}
+        {status === 'unavailable' ? (
+          <TriangleAlert size={16} color={semanticColors[scheme].warning} />
         ) : null}
         {status === 'checking' ? (
           <LoaderCircle size={16} color={colors[scheme].mutedForeground} />
