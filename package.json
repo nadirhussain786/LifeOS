@@ -1,6 +1,6 @@
 {
   "name": "lifeos",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "main": "index.ts",
   "scripts": {
     "start": "expo start",
@@ -9,6 +9,7 @@
     "web": "expo start --web",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "version:bump": "node scripts/bump-version.mjs",
     "check:migrations": "node scripts/check-migrations.mjs",
     "test:sql": "node scripts/test-migrations.mjs",
     "test": "jest",

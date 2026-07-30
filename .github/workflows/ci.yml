@@ -1,9 +1,11 @@
 name: CI
 
 on:
-  push:
-    branches: [main]
   pull_request:
+  # Pushes to main are checked by release.yml, which calls this workflow before
+  # it bumps the version. A `push: branches: [main]` trigger here would run
+  # every check twice on the same commit.
+  workflow_call:
 
 jobs:
   check:
