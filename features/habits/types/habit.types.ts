@@ -84,6 +84,12 @@ export type HabitStreakSummary = {
   currentStreak: number;
   bestStreak: number;
   completionRate30d: number;
+  /**
+   * True when the current run is only alive because its one grace day was
+   * spent. Lets the UI acknowledge the miss ("1 day missed — streak held")
+   * instead of pretending it didn't happen or wiping the run to zero.
+   */
+  graceUsed: boolean;
 };
 
 export type HabitRoutine = {

@@ -1,11 +1,15 @@
 import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { Search } from 'lucide-react-native';
+
 import { Text } from '@/components/ui/text';
+import { colors } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { ModuleCard } from '@/features/hub/components/module-card';
 import { HUB_SECTIONS, type HubModule } from '@/features/hub/config/modules';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
@@ -28,6 +32,7 @@ export default function HubScreen() {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const reducedMotion = useReducedMotion();
+  const scheme = useColorScheme() ?? 'light';
 
   const sections = useMemo(
     () => HUB_SECTIONS.map((section) => ({ ...section, rows: toRows(section.modules) })),
@@ -52,9 +57,21 @@ export default function HubScreen() {
         contentContainerClassName="gap-6 px-4"
         showsVerticalScrollIndicator={false}
       >
-        <View className="gap-1">
-          <Text variant="heading">{t('hub.title')}</Text>
-          <Text variant="muted">{t('hub.modulesReady', { count: readyCount })}</Text>
+        <View className="flex-row items-end justify-between gap-3">
+          <View className="flex-1 gap-1">
+            <Text variant="heading">{t('hub.title')}</Text>
+            <Text variant="muted">{t('hub.modulesReady', { count: readyCount })}</Text>
+          </View>
+          {/* The screen listing every module is exactly where "I know I wrote
+              it down somewhere" happens. */}
+          <Pressable
+            onPress={() => router.push('/search')}
+            accessibilityRole="button"
+            accessibilityLabel={t('search.title')}
+            className="h-11 w-11 items-center justify-center rounded-full border border-border bg-surface"
+          >
+            <Search size={20} color={colors[scheme].foreground} />
+          </Pressable>
         </View>
 
         {sections.map((section, sectionIndex) => (

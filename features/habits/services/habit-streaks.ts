@@ -72,15 +72,33 @@ export function calculateHabitStreaks(
   const logsByDate = indexByDate(logs);
   const skipsByDate = indexByDate(skips);
 
-  // Current streak: walk back from today, stop at the first real miss. Today
+  // Current streak: walk back from today, stop at the SECOND real miss. Today
   // hasn't-happened-yet and excused skips are transparent (neither break nor
   // extend). Counts logged days in the run ending at/just-before today.
+  //
+  // The grace day is deliberate. A streak that resets to zero on one bad day is
+  // pure loss aversion: it punishes hardest exactly when someone is ill, busy or
+  // travelling, and the reliable result is that they stop opening the app rather
+  // than resume the habit. One forgiven miss keeps the thing it is actually
+  // measuring — the shape of a routine — without pretending the day happened.
+  // The miss is not counted, only survived, and `graceUsed` says so out loud.
   let currentStreak = 0;
+  let graceUsed = false;
   {
     let run = 0;
+    let missed = 0;
     let cursor = asOf;
     let isToday = true;
+    // Days before the habit's first-ever log are not misses — there was nothing
+    // to do yet. Without this the walk runs off the start of history and spends
+    // the grace day there, which both mislabels healthy streaks as "grace used"
+    // and, worse, would let two empty days extend a run.
+    const earliestLog = logs.reduce(
+      (min, l) => Math.min(min, parseISO(l.logDate).getTime()),
+      asOf.getTime(),
+    );
     for (let i = 0; i < MAX_STREAK_LOOKBACK_DAYS; i += 1) {
+      if (cursor.getTime() < earliestLog) break;
       const dateKey = toDateKey(cursor);
       if (isHabitScheduledOn(habit, dateKey)) {
         if (logsByDate.has(dateKey)) run += 1;
@@ -88,12 +106,20 @@ export function calculateHabitStreaks(
           // excused
         } else if (isToday) {
           // pending — not a miss
-        } else break;
+        } else {
+          missed += 1;
+          if (missed > 1) break;
+          // A run that hasn't started has nothing to protect: spending the
+          // grace day here would invent a streak out of empty days.
+          if (run === 0) break;
+          graceUsed = true;
+        }
       }
       isToday = false;
       cursor = subDays(cursor, 1);
     }
     currentStreak = run;
+    if (run === 0) graceUsed = false;
   }
 
   // Best streak: full-history scan (no early break) from today back to the
@@ -140,5 +166,6 @@ export function calculateHabitStreaks(
     currentStreak,
     bestStreak: Math.max(bestStreak, currentStreak),
     completionRate30d: scheduledDays === 0 ? 1 : completedDays / scheduledDays,
+    graceUsed,
   };
 }

@@ -1,6 +1,7 @@
 import { set, startOfDay } from 'date-fns';
 
 import { setTaskReminderNotificationId } from '@/features/tasks/services/tasks-repository';
+import i18n from '@/lib/i18n';
 import { cancelNotification, scheduleOneTimeNotification } from '@/lib/notifications';
 import type { Task } from '@/features/tasks/types/task.types';
 
@@ -31,7 +32,7 @@ export async function syncTaskReminder(task: Task): Promise<void> {
 
   const id = await scheduleOneTimeNotification({
     title: task.title,
-    body: task.hasDueTime ? "It's due now." : 'Due today.',
+    body: i18n.t(task.hasDueTime ? 'tasks.reminderDueNow' : 'tasks.reminderDueToday'),
     date: triggerAt,
     data: { category: 'tasks', route: '/tasks' },
   });

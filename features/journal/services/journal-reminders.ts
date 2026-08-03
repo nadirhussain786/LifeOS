@@ -1,3 +1,4 @@
+import i18n from '@/lib/i18n';
 import { cancelNotification, scheduleDailyNotification } from '@/lib/notifications';
 import type { JournalReminderSettings } from '@/features/journal/store/journal-reminder-store';
 
@@ -12,8 +13,8 @@ export async function scheduleJournalReminder(
   if (!settings.enabled) return null;
 
   return scheduleDailyNotification({
-    title: 'Journal 📖',
-    body: "Take a minute to write today's entry.",
+    title: i18n.t('journal.reminderNotifTitle'),
+    body: i18n.t('journal.reminderNotifBody'),
     hour: settings.hour,
     minute: settings.minute,
     data: { category: 'journal', route: '/journal' },

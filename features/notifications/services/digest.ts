@@ -7,6 +7,7 @@ import { useNotificationsStore } from '@/features/notifications/store/notificati
 import { listTasks } from '@/features/tasks/services/tasks-repository';
 import { getDailyTotal } from '@/features/water-intake/services/water-intake-repository';
 import { useWaterSettingsStore } from '@/features/water-intake/store/water-settings-store';
+import i18n from '@/lib/i18n';
 import { cancelNotification, scheduleDailyNotification } from '@/lib/notifications';
 import { toDateKey } from '@/lib/date';
 
@@ -67,30 +68,44 @@ export function buildDigestSummary(): DigestSummary {
   return { tasksDueToday, habitsRemaining, moneyDue, journalPending, waterBehind };
 }
 
-function plural(n: number, word: string): string {
-  return `${n} ${word}${n === 1 ? '' : 's'}`;
-}
-
+/**
+ * The digest sentence.
+ *
+ * Was assembled in English from a hand-rolled pluraliser (`n + word + 's'`) and
+ * a hardcoded "and" joiner — so the one notification most users see every
+ * single morning was the only part of the app that could not be translated, and
+ * it got Arabic and Urdu plurals wrong by construction. i18next's plural rules
+ * handle the counts; `Intl.ListFormat` handles the joining where the runtime
+ * supports it.
+ */
 export function composeDigest(summary: DigestSummary): { title: string; body: string } {
   const parts: string[] = [];
-  if (summary.tasksDueToday) parts.push(plural(summary.tasksDueToday, 'task') + ' due');
-  if (summary.habitsRemaining) parts.push(plural(summary.habitsRemaining, 'habit') + ' to go');
-  if (summary.moneyDue) parts.push(plural(summary.moneyDue, 'money reminder'));
-  if (summary.journalPending) parts.push('journal to write');
-  if (summary.waterBehind) parts.push('water to drink');
+  if (summary.tasksDueToday)
+    parts.push(i18n.t('notif.digestTasks', { count: summary.tasksDueToday }));
+  if (summary.habitsRemaining)
+    parts.push(i18n.t('notif.digestHabits', { count: summary.habitsRemaining }));
+  if (summary.moneyDue) parts.push(i18n.t('notif.digestMoney', { count: summary.moneyDue }));
+  if (summary.journalPending) parts.push(i18n.t('notif.digestJournal'));
+  if (summary.waterBehind) parts.push(i18n.t('notif.digestWater'));
 
-  const title = 'Good morning ☀️';
-  const body =
-    parts.length === 0
-      ? 'Nothing pressing today — enjoy the calm.'
-      : `Today: ${listJoin(parts)}. Tap to plan your day.`;
-  return { title, body };
+  return {
+    title: i18n.t('notif.digestTitle'),
+    body:
+      parts.length === 0
+        ? i18n.t('notif.digestEmpty')
+        : i18n.t('notif.digestBody', { summary: listJoin(parts) }),
+  };
 }
 
+/** Locale-aware list joining, falling back to commas on a Hermes build without
+ *  full Intl — a comma-separated list reads fine in every language we ship. */
 function listJoin(parts: string[]): string {
   if (parts.length === 1) return parts[0];
-  if (parts.length === 2) return `${parts[0]} and ${parts[1]}`;
-  return `${parts.slice(0, -1).join(', ')}, and ${parts[parts.length - 1]}`;
+  try {
+    return new Intl.ListFormat(i18n.language, { style: 'long', type: 'conjunction' }).format(parts);
+  } catch {
+    return parts.join(', ');
+  }
 }
 
 /**

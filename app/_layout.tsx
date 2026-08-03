@@ -25,11 +25,14 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AnimatedSplash } from '@/components/animated-splash';
 import { ErrorBoundary } from '@/components/error-boundary';
+import { NotificationBanner } from '@/components/ui/notification-banner';
 import { ToastHost } from '@/components/ui/toast';
 import { DevErrorBanner } from '@/components/dev/dev-error-banner';
 import { MiniPlayerBar } from '@/features/music/components/mini-player-bar';
+import { useNotificationCenter } from '@/features/notifications/hooks/use-notification-center';
 import { useNotificationNavigation } from '@/features/notifications/hooks/use-notification-navigation';
 import { applyDeliveryMode } from '@/features/notifications/services/delivery';
+import { resyncAllReminders } from '@/features/notifications/services/reminder-scheduler';
 import { syncTodayWidget } from '@/features/widgets/services/widget-data';
 import { useWidgetSync } from '@/features/widgets/hooks/use-widget-sync';
 import { useProfileStore } from '@/features/profile/store/profile-store';
@@ -71,6 +74,13 @@ void configureAndroidChannels().catch(() => undefined);
  * taps and mark inbox rows read. Renders nothing. */
 function NotificationNavigationBridge() {
   useNotificationNavigation();
+  return null;
+}
+
+/** Records arriving notifications in the in-app inbox and raises the in-app
+ * banner (the OS banner is suppressed while foregrounded). Renders nothing. */
+function NotificationCenterBridge() {
+  useNotificationCenter();
   return null;
 }
 
@@ -145,6 +155,11 @@ export default function RootLayout() {
     // morning digest with today's counts on every launch — local notifications
     // carry fixed text, so this is how it stays current.
     applyDeliveryMode();
+    // Rebuild every reminder from the database. Scheduling can silently produce
+    // nothing (permission not yet granted, category off, digest mode, master
+    // switch), and nothing ever retried — so a reminder lost that way stayed
+    // lost until its item happened to be edited again. No-ops without permission.
+    void resyncAllReminders();
     // Refresh the home-screen widget's snapshot with today's counts (Android).
     syncTodayWidget();
   }, [init]);
@@ -215,6 +230,7 @@ export default function RootLayout() {
                 <Stack.Screen name="settings/notifications" />
                 <Stack.Screen name="settings/sync" />
                 <Stack.Screen name="notifications" />
+                <Stack.Screen name="search" options={{ presentation: 'modal' }} />
                 <Stack.Screen name="task/new" options={{ presentation: 'modal' }} />
                 <Stack.Screen name="note/new" options={{ presentation: 'modal' }} />
                 <Stack.Screen name="habit/new" options={{ presentation: 'modal' }} />
@@ -238,12 +254,15 @@ export default function RootLayout() {
               <PushRegistrationBridge />
               <AppLockController />
               <NotificationNavigationBridge />
+              <NotificationCenterBridge />
               <MiniPlayerBar />
               <DevErrorBanner />
             </ErrorBoundary>
             {/* Above the navigator so a toast raised by a delete outlives the
                 router.back() that immediately follows it. */}
             <ToastHost />
+            {/* Top of the screen, where the OS banner would have been. */}
+            <NotificationBanner />
             {/* On top of everything: the lock shield, then the cold-start splash. */}
             <AppLockOverlay />
             {!splashDone && (

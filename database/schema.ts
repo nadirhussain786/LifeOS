@@ -621,11 +621,21 @@ export const notificationLog = sqliteTable('notification_log', {
   route: text('route'),
   /** JSON-encoded route params (e.g. {"id":"abc"}). */
   params: text('params'),
-  /** When it fires; for repeats='daily' this is the next occurrence. */
+  /** When it fires; for a repeating reminder this is the next occurrence. */
   scheduledAt: integer('scheduled_at').notNull(),
-  repeats: text('repeats', { enum: ['none', 'daily'] })
+  repeats: text('repeats', { enum: ['none', 'daily', 'weekly'] })
     .notNull()
     .default('none'),
+  /**
+   * When the notification actually arrived on the device.
+   *
+   * Delivery used to be *inferred* from `scheduledAt <= now`, which cannot work
+   * for a repeating reminder — its scheduledAt is always the NEXT fire, so a
+   * daily habit nudge read as "scheduled" forever and never counted as unread.
+   * The badge therefore ignored every repeating reminder in the app, and push
+   * notifications (which are never scheduled locally at all) left no trace.
+   */
+  deliveredAt: integer('delivered_at'),
   readAt: integer('read_at'),
   canceledAt: integer('canceled_at'),
   createdAt: integer('created_at').notNull(),
@@ -1139,6 +1149,7 @@ export const TABLE_BOOTSTRAP_SQL = `
     params TEXT,
     scheduled_at INTEGER NOT NULL,
     repeats TEXT NOT NULL DEFAULT 'none',
+    delivered_at INTEGER,
     read_at INTEGER,
     canceled_at INTEGER,
     created_at INTEGER NOT NULL
@@ -1196,6 +1207,12 @@ export const INDEX_BOOTSTRAP_SQL = `
  * after bootstrap, guarded by a PRAGMA table_info check.
  */
 export const ADDITIVE_COLUMNS: Record<string, { name: string; ddl: string }[]> = {
+  notification_log: [
+    {
+      name: 'delivered_at',
+      ddl: 'ALTER TABLE notification_log ADD COLUMN delivered_at INTEGER',
+    },
+  ],
   tasks: [
     {
       name: 'has_due_time',

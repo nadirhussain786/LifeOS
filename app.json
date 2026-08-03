@@ -42,7 +42,8 @@
       "package": "com.lifeos.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundImage": "./assets/adaptive-icon-background.png",
+        "backgroundColor": "#12805c"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
@@ -77,7 +78,7 @@
           "resizeMode": "contain",
           "dark": {
             "backgroundColor": "#0e1210",
-            "image": "./assets/splash-icon.png"
+            "image": "./assets/splash-icon-dark.png"
           }
         }
       ],

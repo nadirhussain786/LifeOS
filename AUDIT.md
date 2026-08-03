@@ -58,6 +58,26 @@ Verified each step with `tsc --noEmit` + `jest` (18 tests) + `expo export` (all 
 
 ---
 
+## ✅ Branding, search and notification presentation (2026-07-30, fourth)
+
+`tsc` · `eslint` · **100** jest tests · 48 SQL tests · `expo config` resolves · all 4 locales at key parity (1391 each).
+
+**The app shipped with Expo's placeholder art.** `icon.png`, `adaptive-icon.png` and `splash-icon.png` were still the `create-expo-app` output — grey concentric circles on graph paper — so every EAS build installed with a stock Expo icon and flashed the same placeholder on launch. The config had pointed at the right paths all along; the files behind them had never been replaced.
+
+`scripts/make-brand-assets.mjs` (`npm run assets`) now draws all seven from one geometry function. Four marks were drawn and compared at the size an icon is actually met at — 48px, not 512 — and all four are kept in a `MARKS` registry with `ACTIVE` selecting the one that ships, so changing the app's identity is a one-word edit and a re-run rather than a redraw.
+
+Shipping **modules**: four life areas as unlike shapes, two of them recessed. It says "operating system" without leaning on a letter, and the mix of solid and receded forms is the design system's own premise ("depth comes from layered surfaces, never from neomorphic bevels"). Kept but not shipped: **pulse** (cleanest silhouette, reads as a health app), **bloom** (warmest, reads as a clover), **monogram** (carries the name, but a letter in a box is the safe answer). Discarded outright, because drawing them was the only way to find out: an orbit whose node collided with its own ring, an arc that resolved into nothing when scaled down, a leaf that came out an umbrella, a sunrise that came out a cloche.
+
+Recessed layers are flattened for the Android status-bar stencil, which renders from the alpha channel alone and would otherwise fill them — giving exactly the solid white blob that icon exists to avoid. Rendered in code, not committed as opaque binaries, so the mark stays reviewable; PNG is only zlib + CRC32, so there's no image dependency. Centred on the ink's own bounding box rather than its geometry box, which is what stops it sitting visibly high-left. Colours are the same gradient the accent Button paints with.
+
+Also fixed: the Android adaptive icon had a flat white backdrop (now the gradient); the splash used one white mark on a _light_ ground in light mode (now tinted per theme); and `AnimatedSplash` drew a generic Lucide **leaf**, so the launcher icon, the native splash and the in-app splash were three different marks. `components/ui/lifeos-mark.tsx` is now the single definition, geometry-matched to the generator.
+
+**Global search.** Twelve modules, and no way to look through more than one — so anything written down was findable only if you already remembered which module you put it in, which is the memory the app exists to do for you. `searchEverything()` reads tasks, notes, habits, goals, journal, transactions, debts, subjects, songs, playlists and albums, each source isolated so one broken table costs only its own results. Ranked, not merely filtered: exact title → title prefix → word-boundary → substring → body, with recency used _only_ to break ties, so a good match never loses to a newer bad one. 14 tests pin the ranking. Reachable from Home and Hub.
+
+**Streak grace.** A streak that resets to zero on one bad day is loss aversion: it punishes hardest exactly when somebody is ill, busy or travelling, and what they stop doing is opening the app. One missed day is now survived — not counted — and a second still breaks the run. `graceUsed` surfaces it in the UI as "1 day missed — streak held", because hiding it would be the app flattering a number at the user's expense. Writing the tests surfaced a real bug in the first attempt: the walk ran off the start of history and spent the grace day there, mislabelling healthy streaks and nearly letting two empty days extend a run. Fixed by stopping at the first-ever log.
+
+---
+
 ## ✅ Split group lifecycle (2026-07-30, third)
 
 `tsc` · `eslint` · 65 jest tests · 48 SQL tests · 8 migrations — all green.

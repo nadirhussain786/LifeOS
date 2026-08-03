@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, isNull } from 'drizzle-orm';
+import { and, desc, eq, gt, inArray, isNull } from 'drizzle-orm';
 
 import { getDb } from '@/database/client';
 import {
@@ -51,6 +51,16 @@ export function listArchivedNotes(): Note[] {
 
 export function listRecentNotes(limit: number): Note[] {
   return listNotes().slice(0, limit);
+}
+
+/** Notes whose reminder is still in the future — what a resync has to rebuild.
+ *  Past reminders are left alone: they have already fired. */
+export function listNotesWithReminders(now = Date.now()): Note[] {
+  return getDb()
+    .select()
+    .from(notes)
+    .where(and(eq(notes.userId, LOCAL_USER_ID), isNull(notes.deletedAt), gt(notes.reminderAt, now)))
+    .all();
 }
 
 export function getNote(id: string): Note | null {

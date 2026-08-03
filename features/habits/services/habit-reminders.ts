@@ -1,5 +1,12 @@
 import { setHabitReminderNotificationId } from '@/features/habits/services/habits-repository';
-import { cancelNotification, scheduleDailyNotification } from '@/lib/notifications';
+import i18n from '@/lib/i18n';
+import {
+  cancelPackedNotifications,
+  packNotificationIds,
+  scheduleDailyNotification,
+  scheduleWeeklyNotification,
+} from '@/lib/notifications';
+import { reminderWeekdays } from '@/features/habits/services/habit-schedule';
 import type { Habit } from '@/features/habits/types/habit.types';
 
 function parseReminderTime(reminderTime: string): { hour: number; minute: number } | null {
@@ -11,11 +18,12 @@ function parseReminderTime(reminderTime: string): { hour: number; minute: number
   return { hour, minute };
 }
 
-/** Cancels any previously-scheduled reminder and, if the habit still wants
- * one, schedules a fresh DAILY notification at reminder_time — called after
- * every create/update so the schedule can never drift from what's saved. */
+/** Cancels any previously-scheduled reminders and, if the habit still wants
+ * one, schedules fresh notifications at reminder_time — one per scheduled
+ * weekday, or a single daily trigger when the habit runs every day. Called
+ * after every create/update so the schedule can never drift from what's saved. */
 export async function syncHabitReminder(habit: Habit): Promise<void> {
-  await cancelNotification(habit.reminderNotificationId);
+  await cancelPackedNotifications(habit.reminderNotificationId);
 
   const parsed = habit.reminderTime ? parseReminderTime(habit.reminderTime) : null;
   if (!parsed) {
@@ -23,19 +31,27 @@ export async function syncHabitReminder(habit: Habit): Promise<void> {
     return;
   }
 
-  const id = await scheduleDailyNotification({
+  const content = {
     title: `${habit.emoji ?? '💪'} ${habit.name}`,
-    body: 'Time to check in on this habit.',
-    hour: parsed.hour,
-    minute: parsed.minute,
-    data: { category: 'habits', route: '/habits' },
-  });
-  setHabitReminderNotificationId(habit.id, id);
+    body: i18n.t('habits.reminderBody'),
+    data: { category: 'habits', route: '/habits' } as const,
+  };
+
+  const weekdays = reminderWeekdays(habit);
+
+  const ids =
+    weekdays === null
+      ? [await scheduleDailyNotification({ ...content, ...parsed })]
+      : await Promise.all(
+          weekdays.map((weekday) => scheduleWeeklyNotification({ ...content, weekday, ...parsed })),
+        );
+
+  setHabitReminderNotificationId(habit.id, packNotificationIds(ids));
 }
 
 export async function cancelHabitReminder(
   habit: Pick<Habit, 'id' | 'reminderNotificationId'>,
 ): Promise<void> {
-  await cancelNotification(habit.reminderNotificationId);
+  await cancelPackedNotifications(habit.reminderNotificationId);
   setHabitReminderNotificationId(habit.id, null);
 }

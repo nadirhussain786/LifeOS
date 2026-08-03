@@ -15,9 +15,9 @@ import {
 import {
   CATEGORY_META,
   FALLBACK_NOTIFICATION_ICON,
-  notificationStatus,
   type LoggedNotification,
 } from '@/features/notifications/types/notification.types';
+import { notificationStatus } from '@/features/notifications/services/notification-status';
 import { alpha } from '@/lib/color';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 

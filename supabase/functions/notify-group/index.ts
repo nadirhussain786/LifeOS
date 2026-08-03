@@ -114,7 +114,10 @@ Deno.serve(async (req: Request) => {
       title: payload.title,
       body: payload.body,
       sound: 'default',
-      data: { route: payload.route ?? `/split/${payload.groupId}`, category: 'budget' },
+      // 'split', not 'budget'. Miscategorising these put a shared-group ping
+      // under the user's money reminders — so switching off budget alerts also
+      // silenced their group, and the inbox filed it in the wrong place.
+      data: { route: payload.route ?? `/split/${payload.groupId}`, category: 'split' },
     }));
 
     try {

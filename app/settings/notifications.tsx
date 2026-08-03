@@ -11,6 +11,7 @@ import { Segmented } from '@/components/ui/segmented';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import { applyDeliveryMode } from '@/features/notifications/services/delivery';
+import { resyncAllReminders } from '@/features/notifications/services/reminder-scheduler';
 import { formatQuietWindow } from '@/features/notifications/services/quiet-hours';
 import {
   useNotificationsStore,
@@ -30,6 +31,7 @@ import {
   notificationsAvailable,
   openExactAlarmSettings,
   requestNotificationPermission,
+  SCHEDULING_BUDGET,
   sendTestNotification,
   type NotificationDiagnostics,
 } from '@/lib/notifications';
@@ -165,7 +167,20 @@ export default function NotificationSettingsScreen() {
   // can change which reminders should be queued and whether/when the morning
   // digest fires — reconcile scheduled notifications and the digest.
   const resyncDigest = () => {
-    applyDeliveryMode();
+    void applyDeliveryMode();
+  };
+
+  /**
+   * Rebuilds every reminder in the app.
+   *
+   * Each of these switches used to be one-way: turning a category (or the
+   * master switch) off cancelled its queued reminders, and turning it back on
+   * scheduled nothing — the reminders only returned if the user happened to
+   * re-save every task, habit and note they owned. Same for granting permission
+   * after the fact, and for switching out of digest mode.
+   */
+  const rebuildReminders = () => {
+    void resyncAllReminders().then(() => void refreshDiagnostics());
   };
 
   const handleMasterToggle = async (enabled: boolean) => {
@@ -177,19 +192,25 @@ export default function NotificationSettingsScreen() {
     store.setMasterEnabled(enabled);
     if (enabled) {
       resyncDigest();
+      // Puts back everything the "off" branch cancelled.
+      rebuildReminders();
     } else {
       // True kill switch: silence everything already queued, not just future
-      // scheduling. Reminders return as each item is re-saved once re-enabled.
+      // scheduling.
       store.setDigestNotificationId(null);
       await cancelAllScheduled();
+      await refreshDiagnostics();
     }
   };
 
   const handleCategoryToggle = (category: NotificationCategory, enabled: boolean) => {
     store.setCategoryEnabled(category, enabled);
-    if (!enabled) {
+    if (enabled) {
+      // Was a no-op, so a category switched off and back on stayed silent.
+      rebuildReminders();
+    } else {
       // Clear the category's already-queued reminders immediately.
-      cancelScheduledInCategory(category);
+      void cancelScheduledInCategory(category).then(() => void refreshDiagnostics());
     }
     if (category === 'digest') resyncDigest();
   };
@@ -409,6 +430,15 @@ export default function NotificationSettingsScreen() {
                 <Text variant="caption">
                   {t('notif.statusQueued', { count: diagnostics?.scheduledCount ?? 0 })}
                 </Text>
+                {/* iOS keeps only 64 pending notifications across the whole
+                    app and silently discards the rest — no error, and the app
+                    does not get to choose which survive. The count above is the
+                    only way to see it coming. */}
+                {(diagnostics?.scheduledCount ?? 0) >= SCHEDULING_BUDGET ? (
+                  <Text variant="caption" style={{ color: theme.destructive }}>
+                    {t('notif.statusOverBudget', { limit: 64 })}
+                  </Text>
+                ) : null}
                 {/* An Android channel the user (or an OEM battery optimiser) has
                     turned down reports importance < 3, which silences it no
                     matter what the app asks for. */}

@@ -35,6 +35,13 @@ export function setCalendarEventReminderNotificationId(id: string, notificationI
     .run();
 }
 
+/** Events still to come — what a resync has to rebuild reminders for. Capped
+ *  because a distant event's reminder can be scheduled nearer the time, and the
+ *  OS queue is a finite resource (see SCHEDULING_BUDGET). */
+export function listUpcomingCalendarEvents(fromMs: number, limit = 50): CalendarEvent[] {
+  return listCalendarEventsBetween(fromMs, fromMs + 90 * 24 * 60 * 60 * 1000).slice(0, limit);
+}
+
 export function listCalendarEventsBetween(startMs: number, endMs: number): CalendarEvent[] {
   return getDb()
     .select()

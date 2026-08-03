@@ -175,7 +175,9 @@
     "notifyAtNineAm": "उस दिन सुबह 9:00 बजे मुझे सूचित करें",
     "addNotes": "नोट्स जोड़ें…",
     "deletedToast": "“{{title}}” हटाया गया।",
-    "archivedToast": "“{{title}}” संग्रहीत।"
+    "archivedToast": "“{{title}}” संग्रहीत।",
+    "reminderDueNow": "अभी करना है।",
+    "reminderDueToday": "आज करना है।"
   },
   "buckets": {
     "overdue": "अतिदेय",
@@ -245,7 +247,9 @@
     "streakDays_other": "{{count}} दिन की लय",
     "withoutDays_one": "{{count}} दिन से नहीं",
     "withoutDays_other": "{{count}} दिन से नहीं",
-    "quickLog": "“{{name}}” दर्ज करें"
+    "quickLog": "“{{name}}” दर्ज करें",
+    "reminderBody": "इस आदत पर ध्यान देने का समय।",
+    "streakHeld": "1 दिन छूटा — लय बनी रही"
   },
   "habitType": {
     "boolean": "हां / नहीं",
@@ -284,7 +288,9 @@
     "enableNotifBody": "जर्नल अनुस्मारक पाने के लिए अपनी डिवाइस सेटिंग्स में LifeOS के लिए सूचनाएं सक्षम करें।",
     "reminderSummary": "आपको हर दिन {{time}} बजे आज की प्रविष्टि लिखने का अनुस्मारक मिलेगा।",
     "writeAFewWords": "कुछ शब्द लिखें…",
-    "reminderSettings": "अनुस्मारक सेटिंग्स"
+    "reminderSettings": "अनुस्मारक सेटिंग्स",
+    "reminderNotifTitle": "जर्नल 📖",
+    "reminderNotifBody": "एक मिनट निकालकर आज की बात लिखें।"
   },
   "mood": {
     "notSet": "सेट नहीं",
@@ -371,7 +377,9 @@
     "writeSomething": "कुछ लिखें…",
     "unarchive": "संग्रह से निकालें",
     "unarchiveNamed": "“{{name}}” को संग्रह से निकालें",
-    "deletedToast": "“{{title}}” हटाया गया।"
+    "deletedToast": "“{{title}}” हटाया गया।",
+    "reminderTitle": "नोट अनुस्मारक",
+    "reminderBody": "इस नोट पर एक नज़र डालें।"
   },
   "budget": {
     "title": "बजट",
@@ -489,7 +497,11 @@
     "contributions": "योगदान",
     "noContributions": "अभी कोई योगदान नहीं — ऊपर अपनी पहली जमा जोड़ें।",
     "other": "अन्य",
-    "spent": "खर्च"
+    "spent": "खर्च",
+    "debtReminderOweTitle": "आपको {{name}} को देना है",
+    "debtReminderOwedTitle": "{{name}} को आपको देना है",
+    "debtReminderOweBody": "{{amount}}, {{date}} तक — लौटाने का समय।",
+    "debtReminderOwedBody": "{{amount}}, {{date}} तक — वसूलने का समय।"
   },
   "debtStatus": {
     "settled": "निपटाया गया",
@@ -1082,7 +1094,9 @@
     "habitNamedCompleted": "{{name}} पूर्ण",
     "habitCompleted": "आदत पूर्ण",
     "journalWritten": "जर्नल लिखा गया",
-    "drankWater": "{{amount}} मिली पानी पिया"
+    "drankWater": "{{amount}} मिली पानी पिया",
+    "reminderStartingNow": "अभी शुरू हो रहा है।",
+    "reminderStartingIn": "{{count}} मिनट में शुरू।"
   },
   "water": {
     "title": "पानी",
@@ -1107,7 +1121,9 @@
     "nudgeSummary": "{{start}} और {{end}} के बीच हर {{interval}} में आपको याद दिलाया जाएगा।",
     "checkTimesTitle": "अपने समय जाँचें",
     "checkTimesBody": "याद दिलाने की अवधि की शुरुआत अंत से पहले होनी चाहिए।",
-    "enableForReminders": "पानी की याद पाने के लिए डिवाइस सेटिंग्स में LifeOS के नोटिफ़िकेशन चालू करें।"
+    "enableForReminders": "पानी की याद पाने के लिए डिवाइस सेटिंग्स में LifeOS के नोटिफ़िकेशन चालू करें।",
+    "reminderNotifTitle": "पानी पीने का समय 💧",
+    "reminderNotifBody": "काफ़ी देर हो गई — थोड़ा पानी पिएँ।"
   },
   "hubSection": {
     "growth": "फ़ोकस और विकास",
@@ -1204,7 +1220,19 @@
     "exactAlarm": "रिमाइंडर का समय सटीक रखें",
     "exactAlarmDescription": "जब तक LifeOS को “अलार्म और रिमाइंडर” में अनुमति न हो, Android रिमाइंडर 15 मिनट तक रोक सकता है।",
     "exactAlarmFailedTitle": "खोला नहीं जा सका",
-    "exactAlarmFailedBody": "इसे सेटिंग › ऐप्स › विशेष ऐप एक्सेस › अलार्म और रिमाइंडर में देखें।"
+    "exactAlarmFailedBody": "इसे सेटिंग › ऐप्स › विशेष ऐप एक्सेस › अलार्म और रिमाइंडर में देखें।",
+    "digestTitle": "सुप्रभात ☀️",
+    "digestEmpty": "आज कुछ ख़ास नहीं — आराम कीजिए।",
+    "digestBody": "आज: {{summary}}। दिन की योजना बनाने के लिए टैप करें।",
+    "digestTasks_one": "{{count}} काम बाकी",
+    "digestTasks_other": "{{count}} काम बाकी",
+    "digestHabits_one": "{{count}} आदत बाकी",
+    "digestHabits_other": "{{count}} आदतें बाकी",
+    "digestMoney_one": "{{count}} पैसे का अनुस्मारक",
+    "digestMoney_other": "{{count}} पैसे के अनुस्मारक",
+    "digestJournal": "जर्नल लिखना है",
+    "digestWater": "पानी पीना है",
+    "statusOverBudget": "इस डिवाइस की {{limit}} अनुस्मारक की सीमा पर — कुछ नहीं आ सकते। पानी के अनुस्मारक घटाएँ या कोई श्रेणी बंद करें।"
   },
   "notifCategory": {
     "tasks": {
@@ -1254,6 +1282,10 @@
     "streak": {
       "label": "सिलसिले और जीत",
       "description": "सिलसिला टूटने की चेतावनी और जश्न"
+    },
+    "split": {
+      "label": "साझा समूह",
+      "description": "जब आपके किसी समूह में कोई खर्च जोड़े या भुगतान दर्ज करे।"
     }
   },
   "sync": {
@@ -1459,5 +1491,29 @@
     "unknown": "यह नहीं हो सका। कृपया फिर कोशिश करें।",
     "title": "यह नहीं हो सका",
     "detail": "विवरण: {{code}}"
+  },
+  "search": {
+    "title": "खोज",
+    "placeholder": "सब कुछ खोजें…",
+    "promptTitle": "पूरे LifeOS में खोजें",
+    "promptBody": "काम, नोट्स, आदतें, लक्ष्य, जर्नल, पैसे, पढ़ाई, संगीत और एल्बम — सब एक साथ।",
+    "noResultsTitle": "“{{query}}” के लिए कुछ नहीं",
+    "noResultsBody": "कोई छोटा शब्द या उसका हिस्सा आज़माएँ।",
+    "resultCount_one": "{{count}} परिणाम",
+    "resultCount_other": "{{count}} परिणाम",
+    "kind": {
+      "task": "काम",
+      "note": "नोट",
+      "habit": "आदत",
+      "goal": "लक्ष्य",
+      "journal": "जर्नल",
+      "transaction": "पैसे",
+      "debt": "उधार",
+      "subject": "विषय",
+      "song": "गाना",
+      "playlist": "प्लेलिस्ट",
+      "album": "एल्बम",
+      "group": "समूह"
+    }
   }
 }

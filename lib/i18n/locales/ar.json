@@ -179,7 +179,9 @@
     "notifyAtNineAm": "أبلغني الساعة 9:00 صباحًا في ذلك اليوم",
     "addNotes": "أضف ملاحظات…",
     "deletedToast": "تم حذف «{{title}}».",
-    "archivedToast": "تمت أرشفة «{{title}}»."
+    "archivedToast": "تمت أرشفة «{{title}}».",
+    "reminderDueNow": "موعدها الآن.",
+    "reminderDueToday": "مستحقة اليوم."
   },
   "buckets": {
     "overdue": "متأخرة",
@@ -257,7 +259,9 @@
     "withoutDays_few": "{{count}} أيام بدون",
     "withoutDays_many": "{{count}} يومًا بدون",
     "withoutDays_other": "{{count}} يوم بدون",
-    "quickLog": "تسجيل «{{name}}»"
+    "quickLog": "تسجيل «{{name}}»",
+    "reminderBody": "حان وقت متابعة هذه العادة.",
+    "streakHeld": "فاتك يوم واحد — التسلسل مستمر"
   },
   "habitType": {
     "boolean": "نعم / لا",
@@ -296,7 +300,9 @@
     "enableNotifBody": "فعّل الإشعارات لـ LifeOS في إعدادات جهازك للحصول على تذكير اليوميات.",
     "reminderSummary": "ستصلك تذكير لكتابة مدخل اليوم كل يوم في {{time}}.",
     "writeAFewWords": "اكتب بضع كلمات…",
-    "reminderSettings": "إعدادات التذكير"
+    "reminderSettings": "إعدادات التذكير",
+    "reminderNotifTitle": "اليوميات 📖",
+    "reminderNotifBody": "خذ دقيقة واكتب تدوينة اليوم."
   },
   "mood": {
     "notSet": "غير محدد",
@@ -383,7 +389,9 @@
     "writeSomething": "اكتب شيئًا…",
     "unarchive": "إلغاء الأرشفة",
     "unarchiveNamed": "إلغاء أرشفة «{{name}}»",
-    "deletedToast": "تم حذف «{{title}}»."
+    "deletedToast": "تم حذف «{{title}}».",
+    "reminderTitle": "تذكير بملاحظة",
+    "reminderBody": "ألقِ نظرة على هذه الملاحظة."
   },
   "budget": {
     "title": "الميزانية",
@@ -505,7 +513,11 @@
     "daysCount_zero": "{{count}} يوم",
     "daysCount_two": "يومان",
     "daysCount_few": "{{count}} أيام",
-    "daysCount_many": "{{count}} يومًا"
+    "daysCount_many": "{{count}} يومًا",
+    "debtReminderOweTitle": "أنت مدين لـ {{name}}",
+    "debtReminderOwedTitle": "{{name}} مدين لك",
+    "debtReminderOweBody": "{{amount}} مستحقة في {{date}} — حان وقت السداد.",
+    "debtReminderOwedBody": "{{amount}} مستحقة في {{date}} — حان وقت التحصيل."
   },
   "debtStatus": {
     "settled": "مسدّد",
@@ -1154,7 +1166,9 @@
     "habitNamedCompleted": "اكتمل {{name}}",
     "habitCompleted": "اكتملت العادة",
     "journalWritten": "تمت كتابة اليومية",
-    "drankWater": "شربت {{amount}} مل من الماء"
+    "drankWater": "شربت {{amount}} مل من الماء",
+    "reminderStartingNow": "يبدأ الآن.",
+    "reminderStartingIn": "يبدأ خلال {{count}} دقيقة."
   },
   "water": {
     "title": "الماء",
@@ -1187,7 +1201,9 @@
     "nudgeSummary": "ستحصل على تنبيه كل {{interval}} بين {{start}} و{{end}}.",
     "checkTimesTitle": "تحقّق من أوقاتك",
     "checkTimesBody": "يجب أن تكون بداية نافذة التذكير قبل نهايتها.",
-    "enableForReminders": "فعّل إشعارات LifeOS في إعدادات جهازك لتصلك تذكيرات الماء."
+    "enableForReminders": "فعّل إشعارات LifeOS في إعدادات جهازك لتصلك تذكيرات الماء.",
+    "reminderNotifTitle": "وقت شرب الماء 💧",
+    "reminderNotifBody": "مضى وقت طويل — اشرب بعض الماء."
   },
   "hubSection": {
     "growth": "التركيز والنمو",
@@ -1288,7 +1304,31 @@
     "exactAlarm": "السماح بتوقيت دقيق للتذكيرات",
     "exactAlarmDescription": "يؤخّر Android التذكيرات حتى 15 دقيقة ما لم يُسمح لـ LifeOS ضمن «المنبّهات والتذكيرات».",
     "exactAlarmFailedTitle": "تعذّر الفتح",
-    "exactAlarmFailedBody": "ابحث عنه في الإعدادات › التطبيقات › وصول خاص للتطبيقات › المنبّهات والتذكيرات."
+    "exactAlarmFailedBody": "ابحث عنه في الإعدادات › التطبيقات › وصول خاص للتطبيقات › المنبّهات والتذكيرات.",
+    "digestTitle": "صباح الخير ☀️",
+    "digestEmpty": "لا شيء ملحّ اليوم — استمتع بالهدوء.",
+    "digestBody": "اليوم: {{summary}}. اضغط لتخطيط يومك.",
+    "digestTasks_zero": "لا مهام",
+    "digestTasks_one": "مهمة واحدة مستحقة",
+    "digestTasks_two": "مهمتان مستحقتان",
+    "digestTasks_few": "{{count}} مهام مستحقة",
+    "digestTasks_many": "{{count}} مهمة مستحقة",
+    "digestTasks_other": "{{count}} مهمة مستحقة",
+    "digestHabits_zero": "لا عادات",
+    "digestHabits_one": "عادة واحدة متبقية",
+    "digestHabits_two": "عادتان متبقيتان",
+    "digestHabits_few": "{{count}} عادات متبقية",
+    "digestHabits_many": "{{count}} عادة متبقية",
+    "digestHabits_other": "{{count}} عادة متبقية",
+    "digestMoney_zero": "لا تذكيرات",
+    "digestMoney_one": "تذكير مالي واحد",
+    "digestMoney_two": "تذكيران ماليان",
+    "digestMoney_few": "{{count}} تذكيرات مالية",
+    "digestMoney_many": "{{count}} تذكيرًا ماليًا",
+    "digestMoney_other": "{{count}} تذكير مالي",
+    "digestJournal": "تدوينة لكتابتها",
+    "digestWater": "ماء لشربه",
+    "statusOverBudget": "وصلت إلى حد الجهاز البالغ {{limit}} تذكيرًا — قد لا يصل بعضها. قلّل تذكيرات الماء أو أوقف إحدى الفئات."
   },
   "notifCategory": {
     "tasks": {
@@ -1338,6 +1378,10 @@
     "streak": {
       "label": "السلاسل والإنجازات",
       "description": "تحذيرات انقطاع السلسلة والاحتفالات"
+    },
+    "split": {
+      "label": "المجموعات المشتركة",
+      "description": "عندما يضيف أحدهم مصروفًا أو يسجّل دفعة في مجموعة أنت فيها."
     }
   },
   "sync": {
@@ -1551,5 +1595,33 @@
     "unknown": "لم ينجح ذلك. حاول مرة أخرى من فضلك.",
     "title": "لم ينجح ذلك",
     "detail": "التفاصيل: {{code}}"
+  },
+  "search": {
+    "title": "بحث",
+    "placeholder": "ابحث في كل شيء…",
+    "promptTitle": "ابحث في LifeOS كله",
+    "promptBody": "المهام والملاحظات والعادات والأهداف واليوميات والمال والدراسة والموسيقى والألبومات — دفعة واحدة.",
+    "noResultsTitle": "لا نتائج لـ «{{query}}»",
+    "noResultsBody": "جرّب كلمة أقصر أو جزءًا منها.",
+    "resultCount_zero": "لا نتائج",
+    "resultCount_one": "نتيجة واحدة",
+    "resultCount_two": "نتيجتان",
+    "resultCount_few": "{{count}} نتائج",
+    "resultCount_many": "{{count}} نتيجة",
+    "resultCount_other": "{{count}} نتيجة",
+    "kind": {
+      "task": "مهمة",
+      "note": "ملاحظة",
+      "habit": "عادة",
+      "goal": "هدف",
+      "journal": "يوميات",
+      "transaction": "مال",
+      "debt": "دَين",
+      "subject": "مادة",
+      "song": "أغنية",
+      "playlist": "قائمة",
+      "album": "ألبوم",
+      "group": "مجموعة"
+    }
   }
 }

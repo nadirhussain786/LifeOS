@@ -9,6 +9,7 @@
     "web": "expo start --web",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "assets": "node scripts/make-brand-assets.mjs",
     "version:bump": "node scripts/bump-version.mjs",
     "check:migrations": "node scripts/check-migrations.mjs",
     "test:sql": "node scripts/test-migrations.mjs",

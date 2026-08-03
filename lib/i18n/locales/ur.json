@@ -175,7 +175,9 @@
     "notifyAtNineAm": "اس دن صبح 9:00 بجے مجھے مطلع کریں",
     "addNotes": "نوٹس شامل کریں…",
     "deletedToast": "“{{title}}” حذف ہو گیا۔",
-    "archivedToast": "“{{title}}” محفوظ ہو گیا۔"
+    "archivedToast": "“{{title}}” محفوظ ہو گیا۔",
+    "reminderDueNow": "ابھی کرنا ہے۔",
+    "reminderDueToday": "آج کرنا ہے۔"
   },
   "buckets": {
     "overdue": "مدت گزر گئی",
@@ -245,7 +247,9 @@
     "streakDays_other": "{{count}} دن کا تسلسل",
     "withoutDays_one": "{{count}} دن سے نہیں",
     "withoutDays_other": "{{count}} دن سے نہیں",
-    "quickLog": "“{{name}}” درج کریں"
+    "quickLog": "“{{name}}” درج کریں",
+    "reminderBody": "اس عادت پر توجہ دینے کا وقت۔",
+    "streakHeld": "1 دن رہ گیا — تسلسل برقرار"
   },
   "habitType": {
     "boolean": "ہاں / نہیں",
@@ -284,7 +288,9 @@
     "enableNotifBody": "جرنل یاد دہانی حاصل کرنے کے لیے اپنی ڈیوائس کی ترتیبات میں LifeOS کے لیے اطلاعات فعال کریں۔",
     "reminderSummary": "آپ کو ہر روز {{time}} پر آج کی انٹری لکھنے کی یاد دہانی ملے گی۔",
     "writeAFewWords": "چند الفاظ لکھیں…",
-    "reminderSettings": "یاد دہانی کی ترتیبات"
+    "reminderSettings": "یاد دہانی کی ترتیبات",
+    "reminderNotifTitle": "جرنل 📖",
+    "reminderNotifBody": "ایک منٹ نکال کر آج کی بات لکھیں۔"
   },
   "mood": {
     "notSet": "مقرر نہیں",
@@ -371,7 +377,9 @@
     "writeSomething": "کچھ لکھیں…",
     "unarchive": "محفوظ شدہ سے نکالیں",
     "unarchiveNamed": "“{{name}}” کو محفوظ شدہ سے نکالیں",
-    "deletedToast": "“{{title}}” حذف ہو گیا۔"
+    "deletedToast": "“{{title}}” حذف ہو گیا۔",
+    "reminderTitle": "نوٹ یاد دہانی",
+    "reminderBody": "اس نوٹ پر ایک نظر ڈالیں۔"
   },
   "budget": {
     "title": "بجٹ",
@@ -489,7 +497,11 @@
     "contributions": "شراکتیں",
     "noContributions": "ابھی کوئی شراکت نہیں — اوپر اپنی پہلی جمع رقم شامل کریں۔",
     "other": "دیگر",
-    "spent": "خرچ شدہ"
+    "spent": "خرچ شدہ",
+    "debtReminderOweTitle": "آپ کو {{name}} کو دینا ہے",
+    "debtReminderOwedTitle": "{{name}} کو آپ کو دینا ہے",
+    "debtReminderOweBody": "{{amount}}، {{date}} تک — واپس کرنے کا وقت۔",
+    "debtReminderOwedBody": "{{amount}}، {{date}} تک — وصول کرنے کا وقت۔"
   },
   "debtStatus": {
     "settled": "طے شدہ",
@@ -1082,7 +1094,9 @@
     "habitNamedCompleted": "{{name}} مکمل",
     "habitCompleted": "عادت مکمل",
     "journalWritten": "جرنل لکھا گیا",
-    "drankWater": "{{amount}} ملی لیٹر پانی پیا"
+    "drankWater": "{{amount}} ملی لیٹر پانی پیا",
+    "reminderStartingNow": "ابھی شروع ہو رہا ہے۔",
+    "reminderStartingIn": "{{count}} منٹ میں شروع۔"
   },
   "water": {
     "title": "پانی",
@@ -1107,7 +1121,9 @@
     "nudgeSummary": "{{start}} اور {{end}} کے درمیان ہر {{interval}} بعد آپ کو یاد دہانی ملے گی۔",
     "checkTimesTitle": "اپنے اوقات دیکھیں",
     "checkTimesBody": "یاد دہانی کی مدت کا آغاز اختتام سے پہلے ہونا چاہیے۔",
-    "enableForReminders": "پانی کی یاد دہانیاں پانے کے لیے ڈیوائس کی ترتیبات میں LifeOS کے نوٹیفکیشن فعال کریں۔"
+    "enableForReminders": "پانی کی یاد دہانیاں پانے کے لیے ڈیوائس کی ترتیبات میں LifeOS کے نوٹیفکیشن فعال کریں۔",
+    "reminderNotifTitle": "پانی پینے کا وقت 💧",
+    "reminderNotifBody": "کافی دیر ہو گئی — تھوڑا پانی پیئیں۔"
   },
   "hubSection": {
     "growth": "توجہ اور ترقی",
@@ -1204,7 +1220,19 @@
     "exactAlarm": "یاد دہانی کا وقت بالکل درست رکھیں",
     "exactAlarmDescription": "جب تک LifeOS کو «الارم اور یاد دہانیاں» میں اجازت نہ ہو، اینڈرائیڈ یاد دہانیاں 15 منٹ تک روک سکتا ہے۔",
     "exactAlarmFailedTitle": "کھولا نہیں جا سکا",
-    "exactAlarmFailedBody": "اسے ترتیبات › ایپس › خصوصی رسائی › الارم اور یاد دہانیاں میں تلاش کریں۔"
+    "exactAlarmFailedBody": "اسے ترتیبات › ایپس › خصوصی رسائی › الارم اور یاد دہانیاں میں تلاش کریں۔",
+    "digestTitle": "صبح بخیر ☀️",
+    "digestEmpty": "آج کچھ خاص نہیں — سکون سے رہیں۔",
+    "digestBody": "آج: {{summary}}۔ دن کی منصوبہ بندی کے لیے ٹیپ کریں۔",
+    "digestTasks_one": "{{count}} کام باقی",
+    "digestTasks_other": "{{count}} کام باقی",
+    "digestHabits_one": "{{count}} عادت باقی",
+    "digestHabits_other": "{{count}} عادات باقی",
+    "digestMoney_one": "{{count}} رقم کی یاد دہانی",
+    "digestMoney_other": "{{count}} رقم کی یاد دہانیاں",
+    "digestJournal": "جرنل لکھنا ہے",
+    "digestWater": "پانی پینا ہے",
+    "statusOverBudget": "اس ڈیوائس کی {{limit}} یاد دہانیوں کی حد پر — کچھ نہیں آ سکتیں۔ پانی کی یاد دہانیاں کم کریں یا کوئی زمرہ بند کریں۔"
   },
   "notifCategory": {
     "tasks": {
@@ -1254,6 +1282,10 @@
     "streak": {
       "label": "سلسلے اور کامیابیاں",
       "description": "سلسلہ ٹوٹنے کی وارننگ اور جشن"
+    },
+    "split": {
+      "label": "مشترکہ گروپس",
+      "description": "جب آپ کے کسی گروپ میں کوئی خرچ شامل کرے یا ادائیگی درج کرے۔"
     }
   },
   "sync": {
@@ -1459,5 +1491,29 @@
     "unknown": "یہ نہیں ہو سکا۔ براہِ کرم دوبارہ کوشش کریں۔",
     "title": "یہ نہیں ہو سکا",
     "detail": "تفصیلات: {{code}}"
+  },
+  "search": {
+    "title": "تلاش",
+    "placeholder": "سب کچھ تلاش کریں…",
+    "promptTitle": "پورے LifeOS میں تلاش کریں",
+    "promptBody": "کام، نوٹس، عادات، اہداف، جرنل، رقم، پڑھائی، موسیقی اور البمز — سب ایک ساتھ۔",
+    "noResultsTitle": "“{{query}}” کے لیے کچھ نہیں",
+    "noResultsBody": "کوئی چھوٹا لفظ یا اس کا حصہ آزمائیں۔",
+    "resultCount_one": "{{count}} نتیجہ",
+    "resultCount_other": "{{count}} نتائج",
+    "kind": {
+      "task": "کام",
+      "note": "نوٹ",
+      "habit": "عادت",
+      "goal": "ہدف",
+      "journal": "جرنل",
+      "transaction": "رقم",
+      "debt": "قرض",
+      "subject": "مضمون",
+      "song": "گانا",
+      "playlist": "پلے لسٹ",
+      "album": "البم",
+      "group": "گروپ"
+    }
   }
 }

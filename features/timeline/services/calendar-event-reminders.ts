@@ -1,19 +1,27 @@
 import { format } from 'date-fns';
 
 import { setCalendarEventReminderNotificationId } from '@/features/timeline/services/calendar-events-repository';
+import i18n from '@/lib/i18n';
 import { cancelNotification, scheduleOneTimeNotification } from '@/lib/notifications';
 import type { CalendarEvent } from '@/features/timeline/types/timeline.types';
 
 export async function scheduleCalendarEventReminder(event: CalendarEvent): Promise<void> {
-  if (event.reminderMinutesBefore == null) return;
+  // Cancel first — every other module's sync does, and without it a resync (or
+  // a second call for the same event) leaves the previous notification queued
+  // alongside the new one.
+  await cancelNotification(event.reminderNotificationId);
+  if (event.reminderMinutesBefore == null) {
+    setCalendarEventReminderNotificationId(event.id, null);
+    return;
+  }
 
   const triggerAt = event.startAt - event.reminderMinutesBefore * 60_000;
   const id = await scheduleOneTimeNotification({
     title: event.title,
     body:
       event.reminderMinutesBefore === 0
-        ? 'Starting now.'
-        : `Starting in ${event.reminderMinutesBefore} minutes.`,
+        ? i18n.t('timeline.reminderStartingNow')
+        : i18n.t('timeline.reminderStartingIn', { count: event.reminderMinutesBefore }),
     date: triggerAt,
     data: {
       category: 'calendar',

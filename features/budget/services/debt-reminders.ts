@@ -2,6 +2,7 @@ import { format, setHours, setMinutes, setSeconds, startOfDay, subDays } from 'd
 
 import { setDebtReminderNotificationId } from '@/features/budget/services/debts-repository';
 import { formatMoney } from '@/features/budget/services/money';
+import i18n from '@/lib/i18n';
 import { cancelNotification, scheduleOneTimeNotification } from '@/lib/notifications';
 import type { Debt } from '@/features/budget/types/budget.types';
 
@@ -33,14 +34,14 @@ export async function syncDebtReminder(debt: Debt): Promise<void> {
 
   const amount = formatMoney(remaining, debt.currency);
   const dueLabel = debt.dueDate ? format(debt.dueDate, 'MMM d') : '';
-  const title =
-    debt.direction === 'borrowed'
-      ? `You owe ${debt.counterparty}`
-      : `${debt.counterparty} owes you`;
-  const body =
-    debt.direction === 'borrowed'
-      ? `${amount} due ${dueLabel} — time to pay it back.`
-      : `${amount} due ${dueLabel} — time to collect.`;
+  const borrowed = debt.direction === 'borrowed';
+  const title = i18n.t(borrowed ? 'budget.debtReminderOweTitle' : 'budget.debtReminderOwedTitle', {
+    name: debt.counterparty,
+  });
+  const body = i18n.t(borrowed ? 'budget.debtReminderOweBody' : 'budget.debtReminderOwedBody', {
+    amount,
+    date: dueLabel,
+  });
 
   const id = await scheduleOneTimeNotification({
     title,

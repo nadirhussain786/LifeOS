@@ -175,7 +175,9 @@
     "notifyAtNineAm": "Notify me at 9:00 AM that day",
     "addNotes": "Add notes…",
     "deletedToast": "“{{title}}” deleted.",
-    "archivedToast": "“{{title}}” archived."
+    "archivedToast": "“{{title}}” archived.",
+    "reminderDueNow": "It’s due now.",
+    "reminderDueToday": "Due today."
   },
   "buckets": {
     "overdue": "Overdue",
@@ -245,7 +247,9 @@
     "streakDays_other": "{{count}}d streak",
     "withoutDays_one": "{{count}}d without",
     "withoutDays_other": "{{count}}d without",
-    "quickLog": "Log “{{name}}”"
+    "quickLog": "Log “{{name}}”",
+    "reminderBody": "Time to check in on this habit.",
+    "streakHeld": "1 day missed — streak held"
   },
   "habitType": {
     "boolean": "Yes / No",
@@ -284,7 +288,9 @@
     "enableNotifBody": "Enable notifications for LifeOS in your device settings to get a journal reminder.",
     "reminderSummary": "You'll get a nudge to write today's entry every day at {{time}}.",
     "writeAFewWords": "Write a few words…",
-    "reminderSettings": "Reminder settings"
+    "reminderSettings": "Reminder settings",
+    "reminderNotifTitle": "Journal 📖",
+    "reminderNotifBody": "Take a minute to write today’s entry."
   },
   "mood": {
     "notSet": "Not set",
@@ -371,7 +377,9 @@
     "writeSomething": "Write something…",
     "unarchive": "Unarchive",
     "unarchiveNamed": "Unarchive “{{name}}”",
-    "deletedToast": "“{{title}}” deleted."
+    "deletedToast": "“{{title}}” deleted.",
+    "reminderTitle": "Note reminder",
+    "reminderBody": "Take a look at this note."
   },
   "budget": {
     "title": "Budget",
@@ -489,7 +497,11 @@
     "contributions": "Contributions",
     "noContributions": "No contributions yet — add your first deposit above.",
     "other": "Other",
-    "spent": "Spent"
+    "spent": "Spent",
+    "debtReminderOweTitle": "You owe {{name}}",
+    "debtReminderOwedTitle": "{{name}} owes you",
+    "debtReminderOweBody": "{{amount}} due {{date}} — time to pay it back.",
+    "debtReminderOwedBody": "{{amount}} due {{date}} — time to collect."
   },
   "debtStatus": {
     "settled": "Settled",
@@ -1082,7 +1094,9 @@
     "habitNamedCompleted": "{{name}} completed",
     "habitCompleted": "Habit completed",
     "journalWritten": "Journal written",
-    "drankWater": "Drank {{amount}}ml of water"
+    "drankWater": "Drank {{amount}}ml of water",
+    "reminderStartingNow": "Starting now.",
+    "reminderStartingIn": "Starting in {{count}} minutes."
   },
   "water": {
     "title": "Water",
@@ -1107,7 +1121,9 @@
     "nudgeSummary": "You'll get a nudge every {{interval}} between {{start}} and {{end}}.",
     "checkTimesTitle": "Check your times",
     "checkTimesBody": "The start of your reminder window needs to be before the end.",
-    "enableForReminders": "Enable notifications for LifeOS in your device settings to get water reminders."
+    "enableForReminders": "Enable notifications for LifeOS in your device settings to get water reminders.",
+    "reminderNotifTitle": "Time to hydrate 💧",
+    "reminderNotifBody": "It’s been a while — grab some water."
   },
   "hubSection": {
     "growth": "Focus & Growth",
@@ -1204,7 +1220,19 @@
     "exactAlarm": "Allow exact reminder timing",
     "exactAlarmDescription": "Android holds reminders back by up to 15 minutes unless LifeOS is allowed under “Alarms & reminders”.",
     "exactAlarmFailedTitle": "Couldn't open it",
-    "exactAlarmFailedBody": "Find it under Settings › Apps › Special app access › Alarms & reminders."
+    "exactAlarmFailedBody": "Find it under Settings › Apps › Special app access › Alarms & reminders.",
+    "digestTitle": "Good morning ☀️",
+    "digestEmpty": "Nothing pressing today — enjoy the calm.",
+    "digestBody": "Today: {{summary}}. Tap to plan your day.",
+    "digestTasks_one": "{{count}} task due",
+    "digestTasks_other": "{{count}} tasks due",
+    "digestHabits_one": "{{count}} habit to go",
+    "digestHabits_other": "{{count}} habits to go",
+    "digestMoney_one": "{{count}} money reminder",
+    "digestMoney_other": "{{count}} money reminders",
+    "digestJournal": "journal to write",
+    "digestWater": "water to drink",
+    "statusOverBudget": "At this device’s limit of {{limit}} queued reminders — some may not fire. Reduce hydration reminders or turn off a category."
   },
   "notifCategory": {
     "tasks": {
@@ -1254,6 +1282,10 @@
     "streak": {
       "label": "Streaks & wins",
       "description": "Streak-at-risk warnings and celebrations"
+    },
+    "split": {
+      "label": "Shared groups",
+      "description": "When somebody adds an expense or records a payment in a group you are in."
     }
   },
   "sync": {
@@ -1459,5 +1491,29 @@
     "unknown": "That did not work. Please try again.",
     "title": "That did not work",
     "detail": "Details: {{code}}"
+  },
+  "search": {
+    "title": "Search",
+    "placeholder": "Search everything…",
+    "promptTitle": "Search across LifeOS",
+    "promptBody": "Tasks, notes, habits, goals, journal entries, money, study, music and albums — all at once.",
+    "noResultsTitle": "Nothing for “{{query}}”",
+    "noResultsBody": "Try a shorter word, or part of one.",
+    "resultCount_one": "{{count}} result",
+    "resultCount_other": "{{count}} results",
+    "kind": {
+      "task": "Task",
+      "note": "Note",
+      "habit": "Habit",
+      "goal": "Goal",
+      "journal": "Journal",
+      "transaction": "Money",
+      "debt": "Debt",
+      "subject": "Subject",
+      "song": "Song",
+      "playlist": "Playlist",
+      "album": "Album",
+      "group": "Group"
+    }
   }
 }

@@ -60,6 +60,19 @@ export function getEntryByDate(entryDate: string): JournalEntry | null {
   return row ? toEntry(row) : null;
 }
 
+/** Most recent entries, newest first — what global search reads. Bounded
+ *  because search runs on every keystroke and a journal has no natural end. */
+export function listRecentJournalEntries(limit = 400): JournalEntry[] {
+  return getDb()
+    .select()
+    .from(journalEntries)
+    .where(and(eq(journalEntries.userId, LOCAL_USER_ID), isNull(journalEntries.deletedAt)))
+    .orderBy(desc(journalEntries.entryDate))
+    .limit(limit)
+    .all()
+    .map(toEntry);
+}
+
 /** Inclusive date range, most recent first — the Timeline's paging unit. */
 export function listEntriesBetween(startDate: string, endDate: string): JournalEntry[] {
   return getDb()

@@ -85,10 +85,16 @@ export function configureNotificationHandler(): void {
           shouldShowList: false,
         };
       }
+      // The app is in the foreground here. An OS banner dropping over the
+      // screen the user is already looking at is the crudest possible
+      // presentation — it hides their content to tell them something the app
+      // could show in context. So the banner is suppressed and an in-app one is
+      // raised instead (see components/ui/notification-banner), while the
+      // notification still lands in the shade so it isn't lost if it's missed.
       return {
         shouldPlaySound: true,
         shouldSetBadge: false,
-        shouldShowBanner: true,
+        shouldShowBanner: false,
         shouldShowList: true,
       };
     },
@@ -236,6 +242,36 @@ export async function cancelNotifications(ids: (string | null | undefined)[]): P
   await Promise.all(ids.map((id) => cancelNotification(id)));
 }
 
+/**
+ * One reminder can now need several OS notifications — a habit scheduled for
+ * Mon/Wed/Fri is three weekly triggers, not one daily one. The owning row still
+ * has a single TEXT column for the id, so several are packed into it as JSON.
+ *
+ * `unpack` accepts a bare id too, so rows written before this existed keep
+ * working and get rewritten in the packed form on their next sync. Returning
+ * null for an empty list keeps "no reminder" as NULL in the column rather than
+ * as the string "[]".
+ */
+export function packNotificationIds(ids: (string | null | undefined)[]): string | null {
+  const present = ids.filter((id): id is string => !!id);
+  return present.length === 0 ? null : JSON.stringify(present);
+}
+
+export function unpackNotificationIds(value: string | null | undefined): string[] {
+  if (!value) return [];
+  if (!value.startsWith('[')) return [value];
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function cancelPackedNotifications(value: string | null | undefined): Promise<void> {
+  await cancelNotifications(unpackNotificationIds(value));
+}
+
 /** Guard shared by both schedulers. Skips scheduling when the master switch or
  * the notification's category is off, AND — in "smart digest" delivery mode —
  * when the category is a non-time-critical nudge that gets folded into the
@@ -375,6 +411,97 @@ export async function scheduleDailyNotification(params: {
   return scheduleId;
 }
 
+/**
+ * Weekly-repeating reminder on one weekday.
+ *
+ * Exists because a habit scheduled for Mon/Wed/Fri was being given a DAILY
+ * trigger — it nagged every day of the week, including the four it wasn't due.
+ * expo-notifications' weekday is 1-based with Sunday = 1, while the app stores
+ * `scheduleDays` 0-based with Sunday = 0 (see habit-streaks.isDueOn), so the
+ * conversion happens here, once, rather than at each call site.
+ */
+export async function scheduleWeeklyNotification(params: {
+  title: string;
+  body: string;
+  /** 0 = Sunday, matching Habit.scheduleDays and Date#getDay. */
+  weekday: number;
+  hour: number;
+  minute: number;
+  data?: NotificationPayload;
+}): Promise<string | null> {
+  const Notifications = getNotifications();
+  if (!Notifications) return null;
+  if (!passesCategoryGate(params.data)) return null;
+
+  const category = params.data?.category;
+  let { hour, minute } = params;
+  if (category && !CATEGORY_META[category].bypassQuietHours) {
+    ({ hour, minute } = shiftDailyOutOfQuietHours(hour, minute));
+  }
+
+  const granted = await requestNotificationPermission();
+  if (!granted) return null;
+  await channelsSettled();
+
+  const logId = params.data?.category ? generateId() : undefined;
+  const data = params.data ? { ...params.data, ...(logId ? { logId } : {}) } : {};
+
+  const scheduleId = await Notifications.scheduleNotificationAsync({
+    content: { title: params.title, body: params.body, data, sound: 'default' },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.WEEKLY,
+      weekday: ((params.weekday % 7) + 7) % 7 === 0 ? 1 : (((params.weekday % 7) + 7) % 7) + 1,
+      hour,
+      minute,
+      channelId: channelForCategory(category),
+    },
+  });
+
+  if (params.data?.category) {
+    logScheduledNotification({
+      id: logId,
+      notificationId: scheduleId,
+      category: params.data.category,
+      title: params.title,
+      body: params.body,
+      route: params.data.route,
+      params: params.data.params,
+      scheduledAt: nextWeeklyOccurrence(params.weekday, hour, minute),
+      repeats: 'weekly',
+    });
+  }
+  return scheduleId;
+}
+
+function nextWeeklyOccurrence(weekday: number, hour: number, minute: number): number {
+  const next = new Date();
+  next.setHours(hour, minute, 0, 0);
+  const target = ((weekday % 7) + 7) % 7;
+  let delta = (target - next.getDay() + 7) % 7;
+  if (delta === 0 && next.getTime() <= Date.now()) delta = 7;
+  next.setDate(next.getDate() + delta);
+  return next.getTime();
+}
+
+/** How many LifeOS notifications the OS currently holds. */
+export async function getScheduledCount(): Promise<number> {
+  const Notifications = getNotifications();
+  if (!Notifications) return 0;
+  const scheduled = await Notifications.getAllScheduledNotificationsAsync().catch(() => []);
+  return scheduled.length;
+}
+
+/**
+ * How many pending notifications the platform will actually keep.
+ *
+ * iOS holds **64** and silently discards everything beyond it — no error, no
+ * callback, and the app does not get to choose which ones survive. That ceiling
+ * is easy to hit here without noticing: water reminders every 30 minutes from
+ * 08:00 to 21:00 are 27 on their own, and a habit with a Mon/Wed/Fri schedule
+ * is 3 more. Android has no equivalent limit.
+ */
+export const SCHEDULING_BUDGET = Platform.OS === 'ios' ? 60 : Number.POSITIVE_INFINITY;
+
 /** Cancels every LifeOS-scheduled notification and clears their inbox rows —
  * the true kill switch behind the master toggle, so turning notifications off
  * silences already-queued reminders too, not just future scheduling. No-ops in
@@ -398,6 +525,38 @@ export function addNotificationResponseListener(
   });
   return () => sub.remove();
 }
+
+/**
+ * Subscribes to notifications ARRIVING (as distinct from being tapped).
+ *
+ * Nothing listened for this before, which is why the in-app notification
+ * centre could not see most of what the app sent: repeating reminders never
+ * crossed into "delivered", and shared-group pushes — which this device never
+ * scheduled — had no row at all. Returns an unsubscribe fn.
+ */
+export function addNotificationReceivedListener(
+  handler: (received: ReceivedNotification) => void,
+): () => void {
+  const Notifications = getNotifications();
+  if (!Notifications) return () => undefined;
+  const sub = Notifications.addNotificationReceivedListener((notification) => {
+    const content = notification.request.content;
+    handler({
+      title: content.title ?? '',
+      body: content.body ?? '',
+      payload: (content.data ?? {}) as NotificationPayload,
+      notificationId: notification.request.identifier,
+    });
+  });
+  return () => sub.remove();
+}
+
+export type ReceivedNotification = {
+  title: string;
+  body: string;
+  payload: NotificationPayload;
+  notificationId: string | null;
+};
 
 /** Cancels every OS-queued notification belonging to a category (matched via
  * its data payload) and clears their inbox rows. Used when a category is
@@ -436,13 +595,19 @@ export async function sendTestNotification(params: {
   await channelsSettled();
 
   try {
+    // On the REMINDERS channel, not the time-sensitive one. Almost every real
+    // reminder — habits, hydration, journal, notes, goals — goes to this
+    // channel, and Android hands channel importance to the user (and to OEM
+    // battery managers) the moment it exists. Testing the other channel meant a
+    // passing test could sit alongside reminders that never appear, which
+    // inverts the entire point of the button.
     await Notifications.scheduleNotificationAsync({
       content: { title: params.title, body: params.body, sound: 'default', data: {} },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
         seconds: 2,
         repeats: false,
-        channelId: CHANNELS.timeSensitive,
+        channelId: CHANNELS.reminders,
       },
     });
     return { ok: true };
