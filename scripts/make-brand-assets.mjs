@@ -15,25 +15,21 @@
  *
  * ## The marks
  *
- * Four were drawn and compared at the size an icon is actually met at — 48px,
- * not 512. `MARKS` keeps all of them; `ACTIVE` picks the one that ships, so
- * changing the app's identity is a one-word edit and a re-run, not a redraw.
+ * Twelve were drawn and compared at the size an icon is actually met at — a
+ * settings row and a status bar, not a store page. `MARKS` keeps all of them and
+ * `ACTIVE` picks the one that ships, so changing the app's identity is a
+ * one-word edit and a re-run rather than a redraw.
  *
- * Shipping: **modules** — four life areas as unlike shapes, two of them
- * recessed. It says "operating system" without leaning on a letter, and the
- * mix of solid and receded forms is the design system's own premise: "depth
- * comes from layered surfaces, never from neomorphic bevels or skeuomorphic
- * texture" (constants/design-tokens.ts).
+ * Shipping: **aperture** — six blades leaving a hexagonal opening. A shutter
+ * mid-turn: the most kinetic of the set, and the only one whose negative space
+ * does the work, which is what keeps it legible when it is 48px in a row of
+ * settings. It reads as a lens on a life rather than a letter in a box.
  *
- * Also drawn, kept, not shipped: **pulse** (cleanest silhouette, but reads as a
- * health app when LifeOS also does money and study), **bloom** (warmest, but
- * reads as a clover) and **monogram** (carries the name, but a letter in a box
- * is the safe answer and the circle-on-card can look like an avatar).
- *
- * Discarded outright, because drawing them was the only way to find out: an
- * orbit whose node collided with its own ring, a rising arc that resolved into
- * nothing at small sizes, a leaf that came out an umbrella, and a sunrise that
- * came out a cloche.
+ * Three were drawn and discarded outright, because drawing them was the only
+ * way to find out: a ligature that read as a "6", a sunrise that came out a
+ * croissant, and a leaf that came out an umbrella. `strata` nearly joined them —
+ * its nested squares rendered invisible until the hit test was reordered
+ * smallest-first, since the outer square returns on every point inside it.
  *
  * Colours come from the same gradient the accent Button paints with, so the icon
  * and the app's primary action are visibly the same brand.
@@ -78,12 +74,38 @@ function inCircle(x, y, cx, cy, r) {
   return dx * dx + dy * dy <= r * r;
 }
 
+const TAU = Math.PI * 2;
+
 /** Rounded line segment, for stroke-based marks. */
 function inCapsule(x, y, ax, ay, bx, by, width) {
   const dx = bx - ax;
   const dy = by - ay;
   const t = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy)));
   return Math.hypot(x - (ax + t * dx), y - (ay + t * dy)) <= width / 2;
+}
+
+function inRing(x, y, cx, cy, r, width) {
+  const d = Math.hypot(x - cx, y - cy);
+  return d <= r + width / 2 && d >= r - width / 2;
+}
+
+/** Rotates the sample point by -a, which is the same as rotating the shape by
+ *  +a — so blades can be authored once, upright, and placed by angle. */
+function rotate(x, y, cx, cy, a) {
+  const c = Math.cos(-a);
+  const s = Math.sin(-a);
+  const dx = x - cx;
+  const dy = y - cy;
+  return [cx + dx * c - dy * s, cy + dx * s + dy * c];
+}
+
+function inArc(x, y, cx, cy, r, width, from, to) {
+  if (!inRing(x, y, cx, cy, r, width)) return false;
+  let a = Math.atan2(y - cy, x - cx);
+  if (a < 0) a += TAU;
+  const s = from < 0 ? from + TAU : from;
+  const e = to < 0 ? to + TAU : to;
+  return s <= e ? a >= s && a <= e : a >= s || a <= e;
 }
 
 /**
@@ -93,34 +115,65 @@ function inCapsule(x, y, ax, ay, bx, by, width) {
  * read as sitting *behind* rather than as another form competing for attention.
  */
 export const MARKS = {
-  /** Four life areas as unlike shapes, two of them recessed. */
-  modules(x, y) {
-    if (inRoundedRect(x, y, 0.1, 0.1, 0.46, 0.46, 0.1)) return 1;
-    if (inCircle(x, y, 0.72, 0.28, 0.18)) return 1;
-    if (inCircle(x, y, 0.28, 0.72, 0.18)) return 0.45;
-    if (inRoundedRect(x, y, 0.54, 0.54, 0.9, 0.9, 0.1)) return 0.45;
-    return 0;
-  },
-
-  /** A life traced in one stroke. */
-  pulse(x, y) {
-    const points = [
-      [0.08, 0.5],
-      [0.3, 0.5],
-      [0.4, 0.26],
-      [0.53, 0.74],
-      [0.64, 0.42],
-      [0.72, 0.5],
-      [0.92, 0.5],
-    ];
-    for (let i = 0; i < points.length - 1; i++) {
-      if (inCapsule(x, y, ...points[i], ...points[i + 1], 0.13)) return 1;
+  /** Six blades leaving a hexagonal opening — a shutter mid-turn. */
+  aperture(x, y) {
+    for (let i = 0; i < 6; i++) {
+      const [rx, ry] = rotate(x, y, 0.5, 0.5, (i * TAU) / 6);
+      if (inRoundedRect(rx, ry, 0.46, 0.11, 0.81, 0.255, 0.055)) return 1;
     }
     return 0;
   },
 
-  /** Areas opening from an open hub — the hub stays negative space so the mark
-   *  does not go solid when it is scaled down. */
+  /** A cycle with something riding it. */
+  orbit(x, y) {
+    if (inArc(x, y, 0.5, 0.5, 0.3, 0.135, 0.35, TAU - 0.95)) return 1;
+    if (inCircle(x, y, 0.5 + 0.3 * Math.cos(-0.3), 0.5 + 0.3 * Math.sin(-0.3), 0.115)) return 1;
+    return 0;
+  },
+
+  /** Layers, turning — the spatial stack made literal. Smallest tested first,
+   *  or the outer square returns on every point inside it and hides the rest. */
+  strata(x, y) {
+    for (const [size, angle, alpha] of [
+      [0.26, 0.5, 1],
+      [0.4, 0.25, 0.5],
+      [0.54, 0, 0.28],
+    ]) {
+      const [rx, ry] = rotate(x, y, 0.5, 0.5, angle);
+      const h = size / 2;
+      if (inRoundedRect(rx, ry, 0.5 - h, 0.5 - h, 0.5 + h, 0.5 + h, size * 0.22)) return alpha;
+    }
+    return 0;
+  },
+
+  /** Where the parts of a life meet. */
+  overlap(x, y) {
+    let n = 0;
+    for (let i = 0; i < 3; i++) {
+      const a = (i * TAU) / 3 - Math.PI / 2;
+      if (inCircle(x, y, 0.5 + Math.cos(a) * 0.15, 0.5 + Math.sin(a) * 0.15, 0.27)) n++;
+    }
+    return n === 0 ? 0 : Math.min(1, 0.34 + (n - 1) * 0.33);
+  },
+
+  /** A field with a rhythm running through it. */
+  cadence(x, y) {
+    for (let i = 0; i < 4; i++) {
+      for (let j = 0; j < 4; j++) {
+        const r = 0.038 + 0.045 * (0.5 + 0.5 * Math.sin(i * 0.9 - j * 0.75 + 0.4));
+        if (inCircle(x, y, 0.2 + i * 0.2, 0.2 + j * 0.2, r)) return 1;
+      }
+    }
+    return 0;
+  },
+
+  /** One whole, two halves. */
+  balance(x, y) {
+    if (!inCircle(x, y, 0.5, 0.5, 0.36)) return 0;
+    return x < 0.5 + 0.14 * Math.sin((y - 0.5) * Math.PI * 2.2) ? 1 : 0.42;
+  },
+
+  /** Areas opening from a hub kept as negative space. */
   bloom(x, y) {
     if (inCircle(x, y, 0.5, 0.5, 0.115)) return 0;
     for (const [cx, cy] of [
@@ -134,20 +187,63 @@ export const MARKS = {
     return 0;
   },
 
-  /** The brand initial resting on a layered surface. */
-  monogram(x, y) {
-    const stroke = 0.15;
-    const round = stroke / 2;
-    if (inRoundedRect(x, y, 0.24, 0.14, 0.24 + stroke, 0.8, round)) return 1;
-    if (inRoundedRect(x, y, 0.24, 0.8 - stroke, 0.78, 0.8, round)) return 1;
-    if (inCircle(x, y, 0.63, 0.3, 0.105)) return 1;
-    if (inRoundedRect(x, y, 0.36, 0.05, 0.87, 0.6, 0.13)) return 0.3;
+  /** Cells of one structure. */
+  comb(x, y) {
+    const hex = (cx, cy, r) => {
+      const dx = Math.abs(x - cx);
+      const dy = Math.abs(y - cy);
+      return dy <= r * 0.866 && dx * 0.866 + dy * 0.5 <= r * 0.866;
+    };
+    const R = 0.155;
+    if (hex(0.5, 0.5, R)) return 1;
+    for (let i = 0; i < 6; i++) {
+      const a = (i * TAU) / 6 + Math.PI / 6;
+      if (hex(0.5 + Math.cos(a) * R * 1.78, 0.5 + Math.sin(a) * R * 1.78, R)) return 0.42;
+    }
+    return 0;
+  },
+
+  /** An axis, a floor, and progress — the one mark carrying the initial. */
+  ascent(x, y) {
+    if (inRoundedRect(x, y, 0.14, 0.16, 0.28, 0.86, 0.07)) return 1;
+    if (inRoundedRect(x, y, 0.14, 0.72, 0.88, 0.86, 0.07)) return 1;
+    if (inRoundedRect(x, y, 0.37, 0.5, 0.51, 0.72, 0.07)) return 0.5;
+    if (inRoundedRect(x, y, 0.6, 0.3, 0.74, 0.72, 0.07)) return 0.7;
+    return 0;
+  },
+
+  /** Two loops, one thread. */
+  continuum(x, y) {
+    if (inRing(x, y, 0.33, 0.5, 0.19, 0.125)) return 1;
+    if (inRing(x, y, 0.67, 0.5, 0.19, 0.125)) return 1;
+    return 0;
+  },
+
+  /** The same path, further along. */
+  spiral(x, y) {
+    const r = Math.hypot(x - 0.5, y - 0.5);
+    let a = Math.atan2(y - 0.5, x - 0.5);
+    if (a < 0) a += TAU;
+    for (let k = 0; k < 3; k++) {
+      const target = 0.06 + 0.052 * (a + k * TAU);
+      if (target > 0.44) break;
+      if (Math.abs(r - target) <= 0.062) return 1;
+    }
+    return 0;
+  },
+
+  /** Four life areas as unlike shapes, two of them recessed. */
+  modules(x, y) {
+    if (inRoundedRect(x, y, 0.1, 0.1, 0.46, 0.46, 0.1)) return 1;
+    if (inCircle(x, y, 0.72, 0.28, 0.18)) return 1;
+    if (inCircle(x, y, 0.28, 0.72, 0.18)) return 0.45;
+    if (inRoundedRect(x, y, 0.54, 0.54, 0.9, 0.9, 0.1)) return 0.45;
     return 0;
   },
 };
 
 /** The mark that ships. Change this and re-run; all seven files follow. */
-const ACTIVE = 'modules';
+const ACTIVE = 'aperture';
 
 function markAlpha(x, y, layered = true) {
   const alpha = MARKS[ACTIVE](x, y);
