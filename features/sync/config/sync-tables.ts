@@ -1,20 +1,41 @@
 /**
  * Registry driving the sync engine and the per-module allow-sync toggles.
  *
- * v1 syncs each module's **primary record tables** — the ones that have both a
- * text `id` primary key and an `updated_at` column, which the engine needs for
- * clean upserts and last-write-wins change detection. Child/log/join tables
- * (habit logs, note tags, goal milestones, journal reflections, per-module
- * settings rows, attachments) lack `updated_at` or a single-column id and are
- * a documented v2 (see TODO.md). Media-backed modules (Gallery, Music) and
- * device-local data (notification log, journal prompts) never sync.
+ * Every table here needs a text `id` primary key, a `user_id`, an `updated_at`
+ * (the engine's change-detection key) and a `deleted_at` — without the last,
+ * a removal cannot propagate and the row is resurrected by the next pull.
+ *
+ * v1 synced only each module's **primary records** — your habits, your goals,
+ * your subjects — and none of the history. Signing in on a second device gave
+ * you your habits back with every streak at zero. The history tables are now
+ * included (0009 + ADDITIVE_COLUMNS/BACKFILL_SQL in database/schema.ts); list
+ * children after their parent so a log never lands before the habit it belongs
+ * to.
+ *
+ * Still deliberately excluded, and the reasons are not interchangeable:
+ *   - Gallery, Music and attachments: the rows point at files in the app's
+ *     private storage. Syncing a row without its file gives another device a
+ *     library of broken references, which is worse than an empty one.
+ *   - note_tag_links, habit_routine_items, playlist_songs: join tables with no
+ *     single-column id and no updated_at.
+ *   - sleep/study/budget settings: singletons keyed by user_id, no id column.
+ *   - journal_prompts (app content), notification_log (device bookkeeping).
  *
  * `sensitive` modules default to sync OFF and stay local unless explicitly
  * enabled — reserved for the planned encrypted modules (Love Diary, Vault),
  * none of which exist yet.
  */
 export type SyncModule =
-  'tasks' | 'notes' | 'habits' | 'journal' | 'calendar' | 'goals' | 'sleep' | 'study' | 'budget';
+  | 'tasks'
+  | 'notes'
+  | 'habits'
+  | 'journal'
+  | 'calendar'
+  | 'goals'
+  | 'sleep'
+  | 'study'
+  | 'budget'
+  | 'water';
 
 export type SyncModuleConfig = {
   key: SyncModule;
@@ -41,19 +62,40 @@ export const SYNC_MODULES: SyncModuleConfig[] = [
   {
     key: 'habits',
     labelKey: 'syncModule.habits',
-    tables: ['habit_categories', 'habits', 'habit_routines'],
+    tables: ['habit_categories', 'habits', 'habit_routines', 'habit_logs', 'habit_skips'],
     sensitive: false,
   },
-  { key: 'journal', labelKey: 'syncModule.journal', tables: ['journal_entries'], sensitive: false },
+  {
+    key: 'journal',
+    labelKey: 'syncModule.journal',
+    tables: ['journal_entries', 'journal_reflections'],
+    sensitive: false,
+  },
   {
     key: 'calendar',
     labelKey: 'syncModule.calendar',
     tables: ['calendar_events'],
     sensitive: false,
   },
-  { key: 'goals', labelKey: 'syncModule.goals', tables: ['goals'], sensitive: false },
+  {
+    key: 'goals',
+    labelKey: 'syncModule.goals',
+    tables: ['goals', 'goal_milestones', 'goal_progress_logs'],
+    sensitive: false,
+  },
   { key: 'sleep', labelKey: 'syncModule.sleep', tables: ['sleep_sessions'], sensitive: false },
-  { key: 'study', labelKey: 'syncModule.study', tables: ['study_subjects'], sensitive: false },
+  {
+    key: 'study',
+    labelKey: 'syncModule.study',
+    tables: ['study_subjects', 'study_sessions'],
+    sensitive: false,
+  },
+  {
+    key: 'water',
+    labelKey: 'syncModule.water',
+    tables: ['water_intake_logs'],
+    sensitive: false,
+  },
   {
     key: 'budget',
     labelKey: 'syncModule.budget',

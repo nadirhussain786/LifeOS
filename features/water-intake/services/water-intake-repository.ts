@@ -1,5 +1,5 @@
 import { addDays, parseISO } from 'date-fns';
-import { and, eq, gte, lte } from 'drizzle-orm';
+import { and, eq, gte, isNull, lte } from 'drizzle-orm';
 
 import { getDb } from '@/database/client';
 import { waterIntakeLogs } from '@/database/schema';
@@ -25,7 +25,7 @@ export function logWater(
   const log: WaterIntakeLog = { id: generateId(), logDate, amountMl, loggedAt: now };
   getDb()
     .insert(waterIntakeLogs)
-    .values({ ...log, userId: LOCAL_USER_ID, createdAt: now })
+    .values({ ...log, userId: LOCAL_USER_ID, createdAt: now, updatedAt: now })
     .run();
   return log;
 }
@@ -34,7 +34,13 @@ export function listLogsForDate(logDate: string): WaterIntakeLog[] {
   return getDb()
     .select()
     .from(waterIntakeLogs)
-    .where(and(eq(waterIntakeLogs.userId, LOCAL_USER_ID), eq(waterIntakeLogs.logDate, logDate)))
+    .where(
+      and(
+        eq(waterIntakeLogs.userId, LOCAL_USER_ID),
+        eq(waterIntakeLogs.logDate, logDate),
+        isNull(waterIntakeLogs.deletedAt),
+      ),
+    )
     .orderBy(waterIntakeLogs.loggedAt)
     .all()
     .map(toLog);
@@ -50,7 +56,14 @@ export function undoLastLog(logDate: string = toDateKey(new Date())): void {
   const logs = listLogsForDate(logDate);
   const last = logs[logs.length - 1];
   if (!last) return;
-  getDb().delete(waterIntakeLogs).where(eq(waterIntakeLogs.id, last.id)).run();
+  // Soft: a hard delete cannot sync — the glass would reappear on the next
+  // pull from another device.
+  const now = Date.now();
+  getDb()
+    .update(waterIntakeLogs)
+    .set({ deletedAt: now, updatedAt: now })
+    .where(eq(waterIntakeLogs.id, last.id))
+    .run();
 }
 
 /** Inclusive date range, oldest first — missing days fill in as 0 so a
@@ -64,6 +77,7 @@ export function listDailyTotals(startDate: string, endDate: string): DailyWaterT
         eq(waterIntakeLogs.userId, LOCAL_USER_ID),
         gte(waterIntakeLogs.logDate, startDate),
         lte(waterIntakeLogs.logDate, endDate),
+        isNull(waterIntakeLogs.deletedAt),
       ),
     )
     .all();

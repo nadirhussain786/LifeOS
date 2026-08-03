@@ -58,6 +58,28 @@ Verified each step with `tsc --noEmit` + `jest` (18 tests) + `expo export` (all 
 
 ---
 
+## ✅ Sync now carries the history (2026-07-30, fifth)
+
+`tsc` · `eslint` · **128** jest tests · **52** SQL tests · 9 migrations · prettier clean.
+
+**"Cloud sync" synced the definitions, not the record.** v1 covered each module's primary table — your habits, your goals, your subjects — and none of the tables holding what you actually did with them. Sign in on a second device and you got your habits back with **every streak at zero**, goals at 0%, no water history and no study sessions. Sync looked like it was working, which is the worst way for it not to.
+
+The cause was mechanical, not a scoping decision anyone would defend: the engine detects change with `updated_at` and needs a soft-delete column so a removal propagates, and **none of the history tables had either**. 15 of 38 tables synced; now 22.
+
+Added to sync: `habit_logs`, `habit_skips`, `water_intake_logs`, `goal_milestones`, `goal_progress_logs`, `study_sessions`, `journal_reflections` — plus a new **Water** entry in the per-module sync toggles, which previously had no way to be turned on or off because none of its data moved.
+
+Three things this needed beyond adding a column:
+
+- **`BACKFILL_SQL`.** A column added as `NOT NULL DEFAULT 0` leaves every existing row at 0, and the push is `WHERE updated_at > cursor` starting at 0. `0 > 0` is false — so without the backfill, all history already on the device would be permanently invisible to sync, and the bug would look exactly like sync working. Runs after `ADDITIVE_COLUMNS`, idempotent.
+- **Hard deletes became soft.** Un-ticking a habit, undoing a glass of water and deleting a progress log all removed the row outright. That cannot sync: the row is simply resurrected by the next pull from another device, silently re-ticking a habit the user cleared. All reads now filter tombstones, and re-ticking a previously-cleared day revives its row rather than inserting a duplicate alongside it.
+- **`0009_history_sync.sql`** — 7 mirror tables, RLS scoped to `user_id = auth.uid()`, and a `(user_id, updated_at)` index on each, which is exactly how the engine reads them.
+
+**`sync-contract.test.ts`** holds the line: every registered table is asserted to have `id`, `user_id`, `updated_at` and `deleted_at`, to appear in a Supabase migration, to be listed after its parent, and to have a backfill. A table registered without them doesn't error — it just never syncs — which is precisely how this gap opened.
+
+Still not synced, for reasons that are not interchangeable: **media** (`gallery_*`, `songs`, `playlists`, both attachment tables) because the rows point at files in private storage and syncing a row without its file gives another device broken references; **join tables** (`note_tag_links`, `habit_routine_items`, `playlist_songs`) which have no single-column id; **settings singletons** (`sleep_settings`, `study_settings`, `budget_settings`) keyed by `user_id` with no `id`; and `journal_prompts` (app content) / `notification_log` (device bookkeeping), which never should.
+
+---
+
 ## ✅ Branding, search and notification presentation (2026-07-30, fourth)
 
 `tsc` · `eslint` · **100** jest tests · 48 SQL tests · `expo config` resolves · all 4 locales at key parity (1391 each).

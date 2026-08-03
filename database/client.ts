@@ -48,6 +48,10 @@ export function getDb(): Database {
     const sqliteDb = openDatabaseSync('lifeos.db');
     sqliteDb.execSync(schema.TABLE_BOOTSTRAP_SQL);
     applyAdditiveColumns(sqliteDb);
+    // Must follow the ALTERs and precede anything that reads the data: a column
+    // added with a default leaves every existing row at that default, which for
+    // `updated_at` means invisible to the sync engine forever.
+    sqliteDb.execSync(schema.BACKFILL_SQL);
     sqliteDb.execSync(schema.INDEX_BOOTSTRAP_SQL);
     rawInstance = sqliteDb;
     instance = drizzle(sqliteDb, { schema });

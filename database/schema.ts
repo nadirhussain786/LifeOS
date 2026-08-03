@@ -159,6 +159,13 @@ export const habitLogs = sqliteTable('habit_logs', {
   note: text('note'),
   loggedAt: integer('logged_at').notNull(),
   createdAt: integer('created_at').notNull(),
+  /** Sync bookkeeping. These tables hold the *history* — what you actually did —
+   *  and were unsynced purely because they lacked the columns the engine needs
+   *  (see features/sync/config/sync-tables.ts). */
+  updatedAt: integer('updated_at').notNull().default(0),
+  /** Soft delete. Log rows used to be removed outright, which cannot sync: the
+   *  row would simply reappear on the next pull from another device. */
+  deletedAt: integer('deleted_at'),
 });
 
 export const habitSkips = sqliteTable('habit_skips', {
@@ -167,6 +174,14 @@ export const habitSkips = sqliteTable('habit_skips', {
   logDate: text('log_date').notNull(),
   reason: text('reason', { enum: ['skip', 'vacation'] }).notNull(),
   createdAt: integer('created_at').notNull(),
+  userId: text('user_id').notNull().default('local'),
+  /** Sync bookkeeping. These tables hold the *history* — what you actually did —
+   *  and were unsynced purely because they lacked the columns the engine needs
+   *  (see features/sync/config/sync-tables.ts). */
+  updatedAt: integer('updated_at').notNull().default(0),
+  /** Soft delete. Log rows used to be removed outright, which cannot sync: the
+   *  row would simply reappear on the next pull from another device. */
+  deletedAt: integer('deleted_at'),
 });
 
 /** A named, ordered chain of habits — "Wake Up → Drink Water → Meditate." */
@@ -225,6 +240,14 @@ export const journalReflections = sqliteTable('journal_reflections', {
   promptId: text('prompt_id').notNull(),
   answerText: text('answer_text').notNull(),
   createdAt: integer('created_at').notNull(),
+  userId: text('user_id').notNull().default('local'),
+  /** Sync bookkeeping. These tables hold the *history* — what you actually did —
+   *  and were unsynced purely because they lacked the columns the engine needs
+   *  (see features/sync/config/sync-tables.ts). */
+  updatedAt: integer('updated_at').notNull().default(0),
+  /** Soft delete. Log rows used to be removed outright, which cannot sync: the
+   *  row would simply reappear on the next pull from another device. */
+  deletedAt: integer('deleted_at'),
 });
 
 export const journalAttachments = sqliteTable('journal_attachments', {
@@ -289,6 +312,13 @@ export const waterIntakeLogs = sqliteTable('water_intake_logs', {
   amountMl: integer('amount_ml').notNull(),
   loggedAt: integer('logged_at').notNull(),
   createdAt: integer('created_at').notNull(),
+  /** Sync bookkeeping. These tables hold the *history* — what you actually did —
+   *  and were unsynced purely because they lacked the columns the engine needs
+   *  (see features/sync/config/sync-tables.ts). */
+  updatedAt: integer('updated_at').notNull().default(0),
+  /** Soft delete. Log rows used to be removed outright, which cannot sync: the
+   *  row would simply reappear on the next pull from another device. */
+  deletedAt: integer('deleted_at'),
 });
 
 /** A song imported from the device's own file storage — `uri` points at a
@@ -380,6 +410,13 @@ export const goalMilestones = sqliteTable('goal_milestones', {
   completedAt: integer('completed_at'),
   position: integer('position').notNull().default(0),
   createdAt: integer('created_at').notNull(),
+  /** Sync bookkeeping. These tables hold the *history* — what you actually did —
+   *  and were unsynced purely because they lacked the columns the engine needs
+   *  (see features/sync/config/sync-tables.ts). */
+  updatedAt: integer('updated_at').notNull().default(0),
+  /** Soft delete. Log rows used to be removed outright, which cannot sync: the
+   *  row would simply reappear on the next pull from another device. */
+  deletedAt: integer('deleted_at'),
 });
 
 /** Append-only history of progress updates for a goal — one row per check-in.
@@ -397,6 +434,13 @@ export const goalProgressLogs = sqliteTable('goal_progress_logs', {
   loggedAt: integer('logged_at').notNull(),
   logDate: text('log_date').notNull(),
   createdAt: integer('created_at').notNull(),
+  /** Sync bookkeeping. These tables hold the *history* — what you actually did —
+   *  and were unsynced purely because they lacked the columns the engine needs
+   *  (see features/sync/config/sync-tables.ts). */
+  updatedAt: integer('updated_at').notNull().default(0),
+  /** Soft delete. Log rows used to be removed outright, which cannot sync: the
+   *  row would simply reappear on the next pull from another device. */
+  deletedAt: integer('deleted_at'),
 });
 
 export const sleepSessions = sqliteTable('sleep_sessions', {
@@ -463,6 +507,8 @@ export const studySessions = sqliteTable('study_sessions', {
   focusRating: integer('focus_rating'),
   note: text('note'),
   createdAt: integer('created_at').notNull(),
+  /** Sync bookkeeping — see the note on habit_logs. */
+  updatedAt: integer('updated_at').notNull().default(0),
   deletedAt: integer('deleted_at'),
   syncStatus: text('sync_status', { enum: ['pending', 'synced', 'conflict'] })
     .notNull()
@@ -792,7 +838,9 @@ export const TABLE_BOOTSTRAP_SQL = `
     value REAL NOT NULL DEFAULT 1,
     note TEXT,
     logged_at INTEGER NOT NULL,
-    created_at INTEGER NOT NULL
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL DEFAULT 0
+    deleted_at INTEGER
   );
 
   CREATE TABLE IF NOT EXISTS habit_skips (
@@ -800,7 +848,10 @@ export const TABLE_BOOTSTRAP_SQL = `
     habit_id TEXT NOT NULL,
     log_date TEXT NOT NULL,
     reason TEXT NOT NULL,
-    created_at INTEGER NOT NULL
+    created_at INTEGER NOT NULL,
+    user_id TEXT NOT NULL DEFAULT 'local'
+    updated_at INTEGER NOT NULL DEFAULT 0
+    deleted_at INTEGER
   );
 
   CREATE TABLE IF NOT EXISTS habit_routines (
@@ -856,7 +907,10 @@ export const TABLE_BOOTSTRAP_SQL = `
     entry_id TEXT NOT NULL,
     prompt_id TEXT NOT NULL,
     answer_text TEXT NOT NULL,
-    created_at INTEGER NOT NULL
+    created_at INTEGER NOT NULL,
+    user_id TEXT NOT NULL DEFAULT 'local'
+    updated_at INTEGER NOT NULL DEFAULT 0
+    deleted_at INTEGER
   );
 
   CREATE TABLE IF NOT EXISTS journal_attachments (
@@ -903,7 +957,9 @@ export const TABLE_BOOTSTRAP_SQL = `
     log_date TEXT NOT NULL,
     amount_ml INTEGER NOT NULL,
     logged_at INTEGER NOT NULL,
-    created_at INTEGER NOT NULL
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL DEFAULT 0
+    deleted_at INTEGER
   );
 
   CREATE TABLE IF NOT EXISTS songs (
@@ -972,7 +1028,9 @@ export const TABLE_BOOTSTRAP_SQL = `
     is_completed INTEGER NOT NULL DEFAULT 0,
     completed_at INTEGER,
     position INTEGER NOT NULL DEFAULT 0,
-    created_at INTEGER NOT NULL
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL DEFAULT 0
+    deleted_at INTEGER
   );
 
   CREATE TABLE IF NOT EXISTS goal_progress_logs (
@@ -984,7 +1042,9 @@ export const TABLE_BOOTSTRAP_SQL = `
     note TEXT,
     logged_at INTEGER NOT NULL,
     log_date TEXT NOT NULL,
-    created_at INTEGER NOT NULL
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL DEFAULT 0
+    deleted_at INTEGER
   );
 
   CREATE TABLE IF NOT EXISTS sleep_sessions (
@@ -1038,7 +1098,8 @@ export const TABLE_BOOTSTRAP_SQL = `
     created_at INTEGER NOT NULL,
     deleted_at INTEGER,
     sync_status TEXT NOT NULL DEFAULT 'pending',
-    server_updated_at INTEGER
+    server_updated_at INTEGER,
+    updated_at INTEGER NOT NULL DEFAULT 0
   );
 
   CREATE TABLE IF NOT EXISTS study_settings (
@@ -1156,6 +1217,29 @@ export const TABLE_BOOTSTRAP_SQL = `
   );
 `;
 
+/**
+ * One-time data repair, run after ADDITIVE_COLUMNS.
+ *
+ * `updated_at` arrives on an existing table as `NOT NULL DEFAULT 0`, and the
+ * sync engine pushes with `WHERE updated_at > cursor` starting from cursor 0.
+ * `0 > 0` is false — so without this, every row that existed before the column
+ * did would be permanently invisible to sync. Every habit tick, every glass of
+ * water and every study session already on the device would silently never
+ * upload, and the bug would look exactly like sync working.
+ *
+ * Idempotent: only rows still sitting at the default are touched, so a row
+ * legitimately updated later is never dragged backwards.
+ */
+export const BACKFILL_SQL = `
+  UPDATE habit_logs SET updated_at = created_at WHERE updated_at = 0;
+  UPDATE habit_skips SET updated_at = created_at WHERE updated_at = 0;
+  UPDATE journal_reflections SET updated_at = created_at WHERE updated_at = 0;
+  UPDATE water_intake_logs SET updated_at = created_at WHERE updated_at = 0;
+  UPDATE goal_milestones SET updated_at = created_at WHERE updated_at = 0;
+  UPDATE goal_progress_logs SET updated_at = created_at WHERE updated_at = 0;
+  UPDATE study_sessions SET updated_at = created_at WHERE updated_at = 0;
+`;
+
 /** Run after ADDITIVE_COLUMNS — see TABLE_BOOTSTRAP_SQL's comment for why. */
 export const INDEX_BOOTSTRAP_SQL = `
   CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(user_id, status);
@@ -1207,6 +1291,61 @@ export const INDEX_BOOTSTRAP_SQL = `
  * after bootstrap, guarded by a PRAGMA table_info check.
  */
 export const ADDITIVE_COLUMNS: Record<string, { name: string; ddl: string }[]> = {
+  // The history tables. They held what you actually did — every habit tick,
+  // every glass of water, every study session — and none of it synced, purely
+  // because they lacked `updated_at` (the engine's change-detection key) and a
+  // soft-delete column. Signing in on a second device restored your habits with
+  // zero streaks. See BACKFILL_SQL for why adding the column is not enough.
+  habit_logs: [
+    {
+      name: 'updated_at',
+      ddl: 'ALTER TABLE habit_logs ADD COLUMN updated_at INTEGER NOT NULL DEFAULT 0',
+    },
+    { name: 'deleted_at', ddl: 'ALTER TABLE habit_logs ADD COLUMN deleted_at INTEGER' },
+  ],
+  habit_skips: [
+    {
+      name: 'user_id',
+      ddl: "ALTER TABLE habit_skips ADD COLUMN user_id TEXT NOT NULL DEFAULT 'local'",
+    },
+    {
+      name: 'updated_at',
+      ddl: 'ALTER TABLE habit_skips ADD COLUMN updated_at INTEGER NOT NULL DEFAULT 0',
+    },
+    { name: 'deleted_at', ddl: 'ALTER TABLE habit_skips ADD COLUMN deleted_at INTEGER' },
+  ],
+  journal_reflections: [
+    {
+      name: 'user_id',
+      ddl: "ALTER TABLE journal_reflections ADD COLUMN user_id TEXT NOT NULL DEFAULT 'local'",
+    },
+    {
+      name: 'updated_at',
+      ddl: 'ALTER TABLE journal_reflections ADD COLUMN updated_at INTEGER NOT NULL DEFAULT 0',
+    },
+    { name: 'deleted_at', ddl: 'ALTER TABLE journal_reflections ADD COLUMN deleted_at INTEGER' },
+  ],
+  water_intake_logs: [
+    {
+      name: 'updated_at',
+      ddl: 'ALTER TABLE water_intake_logs ADD COLUMN updated_at INTEGER NOT NULL DEFAULT 0',
+    },
+    { name: 'deleted_at', ddl: 'ALTER TABLE water_intake_logs ADD COLUMN deleted_at INTEGER' },
+  ],
+  goal_milestones: [
+    {
+      name: 'updated_at',
+      ddl: 'ALTER TABLE goal_milestones ADD COLUMN updated_at INTEGER NOT NULL DEFAULT 0',
+    },
+    { name: 'deleted_at', ddl: 'ALTER TABLE goal_milestones ADD COLUMN deleted_at INTEGER' },
+  ],
+  goal_progress_logs: [
+    {
+      name: 'updated_at',
+      ddl: 'ALTER TABLE goal_progress_logs ADD COLUMN updated_at INTEGER NOT NULL DEFAULT 0',
+    },
+    { name: 'deleted_at', ddl: 'ALTER TABLE goal_progress_logs ADD COLUMN deleted_at INTEGER' },
+  ],
   notification_log: [
     {
       name: 'delivered_at',
@@ -1299,6 +1438,10 @@ export const ADDITIVE_COLUMNS: Record<string, { name: string; ddl: string }[]> =
   ],
   study_sessions: [
     { name: 'focus_rating', ddl: 'ALTER TABLE study_sessions ADD COLUMN focus_rating INTEGER' },
+    {
+      name: 'updated_at',
+      ddl: 'ALTER TABLE study_sessions ADD COLUMN updated_at INTEGER NOT NULL DEFAULT 0',
+    },
   ],
   sleep_settings: [
     {

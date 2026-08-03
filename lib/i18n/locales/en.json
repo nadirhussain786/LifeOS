@@ -1328,7 +1328,8 @@
     "goals": "Goals",
     "sleep": "Sleep",
     "study": "Study",
-    "budget": "Budget"
+    "budget": "Budget",
+    "water": "Water"
   },
   "security": {
     "locked": "LifeOS is locked",

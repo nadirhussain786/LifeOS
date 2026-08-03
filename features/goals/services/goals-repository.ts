@@ -54,7 +54,7 @@ export function listMilestones(goalId: string): GoalMilestone[] {
   return getDb()
     .select()
     .from(goalMilestones)
-    .where(eq(goalMilestones.goalId, goalId))
+    .where(and(eq(goalMilestones.goalId, goalId), isNull(goalMilestones.deletedAt)))
     .orderBy(goalMilestones.position)
     .all()
     .map(toMilestone);
@@ -87,7 +87,12 @@ export function listGoals(status?: GoalStatus): GoalWithProgress[] {
   const milestonesByGoal = new Map<string, GoalMilestone[]>();
   const milestoneGoalIds = rows.filter((g) => g.progressMode === 'milestones').map((g) => g.id);
   if (milestoneGoalIds.length > 0) {
-    const allMilestones = getDb().select().from(goalMilestones).all().map(toMilestone);
+    const allMilestones = getDb()
+      .select()
+      .from(goalMilestones)
+      .where(isNull(goalMilestones.deletedAt))
+      .all()
+      .map(toMilestone);
     for (const milestone of allMilestones) {
       if (!milestonesByGoal.has(milestone.goalId)) milestonesByGoal.set(milestone.goalId, []);
       milestonesByGoal.get(milestone.goalId)!.push(milestone);
@@ -160,6 +165,7 @@ export function createGoal(input: CreateGoalInput): Goal {
           title,
           position: index,
           createdAt: now,
+          updatedAt: now,
         })
         .run();
     });
@@ -226,8 +232,17 @@ export function deleteGoal(id: string) {
     .set({ deletedAt: Date.now(), updatedAt: Date.now(), syncStatus: 'pending' })
     .where(eq(goals.id, id))
     .run();
-  db.delete(goalMilestones).where(eq(goalMilestones.goalId, id)).run();
-  db.delete(goalProgressLogs).where(eq(goalProgressLogs.goalId, id)).run();
+  // Soft, like the goal itself: hard deletes cannot sync, and the children
+  // would be resurrected by the next pull from another device.
+  const deletedAt = Date.now();
+  db.update(goalMilestones)
+    .set({ deletedAt, updatedAt: deletedAt })
+    .where(eq(goalMilestones.goalId, id))
+    .run();
+  db.update(goalProgressLogs)
+    .set({ deletedAt, updatedAt: deletedAt })
+    .where(eq(goalProgressLogs.goalId, id))
+    .run();
 }
 
 // ---- Milestones ----
@@ -238,7 +253,7 @@ export function addMilestone(goalId: string, title: string): GoalMilestone {
   const maxPosition = db
     .select()
     .from(goalMilestones)
-    .where(eq(goalMilestones.goalId, goalId))
+    .where(and(eq(goalMilestones.goalId, goalId), isNull(goalMilestones.deletedAt)))
     .all()
     .reduce((max, row) => Math.max(max, row.position), -1);
   const milestone: GoalMilestone = {
@@ -251,7 +266,7 @@ export function addMilestone(goalId: string, title: string): GoalMilestone {
     createdAt: now,
   };
   db.insert(goalMilestones)
-    .values({ ...milestone, userId: LOCAL_USER_ID })
+    .values({ ...milestone, userId: LOCAL_USER_ID, updatedAt: now })
     .run();
   return milestone;
 }
@@ -275,7 +290,7 @@ export function listProgressLogs(goalId: string): GoalProgressLog[] {
   return getDb()
     .select()
     .from(goalProgressLogs)
-    .where(eq(goalProgressLogs.goalId, goalId))
+    .where(and(eq(goalProgressLogs.goalId, goalId), isNull(goalProgressLogs.deletedAt)))
     .orderBy(goalProgressLogs.loggedAt)
     .all()
     .map(toProgressLog);
@@ -306,7 +321,7 @@ export function logGoalProgress(
     createdAt: now,
   };
   db.insert(goalProgressLogs)
-    .values({ ...log, userId: LOCAL_USER_ID })
+    .values({ ...log, userId: LOCAL_USER_ID, updatedAt: now })
     .run();
 
   if (goal.progressMode === 'count') {
@@ -328,13 +343,19 @@ export function logGoalProgress(
 }
 
 export function deleteProgressLog(id: string) {
-  getDb().delete(goalProgressLogs).where(eq(goalProgressLogs.id, id)).run();
+  const now = Date.now();
+  getDb()
+    .update(goalProgressLogs)
+    .set({ deletedAt: now, updatedAt: now })
+    .where(eq(goalProgressLogs.id, id))
+    .run();
 }
 
 export function toggleMilestone(id: string, isCompleted: boolean) {
+  const now = Date.now();
   getDb()
     .update(goalMilestones)
-    .set({ isCompleted, completedAt: isCompleted ? Date.now() : null })
+    .set({ isCompleted, completedAt: isCompleted ? now : null, updatedAt: now })
     .where(eq(goalMilestones.id, id))
     .run();
 }
@@ -342,11 +363,16 @@ export function toggleMilestone(id: string, isCompleted: boolean) {
 export function renameMilestone(id: string, title: string) {
   getDb()
     .update(goalMilestones)
-    .set({ title: title.trim() })
+    .set({ title: title.trim(), updatedAt: Date.now() })
     .where(eq(goalMilestones.id, id))
     .run();
 }
 
 export function deleteMilestone(id: string) {
-  getDb().delete(goalMilestones).where(eq(goalMilestones.id, id)).run();
+  const now = Date.now();
+  getDb()
+    .update(goalMilestones)
+    .set({ deletedAt: now, updatedAt: now })
+    .where(eq(goalMilestones.id, id))
+    .run();
 }

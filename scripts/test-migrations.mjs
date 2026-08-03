@@ -740,4 +740,87 @@ await test('0008 deleting the group is recorded before it disappears from reads'
   );
 });
 
+// ---------------------------------------------------------------------------
+console.log('\nhistory sync (0009)');
+// ---------------------------------------------------------------------------
+
+const HISTORY_TABLES = [
+  'habit_logs',
+  'habit_skips',
+  'water_intake_logs',
+  'goal_milestones',
+  'goal_progress_logs',
+  'study_sessions',
+  'journal_reflections',
+];
+
+await test('0009 every history table exists with the columns the engine needs', async () => {
+  for (const table of HISTORY_TABLES) {
+    const n = await count(
+      `select count(*)::int n from information_schema.columns
+        where table_schema = 'public' and table_name = $1
+          and column_name in ('id','user_id','updated_at','deleted_at')`,
+      [table],
+    );
+    expectEqual(n, 4, `${table} sync columns`);
+  }
+});
+
+await test('0009 history is private to its owner', async () => {
+  const now = Date.now();
+  await asUser(db, ALICE, async () => {
+    await db.query(
+      `insert into public.habit_logs (id, user_id, habit_id, log_date, value, logged_at, created_at, updated_at)
+       values ('hl-alice', $1::uuid, 'h1', '2026-07-30', 1, $2, $2, $2)`,
+      [ALICE, now],
+    );
+  });
+  await asUser(db, BOB, async () => {
+    expectEqual(
+      await count(`select count(*)::int n from public.habit_logs`),
+      0,
+      'habit logs Bob can see',
+    );
+  });
+  await asUser(db, ALICE, async () => {
+    expectEqual(
+      await count(`select count(*)::int n from public.habit_logs`),
+      1,
+      'habit logs Alice can see',
+    );
+  });
+});
+
+await test('0009 one user cannot write history under another uid', async () => {
+  const now = Date.now();
+  await asUser(db, BOB, async () => {
+    await expectRejection(
+      () =>
+        db.query(
+          `insert into public.habit_logs (id, user_id, habit_id, log_date, value, logged_at, created_at, updated_at)
+           values ('hl-forged', $1::uuid, 'h1', '2026-07-30', 1, $2, $2, $2)`,
+          [ALICE, now],
+        ),
+      'row-level security',
+    );
+  });
+});
+
+await test('0009 a soft-deleted row still syncs, so the delete propagates', async () => {
+  // The whole reason deleted_at exists here: a hard delete leaves nothing to
+  // pull, so the row is resurrected on the next sync from another device.
+  const now = Date.now();
+  await asUser(db, ALICE, async () => {
+    await db.query(
+      `update public.habit_logs set deleted_at = $1, updated_at = $1 where id = 'hl-alice'`,
+      [now + 1000],
+    );
+    expectEqual(
+      await count(`select count(*)::int n from public.habit_logs where deleted_at is not null`),
+      1,
+      'tombstoned rows still readable',
+    );
+  });
+});
+
 summary();

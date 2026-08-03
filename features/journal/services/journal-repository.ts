@@ -240,7 +240,7 @@ export function listReflectionsForEntry(entryId: string): JournalReflection[] {
   return getDb()
     .select()
     .from(journalReflections)
-    .where(eq(journalReflections.entryId, entryId))
+    .where(and(eq(journalReflections.entryId, entryId), isNull(journalReflections.deletedAt)))
     .all()
     .map(toReflection);
 }
@@ -255,14 +255,23 @@ export function upsertReflection(entryId: string, promptId: string, answerText: 
 
   if (existing) {
     db.update(journalReflections)
-      .set({ answerText })
+      .set({ answerText, deletedAt: null, updatedAt: Date.now() })
       .where(eq(journalReflections.id, existing.id))
       .run();
     return;
   }
 
+  const now = Date.now();
   db.insert(journalReflections)
-    .values({ id: generateId(), entryId, promptId, answerText, createdAt: Date.now() })
+    .values({
+      id: generateId(),
+      entryId,
+      promptId,
+      answerText,
+      userId: LOCAL_USER_ID,
+      createdAt: now,
+      updatedAt: now,
+    })
     .run();
 }
 

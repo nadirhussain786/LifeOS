@@ -179,17 +179,28 @@ export function reorderHabits(orderedIds: string[]) {
 }
 
 export function listLogsForHabit(habitId: string): HabitLog[] {
-  return getDb().select().from(habitLogs).where(eq(habitLogs.habitId, habitId)).all();
+  return getDb()
+    .select()
+    .from(habitLogs)
+    .where(and(eq(habitLogs.habitId, habitId), isNull(habitLogs.deletedAt)))
+    .all();
 }
 
 export function listSkipsForHabit(habitId: string): HabitSkip[] {
-  return getDb().select().from(habitSkips).where(eq(habitSkips.habitId, habitId)).all();
+  return getDb()
+    .select()
+    .from(habitSkips)
+    .where(and(eq(habitSkips.habitId, habitId), isNull(habitSkips.deletedAt)))
+    .all();
 }
 
 /** Upserts a habit's log for a single day — idempotent so double-tapping
  * offline and syncing later never double-counts (unique on habit_id, log_date). */
 export function logHabit(habitId: string, logDate: string, value = 1, note: string | null = null) {
   const db = getDb();
+  const now = Date.now();
+  // Includes tombstones: re-ticking a day the user previously un-ticked has to
+  // revive that row, not insert a second one alongside it.
   const existing = db
     .select()
     .from(habitLogs)
@@ -197,7 +208,10 @@ export function logHabit(habitId: string, logDate: string, value = 1, note: stri
     .get();
 
   if (existing) {
-    db.update(habitLogs).set({ value, note }).where(eq(habitLogs.id, existing.id)).run();
+    db.update(habitLogs)
+      .set({ value, note, deletedAt: null, updatedAt: now })
+      .where(eq(habitLogs.id, existing.id))
+      .run();
     return;
   }
 
@@ -209,36 +223,61 @@ export function logHabit(habitId: string, logDate: string, value = 1, note: stri
       logDate,
       value,
       note,
-      loggedAt: Date.now(),
-      createdAt: Date.now(),
+      loggedAt: now,
+      createdAt: now,
+      updatedAt: now,
     })
     .run();
 }
 
+/** Soft delete. A hard one cannot sync — the row would simply come back on the
+ *  next pull from another device, silently re-ticking a habit the user cleared. */
 export function unlogHabit(habitId: string, logDate: string) {
+  const now = Date.now();
   getDb()
-    .delete(habitLogs)
+    .update(habitLogs)
+    .set({ deletedAt: now, updatedAt: now })
     .where(and(eq(habitLogs.habitId, habitId), eq(habitLogs.logDate, logDate)))
     .run();
 }
 
 export function skipHabit(habitId: string, logDate: string, reason: HabitSkipReason) {
   const db = getDb();
+  const now = Date.now();
   const existing = db
     .select()
     .from(habitSkips)
     .where(and(eq(habitSkips.habitId, habitId), eq(habitSkips.logDate, logDate)))
     .get();
-  if (existing) return;
+  if (existing) {
+    // Revives a previously-cleared skip rather than leaving the tombstone.
+    if (existing.deletedAt !== null) {
+      db.update(habitSkips)
+        .set({ reason, deletedAt: null, updatedAt: now })
+        .where(eq(habitSkips.id, existing.id))
+        .run();
+    }
+    return;
+  }
 
   db.insert(habitSkips)
-    .values({ id: generateId(), habitId, logDate, reason, createdAt: Date.now() })
+    .values({
+      id: generateId(),
+      habitId,
+      userId: LOCAL_USER_ID,
+      logDate,
+      reason,
+      createdAt: now,
+      updatedAt: now,
+    })
     .run();
 }
 
 export function unskipHabit(habitId: string, logDate: string) {
+  const now = Date.now();
   getDb()
-    .delete(habitSkips)
+    .update(habitSkips)
+    .set({ deletedAt: now, updatedAt: now })
     .where(and(eq(habitSkips.habitId, habitId), eq(habitSkips.logDate, logDate)))
     .run();
 }

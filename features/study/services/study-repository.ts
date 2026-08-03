@@ -98,15 +98,18 @@ export function createStudySession(input: CreateStudySessionInput): StudySession
   };
   getDb()
     .insert(studySessions)
-    .values({ ...session, userId: LOCAL_USER_ID, syncStatus: 'pending' })
+    .values({ ...session, userId: LOCAL_USER_ID, updatedAt: now, syncStatus: 'pending' })
     .run();
   return session;
 }
 
 export function deleteStudySession(id: string) {
+  // updatedAt has to move too: the sync engine detects change by it, so a
+  // delete that only stamps deletedAt would never be pushed.
+  const now = Date.now();
   getDb()
     .update(studySessions)
-    .set({ deletedAt: Date.now(), syncStatus: 'pending' })
+    .set({ deletedAt: now, updatedAt: now, syncStatus: 'pending' })
     .where(eq(studySessions.id, id))
     .run();
 }
