@@ -1,0 +1,160 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { create } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
+
+import type { PrivateModuleId } from '@/features/private/config/private-modules';
+import type { VaultSpace } from '@/features/private/services/vault-keys';
+
+/**
+ * Two kinds of state, deliberately kept apart.
+ *
+ * The **master key and the unlocked space are runtime-only**. They live in this
+ * store because everything needs them, and they are excluded from `partialize`
+ * so they can never reach AsyncStorage — a key written to a plaintext file
+ * would undo the entire scheme, and this is the one line where that mistake
+ * would be made.
+ *
+ * The **preferences** persist: which private modules the user turned on, and
+ * how long the space stays unlocked. Note what is *not* recorded anywhere
+ * outside the encrypted rows themselves — nothing here says which modules hold
+ * data, only which are switched on.
+ */
+
+/** Locking on background is the whole point; the grace period exists so that
+ * picking a photo (which backgrounds the app) does not lock the vault behind
+ * the user mid-task. */
+export const AUTO_LOCK_GRACE_MS = 20_000;
+
+type PrivateState = {
+  // --- runtime only ---
+  /** The unwrapped master key. Present exactly while the space is unlocked. */
+  key: Uint8Array | null;
+  space: VaultSpace | null;
+  /** When the app last went to background, for the grace-period check. */
+  backgroundedAt: number | null;
+
+  // --- persisted ---
+  enabledModules: PrivateModuleId[];
+  /**
+   * Ordinary Hub modules the user has moved behind the vault.
+   *
+   * Distinct from `enabledModules`, and the difference is where the data lives.
+   * A private module's rows are encrypted blobs in `private_entries`. A
+   * *privatised* module keeps its own ordinary tables — moving it here hides it
+   * from the Hub, gates its routes behind the PIN, and takes it out of search,
+   * export and notifications, but does not re-encrypt anything. The settings
+   * screen says exactly that, because the difference matters and the word
+   * "private" invites people to assume the stronger one.
+   */
+  privatised: string[];
+  /** Set once the user finishes the private-space setup flow. */
+  setUpComplete: boolean;
+  hydrated: boolean;
+
+  unlock: (key: Uint8Array, space: VaultSpace) => void;
+  lock: () => void;
+  markBackgrounded: () => void;
+  clearBackgrounded: () => void;
+  setEnabledModules: (ids: PrivateModuleId[]) => void;
+  toggleModule: (id: PrivateModuleId) => void;
+  setPrivatised: (ids: string[]) => void;
+  togglePrivatised: (id: string) => void;
+  setSetUpComplete: (complete: boolean) => void;
+  /** Forgets the preferences too — used when the space is destroyed. */
+  reset: () => void;
+};
+
+export const usePrivateStore = create<PrivateState>()(
+  persist(
+    (set, get) => ({
+      key: null,
+      space: null,
+      backgroundedAt: null,
+      enabledModules: [],
+      privatised: [],
+      setUpComplete: false,
+      hydrated: false,
+
+      unlock: (key, space) => set({ key, space, backgroundedAt: null }),
+      lock: () => set({ key: null, space: null, backgroundedAt: null }),
+      markBackgrounded: () => set({ backgroundedAt: Date.now() }),
+      clearBackgrounded: () => set({ backgroundedAt: null }),
+
+      setEnabledModules: (enabledModules) => set({ enabledModules }),
+      toggleModule: (id) =>
+        set((s) => ({
+          enabledModules: s.enabledModules.includes(id)
+            ? s.enabledModules.filter((m) => m !== id)
+            : [...s.enabledModules, id],
+        })),
+      setPrivatised: (privatised) => set({ privatised }),
+      togglePrivatised: (id) =>
+        set((s) => ({
+          privatised: s.privatised.includes(id)
+            ? s.privatised.filter((m) => m !== id)
+            : [...s.privatised, id],
+        })),
+      setSetUpComplete: (setUpComplete) => set({ setUpComplete }),
+
+      reset: () =>
+        set({
+          key: null,
+          space: null,
+          backgroundedAt: null,
+          enabledModules: [],
+          privatised: [],
+          setUpComplete: false,
+        }),
+    }),
+    {
+      name: 'private-store',
+      storage: createJSONStorage(() => AsyncStorage),
+      // The key, the space and the background timestamp are runtime-only. If
+      // you add a field here, ask whether it would tell somebody reading the
+      // file what is inside the vault.
+      partialize: (s) => ({
+        enabledModules: s.enabledModules,
+        privatised: s.privatised,
+        setUpComplete: s.setUpComplete,
+      }),
+      onRehydrateStorage: () => () => {
+        usePrivateStore.setState({ hydrated: true });
+      },
+    },
+  ),
+);
+
+/** The master key, or null when locked. Callable outside React — the
+ * repository needs it on every read. */
+export function vaultKey(): Uint8Array | null {
+  return usePrivateStore.getState().key;
+}
+
+export function isUnlocked(): boolean {
+  return usePrivateStore.getState().key !== null;
+}
+
+/**
+ * Whether an ordinary Hub module has been moved behind the vault and is
+ * currently locked. Callable outside React — search and export both need it,
+ * and neither runs in a component.
+ */
+export function isPrivatisedAndLocked(moduleId: string): boolean {
+  const state = usePrivateStore.getState();
+  return state.privatised.includes(moduleId) && state.key === null;
+}
+
+/** Every privatised module id, regardless of lock state. Export uses this: a
+ * module the user has chosen to keep private stays out of the plaintext backup
+ * whether or not the vault happens to be open at the time. */
+export function privatisedModules(): string[] {
+  return usePrivateStore.getState().privatised;
+}
+
+/** Modules to show, which is the intersection of "switched on" and "unlocked".
+ * Locked returns nothing at all, so no caller can accidentally render a hint
+ * that a module exists. */
+export function visiblePrivateModules(): PrivateModuleId[] {
+  const state = usePrivateStore.getState();
+  return state.key ? state.enabledModules : [];
+}

@@ -13,7 +13,7 @@ import {
 
 import { moduleTint, type ModuleName, type ThemeName } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
-import type { FocusArea } from '@/features/profile/store/profile-store';
+import type { FocusArea, Gender } from '@/features/profile/store/profile-store';
 
 /** The life areas a user can pick during onboarding. Each carries its module
  *  identity tint so the focus grid reads in the same color language as the app,
@@ -66,3 +66,18 @@ export const FOCUS_AREAS: {
 export function focusTint(module: ModuleName | null, theme: ThemeName): string {
   return module ? moduleTint(module, theme) : colors[theme].accent;
 }
+
+/**
+ * The gender options offered during onboarding.
+ *
+ * "Prefer not to say" is a real, first-class answer rather than a polite
+ * afterthought: the only thing this question feeds is which private modules get
+ * pre-ticked, and somebody who declines simply gets the universal suggestion.
+ * The step is skippable for the same reason.
+ */
+export const GENDER_OPTIONS: { id: Gender; labelKey: string }[] = [
+  { id: 'female', labelKey: 'gender.female' },
+  { id: 'male', labelKey: 'gender.male' },
+  { id: 'non_binary', labelKey: 'gender.nonBinary' },
+  { id: 'prefer_not_to_say', labelKey: 'gender.preferNotToSay' },
+];

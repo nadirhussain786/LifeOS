@@ -688,6 +688,36 @@ export const notificationLog = sqliteTable('notification_log', {
 });
 
 /**
+ * Every private-module record, from every private module, as one encrypted blob
+ * each.
+ *
+ * The shape is unusual on purpose. A conventional `cycle_logs` table with a
+ * `log_date` column would leak the two facts that actually matter to somebody
+ * scrolling this database with the phone in their hand: *that this person
+ * tracks a cycle at all*, and *when*. So the module id, the date and the
+ * contents all live inside `payload`, sealed under the vault key; the only
+ * plaintext is the bookkeeping the sync engine and the soft-delete need.
+ *
+ * The cost is that nothing here is queryable — reads decrypt everything and
+ * filter in memory. At the hundreds of rows these modules produce that is
+ * nothing, and it buys a table that says almost nothing to a reader without
+ * the key.
+ *
+ * Rows sealed under the decoy key simply fail to open under the real one and
+ * vice versa, so the two spaces coexist in this table with no flag
+ * distinguishing them. See features/private/services/private-repository.ts.
+ */
+export const privateEntries = sqliteTable('private_entries', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull(),
+  /** base64(nonce || AES-GCM ciphertext). Holds `{ module, ...record }`. */
+  payload: text('payload').notNull(),
+  createdAt: integer('created_at').notNull(),
+  updatedAt: integer('updated_at').notNull(),
+  deletedAt: integer('deleted_at'),
+});
+
+/**
  * Bootstrap DDL, run once at startup — see database/client.ts for why this
  * is hand-written rather than generated via drizzle-kit migrations.
  *
@@ -1215,6 +1245,15 @@ export const TABLE_BOOTSTRAP_SQL = `
     canceled_at INTEGER,
     created_at INTEGER NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS private_entries (
+    id TEXT PRIMARY KEY NOT NULL,
+    user_id TEXT NOT NULL,
+    payload TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    deleted_at INTEGER
+  );
 `;
 
 /**
@@ -1282,6 +1321,7 @@ export const INDEX_BOOTSTRAP_SQL = `
   CREATE INDEX IF NOT EXISTS idx_gallery_photos_album ON gallery_photos(user_id, album_id, taken_at);
   CREATE INDEX IF NOT EXISTS idx_gallery_photos_favorite ON gallery_photos(user_id, is_favorite);
   CREATE INDEX IF NOT EXISTS idx_notification_log_user ON notification_log(user_id, scheduled_at);
+  CREATE INDEX IF NOT EXISTS idx_private_entries_user ON private_entries(user_id, updated_at);
 `;
 
 /**

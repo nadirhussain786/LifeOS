@@ -1,6 +1,7 @@
 import { Directory, Paths } from 'expo-file-system';
 
 import { getDb, getRawDb } from '@/database/client';
+import { destroyVaultKeys } from '@/features/private/services/vault-keys';
 
 /**
  * "Delete all my data" — the local-only equivalent of deleting your account.
@@ -42,7 +43,7 @@ const SKIP_TABLES = new Set(['sqlite_sequence', 'android_metadata']);
  * Gallery those are the actual photographs, which makes it a privacy problem
  * rather than merely an untidy one.
  */
-const MEDIA_DIRECTORIES = ['songs', 'gallery', 'attachments'];
+const MEDIA_DIRECTORIES = ['songs', 'gallery', 'attachments', 'private-vault'];
 
 /** Every user table in the database — discovered, not remembered. */
 function userTables(): string[] {
@@ -84,6 +85,17 @@ export function clearAllData() {
     const directory = new Directory(Paths.document, name);
     if (directory.exists) directory.delete();
   }
+
+  // The private space's keys live in the OS keystore, which is the one place
+  // a table wipe and a directory delete both miss entirely. Leaving them would
+  // mean "delete all my data" left the keys to the deleted data behind — and
+  // an apparently-set-up private space that opens onto nothing.
+  //
+  // Deliberately not awaited: clearAllData is synchronous by design (the
+  // settings screen wipes and re-renders immediately), and SecureStore only
+  // offers an async delete. Failure is swallowed for the same reason it is
+  // survivable — the data those keys unlocked is already gone.
+  void destroyVaultKeys().catch(() => undefined);
 }
 
 /** The tables a wipe would clear. Exported so the settings screen can say how
