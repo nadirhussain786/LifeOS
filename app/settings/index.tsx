@@ -11,7 +11,9 @@ import {
   Info,
   Languages,
   Upload,
+  UserCircle,
   Laptop,
+  EyeOff,
   LockKeyhole,
   Moon,
   ShieldCheck,
@@ -31,6 +33,7 @@ import { importDataFromFile } from '@/lib/data-import';
 import { clearAllData } from '@/lib/data-management';
 import { queryClient } from '@/lib/query-client';
 import { toast } from '@/lib/toast-store';
+import { isVaultSetUp } from '@/features/private/services/vault-keys';
 import { useProfileStore } from '@/features/profile/store/profile-store';
 import {
   authenticate,
@@ -77,6 +80,9 @@ export default function SettingsScreen() {
   const setAppLockEnabled = useProfileStore((state) => state.setAppLockEnabled);
   const [bioAvailable, setBioAvailable] = useState(false);
   const [bioLabel, setBioLabel] = useState('Biometrics');
+  // Decides whether the private-space row leads to setup or the PIN pad. Says
+  // nothing about what is inside, only whether a space exists.
+  const [privateSetUp, setPrivateSetUp] = useState(false);
 
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
@@ -85,6 +91,7 @@ export default function SettingsScreen() {
   useEffect(() => {
     isBiometricAvailable().then(setBioAvailable);
     getBiometricLabel().then(setBioLabel);
+    void isVaultSetUp().then(setPrivateSetUp);
   }, []);
 
   const toggleAppLock = async (next: boolean) => {
@@ -284,6 +291,26 @@ export default function SettingsScreen() {
                   thumbColor="#ffffff"
                 />
               }
+            />
+            {/*
+              The one visible entry point to the private space. Its *existence*
+              is not the secret — its contents are, and those need a separate
+              PIN. Hiding this row too would leave no way back in, which is a
+              worse failure than an onlooker knowing the feature exists at all.
+            */}
+            <SettingsRow
+              icon={UserCircle}
+              label={t('profile.title')}
+              subtitle={t('profile.settingsSubtitle')}
+              onPress={() => router.push('/profile')}
+            />
+            <SettingsRow
+              icon={EyeOff}
+              label={t('private.entryLabel')}
+              subtitle={
+                privateSetUp ? t('private.entrySubtitleSetUp') : t('private.entrySubtitleNew')
+              }
+              onPress={() => router.push(privateSetUp ? '/private/unlock' : '/private/setup')}
             />
           </View>
         </View>
