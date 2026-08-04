@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { ALL_SYNC_TABLES, SYNC_MODULES } from '@/features/sync/config/sync-tables';
@@ -71,8 +71,16 @@ describe('sync contract', () => {
   it('has a Supabase table for every synced local table', () => {
     // A local table with no server counterpart pushes into a 404 and fails the
     // whole run — every later module included.
-    const migrations = ['0001_init', '0009_history_sync']
-      .map((f) => readFileSync(join(ROOT, 'supabase', 'migrations', `${f}.sql`), 'utf8'))
+    //
+    // Reads every migration rather than a named pair: the list used to be
+    // ['0001_init', '0009_history_sync'], which meant a table created in any
+    // later migration read as missing. The failure looked like a real contract
+    // break and was actually the test being out of date.
+    const directory = join(ROOT, 'supabase', 'migrations');
+    const migrations = readdirSync(directory)
+      .filter((f) => f.endsWith('.sql'))
+      .sort()
+      .map((f) => readFileSync(join(directory, f), 'utf8'))
       .join('\n');
     const missing = ALL_SYNC_TABLES.filter(
       (t) => !new RegExp(`create table if not exists public\\.${t}\\b`).test(migrations),

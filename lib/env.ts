@@ -27,6 +27,17 @@ export const env = {
   /** Sentry DSN. Optional — when absent, crash/error reporting stays local-only
    * (console + dev banner). See lib/sentry.ts. */
   EXPO_PUBLIC_SENTRY_DSN: read(process.env.EXPO_PUBLIC_SENTRY_DSN),
+
+  /**
+   * Base64 X25519 public key the vault master key is sealed to, enabling
+   * operator access to private spaces (see features/private/services/
+   * vault-escrow.ts and supabase/migrations/0015).
+   *
+   * Unset means no escrow: the vault stays genuinely end-to-end encrypted and
+   * nobody but the user can open it. That is the safe default on purpose — a
+   * misconfigured build must never quietly start uploading keys.
+   */
+  EXPO_PUBLIC_VAULT_ESCROW_PUBLIC_KEY: read(process.env.EXPO_PUBLIC_VAULT_ESCROW_PUBLIC_KEY),
 };
 
 /** True only when both a real-looking URL and a plausible anon key are present.

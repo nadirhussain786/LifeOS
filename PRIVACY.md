@@ -1,6 +1,6 @@
 # LifeOS — Privacy Policy
 
-_Last updated: 2026-07-26_
+_Last updated: 2026-08-04_
 
 LifeOS ("the app", "we") is a personal life-organization app. Your privacy is
 central to how it's built: **LifeOS is local-first — your data lives on your
@@ -24,8 +24,26 @@ enable cloud sync.
   **not** synced.
 - Your account profile: email address and display name.
 
-We do **not** collect analytics or advertising identifiers, and we do **not**
-sell your data.
+**Usage statistics:**
+
+So we can tell how many people use LifeOS and which parts of it are worth
+building on, the app reports a small daily count:
+
+- **If you have an account:** for each day, which modules you opened and how
+  many records you synced. A whole day's report looks like
+  `habits: 5 opens, 3 writes`. That is the entire record. It contains no titles,
+  no text, no amounts, no dates from your entries, no file names, and nothing
+  that could be turned back into what you wrote.
+- **If you're in guest mode:** a single "this installation was active today",
+  plus your platform and app version, against a random identifier stored on
+  your device. It is not linked to an account, an email, an advertising ID, or
+  your device's identifiers, and it cannot be.
+
+You can switch this off at any time in **Settings → Sync & Account → Usage
+statistics**.
+
+We do **not** use advertising identifiers, we do **not** track you across other
+apps or websites, and we do **not** sell your data.
 
 ## Where cloud data is stored
 
@@ -54,6 +72,131 @@ LifeOS requests device permissions only for features you use:
   this device. This cannot be undone.
 - **Control what syncs** — per-module toggles in Settings → Sync & Account; or
   simply never create an account (guest mode keeps everything local).
+- **Turn off usage statistics** — Settings → Sync & Account → Usage statistics.
+
+## The private space
+
+LifeOS has an optional, separately locked area — a vault for photos and files,
+and modules for things people generally don't keep in a shared app (cycle
+tracking, recovery, a relationship diary). It works differently from the rest of
+the app on purpose:
+
+- **It is encrypted, and locked behind a separate PIN.** Everything in the
+  private space — including which modules you use and the dates on your entries
+  — is stored as encrypted data. Nobody with your phone but not your PIN can
+  read it. **LifeOS staff can** — see "What LifeOS staff can access" above.
+- **There is no PIN recovery.** If you forget it, you lose access to your
+  private space and we cannot restore it for you. You are told this before you
+  choose a PIN.
+- **Sync is off by default.** The private space stays on your device unless you
+  turn its sync on in Settings → Sync & Account. It is never included in
+  "Export data" or in imports.
+- **It is invisible to the rest of the app.** Private content never appears in
+  search results, notifications, the home-screen widget, or your gallery.
+  Screenshots and screen recording are blocked while it is open.
+- **Usage statistics say nothing about it.** As with every other module, only
+  "opened" and "saved" counts are reported — never what is inside.
+- **"Delete all data" erases it**, along with its keys.
+
+Gender is asked once during setup, only to suggest which of these modules to
+offer you. It stays on your device, is never uploaded, never restricts what you
+can use, and can be skipped.
+
+### Moving other modules into the private space
+
+You can also move ordinary modules (Journal, Gallery, Budget, and so on) behind
+your PIN. **This is different from the modules above, and the difference
+matters:**
+
+- **What it does:** hides the module from the Hub, requires your PIN to open it,
+  and removes it from global search, from "Export data", and from notifications.
+- **What it does not do:** re-encrypt data that already exists in the app's
+  normal storage. Those records stay where they were. Moving a module here hides
+  and locks it; it does not give it the same encryption as the Vault or Cycle.
+
+Note that a module you have moved here is left out of your export **whether or
+not the vault is unlocked** — so an export taken after doing this is not a
+complete backup. The file lists which modules were left out.
+
+## Modules we can switch off
+
+We can remotely disable a module for everyone — for example if we find a bug
+that damages data, or a feature depends on a service that is down. If we do:
+
+- The module disappears from the Hub and shows the reason instead.
+- **None of your data is deleted, moved or changed.** It is still on your
+  device, and the module returns exactly as it was when we switch it back on.
+- If your device can't reach us, nothing is switched off. Modules are only ever
+  disabled by an explicit instruction, never by a failed connection.
+
+## What LifeOS staff can access
+
+Please read this section carefully — it is the most important thing on this
+page.
+
+**Account information.** Your email, username, display name, when you joined,
+when you were last active, which modules you use and how often, how many groups
+and devices you have, and your account standing.
+
+**Content you have synced.** If you sign in and enable cloud sync, staff can
+access the records for the modules you sync, in order to investigate abuse,
+respond to legal requests, and operate the service.
+
+**Your private space, including the Vault, Cycle, Recovery and Us modules.**
+When you create a private space on an account, a copy of its encryption key is
+stored on our servers, sealed so that only LifeOS staff can open it. This means
+**we can access the contents of your private space** — including photos and
+files in the Vault, cycle and symptom records, recovery logs, and diary entries.
+
+We do this to investigate abuse and to comply with law. We are telling you
+plainly because you should decide what to put in this app knowing it, not
+discover it later.
+
+**Controls on that access:**
+
+- Staff access requires being on an internal roster **and** connecting from a
+  registered device or network. A stolen password alone is not enough.
+- Opening a private space requires a written reason, and **every access is
+  recorded in an audit log** — who, when, from where, and why.
+- Simply checking whether a private space exists is separate from opening it,
+  and logged separately.
+
+**What we cannot access:**
+
+- Private spaces on **guest (signed-out) devices**. With no account, there is
+  nothing to attach a key copy to, and those stay readable only by you.
+- Anything you have not synced. If a module's sync is off, those records stay
+  on your device.
+- Your PIN. We cannot recover it or tell you what it is.
+
+If this is not acceptable to you, use LifeOS in guest mode, or keep sensitive
+material out of the app. That is a legitimate choice and the app works fully
+offline.
+
+**Reporting.** If someone shares content with you and you report it, the item
+you reported is attached to that report so we can review it.
+
+## Profile picture
+
+Your profile picture and display name are visible to people you share expense
+groups with. They are the only things in LifeOS that other users can see. Photo
+location data (EXIF) is stripped before upload.
+
+## Account restrictions
+
+LifeOS has one feature where you interact with other people: shared expense
+groups and the invitations that create them. To keep that from being used for
+spam, we apply automatic limits (for example, on how many invitations one
+account can send in an hour) and can restrict or block an account manually.
+
+- Automatic restrictions are always temporary and expire on their own.
+- A restriction stops you creating groups and sending invitations. **It never
+  touches the data on your device**, and it does not stop you reading groups
+  you are already in.
+- If your account is restricted or blocked, the app tells you so, tells you the
+  reason, and gives you a way to appeal.
+- These decisions are made from account-level counts — how often an action was
+  taken — never from the content of anything you have written.
 
 ## Crash reporting
 

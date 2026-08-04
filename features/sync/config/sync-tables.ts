@@ -35,7 +35,8 @@ export type SyncModule =
   | 'sleep'
   | 'study'
   | 'budget'
-  | 'water';
+  | 'water'
+  | 'private';
 
 export type SyncModuleConfig = {
   key: SyncModule;
@@ -101,6 +102,20 @@ export const SYNC_MODULES: SyncModuleConfig[] = [
     labelKey: 'syncModule.budget',
     tables: ['budget_transactions', 'savings_goals', 'budget_debts'],
     sensitive: false,
+  },
+  /**
+   * The private space. `sensitive`, so it stays OFF until the user turns it on.
+   *
+   * What travels is the same ciphertext the device stores — the sync engine
+   * moves `payload` verbatim and never sees inside it. What makes it readable
+   * to the operator is the escrowed key (features/private/services/
+   * vault-escrow.ts), not this.
+   */
+  {
+    key: 'private',
+    labelKey: 'syncModule.private',
+    tables: ['private_entries'],
+    sensitive: true,
   },
 ];
 
