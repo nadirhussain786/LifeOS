@@ -1,5 +1,7 @@
 import { getRawDb } from '@/database/client';
+import { trackModuleWrites } from '@/features/analytics/store/usage-store';
 import { useAuthStore } from '@/features/auth/services/auth-store';
+import { currentStatus } from '@/features/moderation/services/account-standing';
 import { SYNC_MODULES } from '@/features/sync/config/sync-tables';
 import { useSyncStore } from '@/features/sync/store/sync-store';
 import { LOCAL_USER_ID } from '@/lib/local-user';
@@ -22,15 +24,17 @@ function localColumns(table: string): Set<string> {
   return new Set(info.map((c) => c.name));
 }
 
-/** Uploads local rows changed since the last push for one table. */
-async function pushTable(uid: string, table: string): Promise<void> {
+/** Uploads local rows changed since the last push for one table. Returns how
+ * many rows moved, which is also the app's measure of "writes" per module —
+ * see the rollup in runSync(). */
+async function pushTable(uid: string, table: string): Promise<number> {
   const raw = getRawDb();
   const cursor = useSyncStore.getState().pushCursors[table] ?? 0;
   const rows = raw.getAllSync<Row>(
     `SELECT * FROM ${table} WHERE user_id = ? AND updated_at > ? ORDER BY updated_at ASC`,
     [LOCAL_USER_ID, cursor],
   );
-  if (rows.length === 0) return;
+  if (rows.length === 0) return 0;
 
   const payload = rows.map((r) => ({ ...r, user_id: uid }));
   const { error } = await supabase.from(table).upsert(payload, { onConflict: 'id' });
@@ -38,6 +42,7 @@ async function pushTable(uid: string, table: string): Promise<void> {
 
   const maxUpdated = rows.reduce((m, r) => Math.max(m, Number(r.updated_at ?? 0)), cursor);
   useSyncStore.getState().setCursor('push', table, maxUpdated);
+  return rows.length;
 }
 
 /** Downloads server rows changed since the last pull for one table, applying
@@ -93,15 +98,29 @@ async function runSync(): Promise<void> {
   const uid = useAuthStore.getState().user?.id;
   if (!uid) return; // guests keep everything local
 
+  // A blocked account is refused server-side anyway; stopping here turns a
+  // string of RLS rejections into one honest status the Sync screen can show.
+  // Only `blocked` — a restricted account has lost its reach into other
+  // people's groups, not the right to back up its own data.
+  if (currentStatus() === 'blocked') {
+    useSyncStore.getState().setStatus('error', 'This account is blocked. Sync is paused.');
+    return;
+  }
+
   const store = useSyncStore.getState();
   store.setStatus('syncing');
   try {
     for (const mod of SYNC_MODULES) {
       if (!(store.modules[mod.key] ?? false)) continue;
+      // "Writes" is measured from what actually reached the server rather than
+      // from instrumenting every mutation in every module: one place to be
+      // right, and it counts real content rather than button presses.
+      let pushed = 0;
       for (const table of mod.tables) {
-        await pushTable(uid, table);
+        pushed += await pushTable(uid, table);
         await pullTable(uid, table);
       }
+      if (pushed > 0) trackModuleWrites(mod.key, pushed);
     }
     useSyncStore.getState().setStatus('idle');
     useSyncStore.getState().setLastSyncedAt(Date.now());
