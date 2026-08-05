@@ -1903,4 +1903,300 @@ await test('0015 escrow status reveals existence without unsealing', async () =>
   );
 });
 
+// ---------------------------------------------------------------------------
+console.log('\nfull sync coverage (0016)');
+// ---------------------------------------------------------------------------
+
+/** Every table the sync engine touches, and the column it is keyed by. Kept in
+ *  step with features/sync/config/sync-tables.ts by the contract test there;
+ *  what is checked here is the half that only a real database can answer. */
+const SYNCED = [
+  ...[
+    'task_categories',
+    'tasks',
+    'note_categories',
+    'notes',
+    'note_tags',
+    'note_tag_links',
+    'note_attachments',
+    'entry_links',
+    'habit_categories',
+    'habits',
+    'habit_routines',
+    'habit_routine_items',
+    'habit_logs',
+    'habit_skips',
+    'journal_entries',
+    'journal_prompts',
+    'journal_reflections',
+    'journal_attachments',
+    'calendar_events',
+    'goals',
+    'goal_milestones',
+    'goal_progress_logs',
+    'sleep_sessions',
+    'study_subjects',
+    'study_sessions',
+    'water_intake_logs',
+    'budget_transactions',
+    'savings_goals',
+    'budget_debts',
+    'gallery_albums',
+    'gallery_photos',
+    'songs',
+    'playlists',
+    'playlist_songs',
+    'private_entries',
+  ].map((table) => ({ table, key: 'id' })),
+  ...['sleep_settings', 'study_settings', 'budget_settings'].map((table) => ({
+    table,
+    key: 'user_id',
+  })),
+];
+
+await test('0016 every synced table exists with the columns the engine reads', async () => {
+  for (const { table, key } of SYNCED) {
+    const columns = (
+      await db.query(
+        `select column_name from information_schema.columns
+          where table_schema = 'public' and table_name = $1`,
+        [table],
+      )
+    ).rows.map((row) => row.column_name);
+    if (columns.length === 0) throw new Error(`${table}: no such table`);
+    for (const required of [key, 'user_id', 'updated_at']) {
+      if (!columns.includes(required)) throw new Error(`${table}: missing ${required}`);
+    }
+  }
+});
+
+await test('0016 no synced table exposes a device-local column', async () => {
+  // Uploading another device's notification handles or file paths is worse than
+  // not syncing the row at all — see SYNC_DEVICE_LOCAL_COLUMNS. The server not
+  // having the column is what makes that impossible rather than merely
+  // discouraged.
+  const leaked = (
+    await db.query(
+      `select table_name, column_name from information_schema.columns
+        where table_schema = 'public'
+          and table_name = any($1)
+          and column_name in ('uri', 'thumbnail_uri', 'reminder_notification_id')`,
+      [SYNCED.map((s) => s.table)],
+    )
+  ).rows;
+  expectEqual(
+    leaked.map((row) => `${row.table_name}.${row.column_name}`).join(', '),
+    '',
+    'device-local columns on the server',
+  );
+});
+
+await test('0016 every synced table is indexed on (user_id, updated_at)', async () => {
+  // The engine reads nothing else. Without the index this is a sequential scan
+  // of every user's rows on every pull.
+  const missing = [];
+  for (const { table } of SYNCED) {
+    const found = await count(
+      `select count(*)::int n from pg_indexes
+        where schemaname = 'public' and tablename = $1
+          and indexdef like '%(user_id, updated_at)%'`,
+      [table],
+    );
+    if (found === 0) missing.push(table);
+  }
+  expectEqual(missing.join(', '), '', 'tables without a sync index');
+});
+
+await test('0016 every synced table refuses another user', async () => {
+  // RLS, asserted per table rather than per migration: a table added later with
+  // `enable row level security` but no policy reads as locked down to a static
+  // check and is wide open to nobody, which is a different bug with the same
+  // shape. This inserts as Alice and reads as Bob.
+  await asUser(db, ALICE, async () => {
+    await db.query(
+      `insert into public.note_tags (id, user_id, name, created_at, updated_at)
+        values ('tag-a', $1, 'private tag', 1, 1)`,
+      [ALICE],
+    );
+    await db.query(
+      `insert into public.sleep_settings (user_id, goal_minutes, updated_at)
+        values ($1, 400, 1)`,
+      [ALICE],
+    );
+  });
+
+  await asUser(db, BOB, async () => {
+    expectEqual(
+      await count(`select count(*)::int n from public.note_tags`),
+      0,
+      "Bob's view of Alice's tags",
+    );
+    expectEqual(
+      await count(`select count(*)::int n from public.sleep_settings`),
+      0,
+      "Bob's view of Alice's sleep settings",
+    );
+  });
+
+  await asUser(db, ALICE, async () => {
+    expectEqual(await count(`select count(*)::int n from public.note_tags`), 1, 'Alice sees hers');
+  });
+});
+
+await test('0016 one user cannot write a row under another uid', async () => {
+  await asUser(db, BOB, async () => {
+    await expectRejection(
+      () =>
+        db.query(
+          `insert into public.entry_links
+            (id, user_id, source_type, source_id, target_type, target_id, relation,
+             created_at, updated_at)
+           values ('forged', $1, 'note', 'n1', 'note', 'n2', 'mentions', 1, 1)`,
+          [ALICE],
+        ),
+      'row-level security',
+    );
+  });
+});
+
+await test('0016 an anonymous caller sees none of it', async () => {
+  await asAnon(db, async () => {
+    for (const table of ['note_tags', 'gallery_photos', 'songs', 'budget_settings']) {
+      expectEqual(
+        await count(`select count(*)::int n from public.${table}`),
+        0,
+        `anon rows in ${table}`,
+      );
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+console.log('\nRLS at scale (0017)');
+// ---------------------------------------------------------------------------
+
+await test('0017 owner policies still refuse another user after the rewrite', async () => {
+  // The rewrite is meant to be semantics-preserving. This is the assertion that
+  // says so: if the loop had produced `user_id = user_id`, every table in the
+  // schema would be world-readable and every other test here would still pass.
+  await asUser(db, ALICE, async () => {
+    await db.query(
+      `insert into public.tasks (id, user_id, title, created_at, updated_at)
+        values ('t-rls', $1, 'Alice private task', 1, 1)`,
+      [ALICE],
+    );
+  });
+  await asUser(db, BOB, async () => {
+    expectEqual(
+      await count(`select count(*)::int n from public.tasks where id = 't-rls'`),
+      0,
+      "Bob's view of Alice's task",
+    );
+  });
+  await asUser(db, ALICE, async () => {
+    expectEqual(
+      await count(`select count(*)::int n from public.tasks where id = 't-rls'`),
+      1,
+      'Alice sees her own',
+    );
+  });
+});
+
+await test('0017 a blocked account cannot write, server-side', async () => {
+  // The sync engine refuses to run for a blocked account, but that check is in
+  // the client and is therefore advice. This is the enforcement.
+  await asUser(db, VANDAL, async () => {
+    await db.query(
+      `insert into public.notes (id, user_id, title, created_at, updated_at)
+        values ('n-before', $1, 'written while in good standing', 1, 1)`,
+      [VANDAL],
+    );
+  });
+
+  await db.query(
+    `insert into public.account_status (user_id, status, reason, actor)
+      values ($1, 'blocked', 'abuse', $2)
+     on conflict (user_id) do update set status = 'blocked', reason = 'abuse', expires_at = null`,
+    [VANDAL, ADMIN],
+  );
+
+  await asUser(db, VANDAL, async () => {
+    await expectRejection(
+      () =>
+        db.query(
+          `insert into public.notes (id, user_id, title, created_at, updated_at)
+            values ('n-after', $1, 'written while blocked', 2, 2)`,
+          [VANDAL],
+        ),
+      'row-level security',
+    );
+  });
+});
+
+await test('0019 a blocked account cannot read its own data either', async () => {
+  // 0017 allowed this; 0019 deliberately does not. A block that leaves the
+  // cloud copy readable through any HTTP client is not a block, and the
+  // export-my-data obligation is now served by the operator surface (an admin
+  // can produce the rows) rather than by leaving the account's own access open.
+  await asUser(db, VANDAL, async () => {
+    expectEqual(
+      await count(`select count(*)::int n from public.notes where id = 'n-before'`),
+      0,
+      'blocked user reading their own note',
+    );
+  });
+});
+
+await test('0019 a blocked account can still read why', async () => {
+  // account_status, profiles and device_commands stay reachable on purpose:
+  // "you are blocked" with no reason and no expiry is how an appeal turns into
+  // a support ticket answered by hand.
+  await asUser(db, VANDAL, async () => {
+    const row = await one(
+      `select status::text, reason from public.account_status where user_id = $1`,
+      [VANDAL],
+    );
+    expectEqual(row.status, 'blocked', 'own standing is readable');
+    expectEqual(row.reason, 'abuse', 'and says why');
+  });
+});
+
+await test('0017 lifting the block restores writing', async () => {
+  await db.query(`update public.account_status set status = 'active' where user_id = $1`, [VANDAL]);
+  await asUser(db, VANDAL, async () => {
+    await db.query(
+      `insert into public.notes (id, user_id, title, created_at, updated_at)
+        values ('n-restored', $1, 'unblocked', 3, 3)`,
+      [VANDAL],
+    );
+  });
+  expectEqual(
+    await count(`select count(*)::int n from public.notes where id = 'n-restored'`),
+    1,
+    'write after the block was lifted',
+  );
+});
+
+await test('0017 an expired block stops applying on its own', async () => {
+  // `is_active()` honours expires_at, so a timed restriction lapses without
+  // anybody having to remember to clear it.
+  await db.query(
+    `update public.account_status
+        set status = 'blocked', expires_at = now() - interval '1 hour'
+      where user_id = $1`,
+    [VANDAL],
+  );
+  await asUser(db, VANDAL, async () => {
+    await db.query(
+      `insert into public.notes (id, user_id, title, created_at, updated_at)
+        values ('n-expired', $1, 'block already lapsed', 4, 4)`,
+      [VANDAL],
+    );
+  });
+  expectEqual(
+    await count(`select count(*)::int n from public.notes where id = 'n-expired'`),
+    1,
+    'write after the block expired',
+  );
+});
 summary();

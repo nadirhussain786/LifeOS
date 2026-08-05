@@ -18,7 +18,11 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/ui/text';
-import { displayUri, type GalleryPhoto } from '@/features/gallery/types/gallery.types';
+import {
+  displayUri,
+  isOnThisDevice,
+  type GalleryPhoto,
+} from '@/features/gallery/types/gallery.types';
 import { usePhotos } from '@/features/gallery/hooks/use-gallery';
 import { moduleTint } from '@/constants/design-tokens';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -55,7 +59,11 @@ export default function StoryPlayerScreen() {
   const { data: photos = [] } = usePhotos();
 
   const story = useMemo<GalleryPhoto[]>(() => {
-    const scoped = album ? photos.filter((p) => p.albumId === album) : photos;
+    // A story is nothing but full-bleed pixels, so media whose file lives on
+    // another device is left out rather than shown as a blank frame the user
+    // has to tap past.
+    const available = photos.filter(isOnThisDevice);
+    const scoped = album ? available.filter((p) => p.albumId === album) : available;
     const sorted = [...scoped].sort((a, b) => a.takenAt - b.takenAt); // oldest → newest
     if (period === 'all' || !period) return sorted;
     return sorted.filter((p) => format(p.takenAt, 'yyyy-MM') === period);
@@ -137,7 +145,7 @@ export default function StoryPlayerScreen() {
         {/* Ken Burns media */}
         <Animated.View style={[{ position: 'absolute', width, height }, kbStyle]}>
           <Image
-            source={{ uri: displayUri(current) }}
+            source={{ uri: displayUri(current) ?? undefined }}
             style={{ width, height }}
             contentFit="cover"
             recyclingKey={current.id}

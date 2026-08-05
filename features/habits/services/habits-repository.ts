@@ -168,7 +168,10 @@ export function deleteHabit(id: string) {
     .set({ deletedAt: Date.now(), updatedAt: Date.now(), syncStatus: 'pending' })
     .where(eq(habits.id, id))
     .run();
-  db.delete(habitRoutineItems).where(eq(habitRoutineItems.habitId, id)).run();
+  db.update(habitRoutineItems)
+    .set({ deletedAt: Date.now(), updatedAt: Date.now() })
+    .where(and(eq(habitRoutineItems.habitId, id), isNull(habitRoutineItems.deletedAt)))
+    .run();
 }
 
 export function reorderHabits(orderedIds: string[]) {
@@ -368,7 +371,13 @@ export function deleteRoutine(id: string) {
     .set({ deletedAt: Date.now(), updatedAt: Date.now() })
     .where(eq(habitRoutines.id, id))
     .run();
-  db.delete(habitRoutineItems).where(eq(habitRoutineItems.routineId, id)).run();
+  // Soft, like the routine itself: routine items sync now, and a hard DELETE
+  // leaves nothing for the engine to push, so the next pull would put every
+  // item back.
+  db.update(habitRoutineItems)
+    .set({ deletedAt: Date.now(), updatedAt: Date.now() })
+    .where(and(eq(habitRoutineItems.routineId, id), isNull(habitRoutineItems.deletedAt)))
+    .run();
 }
 
 /** Ordered habit ids for one routine. */
@@ -376,7 +385,7 @@ export function listRoutineHabitIds(routineId: string): string[] {
   return getDb()
     .select()
     .from(habitRoutineItems)
-    .where(eq(habitRoutineItems.routineId, routineId))
+    .where(and(eq(habitRoutineItems.routineId, routineId), isNull(habitRoutineItems.deletedAt)))
     .orderBy(habitRoutineItems.position)
     .all()
     .map((row) => row.habitId);
@@ -389,6 +398,7 @@ export function listRoutinedHabitIds(): Set<string> {
     getDb()
       .select()
       .from(habitRoutineItems)
+      .where(isNull(habitRoutineItems.deletedAt))
       .all()
       .map((row) => row.habitId),
   );
@@ -396,36 +406,59 @@ export function listRoutinedHabitIds(): Set<string> {
 
 export function addHabitToRoutine(routineId: string, habitId: string) {
   const db = getDb();
+  const now = Date.now();
   const existing = db
     .select()
     .from(habitRoutineItems)
     .where(and(eq(habitRoutineItems.routineId, routineId), eq(habitRoutineItems.habitId, habitId)))
     .get();
-  if (existing) return;
+
+  // A row may exist but be soft-deleted from an earlier removal. Reviving it
+  // keeps the derived id — and therefore the server row — stable.
+  if (existing) {
+    if (existing.deletedAt === null) return;
+    db.update(habitRoutineItems)
+      .set({ deletedAt: null, updatedAt: now })
+      .where(
+        and(eq(habitRoutineItems.routineId, routineId), eq(habitRoutineItems.habitId, habitId)),
+      )
+      .run();
+    return;
+  }
 
   const maxPosition = db
     .select()
     .from(habitRoutineItems)
-    .where(eq(habitRoutineItems.routineId, routineId))
+    .where(and(eq(habitRoutineItems.routineId, routineId), isNull(habitRoutineItems.deletedAt)))
     .all()
     .reduce((max, row) => Math.max(max, row.position), -1);
   db.insert(habitRoutineItems)
-    .values({ routineId, habitId, position: maxPosition + 1 })
+    .values({
+      id: `${routineId}:${habitId}`,
+      userId: LOCAL_USER_ID,
+      routineId,
+      habitId,
+      position: maxPosition + 1,
+      updatedAt: now,
+    })
     .run();
 }
 
 export function removeHabitFromRoutine(routineId: string, habitId: string) {
+  const now = Date.now();
   getDb()
-    .delete(habitRoutineItems)
+    .update(habitRoutineItems)
+    .set({ deletedAt: now, updatedAt: now })
     .where(and(eq(habitRoutineItems.routineId, routineId), eq(habitRoutineItems.habitId, habitId)))
     .run();
 }
 
 export function reorderRoutineHabits(routineId: string, orderedHabitIds: string[]) {
   const db = getDb();
+  const now = Date.now();
   orderedHabitIds.forEach((habitId, index) => {
     db.update(habitRoutineItems)
-      .set({ position: index })
+      .set({ position: index, updatedAt: now })
       .where(
         and(eq(habitRoutineItems.routineId, routineId), eq(habitRoutineItems.habitId, habitId)),
       )

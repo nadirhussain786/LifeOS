@@ -124,7 +124,9 @@ export default function SyncSettingsScreen() {
 
   const handleSyncNow = () => {
     Haptics.selectionAsync();
-    void syncNow();
+    // Forced: somebody who just pressed the button gets a request even if the
+    // throttle or the post-failure backoff would have skipped this one.
+    void syncNow({ force: true });
   };
 
   const handleSignOut = () => {
@@ -242,6 +244,11 @@ export default function SyncSettingsScreen() {
           </View>
           <Text variant="caption" className="px-1">
             {t('sync.whatSyncsNote')}
+          </Text>
+          {/* Said plainly, because "Gallery: on" otherwise reads as a promise
+              that the photos themselves are backed up. They are not. */}
+          <Text variant="caption" className="px-1">
+            {t('sync.mediaNote')}
           </Text>
         </View>
 

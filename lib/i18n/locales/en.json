@@ -957,7 +957,8 @@
     "openNowPlaying": "Open now playing",
     "nextTrack": "Next track",
     "hidePlayer": "Hide player",
-    "playHint": "Plays this song"
+    "playHint": "Plays this song",
+    "notOnThisDevice": "Not on this device"
   },
   "albumCategory": {
     "gym": "Gym Progress",
@@ -1062,7 +1063,8 @@
     "subjectEmpty": "Add your first photo to start tracking.",
     "subjectNeedsSecond": "Add one more photo to see your change.",
     "playProgression": "Play",
-    "viewInAll": "View"
+    "viewInAll": "View",
+    "notOnThisDevice": "Not on this device"
   },
   "timeline": {
     "title": "Timeline",
@@ -1318,7 +1320,8 @@
     "notConfiguredBody": "Accounts and cloud sync are switched off — everything still works offline. For an EAS build, set these in the environment the build profile uses, then rebuild.",
     "envMissing": "missing",
     "failedToast": "Sync didn’t finish. Your data is safe on this device.",
-    "privateSyncWarning": "Turning this on uploads your private space so it can sync across your devices. It stays encrypted in transit and at rest."
+    "privateSyncWarning": "Turning this on uploads your private space so it can sync across your devices. It stays encrypted in transit and at rest.",
+    "mediaNote": "Gallery and Music sync your albums, playlists and details — not the photo, video and audio files themselves. Those stay on the device that imported them, and appear elsewhere as “Not on this device”."
   },
   "syncModule": {
     "tasks": "Tasks",
@@ -1331,6 +1334,8 @@
     "study": "Study",
     "budget": "Budget",
     "water": "Water",
+    "gallery": "Gallery",
+    "music": "Music",
     "private": "Private space"
   },
   "security": {

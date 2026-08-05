@@ -59,7 +59,13 @@ export function createSong(input: {
   };
   getDb()
     .insert(songs)
-    .values({ ...song, userId: LOCAL_USER_ID, createdAt: now, syncStatus: 'pending' })
+    .values({
+      ...song,
+      userId: LOCAL_USER_ID,
+      createdAt: now,
+      updatedAt: now,
+      syncStatus: 'pending',
+    })
     .run();
   return song;
 }
@@ -67,7 +73,7 @@ export function createSong(input: {
 export function updateSong(id: string, input: { title?: string; artist?: string | null }) {
   getDb()
     .update(songs)
-    .set({ ...input, syncStatus: 'pending' })
+    .set({ ...input, updatedAt: Date.now(), syncStatus: 'pending' })
     .where(eq(songs.id, id))
     .run();
 }
@@ -79,13 +85,19 @@ export function updateSong(id: string, input: { title?: string; artist?: string 
 export function deleteSong(id: string) {
   const song = getSong(id);
   const db = getDb();
-  db.delete(playlistSongs).where(eq(playlistSongs.songId, id)).run();
+  const now = Date.now();
+  db.update(playlistSongs)
+    .set({ deletedAt: now, updatedAt: now })
+    .where(and(eq(playlistSongs.songId, id), isNull(playlistSongs.deletedAt)))
+    .run();
   db.update(songs)
-    .set({ deletedAt: Date.now(), syncStatus: 'pending' })
+    .set({ deletedAt: now, updatedAt: now, syncStatus: 'pending' })
     .where(eq(songs.id, id))
     .run();
 
-  if (song) {
+  // A row that arrived by sync has no bytes on this device, and `uri` is the
+  // empty string rather than a path. Constructing a File from it would throw.
+  if (song && song.uri) {
     const file = new File(song.uri);
     if (file.exists) file.delete();
   }

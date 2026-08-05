@@ -84,11 +84,28 @@ export const noteTags = sqliteTable('note_tags', {
   name: text('name').notNull(),
   colorToken: text('color_token'),
   createdAt: integer('created_at').notNull(),
+  updatedAt: integer('updated_at').notNull().default(0),
+  deletedAt: integer('deleted_at'),
 });
 
+/**
+ * Join table, and the `id` is deliberately derived rather than random:
+ * `noteId:tagId`. Two devices that tag the same note with the same tag while
+ * offline then produce the *same* row, which the sync engine's upsert collapses
+ * into one. A random id would give the note two identical tag links, one per
+ * device, and nothing downstream would notice.
+ *
+ * The composite PRIMARY KEY stays — it is what every existing device already
+ * has, and SQLite cannot alter a primary key without rebuilding the table.
+ * `id` is a plain column with a unique index, which is all the engine needs.
+ */
 export const noteTagLinks = sqliteTable('note_tag_links', {
+  id: text('id'),
+  userId: text('user_id').notNull().default('local'),
   noteId: text('note_id').notNull(),
   tagId: text('tag_id').notNull(),
+  updatedAt: integer('updated_at').notNull().default(0),
+  deletedAt: integer('deleted_at'),
 });
 
 export const noteAttachments = sqliteTable('note_attachments', {
@@ -101,7 +118,9 @@ export const noteAttachments = sqliteTable('note_attachments', {
   durationMs: integer('duration_ms'),
   sizeBytes: integer('size_bytes'),
   createdAt: integer('created_at').notNull(),
+  updatedAt: integer('updated_at').notNull().default(0),
   deletedAt: integer('deleted_at'),
+  remotePath: text('remote_path'),
 });
 
 export const habitCategories = sqliteTable('habit_categories', {
@@ -195,10 +214,15 @@ export const habitRoutines = sqliteTable('habit_routines', {
   deletedAt: integer('deleted_at'),
 });
 
+/** Derived `id` (`routineId:habitId`) for the same reason as noteTagLinks. */
 export const habitRoutineItems = sqliteTable('habit_routine_items', {
+  id: text('id'),
+  userId: text('user_id').notNull().default('local'),
   routineId: text('routine_id').notNull(),
   habitId: text('habit_id').notNull(),
   position: integer('position').notNull().default(0),
+  updatedAt: integer('updated_at').notNull().default(0),
+  deletedAt: integer('deleted_at'),
 });
 
 export const journalEntries = sqliteTable('journal_entries', {
@@ -232,6 +256,8 @@ export const journalPrompts = sqliteTable('journal_prompts', {
   isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
   sortOrder: integer('sort_order').notNull().default(0),
   createdAt: integer('created_at').notNull(),
+  updatedAt: integer('updated_at').notNull().default(0),
+  deletedAt: integer('deleted_at'),
 });
 
 export const journalReflections = sqliteTable('journal_reflections', {
@@ -259,7 +285,9 @@ export const journalAttachments = sqliteTable('journal_attachments', {
   thumbnailUri: text('thumbnail_uri'),
   durationMs: integer('duration_ms'),
   createdAt: integer('created_at').notNull(),
+  updatedAt: integer('updated_at').notNull().default(0),
   deletedAt: integer('deleted_at'),
+  remotePath: text('remote_path'),
 });
 
 /** Cross-module reference graph — the literal implementation of "everything
@@ -281,6 +309,8 @@ export const entryLinks = sqliteTable('entry_links', {
     enum: ['mentions', 'completed_by', 'generated_from', 'logged_by'],
   }).notNull(),
   createdAt: integer('created_at').notNull(),
+  updatedAt: integer('updated_at').notNull().default(0),
+  deletedAt: integer('deleted_at'),
 });
 
 /** Standalone scheduled events — the one genuinely new source of truth the
@@ -329,11 +359,16 @@ export const songs = sqliteTable('songs', {
   userId: text('user_id').notNull(),
   title: text('title').notNull(),
   artist: text('artist'),
-  uri: text('uri').notNull(),
+  /** Local file:// URI. Device-scoped — see SYNC_DEVICE_LOCAL_COLUMNS. */
+  uri: text('uri').notNull().default(''),
   durationMs: integer('duration_ms'),
   addedAt: integer('added_at').notNull(),
   createdAt: integer('created_at').notNull(),
+  updatedAt: integer('updated_at').notNull().default(0),
   deletedAt: integer('deleted_at'),
+  /** Storage object path once the bytes are uploaded; null while the file
+   * exists only on the device that imported it. */
+  remotePath: text('remote_path'),
   syncStatus: text('sync_status', { enum: ['pending', 'synced', 'conflict'] })
     .notNull()
     .default('pending'),
@@ -355,10 +390,15 @@ export const playlists = sqliteTable('playlists', {
   serverUpdatedAt: integer('server_updated_at'),
 });
 
+/** Derived `id` (`playlistId:songId`) for the same reason as noteTagLinks. */
 export const playlistSongs = sqliteTable('playlist_songs', {
+  id: text('id'),
+  userId: text('user_id').notNull().default('local'),
   playlistId: text('playlist_id').notNull(),
   songId: text('song_id').notNull(),
   position: integer('position').notNull().default(0),
+  updatedAt: integer('updated_at').notNull().default(0),
+  deletedAt: integer('deleted_at'),
 });
 
 export const goals = sqliteTable('goals', {
@@ -616,8 +656,10 @@ export const galleryPhotos = sqliteTable('gallery_photos', {
   userId: text('user_id').notNull(),
   albumId: text('album_id'),
   /** Local file:// URI inside the app's document directory (copied on import
-   * so it survives relaunch). */
-  uri: text('uri').notNull(),
+   * so it survives relaunch). Device-scoped: a row that arrived by sync from
+   * another phone has no bytes here and reads as `''` until they are fetched.
+   * See SYNC_DEVICE_LOCAL_COLUMNS. */
+  uri: text('uri').notNull().default(''),
   /** 'photo' or 'video' — videos also carry a durationMs + thumbnailUri. */
   mediaType: text('media_type', { enum: ['photo', 'video'] })
     .notNull()
@@ -641,6 +683,9 @@ export const galleryPhotos = sqliteTable('gallery_photos', {
     .notNull()
     .default('pending'),
   serverUpdatedAt: integer('server_updated_at'),
+  /** Storage object path once the bytes are uploaded; null while the file
+   * exists only on the device that imported it. */
+  remotePath: text('remote_path'),
 });
 
 /**
@@ -802,12 +847,18 @@ export const TABLE_BOOTSTRAP_SQL = `
     user_id TEXT NOT NULL,
     name TEXT NOT NULL,
     color_token TEXT,
-    created_at INTEGER NOT NULL
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL DEFAULT 0,
+    deleted_at INTEGER
   );
 
   CREATE TABLE IF NOT EXISTS note_tag_links (
     note_id TEXT NOT NULL,
     tag_id TEXT NOT NULL,
+    id TEXT,
+    user_id TEXT NOT NULL DEFAULT 'local',
+    updated_at INTEGER NOT NULL DEFAULT 0,
+    deleted_at INTEGER,
     PRIMARY KEY (note_id, tag_id)
   );
 
@@ -816,12 +867,14 @@ export const TABLE_BOOTSTRAP_SQL = `
     note_id TEXT NOT NULL,
     user_id TEXT NOT NULL,
     kind TEXT NOT NULL,
-    uri TEXT NOT NULL,
+    uri TEXT NOT NULL DEFAULT '',
     thumbnail_uri TEXT,
     duration_ms INTEGER,
     size_bytes INTEGER,
     created_at INTEGER NOT NULL,
-    deleted_at INTEGER
+    updated_at INTEGER NOT NULL DEFAULT 0,
+    deleted_at INTEGER,
+    remote_path TEXT
   );
 
   CREATE TABLE IF NOT EXISTS habit_categories (
@@ -869,7 +922,7 @@ export const TABLE_BOOTSTRAP_SQL = `
     note TEXT,
     logged_at INTEGER NOT NULL,
     created_at INTEGER NOT NULL,
-    updated_at INTEGER NOT NULL DEFAULT 0
+    updated_at INTEGER NOT NULL DEFAULT 0,
     deleted_at INTEGER
   );
 
@@ -879,8 +932,8 @@ export const TABLE_BOOTSTRAP_SQL = `
     log_date TEXT NOT NULL,
     reason TEXT NOT NULL,
     created_at INTEGER NOT NULL,
-    user_id TEXT NOT NULL DEFAULT 'local'
-    updated_at INTEGER NOT NULL DEFAULT 0
+    user_id TEXT NOT NULL DEFAULT 'local',
+    updated_at INTEGER NOT NULL DEFAULT 0,
     deleted_at INTEGER
   );
 
@@ -898,6 +951,10 @@ export const TABLE_BOOTSTRAP_SQL = `
     routine_id TEXT NOT NULL,
     habit_id TEXT NOT NULL,
     position INTEGER NOT NULL DEFAULT 0,
+    id TEXT,
+    user_id TEXT NOT NULL DEFAULT 'local',
+    updated_at INTEGER NOT NULL DEFAULT 0,
+    deleted_at INTEGER,
     PRIMARY KEY (routine_id, habit_id)
   );
 
@@ -929,7 +986,9 @@ export const TABLE_BOOTSTRAP_SQL = `
     text TEXT NOT NULL,
     is_active INTEGER NOT NULL DEFAULT 1,
     sort_order INTEGER NOT NULL DEFAULT 0,
-    created_at INTEGER NOT NULL
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL DEFAULT 0,
+    deleted_at INTEGER
   );
 
   CREATE TABLE IF NOT EXISTS journal_reflections (
@@ -938,8 +997,8 @@ export const TABLE_BOOTSTRAP_SQL = `
     prompt_id TEXT NOT NULL,
     answer_text TEXT NOT NULL,
     created_at INTEGER NOT NULL,
-    user_id TEXT NOT NULL DEFAULT 'local'
-    updated_at INTEGER NOT NULL DEFAULT 0
+    user_id TEXT NOT NULL DEFAULT 'local',
+    updated_at INTEGER NOT NULL DEFAULT 0,
     deleted_at INTEGER
   );
 
@@ -948,11 +1007,13 @@ export const TABLE_BOOTSTRAP_SQL = `
     entry_id TEXT NOT NULL,
     user_id TEXT NOT NULL,
     kind TEXT NOT NULL,
-    uri TEXT NOT NULL,
+    uri TEXT NOT NULL DEFAULT '',
     thumbnail_uri TEXT,
     duration_ms INTEGER,
     created_at INTEGER NOT NULL,
-    deleted_at INTEGER
+    updated_at INTEGER NOT NULL DEFAULT 0,
+    deleted_at INTEGER,
+    remote_path TEXT
   );
 
   CREATE TABLE IF NOT EXISTS entry_links (
@@ -963,7 +1024,9 @@ export const TABLE_BOOTSTRAP_SQL = `
     target_type TEXT NOT NULL,
     target_id TEXT NOT NULL,
     relation TEXT NOT NULL,
-    created_at INTEGER NOT NULL
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL DEFAULT 0,
+    deleted_at INTEGER
   );
 
   CREATE TABLE IF NOT EXISTS calendar_events (
@@ -988,7 +1051,7 @@ export const TABLE_BOOTSTRAP_SQL = `
     amount_ml INTEGER NOT NULL,
     logged_at INTEGER NOT NULL,
     created_at INTEGER NOT NULL,
-    updated_at INTEGER NOT NULL DEFAULT 0
+    updated_at INTEGER NOT NULL DEFAULT 0,
     deleted_at INTEGER
   );
 
@@ -997,13 +1060,15 @@ export const TABLE_BOOTSTRAP_SQL = `
     user_id TEXT NOT NULL,
     title TEXT NOT NULL,
     artist TEXT,
-    uri TEXT NOT NULL,
+    uri TEXT NOT NULL DEFAULT '',
     duration_ms INTEGER,
     added_at INTEGER NOT NULL,
     created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL DEFAULT 0,
     deleted_at INTEGER,
     sync_status TEXT NOT NULL DEFAULT 'pending',
-    server_updated_at INTEGER
+    server_updated_at INTEGER,
+    remote_path TEXT
   );
 
   CREATE TABLE IF NOT EXISTS playlists (
@@ -1023,6 +1088,10 @@ export const TABLE_BOOTSTRAP_SQL = `
     playlist_id TEXT NOT NULL,
     song_id TEXT NOT NULL,
     position INTEGER NOT NULL DEFAULT 0,
+    id TEXT,
+    user_id TEXT NOT NULL DEFAULT 'local',
+    updated_at INTEGER NOT NULL DEFAULT 0,
+    deleted_at INTEGER,
     PRIMARY KEY (playlist_id, song_id)
   );
 
@@ -1059,7 +1128,7 @@ export const TABLE_BOOTSTRAP_SQL = `
     completed_at INTEGER,
     position INTEGER NOT NULL DEFAULT 0,
     created_at INTEGER NOT NULL,
-    updated_at INTEGER NOT NULL DEFAULT 0
+    updated_at INTEGER NOT NULL DEFAULT 0,
     deleted_at INTEGER
   );
 
@@ -1073,7 +1142,7 @@ export const TABLE_BOOTSTRAP_SQL = `
     logged_at INTEGER NOT NULL,
     log_date TEXT NOT NULL,
     created_at INTEGER NOT NULL,
-    updated_at INTEGER NOT NULL DEFAULT 0
+    updated_at INTEGER NOT NULL DEFAULT 0,
     deleted_at INTEGER
   );
 
@@ -1212,7 +1281,7 @@ export const TABLE_BOOTSTRAP_SQL = `
     id TEXT PRIMARY KEY NOT NULL,
     user_id TEXT NOT NULL,
     album_id TEXT,
-    uri TEXT NOT NULL,
+    uri TEXT NOT NULL DEFAULT '',
     media_type TEXT NOT NULL DEFAULT 'photo',
     duration_ms INTEGER,
     thumbnail_uri TEXT,
@@ -1226,7 +1295,8 @@ export const TABLE_BOOTSTRAP_SQL = `
     updated_at INTEGER NOT NULL,
     deleted_at INTEGER,
     sync_status TEXT NOT NULL DEFAULT 'pending',
-    server_updated_at INTEGER
+    server_updated_at INTEGER,
+    remote_path TEXT
   );
 
   CREATE TABLE IF NOT EXISTS notification_log (
@@ -1277,6 +1347,26 @@ export const BACKFILL_SQL = `
   UPDATE goal_milestones SET updated_at = created_at WHERE updated_at = 0;
   UPDATE goal_progress_logs SET updated_at = created_at WHERE updated_at = 0;
   UPDATE study_sessions SET updated_at = created_at WHERE updated_at = 0;
+
+  UPDATE note_tags SET updated_at = created_at WHERE updated_at = 0;
+  UPDATE note_attachments SET updated_at = created_at WHERE updated_at = 0;
+  UPDATE journal_prompts SET updated_at = created_at WHERE updated_at = 0;
+  UPDATE journal_attachments SET updated_at = created_at WHERE updated_at = 0;
+  UPDATE entry_links SET updated_at = created_at WHERE updated_at = 0;
+  UPDATE songs SET updated_at = created_at WHERE updated_at = 0;
+
+  /* The join tables carry no timestamp of their own, so there is nothing to
+   * derive an honest created_at from. 1 rather than 0: the push predicate is
+   * \`updated_at > cursor\` with the cursor starting at 0, so a row left at 0 is
+   * invisible to sync forever — the exact trap BACKFILL_SQL exists to close.
+   * Their ids are derived from the pair they join, which is what lets two
+   * devices that made the same link agree on one row instead of two. */
+  UPDATE note_tag_links SET id = note_id || ':' || tag_id WHERE id IS NULL;
+  UPDATE note_tag_links SET updated_at = 1 WHERE updated_at = 0;
+  UPDATE habit_routine_items SET id = routine_id || ':' || habit_id WHERE id IS NULL;
+  UPDATE habit_routine_items SET updated_at = 1 WHERE updated_at = 0;
+  UPDATE playlist_songs SET id = playlist_id || ':' || song_id WHERE id IS NULL;
+  UPDATE playlist_songs SET updated_at = 1 WHERE updated_at = 0;
 `;
 
 /** Run after ADDITIVE_COLUMNS — see TABLE_BOOTSTRAP_SQL's comment for why. */
@@ -1322,6 +1412,57 @@ export const INDEX_BOOTSTRAP_SQL = `
   CREATE INDEX IF NOT EXISTS idx_gallery_photos_favorite ON gallery_photos(user_id, is_favorite);
   CREATE INDEX IF NOT EXISTS idx_notification_log_user ON notification_log(user_id, scheduled_at);
   CREATE INDEX IF NOT EXISTS idx_private_entries_user ON private_entries(user_id, updated_at);
+
+  /* ---------------------------------------------------------------------
+   * Sync indexes.
+   *
+   * The engine does exactly two things to a local table: it selects the rows
+   * after a cursor, ordered \`(updated_at, id)\`, and it looks up one row by
+   * \`id\` for every row it pulls. Both are unindexed without these.
+   *
+   * The lookup one is the sharper edge. A pull of a thousand rows performs a
+   * thousand single-row lookups, and on a table with a few years of habit ticks
+   * in it each of those was a full scan — quadratic work on the phone's main
+   * thread, in a transaction, while the UI waits.
+   *
+   * The join tables' \`id\` is a plain column with a derived value (see
+   * ADDITIVE_COLUMNS), so it gets the UNIQUE index a primary key would
+   * otherwise have provided. Unique, not just indexed: it is what stops two
+   * rows ever claiming the same server row.
+   * ------------------------------------------------------------------- */
+  CREATE UNIQUE INDEX IF NOT EXISTS idx_note_tag_links_id ON note_tag_links(id);
+  CREATE UNIQUE INDEX IF NOT EXISTS idx_habit_routine_items_id ON habit_routine_items(id);
+  CREATE UNIQUE INDEX IF NOT EXISTS idx_playlist_songs_id ON playlist_songs(id);
+
+  CREATE INDEX IF NOT EXISTS idx_sync_tasks ON tasks(user_id, updated_at, id);
+  CREATE INDEX IF NOT EXISTS idx_sync_notes ON notes(user_id, updated_at, id);
+  CREATE INDEX IF NOT EXISTS idx_sync_note_tag_links ON note_tag_links(user_id, updated_at, id);
+  CREATE INDEX IF NOT EXISTS idx_sync_note_attachments
+    ON note_attachments(user_id, updated_at, id);
+  CREATE INDEX IF NOT EXISTS idx_sync_entry_links ON entry_links(user_id, updated_at, id);
+  CREATE INDEX IF NOT EXISTS idx_sync_habits ON habits(user_id, updated_at, id);
+  CREATE INDEX IF NOT EXISTS idx_sync_habit_logs ON habit_logs(user_id, updated_at, id);
+  CREATE INDEX IF NOT EXISTS idx_sync_habit_skips ON habit_skips(user_id, updated_at, id);
+  CREATE INDEX IF NOT EXISTS idx_sync_habit_routine_items
+    ON habit_routine_items(user_id, updated_at, id);
+  CREATE INDEX IF NOT EXISTS idx_sync_journal_entries ON journal_entries(user_id, updated_at, id);
+  CREATE INDEX IF NOT EXISTS idx_sync_journal_reflections
+    ON journal_reflections(user_id, updated_at, id);
+  CREATE INDEX IF NOT EXISTS idx_sync_journal_attachments
+    ON journal_attachments(user_id, updated_at, id);
+  CREATE INDEX IF NOT EXISTS idx_sync_calendar_events ON calendar_events(user_id, updated_at, id);
+  CREATE INDEX IF NOT EXISTS idx_sync_goal_progress_logs
+    ON goal_progress_logs(user_id, updated_at, id);
+  CREATE INDEX IF NOT EXISTS idx_sync_goal_milestones ON goal_milestones(user_id, updated_at, id);
+  CREATE INDEX IF NOT EXISTS idx_sync_sleep_sessions ON sleep_sessions(user_id, updated_at, id);
+  CREATE INDEX IF NOT EXISTS idx_sync_study_sessions ON study_sessions(user_id, updated_at, id);
+  CREATE INDEX IF NOT EXISTS idx_sync_water_intake_logs
+    ON water_intake_logs(user_id, updated_at, id);
+  CREATE INDEX IF NOT EXISTS idx_sync_budget_transactions
+    ON budget_transactions(user_id, updated_at, id);
+  CREATE INDEX IF NOT EXISTS idx_sync_gallery_photos ON gallery_photos(user_id, updated_at, id);
+  CREATE INDEX IF NOT EXISTS idx_sync_songs ON songs(user_id, updated_at, id);
+  CREATE INDEX IF NOT EXISTS idx_sync_playlist_songs ON playlist_songs(user_id, updated_at, id);
 `;
 
 /**
@@ -1451,6 +1592,11 @@ export const ADDITIVE_COLUMNS: Record<string, { name: string; ddl: string }[]> =
       ddl: "ALTER TABLE songs ADD COLUMN sync_status TEXT NOT NULL DEFAULT 'pending'",
     },
     { name: 'server_updated_at', ddl: 'ALTER TABLE songs ADD COLUMN server_updated_at INTEGER' },
+    {
+      name: 'updated_at',
+      ddl: 'ALTER TABLE songs ADD COLUMN updated_at INTEGER NOT NULL DEFAULT 0',
+    },
+    { name: 'remote_path', ddl: 'ALTER TABLE songs ADD COLUMN remote_path TEXT' },
   ],
   playlists: [
     {
@@ -1469,6 +1615,7 @@ export const ADDITIVE_COLUMNS: Record<string, { name: string; ddl: string }[]> =
     },
     { name: 'duration_ms', ddl: 'ALTER TABLE gallery_photos ADD COLUMN duration_ms INTEGER' },
     { name: 'thumbnail_uri', ddl: 'ALTER TABLE gallery_photos ADD COLUMN thumbnail_uri TEXT' },
+    { name: 'remote_path', ddl: 'ALTER TABLE gallery_photos ADD COLUMN remote_path TEXT' },
   ],
   sleep_sessions: [
     {
@@ -1492,5 +1639,92 @@ export const ADDITIVE_COLUMNS: Record<string, { name: string; ddl: string }[]> =
       name: 'reminder_notification_id',
       ddl: 'ALTER TABLE sleep_settings ADD COLUMN reminder_notification_id TEXT',
     },
+  ],
+
+  // ---------------------------------------------------------------------
+  // The tables that finished sync coverage.
+  //
+  // Everything above this line was already synced or already local-only on
+  // purpose. These are the remainder — tags, links, join tables, per-module
+  // settings and media metadata — and they were all excluded for the same
+  // mechanical reason the history tables were: they lacked the columns the
+  // engine reads. Adding the columns is what makes them eligible; see
+  // features/sync/config/sync-tables.ts for what each one now carries.
+  //
+  // The join tables get an `id` as a plain column, not a primary key: SQLite
+  // cannot alter a PK without rebuilding the table, and the composite PK they
+  // already have is a correct local uniqueness constraint. BACKFILL_SQL
+  // derives the value and INDEX_BOOTSTRAP_SQL makes it unique.
+  // ---------------------------------------------------------------------
+  note_tags: [
+    {
+      name: 'updated_at',
+      ddl: 'ALTER TABLE note_tags ADD COLUMN updated_at INTEGER NOT NULL DEFAULT 0',
+    },
+    { name: 'deleted_at', ddl: 'ALTER TABLE note_tags ADD COLUMN deleted_at INTEGER' },
+  ],
+  note_tag_links: [
+    { name: 'id', ddl: 'ALTER TABLE note_tag_links ADD COLUMN id TEXT' },
+    {
+      name: 'user_id',
+      ddl: "ALTER TABLE note_tag_links ADD COLUMN user_id TEXT NOT NULL DEFAULT 'local'",
+    },
+    {
+      name: 'updated_at',
+      ddl: 'ALTER TABLE note_tag_links ADD COLUMN updated_at INTEGER NOT NULL DEFAULT 0',
+    },
+    { name: 'deleted_at', ddl: 'ALTER TABLE note_tag_links ADD COLUMN deleted_at INTEGER' },
+  ],
+  note_attachments: [
+    {
+      name: 'updated_at',
+      ddl: 'ALTER TABLE note_attachments ADD COLUMN updated_at INTEGER NOT NULL DEFAULT 0',
+    },
+    { name: 'remote_path', ddl: 'ALTER TABLE note_attachments ADD COLUMN remote_path TEXT' },
+  ],
+  habit_routine_items: [
+    { name: 'id', ddl: 'ALTER TABLE habit_routine_items ADD COLUMN id TEXT' },
+    {
+      name: 'user_id',
+      ddl: "ALTER TABLE habit_routine_items ADD COLUMN user_id TEXT NOT NULL DEFAULT 'local'",
+    },
+    {
+      name: 'updated_at',
+      ddl: 'ALTER TABLE habit_routine_items ADD COLUMN updated_at INTEGER NOT NULL DEFAULT 0',
+    },
+    { name: 'deleted_at', ddl: 'ALTER TABLE habit_routine_items ADD COLUMN deleted_at INTEGER' },
+  ],
+  journal_prompts: [
+    {
+      name: 'updated_at',
+      ddl: 'ALTER TABLE journal_prompts ADD COLUMN updated_at INTEGER NOT NULL DEFAULT 0',
+    },
+    { name: 'deleted_at', ddl: 'ALTER TABLE journal_prompts ADD COLUMN deleted_at INTEGER' },
+  ],
+  journal_attachments: [
+    {
+      name: 'updated_at',
+      ddl: 'ALTER TABLE journal_attachments ADD COLUMN updated_at INTEGER NOT NULL DEFAULT 0',
+    },
+    { name: 'remote_path', ddl: 'ALTER TABLE journal_attachments ADD COLUMN remote_path TEXT' },
+  ],
+  entry_links: [
+    {
+      name: 'updated_at',
+      ddl: 'ALTER TABLE entry_links ADD COLUMN updated_at INTEGER NOT NULL DEFAULT 0',
+    },
+    { name: 'deleted_at', ddl: 'ALTER TABLE entry_links ADD COLUMN deleted_at INTEGER' },
+  ],
+  playlist_songs: [
+    { name: 'id', ddl: 'ALTER TABLE playlist_songs ADD COLUMN id TEXT' },
+    {
+      name: 'user_id',
+      ddl: "ALTER TABLE playlist_songs ADD COLUMN user_id TEXT NOT NULL DEFAULT 'local'",
+    },
+    {
+      name: 'updated_at',
+      ddl: 'ALTER TABLE playlist_songs ADD COLUMN updated_at INTEGER NOT NULL DEFAULT 0',
+    },
+    { name: 'deleted_at', ddl: 'ALTER TABLE playlist_songs ADD COLUMN deleted_at INTEGER' },
   ],
 };
