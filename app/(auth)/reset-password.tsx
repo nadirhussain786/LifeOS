@@ -8,6 +8,11 @@ import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { AuthField } from '@/features/auth/components/auth-field';
 import { useAuthStore } from '@/features/auth/services/auth-store';
+import {
+  checkPassword,
+  passwordProblemKey,
+  PASSWORD_MIN_LENGTH,
+} from '@/features/auth/services/password-policy';
 import { useSplashStore } from '@/hooks/use-splash-store';
 import { supabase } from '@/lib/supabase';
 
@@ -67,8 +72,14 @@ export default function ResetPasswordScreen() {
   }, [url]);
 
   const handleUpdate = async () => {
-    if (password.length < 6) {
-      setError(t('auth.passwordMin'));
+    // The same floor as sign-up. A reset is exactly when somebody reaches for
+    // the weakest thing they will remember.
+    const strength = checkPassword(password, [
+      useAuthStore.getState().profile?.email ?? '',
+      useAuthStore.getState().profile?.displayName ?? '',
+    ]);
+    if (!strength.ok) {
+      setError(t(passwordProblemKey(strength.problem), { min: PASSWORD_MIN_LENGTH }));
       return;
     }
     if (password !== confirm) {

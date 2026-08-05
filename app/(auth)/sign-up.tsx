@@ -8,6 +8,11 @@ import { Text } from '@/components/ui/text';
 import { AuthField } from '@/features/auth/components/auth-field';
 import { UsernameField, type UsernameStatus } from '@/features/auth/components/username-field';
 import { useAuthStore } from '@/features/auth/services/auth-store';
+import {
+  checkPassword,
+  passwordProblemKey,
+  PASSWORD_MIN_LENGTH,
+} from '@/features/auth/services/password-policy';
 
 export default function SignUpScreen() {
   const router = useRouter();
@@ -28,8 +33,12 @@ export default function SignUpScreen() {
       setError(t('auth.enterEmailPassword'));
       return;
     }
-    if (password.length < 6) {
-      setError(t('auth.passwordMin'));
+    // The account's own email and name are passed in so a password built out of
+    // them is refused — for a phone somebody else may pick up, that is the
+    // guess that actually gets tried.
+    const strength = checkPassword(password, [email, name, username]);
+    if (!strength.ok) {
+      setError(t(passwordProblemKey(strength.problem), { min: PASSWORD_MIN_LENGTH }));
       return;
     }
     // 'unavailable' means the availability probe couldn't run, which is not the

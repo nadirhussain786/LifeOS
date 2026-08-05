@@ -585,6 +585,13 @@
     "newHere": "New here?",
     "email": "Email",
     "password": "Password",
+    "passwordProblem": {
+      "too_short": "Use at least {{min}} characters. A few ordinary words you’ll remember beats a short, clever one.",
+      "too_common": "That password appears on every list attackers try first. Pick something else.",
+      "too_simple": "That’s a straight run of characters. Mix in something less predictable.",
+      "contains_identity": "Don’t build your password out of your name or email — anyone holding your phone already knows both.",
+      "too_long": "That’s longer than the 72 bytes we can actually hash. Shorten it."
+    },
     "name": "Name",
     "forgotPassword": "Forgot password?",
     "continueGuest": "Continue without an account",
