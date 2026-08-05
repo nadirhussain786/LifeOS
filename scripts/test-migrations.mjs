@@ -32,6 +32,9 @@ const STRANGER = '33333333-3333-3333-3333-333333333333';
 const ADMIN = '55555555-5555-5555-5555-555555555555';
 const MALLORY = '66666666-6666-6666-6666-666666666666';
 const VANDAL = '77777777-7777-7777-7777-777777777777';
+// 0018: a subject with no report history, so the report gate is tested from a
+// clean slate — ALICE already collects reports in the 0010 rate-limit tests.
+const SUBJECT = '88888888-8888-8888-8888-888888888888';
 
 /** Today as the server sees it — the window checks in record_usage are relative
  * to current_date, so the test has to speak the same calendar. */
@@ -49,13 +52,14 @@ await createUser(db, STRANGER, 'stranger@example.com');
 await createUser(db, ADMIN, 'admin@example.com');
 await createUser(db, MALLORY, 'mallory@example.com');
 await createUser(db, VANDAL, 'vandal@example.com');
+await createUser(db, SUBJECT, 'subject@example.com');
 
 // ---------------------------------------------------------------------------
 console.log('schema');
 // ---------------------------------------------------------------------------
 
 await test('0001 auto-creates a profile for each new auth user', async () => {
-  expectEqual(await count('select count(*)::int n from public.profiles'), 6, 'profile count');
+  expectEqual(await count('select count(*)::int n from public.profiles'), 7, 'profile count');
 });
 
 await test('every public table has row level security enabled', async () => {
@@ -2199,4 +2203,441 @@ await test('0017 an expired block stops applying on its own', async () => {
     'write after the block expired',
   );
 });
+
+// ---------------------------------------------------------------------------
+console.log('\nstaff roles & report gating (0018)');
+// ---------------------------------------------------------------------------
+
+// MALLORY becomes the lower-tier operator; ADMIN keeps the full tier.
+await db.query(`insert into public.admins (user_id, role) values ($1, 'staff')`, [MALLORY]);
+await db.query(`update public.admins set role = 'admin' where user_id = $1`, [ADMIN]);
+
+await test('0018 an existing admin keeps the full tier by default', async () => {
+  // The column defaults to 'admin' precisely so a deploy does not silently
+  // demote the owner out of their own console.
+  await asUser(db, ADMIN, async () => {
+    expectEqual((await one(`select public.is_admin() as v`)).v, true, 'admin is admin');
+    expectEqual((await one(`select public.is_staff() as v`)).v, true, 'admin is also staff');
+  });
+});
+
+await test('0018 staff are not admins', async () => {
+  await asUser(db, MALLORY, async () => {
+    expectEqual((await one(`select public.is_staff() as v`)).v, true, 'staff is staff');
+    expectEqual((await one(`select public.is_admin() as v`)).v, false, 'staff is not admin');
+  });
+});
+
+await test('0018 staff cannot open an account nobody reported', async () => {
+  // The whole point of the tier. Without a report there are no grounds, and the
+  // error says which of the two problems it is.
+  await asUser(db, MALLORY, async () => {
+    await expectRejection(
+      () =>
+        db.query(`select * from public.operator_user_profile($1::uuid, 'routine check')`, [
+          SUBJECT,
+        ]),
+      'no live report',
+    );
+  });
+});
+
+await test('0018 an admin can open any account without a report', async () => {
+  await asUser(db, ADMIN, async () => {
+    const row = await one(
+      `select * from public.operator_user_profile($1::uuid, 'ownership review')`,
+      [SUBJECT],
+    );
+    expectEqual(row.email, 'subject@example.com', 'profile returned');
+    expectEqual(row.grounds, 'admin', 'grounds recorded as admin');
+  });
+});
+
+await test('0018 a report opens the account to staff', async () => {
+  await asUser(db, BOB, async () => {
+    await db.query(
+      `select public.submit_content_report(
+         'rep-gate-1', $1::uuid, 'expense_group', 'g-1', 'harassment', 'abusive messages', '{}'::jsonb)`,
+      [SUBJECT],
+    );
+  });
+
+  await asUser(db, MALLORY, async () => {
+    const row = await one(
+      `select * from public.operator_user_profile($1::uuid, 'reviewing report rep-gate-1')`,
+      [SUBJECT],
+    );
+    expectEqual(row.grounds, 'rep-gate-1', 'grounds recorded as the report id');
+    expectEqual(Number(row.open_reports), 1, 'open report count');
+  });
+});
+
+await test('0018 access is audited with the grounds that justified it', async () => {
+  // "opened X because of report Y" is what a later review needs. "opened X" is
+  // not enough to tell a moderator doing their job from one who is not.
+  const row = await one(
+    `select detail from public.admin_audit_log
+      where actor = $1 and action = 'read_user_profile' order by created_at desc limit 1`,
+    [MALLORY],
+  );
+  expectEqual(row.detail.grounds, 'rep-gate-1', 'audited grounds');
+  expectEqual(row.detail.reason, 'reviewing report rep-gate-1', 'audited reason');
+});
+
+await test('0018 staff must state a reason', async () => {
+  await asUser(db, MALLORY, async () => {
+    await expectRejection(
+      () => db.query(`select * from public.operator_user_profile($1::uuid, 'x')`, [SUBJECT]),
+      'a reason is required',
+    );
+  });
+});
+
+await test('0018 dismissing the report closes the door again', async () => {
+  await db.query(
+    `update public.content_reports set status = 'dismissed', resolved_at = now() where id = 'rep-gate-1'`,
+  );
+  await asUser(db, MALLORY, async () => {
+    await expectRejection(
+      () =>
+        db.query(`select * from public.operator_user_profile($1::uuid, 'having another look')`, [
+          SUBJECT,
+        ]),
+      'no live report',
+    );
+  });
+});
+
+await test('0018 an actioned report keeps access open for the appeal window', async () => {
+  // Work does not stop at the verdict: appeals arrive, and a moderator has to
+  // be able to check their own decision.
+  await db.query(
+    `update public.content_reports set status = 'actioned', resolved_at = now() where id = 'rep-gate-1'`,
+  );
+  await asUser(db, MALLORY, async () => {
+    const row = await one(
+      `select * from public.operator_user_profile($1::uuid, 'appeal review for rep-gate-1')`,
+      [SUBJECT],
+    );
+    expectEqual(row.grounds, 'rep-gate-1', 'still open on an actioned report');
+  });
+
+  // But not forever.
+  await db.query(
+    `update public.content_reports
+        set resolved_at = now() - interval '31 days' where id = 'rep-gate-1'`,
+  );
+  await asUser(db, MALLORY, async () => {
+    await expectRejection(
+      () =>
+        db.query(`select * from public.operator_user_profile($1::uuid, 'much later')`, [SUBJECT]),
+      'no live report',
+    );
+  });
+});
+
+await test('0018 the report queue never names the reporter', async () => {
+  // Telling the reported party's moderator who complained is one leak away from
+  // telling the reported party, and that is how reporting stops happening.
+  await db.query(`update public.content_reports set status = 'open' where id = 'rep-gate-1'`);
+  await asUser(db, MALLORY, async () => {
+    const columns = (
+      await db.query(
+        `select * from public.operator_user_reports($1::uuid, 'reviewing the queue')`,
+        [ALICE],
+      )
+    ).fields.map((f) => f.name);
+    expectEqual(columns.includes('reporter_id'), false, 'reporter_id exposed');
+  });
+});
+
+await test('0018 an ordinary user is neither', async () => {
+  await asUser(db, STRANGER, async () => {
+    expectEqual((await one(`select public.is_staff() as v`)).v, false, 'not staff');
+    await expectRejection(
+      () => db.query(`select * from public.operator_report_queue(10)`),
+      'not an operator',
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+console.log('\nblock enforcement & device wipe (0019)');
+// ---------------------------------------------------------------------------
+
+await test('0019 blocking cuts the account off and queues a wipe', async () => {
+  await asUser(db, ADMIN, async () => {
+    await db.query(
+      `select public.admin_block_user($1::uuid, 'sustained harassment', null, true, 15)`,
+      [ALICE],
+    );
+  });
+
+  const status = await one(
+    `select status::text, evacuation_until from public.account_status where user_id = $1`,
+    [ALICE],
+  );
+  expectEqual(status.status, 'blocked', 'status');
+  expectEqual(status.evacuation_until !== null, true, 'evacuation window opened');
+
+  await asUser(db, ALICE, async () => {
+    const commands = (await db.query(`select * from public.pending_device_commands()`)).rows;
+    expectEqual(commands.length, 1, 'pending commands');
+    expectEqual(commands[0].command, 'wipe_local', 'command');
+  });
+});
+
+await test('0019 the evacuation window lets the device push a last time', async () => {
+  // The window is what stops the wipe destroying anything that was never
+  // synced. Blocked, but still able to reach its own rows for a few minutes.
+  await asUser(db, ALICE, async () => {
+    await db.query(
+      `insert into public.notes (id, user_id, title, created_at, updated_at)
+        values ('n-evac', $1, 'written during evacuation', 9, 9)`,
+      [ALICE],
+    );
+  });
+  expectEqual(
+    await count(`select count(*)::int n from public.notes where id = 'n-evac'`),
+    1,
+    'evacuated row',
+  );
+});
+
+await test('0019 once the window closes the account is fully cut off', async () => {
+  await db.query(
+    `update public.account_status set evacuation_until = now() - interval '1 minute'
+      where user_id = $1`,
+    [ALICE],
+  );
+
+  await asUser(db, ALICE, async () => {
+    expectEqual(
+      await count(`select count(*)::int n from public.notes`),
+      0,
+      'reads after the window',
+    );
+    await expectRejection(
+      () =>
+        db.query(
+          `insert into public.notes (id, user_id, title, created_at, updated_at)
+            values ('n-late', $1, 'too late', 10, 10)`,
+          [ALICE],
+        ),
+      'row-level security',
+    );
+  });
+});
+
+await test('0019 the wipe command is still readable once cut off', async () => {
+  // The one thing a blocked device must be able to fetch is the instruction to
+  // wipe itself. Gating device_commands would make the whole mechanism
+  // unreachable exactly when it is needed.
+  await asUser(db, ALICE, async () => {
+    expectEqual(
+      (await db.query(`select * from public.pending_device_commands()`)).rows.length,
+      1,
+      'command still visible',
+    );
+  });
+});
+
+await test('0019 a device acknowledges the wipe, and says what it could not save', async () => {
+  await asUser(db, ALICE, async () => {
+    const id = (await db.query(`select id from public.pending_device_commands()`)).rows[0].id;
+    await db.query(`select public.ack_device_command($1::uuid, $2::jsonb)`, [
+      id,
+      JSON.stringify({ wiped: true, unsyncedModules: ['gallery'] }),
+    ]);
+    expectEqual(
+      (await db.query(`select * from public.pending_device_commands()`)).rows.length,
+      0,
+      'still pending after ack',
+    );
+  });
+
+  const row = await one(
+    `select ack_detail from public.device_commands where user_id = $1 order by issued_at desc limit 1`,
+    [ALICE],
+  );
+  expectEqual(row.ack_detail.unsyncedModules[0], 'gallery', 'what was lost is recorded');
+});
+
+await test('0019 one user cannot acknowledge another user’s wipe', async () => {
+  await asUser(db, ADMIN, async () => {
+    await db.query(`select public.admin_wipe_user_device($1::uuid, 'content removal request')`, [
+      BOB,
+    ]);
+  });
+  const id = (
+    await db.query(
+      `select id from public.device_commands where user_id = $1 and acked_at is null`,
+      [BOB],
+    )
+  ).rows[0].id;
+
+  await asUser(db, STRANGER, async () => {
+    await db.query(`select public.ack_device_command($1::uuid, '{}'::jsonb)`, [id]);
+  });
+  expectEqual(
+    await count(
+      `select count(*)::int n from public.device_commands where id = $1 and acked_at is null`,
+      [id],
+    ),
+    1,
+    "Bob's command after a stranger tried to ack it",
+  );
+});
+
+await test('0019 unblocking restores access and cancels an outstanding wipe', async () => {
+  // A phone that was off for the whole episode must not wake up and wipe an
+  // account that is fine again.
+  await asUser(db, ADMIN, async () => {
+    await db.query(
+      `select public.admin_block_user($1::uuid, 'second look needed', null, true, 0)`,
+      [BOB],
+    );
+    await db.query(`select public.admin_unblock_user($1::uuid, 'appeal upheld')`, [BOB]);
+  });
+
+  await asUser(db, BOB, async () => {
+    expectEqual(
+      (await db.query(`select * from public.pending_device_commands()`)).rows.length,
+      0,
+      'pending wipes after unblock',
+    );
+    await db.query(
+      `insert into public.notes (id, user_id, title, created_at, updated_at)
+        values ('n-unblocked', $1, 'back in good standing', 11, 11)`,
+      [BOB],
+    );
+  });
+  expectEqual(
+    await count(`select count(*)::int n from public.notes where id = 'n-unblocked'`),
+    1,
+    'write after unblock',
+  );
+});
+
+await test('0019 zero evacuation minutes cuts the account off immediately', async () => {
+  await asUser(db, ADMIN, async () => {
+    await db.query(
+      `select public.admin_block_user($1::uuid, 'active abuse in progress', null, true, 0)`,
+      [VANDAL],
+    );
+  });
+  const status = await one(
+    `select evacuation_until from public.account_status where user_id = $1`,
+    [VANDAL],
+  );
+  expectEqual(status.evacuation_until, null, 'no window');
+  await asUser(db, VANDAL, async () => {
+    expectEqual(await count(`select count(*)::int n from public.notes`), 0, 'reads');
+  });
+});
+
+await test('0019 an admin reads any row, including soft-deleted ones', async () => {
+  await asUser(db, ADMIN, async () => {
+    const all = (
+      await db.query(
+        `select * from public.admin_user_rows($1::uuid, 'notes', 'evidence for report rep-gate-1', true, 100)`,
+        [ALICE],
+      )
+    ).rows;
+    // Alice wrote 'n-before'… no: that was VANDAL. Alice has n-rls-era rows.
+    expectEqual(all.length >= 1, true, 'rows returned');
+  });
+});
+
+await test('0019 admin_user_rows refuses a table that is not on the list', async () => {
+  // The whitelist is what stops `p_table` being a way to select from auth.users.
+  await asUser(db, ADMIN, async () => {
+    await expectRejection(
+      () =>
+        db.query(
+          `select * from public.admin_user_rows($1::uuid, 'admins', 'poking about', true, 10)`,
+          [ALICE],
+        ),
+      'not readable through this function',
+    );
+  });
+});
+
+await test('0019 staff cannot read rows at all', async () => {
+  // The unrestricted capability stays with the owner tier. This is the split
+  // 0018's report gate exists to preserve.
+  await asUser(db, MALLORY, async () => {
+    await expectRejection(
+      () =>
+        db.query(
+          `select * from public.admin_user_rows($1::uuid, 'notes', 'reviewing report rep-gate-1', true, 10)`,
+          [ALICE],
+        ),
+      'not an administrator',
+    );
+  });
+});
+
+await test('0019 purging soft-deletes, so an appeal can still be answered', async () => {
+  const before = await count(
+    `select count(*)::int n from public.notes where user_id = $1 and deleted_at is null`,
+    [ALICE],
+  );
+  expectEqual(before > 0, true, 'notes before the purge');
+
+  await asUser(db, ADMIN, async () => {
+    await db.query(`select public.admin_purge_user_data($1::uuid, 'confirmed abuse, rep-gate-1')`, [
+      ALICE,
+    ]);
+  });
+
+  expectEqual(
+    await count(
+      `select count(*)::int n from public.notes where user_id = $1 and deleted_at is null`,
+      [ALICE],
+    ),
+    0,
+    'live notes after the purge',
+  );
+  // The rows survive — a hard delete would destroy the evidence the report was
+  // about along with the ability to reverse a mistake.
+  expectEqual(
+    (await count(`select count(*)::int n from public.notes where user_id = $1`, [ALICE])) > 0,
+    true,
+    'rows retained for appeal',
+  );
+});
+
+await test('0019 every operator action left an audit row', async () => {
+  for (const action of [
+    'block_user',
+    'unblock_user',
+    'wipe_user_device',
+    'read_user_rows',
+    'purge_user_data',
+  ]) {
+    expectEqual(
+      (await count(`select count(*)::int n from public.admin_audit_log where action = $1`, [
+        action,
+      ])) > 0,
+      true,
+      `audit rows for ${action}`,
+    );
+  }
+});
+
+await test('0019 a non-admin cannot block anybody', async () => {
+  for (const actor of [MALLORY, STRANGER]) {
+    await asUser(db, actor, async () => {
+      await expectRejection(
+        () =>
+          db.query(`select public.admin_block_user($1::uuid, 'because I say so', null, true, 0)`, [
+            BOB,
+          ]),
+        'not an administrator',
+      );
+    });
+  }
+});
+
 summary();

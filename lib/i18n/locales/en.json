@@ -1536,11 +1536,14 @@
     "blockedBody": "Your LifeOS account has been blocked. Cloud sync and shared groups are paused.",
     "blockedUntil": "Your LifeOS account is blocked until {{date}}. Cloud sync and shared groups are paused until then.",
     "reason": "Reason",
-    "localDataSafe": "Everything already on this device is untouched, and still works offline.",
     "appeal": "Appeal this decision",
     "appealSubject": "LifeOS account appeal",
     "restrictedTitle": "Account restricted",
-    "restrictedBody": "You can't create groups or send invites right now. Everything else works as usual."
+    "restrictedBody": "You can't create groups or send invites right now. Everything else works as usual.",
+    "wipedTitle": "This device was cleared",
+    "wipedBody": "Your data was removed from this phone. Anything that had synced is still on our servers and comes back if the block is lifted.",
+    "wipedUnsaved": "These modules had sync switched off, so they were never uploaded and could not be recovered: {{modules}}.",
+    "wipedNothingSaved": "Nothing could be uploaded before this device was cleared, so local data was not recovered."
   },
   "usage": {
     "title": "Usage statistics",
