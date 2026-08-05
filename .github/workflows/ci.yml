@@ -37,3 +37,14 @@ jobs:
 
       - name: Test
         run: npm test -- --ci
+
+      # The Supabase migrations are applied by hand against a hosted database,
+      # so nothing else would catch a file that fails on first run. These two
+      # scripts existed and were never wired in here: `check` reads them,
+      # `test:sql` applies them to a real Postgres and asserts that RLS refuses
+      # what it should.
+      - name: Check migrations
+        run: npm run check:migrations
+
+      - name: Test migrations
+        run: npm run test:sql

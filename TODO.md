@@ -28,9 +28,116 @@ verified with `tsc` + `expo config` + `expo export` (build-level only — see ca
 
 ---
 
+## 🔁 Sync coverage, performance & hardening (0016 + 0017 shipped)
+
+Sync now covers **every** local table except `notification_log`, which is this
+phone's record of what it scheduled and is meaningless anywhere else.
+
+- [x] **The local database could not open on a fresh install.** `TABLE_BOOTSTRAP_SQL`
+      had six missing commas; SQLite rejects all six, and a failing statement
+      aborts the whole exec. Every check in CI passed because they all read the
+      SQL as text and nothing ran it. `database/schema.test.ts` now executes it
+      against a real SQLite (`node:sqlite`), which is why CI needs Node 24.
+- [x] **Everything left over now syncs**: tags and tag links, wiki-links between
+      entries, routine and playlist membership, custom journal prompts,
+      per-module settings, and media metadata.
+- [x] **Media syncs as rows, not bytes.** Albums, playlists, captions, ordering
+      and favourites travel; the photo/video/audio files stay on the device that
+      imported them and show as "Not on this device" elsewhere.
+- [x] **Device-local columns stopped travelling.** `reminder_notification_id`
+      had been syncing since 0001 — one phone's OS notification handles
+      overwriting another's, which is how you get a reminder that cannot be
+      switched off. Dropped server-side in 0016.
+- [x] **Cursors are `(updated_at, id)` pairs.** A plain timestamp cursor cannot
+      advance past a page-full of rows sharing one millisecond, and those rows
+      become permanently invisible to sync.
+- [x] **Both directions paginate.** PostgREST caps a response at 1000 rows
+      regardless; the old code took that as "everything", so a large account
+      synced one page per launch.
+- [x] Chunked pushes, one transaction per pulled page, throttle + jittered
+      exponential backoff, and local sync indexes (the row lookup during a pull
+      was a full table scan per row).
+- [x] **RLS made affordable** (0017): every owner policy re-evaluated
+      `auth.uid()` per row. Now `(select auth.uid())`, an InitPlan computed once
+      per statement that the index can be used against.
+- [x] **A blocked account is refused server-side** (0017). It could previously
+      write freely — the only check was in the client. 0017 denied writes and
+      left reads alone; 0019 closed reads too, so see the moderation section
+      below for what a block now means.
+- [x] **Session moved to the OS keystore** (`lib/secure-session-storage.ts`),
+      chunked because a Supabase session exceeds SecureStore's 2048-byte
+      threshold. Existing sessions migrate on first read rather than logging
+      everyone out.
+- [x] PKCE flow (the reset deep link no longer carries tokens in a URL),
+      AppState-driven token refresh, and a real password policy.
+
+Still to do here:
+
+- [ ] **Raise the server-side password floor to match the client.** Supabase
+      project settings → Auth → `password_min_length` (10) and consider enabling
+      leaked-password protection. `features/auth/services/password-policy.ts` is
+      advisory until that is done — it improves the choice, it does not stop a
+      crafted request.
+- [ ] **Media bytes.** `remote_path` exists on every media table and nothing
+      writes it. Uploading the files needs Storage buckets with per-user RLS, a
+      resumable upload queue, per-user quotas and a download-on-demand cache —
+      and at ten million users it is the line item that dominates the bill, so
+      it wants a quota and an opt-in before it wants code.
+- [ ] **The expense-group policies still use membership functions** that take a
+      per-row argument and so cannot be hoisted the way 0017 hoisted the owner
+      policies. Making those cheap means turning the membership check into a
+      join the planner can see through — worth doing, easy to get wrong in a way
+      that leaks between groups.
+- [ ] **Nothing here has run against a real Supabase project or a real device.**
+      The migrations are executed by `npm run test:sql` against WASM Postgres and
+      the local schema by `npm test`; neither proves behaviour on hardware.
+
+## 🛡 Moderation & operations (0018 + 0019 shipped — see docs/OPERATIONS.md)
+
+- [x] **Migration runner** — `npm run migrate:status|staging|production`, with a
+      `schema_migrations` ledger, checksums that refuse an edited-after-applied
+      migration, an advisory lock, and a transaction per file. Two databases,
+      staging and production, from shell env vars only.
+- [x] **Two operator tiers.** `staff` can reach an account only while a live
+      report names it; `admin` is unrestricted. Both audited, both still behind
+      0014's origin allowlist. Existing rows default to `admin`.
+- [x] **A block now blocks.** RLS denies reads _and_ writes; the device is sent
+      a `wipe_local` command it acknowledges; production keeps the data
+      soft-deleted so an unblock restores it.
+- [x] **Evacuation window** so the wipe does not destroy what the cloud never
+      received, and an honest list of what it could not save.
+- [x] **Admin can read any row including soft-deleted ones**, with no password
+      or PIN, against a table whitelist and with an audit row first.
+
+Still to do here:
+
+- [ ] **Register the admin origins before adding any staff.** Until the first
+      `admin_allowed_origins` row exists the allowlist is inert (0014), which
+      means a staff account would be usable from anywhere. That bootstrap is now
+      load-bearing in a way it was not when there was one operator.
+- [ ] **Operator console UI.** All of this is SQL in the editor today. Fine for
+      one owner; poor for a moderator working a queue, and worse at 3am.
+      `operator_report_queue()` is the screen that wants building first.
+- [ ] **Wipe needs a cooperating client.** A modified build can decline to run
+      it. The server-side denial cannot be declined; the local wipe can. Worth
+      stating in any T&S policy rather than implying devices are controllable.
+- [ ] **Appeals have no route back in.** The block screen offers an email link.
+      A blocked user cannot read their own data to export it, so a data-access
+      request has to be served by an admin running `admin_user_rows` by hand —
+      which is a GDPR obligation currently met by a person remembering to.
+- [ ] **No staging project exists yet.** The runner supports one; nothing has
+      been run against either database.
+
 ## 🔒 Needs you (blocked on account / asset / decision)
 
-- [ ] **Supabase project** — create one, run `supabase/migrations/0001_init.sql` in the SQL editor, and put the real URL + anon key in `.env` (currently placeholders). Required before auth or sync can run.
+- [ ] **Supabase projects** — create **two** (staging and production). Export
+      `SUPABASE_DB_URL_STAGING` / `SUPABASE_DB_URL_PRODUCTION` in your shell —
+      never in `.env`, which Expo inlines into the app bundle — then
+      `npm run migrate:staging`, verify, `npm run migrate:production`. Put the
+      project URL + anon key in `.env` (currently placeholders). Required before
+      auth or sync can run. 0016 drops columns that older app builds still push,
+      so apply it during a release rather than ahead of one — a stale client's
+      sync will fail loudly.
 - [ ] **Device validation** — run `eas login && eas init && eas build -p android --profile development`, install the APK, and confirm reminders fire + widget renders + sign-in/sync works. _#1 next step._
 - [ ] **Notification status-bar icon** — provide a 96×96 white-on-transparent PNG in `assets/`; then wire `"icon"` into the `expo-notifications` plugin.
 - [ ] **Real bundle identifier** — replace the `com.lifeos.app` placeholder before any store submission.
@@ -53,6 +160,9 @@ verified with `tsc` + `expo config` + `expo export` (build-level only — see ca
       `sync-tables.ts` was built for this: upload ciphertext only, so the server
       cannot read it. Requires key transfer between devices, which is its own
       design problem (QR-based key exchange is the usual answer).
+- [ ] **Private media is not covered by the media-metadata sync.** Vault images
+      live in `private-vault/` and are encrypted field-by-field; they are not in
+      `gallery_photos` and nothing in 0016 touches them.
 
 ## 🔑 Operator access & escrow (0014 + 0015 shipped) — READ THIS FIRST
 
