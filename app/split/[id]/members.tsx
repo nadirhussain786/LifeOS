@@ -1,7 +1,8 @@
+import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { useLocalSearchParams } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { Mail, Send, Trash2, UserPlus } from 'lucide-react-native';
-import { useState } from 'react';
+import { Flag, Mail, Send, Trash2, UserPlus } from 'lucide-react-native';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Alert,
@@ -22,6 +23,8 @@ import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { MemberAvatars } from '@/features/split/components/member-avatars';
 import { formatMoney } from '@/features/budget/services/money';
+import { ReportSheet, type ReportTarget } from '@/features/moderation/components/report-sheet';
+import { useBlockMutations } from '@/features/moderation/hooks/use-blocks';
 import {
   useGroupBalances,
   useGroupDetail,
@@ -49,11 +52,16 @@ export default function SplitMembersScreen() {
 
   const { data } = useGroupDetail(id);
   const { balances } = useGroupBalances(data);
-  const { isOwner } = useMyMembership(data);
+  const { me, isOwner } = useMyMembership(data);
+  const myUserId = me?.userId ?? null;
   const { addMember, invite, removeMember } = useSplitMutations(id);
 
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
+
+  const reportSheet = useRef<BottomSheetModal>(null);
+  const [reportTarget, setReportTarget] = useState<ReportTarget | null>(null);
+  const { block } = useBlockMutations();
 
   const emailValid = EMAIL.test(email.trim());
   const canAdd = emailValid && !addMember.isPending;
@@ -136,6 +144,69 @@ export default function SplitMembersScreen() {
     ]);
   };
 
+  const applyBlock = (userId: string, label: string) =>
+    block.mutate(userId, {
+      onSuccess: (result) =>
+        result.ok
+          ? toast.success(t('moderation.blocked', { name: label }))
+          : toast.error(
+              t(`errors.${result.error === 'not-configured' ? 'not-configured' : 'unknown'}`),
+            ),
+      onError: (error) => toast.error(t(`errors.${errorKind(error)}`)),
+    });
+
+  const openReport = (member: { id: string; userId: string | null }, label: string) => {
+    setReportTarget({
+      reportedUserId: member.userId,
+      surface: 'expense_group',
+      surfaceId: id,
+      // One item: who, in which group. Deliberately not the expense list — a
+      // report that carries the whole group is a way to exfiltrate it by
+      // complaining about one line.
+      evidence: { memberId: member.id, memberLabel: label, groupName: data?.group?.name ?? null },
+      label,
+    });
+    reportSheet.current?.present();
+  };
+
+  /**
+   * Report and block, on the member row.
+   *
+   * On the row rather than behind a long-press: a gesture nobody discovers is
+   * the same as not having the feature, and this is the screen where you are
+   * looking at the person you have a problem with. Blocking is reachable
+   * without reporting first — they are different decisions, and requiring a
+   * report to get to the block means filing one you did not mean.
+   *
+   * Somebody invited by email who has not joined has no account yet, so only
+   * the report is offered: blocking an email address would be a promise the
+   * server cannot keep, since the block is between two auth users.
+   */
+  const openMemberActions = (member: { id: string; userId: string | null }, label: string) => {
+    if (member.userId === null) {
+      openReport(member, label);
+      return;
+    }
+    const userId = member.userId;
+    Alert.alert(label, undefined, [
+      { text: t('moderation.reportMember'), onPress: () => openReport(member, label) },
+      {
+        text: t('moderation.block'),
+        style: 'destructive',
+        onPress: () =>
+          Alert.alert(t('moderation.blockTitle', { name: label }), t('moderation.blockBody'), [
+            { text: t('common.cancel'), style: 'cancel' },
+            {
+              text: t('moderation.block'),
+              style: 'destructive',
+              onPress: () => applyBlock(userId, label),
+            },
+          ]),
+      },
+      { text: t('common.cancel'), style: 'cancel' },
+    ]);
+  };
+
   return (
     <View className="flex-1 bg-background">
       <SheetHeader title={t('split.people')} />
@@ -185,6 +256,19 @@ export default function SplitMembersScreen() {
                       className="h-11 w-11 items-center justify-center"
                     >
                       <Send size={16} color={tint} />
+                    </Pressable>
+                  ) : null}
+                  {/* Not on your own row: reporting yourself is refused
+                      server-side (0013) and offering it reads as a bug. */}
+                  {member.userId !== myUserId ? (
+                    <Pressable
+                      onPress={() => openMemberActions(member, label)}
+                      hitSlop={8}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${t('moderation.reportMember')}: ${label}`}
+                      className="h-11 w-11 items-center justify-center"
+                    >
+                      <Flag size={16} color={colors[scheme].mutedForeground} />
                     </Pressable>
                   ) : null}
                   {member.role !== 'owner' && isOwner ? (
@@ -304,6 +388,25 @@ export default function SplitMembersScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <ReportSheet
+        ref={reportSheet}
+        target={reportTarget}
+        // Offered straight after a report goes in, because that is when
+        // somebody knows they want it. Still a separate decision — reporting
+        // spam is not the same as never hearing from someone again.
+        onBlock={(userId) => {
+          const label = reportTarget?.label ?? t('moderation.someone');
+          Alert.alert(t('moderation.blockAfterReport'), t('moderation.blockAfterReportBody'), [
+            { text: t('moderation.notNow'), style: 'cancel' },
+            {
+              text: t('moderation.block'),
+              style: 'destructive',
+              onPress: () => applyBlock(userId, label),
+            },
+          ]);
+        }}
+      />
     </View>
   );
 }

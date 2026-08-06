@@ -70,9 +70,18 @@ export default function JoinGroupScreen() {
     }
   };
 
-  const failed = ['invalid', 'expired', 'already_accepted', 'member_unavailable', 'error'].includes(
-    status,
-  );
+  // `blocked` (0021): you blocked whoever sent this. The token is deliberately
+  // NOT consumed by that refusal, so unblocking and following the link again
+  // still works — which is why the copy names the way back rather than reading
+  // as a dead link.
+  const failed = [
+    'invalid',
+    'expired',
+    'already_accepted',
+    'member_unavailable',
+    'blocked',
+    'error',
+  ].includes(status);
 
   return (
     <View className="flex-1 bg-background">

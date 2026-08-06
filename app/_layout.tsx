@@ -46,6 +46,7 @@ import { useAppLock } from '@/features/security/hooks/use-app-lock';
 import { useAuthStore } from '@/features/auth/services/auth-store';
 import { useAuthGate } from '@/features/auth/hooks/use-auth-gate';
 import { useUsageReporter } from '@/features/analytics/hooks/use-usage-reporter';
+import { UsageConsentCard } from '@/features/analytics/components/usage-consent-card';
 import { BlockedOverlay } from '@/features/moderation/components/blocked-overlay';
 import { useAccountStandingSync } from '@/features/moderation/hooks/use-account-standing';
 import {
@@ -273,6 +274,7 @@ export default function RootLayout() {
                 <Stack.Screen name="settings/index" />
                 <Stack.Screen name="settings/notifications" />
                 <Stack.Screen name="settings/sync" />
+                <Stack.Screen name="settings/blocked" />
                 {/* The private space brings its own layout (screenshot block,
                     no swipe-back), so it is registered as one route here. */}
                 <Stack.Screen name="private" />
@@ -315,6 +317,9 @@ export default function RootLayout() {
             <ToastHost />
             {/* Top of the screen, where the OS banner would have been. */}
             <NotificationBanner />
+            {/* Below the overlays and above the app: nothing is collected until
+                it is answered, so it never needs to interrupt anything. */}
+            <UsageConsentCard />
             {/* On top of everything: the block notice, the lock shield, then the
                 cold-start splash. Blocked sits under the lock deliberately —
                 the device's owner still authenticates first. */}

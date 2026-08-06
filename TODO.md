@@ -115,6 +115,13 @@ Still to do here:
       `admin_allowed_origins` row exists the allowlist is inert (0014), which
       means a staff account would be usable from anywhere. That bootstrap is now
       load-bearing in a way it was not when there was one operator.
+- [x] **User-side reporting and blocking** (0021). `submitReport` had existed
+      since 0013 with no caller — the app had a complete abuse pipeline and no
+      opening. There is now a report sheet on the group and on every member, a
+      block reachable without reporting first, and a Settings → Blocked accounts
+      screen to undo one. Enforcement is server-side across all three contact
+      routes. `features/moderation/moderation-wiring.test.ts` fails if any of it
+      becomes unreachable again.
 - [ ] **Operator console UI.** All of this is SQL in the editor today. Fine for
       one owner; poor for a moderator working a queue, and worse at 3am.
       `operator_report_queue()` is the screen that wants building first.

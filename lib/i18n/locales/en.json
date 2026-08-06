@@ -575,7 +575,10 @@
     "import_notabackup": "That is not a LifeOS backup file.",
     "import_failed": "The restore failed and nothing was changed.",
     "importMissingMedia_one": "{{count}} photo or audio file is missing — media is not stored in the backup.",
-    "importMissingMedia_other": "{{count}} photo and audio files are missing — media is not stored in the backup."
+    "importMissingMedia_other": "{{count}} photo and audio files are missing — media is not stored in the backup.",
+    "terms": "Terms of Service",
+    "support": "Contact support",
+    "supportSubtitle": "Questions, appeals, and data requests"
   },
   "auth": {
     "welcomeBack": "Welcome back",
@@ -1453,7 +1456,8 @@
       "expired": "This invitation has expired. Ask for a new one.",
       "already_accepted": "This invitation has already been used.",
       "member_unavailable": "Your place in the group is no longer available. Ask to be added again.",
-      "error": "Something went wrong. Try again in a moment."
+      "error": "Something went wrong. Try again in a moment.",
+      "blocked": "You blocked whoever sent this invitation. Unblock them in Settings → Blocked accounts to join."
     },
     "groupCreated": "“{{name}}” created.",
     "currencyNote": "This group settles in {{currency}}.",
@@ -1543,11 +1547,32 @@
     "wipedTitle": "This device was cleared",
     "wipedBody": "Your data was removed from this phone. Anything that had synced is still on our servers and comes back if the block is lifted.",
     "wipedUnsaved": "These modules had sync switched off, so they were never uploaded and could not be recovered: {{modules}}.",
-    "wipedNothingSaved": "Nothing could be uploaded before this device was cleared, so local data was not recovered."
+    "wipedNothingSaved": "Nothing could be uploaded before this device was cleared, so local data was not recovered.",
+    "blockTitle": "Block {{name}}?",
+    "blockBody": "They won't be able to add you to a group or send you an invitation, and you won't be able to add them. You'll both stay in any group you already share — leave the group if you want out of it.",
+    "block": "Block",
+    "blocked": "{{name}} is blocked",
+    "unblock": "Unblock",
+    "unblocked": "{{name}} is unblocked",
+    "blockedAccounts": "Blocked accounts",
+    "blockedAccountsSubtitle": "People you've blocked",
+    "blockedEmpty": "You haven't blocked anyone",
+    "blockedEmptyBody": "Blocking someone stops them adding you to shared groups or inviting you.",
+    "blockAfterReport": "Block them too?",
+    "blockAfterReportBody": "We'll review your report. You can also stop them contacting you now.",
+    "notNow": "Not now",
+    "someone": "This person",
+    "reportMember": "Report",
+    "reportGroupLabel": "Group: {{name}}"
   },
   "usage": {
     "title": "Usage statistics",
-    "description": "Share anonymous counts of which modules you open. No content, ever."
+    "description": "Share anonymous counts of which modules you open. No content, ever.",
+    "consentTitle": "Help improve LifeOS?",
+    "consentBody": "Share a daily count of which modules you opened and how many records you saved. Nothing else.",
+    "consentNever": "No titles, no text, no amounts, no file names — the counts contain nothing that could be turned back into what you wrote.",
+    "consentAccept": "Share counts",
+    "consentDecline": "No thanks"
   },
   "gender": {
     "female": "Woman",
@@ -1733,6 +1758,8 @@
     "reason_sexual_content": "Unwanted sexual content",
     "reason_impersonation": "Impersonation",
     "reason_other": "Something else",
-    "reportEvidenceNote": "The item you’re reporting is sent with this report so it can be reviewed. Nothing else from this space is."
+    "reportEvidenceNote": "The item you’re reporting is sent with this report so it can be reviewed. Nothing else from this space is.",
+    "reportSubmit": "Send report",
+    "reportNotePlaceholder": "Anything else we should know? (optional)"
   }
 }

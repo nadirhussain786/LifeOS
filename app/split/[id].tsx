@@ -1,7 +1,8 @@
+import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { format } from 'date-fns';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { HandCoins, LogOut, Plus, Receipt, Trash2, UserPlus } from 'lucide-react-native';
-import { useCallback, useState } from 'react';
+import { Flag, HandCoins, LogOut, Plus, Receipt, Trash2, UserPlus } from 'lucide-react-native';
+import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, RefreshControl, ScrollView, View } from 'react-native';
 
@@ -15,6 +16,7 @@ import { moduleTint, colors as dsColors } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { formatMoney } from '@/features/budget/services/money';
 import { MemberAvatars } from '@/features/split/components/member-avatars';
+import { ReportSheet, type ReportTarget } from '@/features/moderation/components/report-sheet';
 import {
   useGroupBalances,
   useGroupDetail,
@@ -38,6 +40,9 @@ export default function SplitGroupScreen() {
   const { data, isLoading, isError, error, refetch } = useGroupDetail(id);
   const { balances, spendCents, mine } = useGroupBalances(data);
   const { me, isOwner } = useMyMembership(data);
+
+  const reportSheet = useRef<BottomSheetModal>(null);
+  const [reportTarget, setReportTarget] = useState<ReportTarget | null>(null);
   const { deleteGroup, removeMember } = useSplitMutations(id);
 
   const onRefresh = useCallback(async () => {
@@ -134,6 +139,26 @@ export default function SplitGroupScreen() {
             icon: UserPlus,
             label: t('split.addPeople'),
             onPress: () => router.push(`/split/${id}/members`),
+          },
+          // The group itself is reportable, not only its members: an abusive
+          // group name or a group somebody was added to against their will has
+          // no single member to name, and "leave" is not a report.
+          {
+            icon: Flag,
+            label: t('moderation.reportMember'),
+            onPress: () => {
+              setReportTarget({
+                reportedUserId: data?.group?.createdBy ?? null,
+                surface: 'expense_group',
+                surfaceId: id,
+                evidence: {
+                  groupId: id,
+                  groupName: data?.group?.name ?? null,
+                },
+                label: t('moderation.reportGroupLabel', { name: data?.group?.name ?? '' }),
+              });
+              reportSheet.current?.present();
+            },
           },
           // The owner retires the group; everyone else can only leave it.
           isOwner
@@ -346,6 +371,8 @@ export default function SplitGroupScreen() {
           )}
         </ScrollView>
       )}
+
+      <ReportSheet ref={reportSheet} target={reportTarget} />
     </View>
   );
 }

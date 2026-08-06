@@ -1,0 +1,113 @@
+# Publishes the privacy policy and terms to GitHub Pages.
+#
+# Both stores require these at a stable, publicly reachable URL that is not
+# editable-in-place. The app used to link to a GitHub *blob* — the file as
+# rendered inside the repository — which fails that twice: it changes silently
+# whenever the file does, and it 404s entirely if the repository is private.
+#
+# The documents are built from PRIVACY.md and TERMS.md at the repo root rather
+# than copied into a site folder, so the published policy and the one in the
+# repository cannot drift. Editing either file and pushing to main republishes.
+#
+# One-time setup, in the repository's Settings → Pages:
+#   Source: GitHub Actions
+# The repository must be public for the URLs to be reachable without a login.
+# Published at:
+#   https://<owner>.github.io/<repo>/privacy/
+#   https://<owner>.github.io/<repo>/terms/
+# which is what lib/env.ts defaults EXPO_PUBLIC_PRIVACY_URL and
+# EXPO_PUBLIC_TERMS_URL to.
+
+name: Publish policies
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - PRIVACY.md
+      - TERMS.md
+      - .github/workflows/pages.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deploy at a time; a queued run replaces a pending one rather than racing.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assemble the site
+        run: |
+          set -euo pipefail
+          mkdir -p site
+
+          # Jekyll needs front matter to apply a layout; the source documents
+          # must not carry it, or they render as literal text on GitHub and in
+          # any editor. So it is prepended here rather than committed.
+          {
+            echo '---'
+            echo 'layout: default'
+            echo 'title: Privacy Policy'
+            echo 'permalink: /privacy/'
+            echo '---'
+            cat PRIVACY.md
+          } > site/privacy.md
+
+          {
+            echo '---'
+            echo 'layout: default'
+            echo 'title: Terms of Service'
+            echo 'permalink: /terms/'
+            echo '---'
+            cat TERMS.md
+          } > site/terms.md
+
+          {
+            echo '---'
+            echo 'layout: default'
+            echo 'title: LifeOS'
+            echo '---'
+            echo '# LifeOS'
+            echo
+            echo 'A local-first personal life operating system.'
+            echo
+            echo '- [Privacy Policy](privacy/)'
+            echo '- [Terms of Service](terms/)'
+          } > site/index.md
+
+          # `baseurl` matters: the site is served from /<repo>/, and without it
+          # every internal link resolves to the domain root and 404s.
+          cat > site/_config.yml <<'YAML'
+          title: LifeOS
+          description: Privacy policy and terms of service
+          theme: jekyll-theme-primer
+          baseurl: /LifeOS
+          YAML
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./site
+          destination: ./_site
+
+      - uses: actions/upload-pages-artifact@v3
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

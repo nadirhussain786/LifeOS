@@ -2640,4 +2640,346 @@ await test('0019 a non-admin cannot block anybody', async () => {
   }
 });
 
+// ---------------------------------------------------------------------------
+console.log('\naccount deletion (0020)');
+// ---------------------------------------------------------------------------
+//
+// The bug: deletion was a 15-name list in the edge function while sync covered
+// 38 tables, and `user_id` carried no foreign key, so deleting the auth user
+// left the other 23 tables' rows behind owned by a uid that resolves to nobody.
+// Every assertion below is about a table that was in that gap.
+
+await test('0020 no per-user table is left outside the cascade', async () => {
+  // The preflight the edge function refuses to delete without. Catalog-derived,
+  // so it fails the day a migration adds a table without the constraint —
+  // which is exactly how the 23-table gap opened in the first place.
+  const rows = (await db.query(`select * from public.account_deletion_uncovered_tables()`)).rows;
+  expectEqual(
+    rows.map((r) => r.account_deletion_uncovered_tables).join(', '),
+    '',
+    'tables with no auth.users foreign key',
+  );
+});
+
+await test('0020 deleting the auth user takes the data with it', async () => {
+  const DOOMED = '99999999-9999-9999-9999-999999999999';
+  await createUser(db, DOOMED, 'doomed@example.com');
+
+  // One row in each of six tables the old delete list never named — including
+  // the two that matter most: cycle/intimacy records, and the sealed copy of
+  // the private space's master key.
+  await db.query(
+    `insert into public.water_intake_logs (id, user_id, log_date, amount_ml, logged_at, created_at, updated_at)
+     values ('w1', $1, '2026-08-06', 250, 1, 1, 1)`,
+    [DOOMED],
+  );
+  await db.query(
+    `insert into public.gallery_albums (id, user_id, name, created_at, updated_at)
+     values ('a1', $1, 'Album', 1, 1)`,
+    [DOOMED],
+  );
+  await db.query(
+    `insert into public.songs (id, user_id, title, added_at, created_at, updated_at)
+     values ('s1', $1, 'Song', 1, 1, 1)`,
+    [DOOMED],
+  );
+  await db.query(
+    `insert into public.habit_logs (id, user_id, habit_id, log_date, logged_at, created_at, updated_at)
+     values ('hl1', $1, 'h1', '2026-08-06', 1, 1, 1)`,
+    [DOOMED],
+  );
+  await db.query(
+    `insert into public.private_entries (id, user_id, payload, created_at, updated_at)
+     values ('p1', $1, 'ciphertext', 1, 1)`,
+    [DOOMED],
+  );
+  await db.query(
+    `insert into public.vault_escrow (user_id, ephemeral_public_key, wrapped_key)
+     values ($1, 'epk', 'wrapped')`,
+    [DOOMED],
+  );
+
+  await db.query(`delete from auth.users where id = $1`, [DOOMED]);
+
+  for (const table of [
+    'water_intake_logs',
+    'gallery_albums',
+    'songs',
+    'habit_logs',
+    'private_entries',
+    'vault_escrow',
+  ]) {
+    expectEqual(
+      await count(`select count(*)::int n from public.${table} where user_id = $1`, [DOOMED]),
+      0,
+      `${table} rows left behind`,
+    );
+  }
+
+  // The postflight, over every per-user table rather than the six above.
+  const remaining = (
+    await db.query(`select * from public.account_data_remaining($1::uuid)`, [DOOMED])
+  ).rows;
+  expectEqual(
+    remaining.map((r) => `${r.relation}=${r.rows_left}`).join(', '),
+    '',
+    'rows surviving the account',
+  );
+});
+
+await test('0020 a shared ledger survives a member deleting their account', async () => {
+  // The deliberate exception. `expense_group_members.user_id` is `set null`, so
+  // the membership row outlives the account and the group's balances still add
+  // up — cascading here would silently rewrite what everybody else is owed.
+  const LEAVER = 'aaaaaaaa-0000-0000-0000-000000000001';
+  await createUser(db, LEAVER, 'leaver@example.com');
+
+  await asUser(db, LEAVER, async () => {
+    await db.query(
+      `select public.create_expense_group('g-leaver','Trip','trip','$','m-leaver',null,'act-leaver',$1)`,
+      [Date.now()],
+    );
+  });
+
+  await db.query(`delete from auth.users where id = $1`, [LEAVER]);
+
+  expectEqual(
+    await count(
+      `select count(*)::int n from public.expense_group_members where group_id = 'g-leaver'`,
+    ),
+    1,
+    'membership rows kept for the ledger',
+  );
+  expectEqual(
+    await count(
+      `select count(*)::int n from public.expense_group_members
+        where group_id = 'g-leaver' and user_id is null`,
+    ),
+    1,
+    'membership rows detached from the deleted account',
+  );
+});
+
+await test('0020 the deletion helpers are not a row-count oracle', async () => {
+  // Both are SECURITY DEFINER and read across every user's rows. Left callable
+  // by `authenticated`, they would let any signed-in user count anybody else's
+  // private_entries by uid.
+  await asUser(db, MALLORY, async () => {
+    await expectRejection(
+      () => db.query(`select * from public.account_data_remaining($1::uuid)`, [ALICE]),
+      'permission denied',
+    );
+    await expectRejection(
+      () => db.query(`select * from public.account_deletion_uncovered_tables()`),
+      'permission denied',
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+console.log('\nuser blocking (0021)');
+// ---------------------------------------------------------------------------
+//
+// The requirement: a user must be able to stop another user reaching them,
+// without an operator in the loop. The contact vector in this app is a shared
+// expense group, and it has three doors — adding an email as a member, sending
+// the invitation, and redeeming a token minted before the block. All three.
+
+const BLOCKER = 'bbbbbbbb-0000-0000-0000-000000000001';
+const PEST = 'bbbbbbbb-0000-0000-0000-000000000002';
+await createUser(db, BLOCKER, 'blocker@example.com');
+await createUser(db, PEST, 'pest@example.com');
+
+await test('0021 a token minted before the block cannot be redeemed after it', async () => {
+  // Ordering matters: the invitation is created while contact is still allowed,
+  // so this is the case the two triggers cannot catch. Without the check inside
+  // accept_group_invitation, blocking somebody who had already invited you
+  // leaves their way in open until the token expires.
+  await asUser(db, PEST, async () => {
+    await db.query(
+      `select public.create_expense_group('g21-a','Trip','trip','$','m21-pest',null,'act21-a',$1)`,
+      [Date.now()],
+    );
+    await db.query(
+      `insert into public.expense_group_members (id, group_id, user_id, email, display_name, role, created_at, updated_at)
+       values ('m21-target','g21-a',null,'blocker@example.com','Blocker','member',$1,$1)`,
+      [Date.now()],
+    );
+    await db.query(
+      `select public.create_group_invitation('inv21-1','g21-a','m21-target','blocker@example.com','tok21-1',$1,$2)`,
+      [Date.now() + 86400000, Date.now()],
+    );
+  });
+
+  await asUser(db, BLOCKER, async () => {
+    await db.query(`select public.block_user($1::uuid)`, [PEST]);
+    expectEqual(
+      (await one(`select public.accept_group_invitation('tok21-1', $1) as v`, [Date.now()])).v,
+      'blocked',
+      'redeeming a blocked inviter’s token',
+    );
+  });
+
+  // Refused without consuming the token, so unblocking and accepting later
+  // still works — declining should not destroy the invitation.
+  expectEqual(
+    await count(
+      `select count(*)::int n from public.expense_group_invitations
+        where id = 'inv21-1' and accepted_at is null`,
+    ),
+    1,
+    'invitation left unconsumed',
+  );
+});
+
+await test('0021 a blocked user cannot add you to a group', async () => {
+  // A fresh group: the email is unique per group (0003), so re-adding to g21-a
+  // would fail on that index and prove nothing about the block.
+  await asUser(db, PEST, async () => {
+    await db.query(
+      `select public.create_expense_group('g21-b','Another','trip','$','m21-pest-b',null,'act21-b',$1)`,
+      [Date.now()],
+    );
+    await expectRejection(
+      () =>
+        db.query(
+          `insert into public.expense_group_members (id, group_id, user_id, email, display_name, role, created_at, updated_at)
+           values ('m21-again','g21-b',null,'blocker@example.com','Blocker','member',$1,$1)`,
+          [Date.now()],
+        ),
+      'cannot be added',
+    );
+  });
+});
+
+await test('0021 a blocked user cannot invite you', async () => {
+  await asUser(db, PEST, async () => {
+    await expectRejection(
+      () =>
+        db.query(
+          `insert into public.expense_group_invitations (id, group_id, member_id, email, token, invited_by, expires_at, created_at)
+           values ('inv21-2','g21-a','m21-target','blocker@example.com','tok21-2',$1,$2,$3)`,
+          [PEST, Date.now() + 86400000, Date.now()],
+        ),
+      'cannot be invited',
+    );
+  });
+});
+
+await test('0021 the block runs both ways', async () => {
+  // Asymmetric blocking leaves an obvious hole: block somebody, then add them
+  // to a group yourself, and you are back in a shared space with content they
+  // can write. Blocking is about contact, and contact has two ends.
+  await asUser(db, BLOCKER, async () => {
+    await db.query(
+      `select public.create_expense_group('g21-c','Mine','trip','$','m21-blk',null,'act21-c',$1)`,
+      [Date.now()],
+    );
+    await expectRejection(
+      () =>
+        db.query(
+          `insert into public.expense_group_members (id, group_id, user_id, email, display_name, role, created_at, updated_at)
+           values ('m21-pest2','g21-c',null,'pest@example.com','Pest','member',$1,$1)`,
+          [Date.now()],
+        ),
+      'cannot be added',
+    );
+  });
+});
+
+await test('0021 unblocking reopens contact', async () => {
+  await asUser(db, BLOCKER, async () => {
+    await db.query(`select public.unblock_user($1::uuid)`, [PEST]);
+    expectEqual(
+      (await one(`select public.accept_group_invitation('tok21-1', $1) as v`, [Date.now()])).v,
+      'ok',
+      'the original invitation after unblocking',
+    );
+  });
+});
+
+await test('0021 you cannot see who blocked you', async () => {
+  // The policy grants `blocker_id = auth.uid()` only. Somebody who can
+  // enumerate their blockers knows exactly who to reach from a second account,
+  // and not being findable is usually the entire point of the block.
+  await asUser(db, BLOCKER, async () => {
+    await db.query(`select public.block_user($1::uuid)`, [PEST]);
+  });
+  await asUser(db, PEST, async () => {
+    expectEqual(
+      await count(`select count(*)::int n from public.user_blocks`),
+      0,
+      'rows visible to the blocked party',
+    );
+    // And not through the helper either — it is revoked from `authenticated`.
+    await expectRejection(
+      () => db.query(`select public.contact_blocked($1::uuid, $2::uuid)`, [PEST, BLOCKER]),
+      'permission denied',
+    );
+  });
+});
+
+await test('0021 you can list and unblock the accounts you blocked', async () => {
+  await asUser(db, BLOCKER, async () => {
+    const rows = (await db.query(`select * from public.list_blocked_accounts()`)).rows;
+    expectEqual(rows.length, 1, 'blocked accounts listed');
+    expectEqual(rows[0].user_id, PEST, 'the account blocked');
+    // Needs a name to show, and profiles_own hides it — hence SECURITY DEFINER.
+    expectEqual(rows[0].display_name, 'pest', 'a label for the unblock screen');
+  });
+});
+
+await test('0021 blocking yourself is refused', async () => {
+  await asUser(db, BLOCKER, async () => {
+    await expectRejection(
+      () => db.query(`select public.block_user($1::uuid)`, [BLOCKER]),
+      'cannot block yourself',
+    );
+  });
+});
+
+await test('0021 blocking twice is not an error', async () => {
+  // The UI should not have to model "already blocked" as a failure state.
+  await asUser(db, BLOCKER, async () => {
+    await db.query(`select public.block_user($1::uuid)`, [PEST]);
+    await db.query(`select public.block_user($1::uuid)`, [PEST]);
+    expectEqual(
+      await count(`select count(*)::int n from public.user_blocks where blocker_id = $1`, [
+        BLOCKER,
+      ]),
+      1,
+      'rows after blocking twice',
+    );
+  });
+});
+
+await test('0021 blocks die with either account', async () => {
+  // user_blocks has no `user_id` column, so 0020's catalog checks do not see
+  // it. The two cascades are the whole guarantee, in both directions.
+  const A = 'cccccccc-0000-0000-0000-000000000001';
+  const B = 'cccccccc-0000-0000-0000-000000000002';
+  await createUser(db, A, 'a@example.com');
+  await createUser(db, B, 'b@example.com');
+
+  await asUser(db, A, async () => {
+    await db.query(`select public.block_user($1::uuid)`, [B]);
+  });
+  await db.query(`delete from auth.users where id = $1`, [B]);
+  expectEqual(
+    await count(`select count(*)::int n from public.user_blocks where blocker_id = $1`, [A]),
+    0,
+    'blocks left after the blocked account is deleted',
+  );
+
+  await asUser(db, A, async () => {
+    await db.query(`select public.block_user($1::uuid)`, [PEST]);
+  });
+  await db.query(`delete from auth.users where id = $1`, [A]);
+  expectEqual(
+    await count(`select count(*)::int n from public.user_blocks where blocked_id = $1`, [PEST]),
+    1,
+    'only the blocker’s own rows removed',
+  );
+});
+
 summary();

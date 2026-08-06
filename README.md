@@ -7,8 +7,8 @@ you create an account and switch sync on, module by module.
 Built with Expo (React Native), SQLite on the device, and Supabase (Postgres +
 Row Level Security) as the optional backend.
 
-> **Status: pre-release.** The code typechecks, lints, and passes 246 unit tests
-> plus 159 assertions against a real Postgres. **None of it has been observed
+> **Status: pre-release.** The code typechecks, lints, and passes 263 unit tests
+> plus 173 assertions against a real Postgres. **None of it has been observed
 > running on a physical device**, and no Supabase project has been created yet.
 > Notifications and widgets cannot run in Expo Go at all — they need a dev
 > build. See [Known limitations](#known-limitations) before trusting anything
@@ -99,7 +99,7 @@ features/<module>/      One folder per feature, consistently layered:
 database/               Drizzle schema, bootstrap DDL, client
 lib/                    Cross-cutting: i18n, supabase, dates, money, errors
 components/ constants/  Shared primitives and design tokens
-supabase/migrations/    Numbered SQL migrations, 0001 → 0019
+supabase/migrations/    Numbered SQL migrations, 0001 → 0021
 scripts/                Migration runner, SQL test harness, build tooling
 docs/                   Operations, design system, SQLCipher notes
 ```
@@ -206,10 +206,13 @@ tables, additive columns for older installs, backfills, then indexes — in that
 order, because a column added with a default leaves existing rows at that default
 and `updated_at` at a default is invisible to sync forever.
 
-**On the server.** Postgres, defined by the 19 numbered migrations in
+**On the server.** Postgres, defined by the 21 numbered migrations in
 [`supabase/migrations/`](supabase/migrations/). Every table has Row Level
 Security; a user reaches only their own rows, and the policies — not the client —
-are what enforce it.
+are what enforce it. Every per-user table also carries
+`references auth.users(id) on delete cascade`, so deleting an account deletes
+its data as one transaction rather than relying on a list somebody has to keep
+up to date — see [0020](supabase/migrations/0020_account_deletion_cascade.sql).
 
 ### Running migrations
 
@@ -239,10 +242,10 @@ Full detail in [docs/OPERATIONS.md](docs/OPERATIONS.md).
 ## Testing
 
 ```bash
-npm test              # 246 unit tests
+npm test              # 263 unit tests
 npm run typecheck     # tsc --noEmit
 npm run lint          # eslint
-npm run test:sql      # 159 assertions against real Postgres (PGlite, no Docker)
+npm run test:sql      # 173 assertions against real Postgres (PGlite, no Docker)
 npm run check:migrations
 ```
 
@@ -319,6 +322,13 @@ produce an app that installs fine and cannot sign anybody in.
 - **Moderation** is documented, audited, and bounded: staff can reach an account
   only while a live report names it, admins can reach anything, and every access
   writes an audit row _before_ the data is produced.
+- **Users can moderate for themselves.** Any member of a shared expense group
+  can report the group or a person in it, and block that person outright. A
+  block is enforced by the database, not the screen that offers it: it shuts
+  being added to a group, being invited to one, and redeeming a token minted
+  before the block. It does not remove either party from a group they already
+  share — that would rewrite a ledger other people depend on — and the app says
+  so rather than implying otherwise.
 
 > **LifeOS is not end-to-end encrypted when a build carries
 > `EXPO_PUBLIC_VAULT_ESCROW_PUBLIC_KEY`.** With that key set, every private
@@ -340,6 +350,7 @@ produce an app that installs fine and cannot sign anybody in.
 | [PRIVACY.md](PRIVACY.md)                       | The user-facing privacy policy                         |
 | [AUDIT.md](AUDIT.md)                           | Full-app audit: gaps, severities, what was fixed       |
 | [TODO.md](TODO.md)                             | Roadmap and what is still blocked on you               |
+| [TERMS.md](TERMS.md)                           | Terms of service, incl. the rules for shared groups    |
 | [AGENTS.md](AGENTS.md)                         | Instructions for AI coding agents in this repo         |
 
 ---
@@ -376,12 +387,20 @@ implies away:
   decline to run it; the server-side denial cannot be declined.
 - **Appeals have no route back in.** A blocked user cannot export their own data,
   so a data-access request is served by an admin running SQL by hand.
-- **The bundle identifier is still `com.lifeos.app`,** a placeholder to replace
-  before any store submission.
+- **The bundle identifier is `com.lifeos.app`.** Kept deliberately, but it is a
+  generic name on a domain nobody here owns. Both stores only require
+  uniqueness, so it will work; it is worth knowing it cannot be changed once
+  either store has accepted a build under it.
+- **The published policy URLs are unreachable until Pages is switched on.**
+  `.github/workflows/pages.yml` publishes PRIVACY.md and TERMS.md, but the
+  repository must be public and Settings → Pages set to "GitHub Actions" first.
+  Until then the two links in Settings 404.
+- **The governing-law clause in TERMS.md is an unfilled placeholder.**
 
 ---
 
 ## License
 
-No `LICENSE` file is present in this repository, and `package.json` is marked
-`"private": true`. All rights reserved by default until a license is chosen.
+Proprietary — see [LICENSE](LICENSE). All rights reserved; `package.json` is
+marked `"private": true`. Viewing this repository grants no license to its
+contents. Third-party dependencies keep their own licenses.

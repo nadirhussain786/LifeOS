@@ -10,6 +10,8 @@ import {
   FileText,
   Info,
   Languages,
+  LifeBuoy,
+  Scale,
   Upload,
   UserCircle,
   Laptop,
@@ -19,6 +21,7 @@ import {
   ShieldCheck,
   Sun,
   Trash2,
+  UserX,
 } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -48,10 +51,7 @@ import {
 } from '@/features/settings/store/appearance-store';
 import { useLanguageStore, type Language } from '@/features/settings/store/language-store';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-
-/** Public privacy-policy URL (PRIVACY.md in the repo). Replace with your hosted
- * policy URL for store submission. */
-const PRIVACY_POLICY_URL = 'https://github.com/nadirhussain786/LifeOS/blob/main/PRIVACY.md';
+import { env } from '@/lib/env';
 
 const THEME_OPTIONS: { value: ThemePreference; labelKey: string; icon: typeof Sun }[] = [
   { value: 'system', labelKey: 'settings.system', icon: Laptop },
@@ -366,10 +366,37 @@ export default function SettingsScreen() {
               subtitle={t('settings.syncAccountSubtitle')}
               onPress={() => router.push('/settings/sync')}
             />
+            {/* Reachable without an account: guest mode has no blocks to show,
+                but somebody who signed out still needs the way back to undo
+                one, and hiding the row makes the feature look absent. */}
+            <SettingsRow
+              icon={UserX}
+              label={t('moderation.blockedAccounts')}
+              subtitle={t('moderation.blockedAccountsSubtitle')}
+              onPress={() => router.push('/settings/blocked')}
+            />
             <SettingsRow
               icon={FileText}
               label={t('settings.privacyPolicy')}
-              onPress={() => Linking.openURL(PRIVACY_POLICY_URL)}
+              onPress={() => Linking.openURL(env.EXPO_PUBLIC_PRIVACY_URL)}
+            />
+            <SettingsRow
+              icon={Scale}
+              label={t('settings.terms')}
+              onPress={() => Linking.openURL(env.EXPO_PUBLIC_TERMS_URL)}
+            />
+            {/* Both stores require a working contact address. Until now the
+                app's only one was the mailto on the block screen — reachable
+                exactly when the user could no longer use the app. */}
+            <SettingsRow
+              icon={LifeBuoy}
+              label={t('settings.support')}
+              subtitle={t('settings.supportSubtitle')}
+              onPress={() =>
+                Linking.openURL(
+                  `mailto:${env.EXPO_PUBLIC_SUPPORT_EMAIL}?subject=${encodeURIComponent('LifeOS support')}`,
+                )
+              }
             />
           </View>
         </View>

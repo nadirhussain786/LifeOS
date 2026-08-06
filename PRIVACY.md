@@ -1,6 +1,6 @@
 # LifeOS — Privacy Policy
 
-_Last updated: 2026-08-04_
+_Last updated: 2026-08-06_
 
 LifeOS ("the app", "we") is a personal life-organization app. Your privacy is
 central to how it's built: **LifeOS is local-first — your data lives on your
@@ -20,14 +20,25 @@ enable cloud sync.
 **In the cloud (only if you sign in and enable sync):**
 
 - The above records for the modules you choose to sync (you control this
-  per-module in Settings → Sync & Account). Photos, audio, and reminders are
-  **not** synced.
+  per-module in Settings → Sync & Account).
+- For photos, videos and music, **the details travel but the files do not.**
+  Album and playlist names, captions, file names, favourites, ordering and dates
+  are uploaded so a second device can show your library; the images, videos and
+  audio themselves stay on the device that imported them and appear elsewhere as
+  "Not on this device". Treat a caption or a file name as text you have uploaded,
+  because it is.
+- Reminders are **not** synced. They are scheduled by your phone, and each phone
+  keeps its own.
 - Your account profile: email address and display name.
 
-**Usage statistics:**
+**Usage statistics — off unless you turn them on:**
 
-So we can tell how many people use LifeOS and which parts of it are worth
-building on, the app reports a small daily count:
+We ask once, in the app, and collect nothing unless you say yes. If you decline
+or simply never answer, no usage data is collected at all. You can change your
+mind either way in **Settings → Sync & Account → Usage statistics**.
+
+If you do say yes, so we can tell how many people use LifeOS and which parts of
+it are worth building on, the app reports a small daily count:
 
 - **If you have an account:** for each day, which modules you opened and how
   many records you synced. A whole day's report looks like
@@ -38,9 +49,6 @@ building on, the app reports a small daily count:
   plus your platform and app version, against a random identifier stored on
   your device. It is not linked to an account, an email, an advertising ID, or
   your device's identifiers, and it cannot be.
-
-You can switch this off at any time in **Settings → Sync & Account → Usage
-statistics**.
 
 We do **not** use advertising identifiers, we do **not** track you across other
 apps or websites, and we do **not** sell your data.
@@ -58,7 +66,11 @@ LifeOS requests device permissions only for features you use:
 - **Notifications** — to deliver reminders you set.
 - **Camera / Photos** — to add media to the gallery, notes, and journal.
 - **Microphone** — to record voice notes.
-- **Location** — only when you explicitly tag a journal entry's location.
+- **Location** — approximate only, and only when you explicitly tag a journal
+  entry's location. The app requests coarse location and blocks the precise
+  permission outright, because all it does with it is look up a town and region
+  name. Whether that tag then leaves your device depends on your journal sync
+  setting.
 - **Face ID / biometrics** — only to unlock the app if you enable App Lock.
 
 ## Your rights and controls
@@ -70,9 +82,18 @@ LifeOS requests device permissions only for features you use:
 - **Delete your account** — Settings → Sync & Account → Delete account
   permanently deletes your account and all your synced cloud data, and clears
   this device. This cannot be undone.
+
+  One thing deliberately survives it, and you should know what: if you were in a
+  shared expense group, **your membership row stays, with your name and your
+  share of the ledger, but no longer attached to any account**. Removing it would
+  silently change what everybody else in that group is owed. Nothing else of
+  yours remains — your private space, its records and the escrowed copy of its
+  key all go with the account.
+
 - **Control what syncs** — per-module toggles in Settings → Sync & Account; or
   simply never create an account (guest mode keeps everything local).
-- **Turn off usage statistics** — Settings → Sync & Account → Usage statistics.
+- **Turn usage statistics on or off** — Settings → Sync & Account → Usage
+  statistics. They are off until you switch them on.
 
 ## The private space
 
@@ -95,7 +116,8 @@ the app on purpose:
   search results, notifications, the home-screen widget, or your gallery.
   Screenshots and screen recording are blocked while it is open.
 - **Usage statistics say nothing about it.** As with every other module, only
-  "opened" and "saved" counts are reported — never what is inside.
+  "opened" and "saved" counts are reported — and only if you switched them on
+  at all — never what is inside.
 - **"Delete all data" erases it**, along with its keys.
 
 Gender is asked once during setup, only to suggest which of these modules to
@@ -214,6 +236,28 @@ data from them.
 We may update this policy; material changes will be reflected by the "Last
 updated" date above.
 
+## Your rights under GDPR and similar laws
+
+Depending on where you live you have the right to access your data, correct it,
+delete it, take it elsewhere, and object to or restrict some processing.
+
+In LifeOS most of these are buttons rather than requests: **Export data** gives
+you a machine-readable copy, **Delete account** erases the cloud side, and
+**Clear all data** erases the device. For anything those do not cover — including
+a data-access request from an account that has been blocked, which cannot read
+its own data to export it — email the address below and we will do it by hand.
+
+Our lawful basis is your consent for usage statistics, and performance of this
+agreement for everything else needed to run the app. You can withdraw consent for
+usage statistics at any time without losing any functionality.
+
+## Terms of Service
+
+These terms govern use of the app, including the rules for shared expense groups
+and what happens when content is reported:
+https://nadirhussain786.github.io/LifeOS/terms/
+
 ## Contact
 
-Questions about privacy or your data: **nh262464@gmail.com**
+Questions about privacy or your data, and data-access requests:
+**nh262464@gmail.com**
