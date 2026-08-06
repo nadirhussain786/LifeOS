@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 import {
@@ -65,6 +65,42 @@ function additiveColumns(): Record<string, string[]> {
 /** The one BACKFILL_SQL body, parsed once. */
 function backfillSql(): string {
   return schema.match(/export const BACKFILL_SQL = `([\s\S]*?)`;/)?.[1] ?? '';
+}
+
+/** Every non-test `.ts` under the given directories, recursively. */
+function sourceFiles(...directories: string[]): string[] {
+  const out: string[] = [];
+  const walk = (directory: string) => {
+    for (const entry of readdirSync(directory)) {
+      const path = join(directory, entry);
+      if (statSync(path).isDirectory()) walk(path);
+      else if (entry.endsWith('.ts') && !entry.endsWith('.test.ts')) out.push(path);
+    }
+  };
+  for (const directory of directories) walk(join(ROOT, directory));
+  return out;
+}
+
+/**
+ * The object literal of every `.set({ … })` in a source file.
+ *
+ * Brace-matched rather than regexed to a closing `})`: a nested object or a
+ * template literal in one property would end the match early and hand back a
+ * truncated literal, which reads as "this call sets fewer columns than it does"
+ * — a false pass in exactly the case worth catching.
+ */
+function setLiterals(source: string): string[] {
+  const out: string[] = [];
+  for (const match of source.matchAll(/\.set\(\s*\{/g)) {
+    let depth = 1;
+    let i = match.index! + match[0].length;
+    for (; i < source.length && depth > 0; i++) {
+      if (source[i] === '{') depth++;
+      else if (source[i] === '}') depth--;
+    }
+    out.push(source.slice(match.index! + match[0].length, i - 1));
+  }
+  return out;
 }
 
 describe('sync contract', () => {
@@ -194,6 +230,37 @@ describe('sync contract', () => {
       (table) => !new RegExp(`UPDATE ${table} SET updated_at =`).test(backfill),
     );
     expect(missing).toEqual([]);
+  });
+
+  it('moves updated_at on every write that touches deleted_at', () => {
+    // The bug this exists for, twice over. `deleteAlbum` and `deletePlaylist`
+    // set `deletedAt` and left `updatedAt` at the row's last edit — and the push
+    // is `WHERE (updated_at, id) > cursor`, so the tombstone was never selected.
+    // The delete stayed on one device and the next pull put the album back.
+    //
+    // It reads as correct at the call site, which is why it came back after
+    // being fixed once across nine repositories: nothing about `.set({
+    // deletedAt })` looks incomplete. The same applies to an undelete —
+    // restoring a row without moving updated_at leaves the server's tombstone
+    // winning, so the row is resurrected and then deleted again.
+    const offenders: string[] = [];
+    let checked = 0;
+
+    for (const file of sourceFiles('features', 'lib')) {
+      const source = readFileSync(file, 'utf8');
+      for (const literal of setLiterals(source)) {
+        if (!/\bdeletedAt\b/.test(literal)) continue;
+        checked++;
+        if (!/\bupdatedAt\b/.test(literal)) {
+          offenders.push(`${file.slice(ROOT.length + 1)}: .set({ ${literal.trim()} })`);
+        }
+      }
+    }
+
+    // Guards the guard: if the brace matcher stops finding anything, this test
+    // must fail rather than pass over an empty list.
+    expect(checked).toBeGreaterThan(20);
+    expect(offenders).toEqual([]);
   });
 
   it('gives the derived-id join tables an id to sync by', () => {

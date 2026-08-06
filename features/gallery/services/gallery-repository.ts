@@ -136,7 +136,13 @@ export function updateAlbum(
  * than being destroyed — the images are precious progress records). */
 export function deleteAlbum(id: string) {
   const db = getDb();
-  db.update(galleryAlbums).set({ deletedAt: Date.now() }).where(eq(galleryAlbums.id, id)).run();
+  // See deletePlaylist: the tombstone only travels if `updatedAt` moves with it.
+  // No `syncStatus` here — unlike gallery_photos, this table does not carry the
+  // column. The engine keys off `updated_at`, so the tombstone still travels.
+  db.update(galleryAlbums)
+    .set({ deletedAt: Date.now(), updatedAt: Date.now() })
+    .where(eq(galleryAlbums.id, id))
+    .run();
   db.update(galleryPhotos)
     .set({ albumId: null, updatedAt: Date.now() })
     .where(eq(galleryPhotos.albumId, id))

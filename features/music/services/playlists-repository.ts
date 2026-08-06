@@ -81,8 +81,12 @@ export function renamePlaylist(id: string, name: string) {
 
 export function deletePlaylist(id: string) {
   const db = getDb();
+  // `updatedAt` matters as much as `deletedAt`: the push selects
+  // `WHERE (updated_at, id) > cursor`, so a tombstone that leaves updated_at at
+  // the row's last edit is never picked up. The delete then stays local, and the
+  // next pull writes the playlist back onto the device that deleted it.
   db.update(playlists)
-    .set({ deletedAt: Date.now(), syncStatus: 'pending' })
+    .set({ deletedAt: Date.now(), updatedAt: Date.now(), syncStatus: 'pending' })
     .where(eq(playlists.id, id))
     .run();
   // Soft, like the playlist itself: playlist membership syncs now, and a hard
