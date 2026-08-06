@@ -302,6 +302,34 @@ the Supabase credentials are missing, because the bundler treats an unset
 `EXPO_PUBLIC_` variable as an empty string: the build would otherwise succeed and
 produce an app that installs fine and cannot sign anybody in.
 
+### Releases are automatic
+
+Every merge into `main` runs [release.yml](.github/workflows/release.yml), which:
+
+1. runs the full CI suite — a version is never cut from code that does not pass;
+2. bumps the minor version in `app.json` and `package.json`, commits it as
+   `chore(release): vX.Y.Z [skip ci]`, and tags it;
+3. builds `production-apk` on EAS **from that tag**, and puts a download link in
+   the run summary.
+
+The build is Android-only. An APK is an Android artefact, and the iOS half of
+`eas.json`'s submit block is still `REPLACE_WITH_*` — `--platform all` would
+queue a build that cannot finish.
+
+Two things this needs from you, both one-off:
+
+| What                                          | Where                                                                                                                                    | Without it                                                                                          |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `EXPO_TOKEN` secret                           | Repo → Settings → Secrets and variables → Actions. Token from [expo.dev/settings/access-tokens](https://expo.dev/settings/access-tokens) | The build job fails immediately, with instructions                                                  |
+| `EXPO_PUBLIC_SUPABASE_URL` and `..._ANON_KEY` | The EAS **production** environment (`eas env:create --environment production …`)                                                         | `app.config.js` fails the build on purpose, rather than shipping an APK that cannot sign anybody in |
+
+Opting out of a release: put `[skip version]` in the merge commit message. No
+version is cut, and no build runs — the build job needs the version job.
+
+To cut a major or patch release, or to rebuild without bumping, run the workflow
+from the Actions tab: it takes the bump level, whether to build, and which
+profile to use.
+
 ---
 
 ## Security and privacy
