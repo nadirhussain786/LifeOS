@@ -132,7 +132,9 @@
     "noBiometrics": "Biometric lock isn’t set up on this device. You can enable it later from Settings once you’ve added Face ID or a fingerprint.",
     "enableMethod": "Enable {{method}}",
     "notNow": "Not now",
-    "finishSetup": "Finish setup"
+    "finishSetup": "Finish setup",
+    "genderQuestion": "How do you identify?",
+    "genderWhy": "Only used to suggest which private modules to offer you. It stays on your device, is never uploaded, and you can skip it."
   },
   "fields": {
     "priority": "Priority",
@@ -1720,7 +1722,10 @@
     "destroyConfirm": "Delete everything",
     "moveModules": "Keep other modules private",
     "moveModulesNote": "These move into this space: hidden from the Hub, locked behind your PIN, and left out of search and exports. Their existing data stays in the app's normal storage, so this hides them rather than re-encrypting them.",
-    "operatorNotice": "For safety and abuse investigations, LifeOS staff can access private space contents. Every access is logged. See the privacy policy."
+    "operatorNotice": "For safety and abuse investigations, LifeOS staff can access private space contents. Every access is logged. See the privacy policy.",
+    "setupFailed": "Couldn't create your private space. Nothing was saved — try again.",
+    "unlockFailed": "Couldn't open your private space. Your PIN is fine; something went wrong on this device. Try again.",
+    "creatingSpace": "Creating your space…"
   },
   "moduleFlags": {
     "unavailable": "Temporarily unavailable",

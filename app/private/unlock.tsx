@@ -11,6 +11,7 @@ import { colors } from '@/constants/theme';
 import { PinPad } from '@/features/private/components/pin-pad';
 import { MIN_PIN_LENGTH, isVaultSetUp, unlockVault } from '@/features/private/services/vault-keys';
 import { usePrivateStore } from '@/features/private/store/private-store';
+import { reportError } from '@/lib/error-reporting';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 /**
@@ -45,26 +46,37 @@ export default function PrivateUnlockScreen() {
     setBusy(true);
     setError(null);
 
-    const result = await unlockVault(pin);
-    setBusy(false);
-    setPin('');
+    // try/finally: unlocking is seconds of PBKDF2 with every control disabled,
+    // so a throw here is indistinguishable from a hang — see private/setup.tsx.
+    try {
+      const result = await unlockVault(pin);
+      setPin('');
 
-    if (result.ok) {
-      unlock(result.key, result.space);
-      router.replace('/private');
-      return;
-    }
+      if (result.ok) {
+        unlock(result.key, result.space);
+        router.replace('/private');
+        return;
+      }
 
-    if (result.reason === 'throttled') {
-      setRetryInMs(result.retryInMs ?? 0);
-      setError(t('private.throttled', { minutes: Math.ceil((result.retryInMs ?? 0) / 60000) }));
-      return;
+      if (result.reason === 'throttled') {
+        setRetryInMs(result.retryInMs ?? 0);
+        setError(t('private.throttled', { minutes: Math.ceil((result.retryInMs ?? 0) / 60000) }));
+        return;
+      }
+      if (result.reason === 'not-set-up') {
+        router.replace('/private/setup');
+        return;
+      }
+      setError(t('private.wrongPin'));
+    } catch (cause) {
+      // Never reported as a wrong PIN. Telling somebody their correct PIN is
+      // wrong is how they conclude the data is gone and stop trying.
+      reportError(cause, { screen: 'private/unlock' });
+      setPin('');
+      setError(t('private.unlockFailed'));
+    } finally {
+      setBusy(false);
     }
-    if (result.reason === 'not-set-up') {
-      router.replace('/private/setup');
-      return;
-    }
-    setError(t('private.wrongPin'));
   }, [pin, busy, unlock, router, t]);
 
   // Counts the throttle down so the button re-enables on its own rather than

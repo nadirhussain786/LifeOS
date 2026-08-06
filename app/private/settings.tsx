@@ -24,6 +24,7 @@ import {
   setUpDecoy,
 } from '@/features/private/services/vault-keys';
 import { usePrivateStore } from '@/features/private/store/private-store';
+import { reportError } from '@/lib/error-reporting';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { confirm } from '@/lib/dialog-store';
 
@@ -113,36 +114,43 @@ export default function PrivateSettingsScreen() {
     const value = mode === 'change-current' ? currentPin : nextPin;
     const setValue = mode === 'change-current' ? setCurrentPin : setNextPin;
 
+    /** try/finally for the same reason as private/setup.tsx: every control here
+     *  is `disabled={busy}`, so a throw inside used to leave the screen dead
+     *  with no message and no way out. */
     const submit = async () => {
       setBusy(true);
       setError(null);
-      if (mode === 'change-current') {
-        setBusy(false);
-        setMode('change-next');
-        return;
-      }
-      if (mode === 'change-next') {
-        const ok = await changePin(currentPin, nextPin);
-        setBusy(false);
-        if (!ok) {
-          setError(t('private.wrongPin'));
-          setCurrentPin('');
-          setNextPin('');
-          setMode('change-current');
+      try {
+        if (mode === 'change-current') {
+          setMode('change-next');
           return;
         }
-        setDecoyExists(false);
-        setCurrentPin('');
+        if (mode === 'change-next') {
+          const ok = await changePin(currentPin, nextPin);
+          if (!ok) {
+            setError(t('private.wrongPin'));
+            setCurrentPin('');
+            setNextPin('');
+            setMode('change-current');
+            return;
+          }
+          setDecoyExists(false);
+          setCurrentPin('');
+          setNextPin('');
+          setMode('menu');
+          return;
+        }
+        // Decoy setup.
+        await setUpDecoy(nextPin);
+        setDecoyExists(true);
         setNextPin('');
         setMode('menu');
-        return;
+      } catch (cause) {
+        reportError(cause, { screen: 'private/settings', mode });
+        setError(t('private.setupFailed'));
+      } finally {
+        setBusy(false);
       }
-      // Decoy setup.
-      await setUpDecoy(nextPin);
-      setDecoyExists(true);
-      setBusy(false);
-      setNextPin('');
-      setMode('menu');
     };
 
     return (

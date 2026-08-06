@@ -1,6 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
 
 import {
+  DEFAULT_PBKDF2_ITERATIONS,
   decryptBytes,
   deriveKek,
   encryptBytes,
@@ -61,6 +62,46 @@ async function readItem(key: string): Promise<string | null> {
   } catch {
     return null;
   }
+}
+
+/**
+ * How a vault's KEK was derived. Stored beside the wrapped key, because the
+ * derivation cost is an input to the key: reproduce it with a different
+ * iteration count and you get different bytes, the unwrap fails, and the user
+ * is told their correct PIN is wrong.
+ *
+ * Vaults created before this existed stored a bare base64 salt with no params,
+ * so `readParams` treats that shape as the cost in force at the time. Dropping
+ * that fallback would lock every one of those vaults shut permanently.
+ */
+type KdfParams = { salt: Uint8Array; iterations: number };
+
+/** The cost every pre-params vault was created with. Never change this — it is
+ *  a historical fact about existing installs, not a tunable. */
+const LEGACY_ITERATIONS = 120_000;
+
+async function readParams(): Promise<KdfParams | null> {
+  const raw = await readItem(SALT_KEY);
+  if (!raw) return null;
+
+  // New shape: {"s":"<base64>","i":120000}
+  if (raw.startsWith('{')) {
+    try {
+      const parsed = JSON.parse(raw) as { s?: string; i?: number };
+      if (typeof parsed.s === 'string' && typeof parsed.i === 'number' && parsed.i > 0) {
+        return { salt: fromBase64(parsed.s), iterations: parsed.i };
+      }
+    } catch {
+      // Falls through to the legacy read below rather than failing the unlock:
+      // a corrupted params record with an intact wrapped key is still worth
+      // one attempt at the historical cost.
+    }
+  }
+  return { salt: fromBase64(raw), iterations: LEGACY_ITERATIONS };
+}
+
+async function writeParams(params: KdfParams): Promise<void> {
+  await writeItem(SALT_KEY, JSON.stringify({ s: toBase64(params.salt), i: params.iterations }));
 }
 
 async function writeItem(key: string, value: string): Promise<void> {
@@ -127,10 +168,14 @@ async function clearFailures(): Promise<void> {
  * PIN; the key returned is the one to hold in memory for this session. */
 export async function setUpVault(pin: string): Promise<Uint8Array> {
   const salt = randomBytes(16);
-  const kek = await deriveKek(pin, salt);
+  const iterations = DEFAULT_PBKDF2_ITERATIONS;
+  const kek = await deriveKek(pin, salt, iterations);
   const masterKey = generateMasterKey();
 
-  await writeItem(SALT_KEY, toBase64(salt));
+  // Params first. If the wrapped-key write fails, a params record with no
+  // wrapped key reads as "not set up" and setup can simply be retried; the
+  // reverse order would leave a wrapped key nothing can derive a KEK for.
+  await writeParams({ salt, iterations });
   await writeItem(REAL_KEY, toBase64(encryptBytes(kek, masterKey)));
   await clearFailures();
   return masterKey;
@@ -142,9 +187,9 @@ export async function setUpVault(pin: string): Promise<Uint8Array> {
  * master key.
  */
 export async function setUpDecoy(pin: string): Promise<void> {
-  const saltRaw = await readItem(SALT_KEY);
-  if (!saltRaw) throw new Error('vault not set up');
-  const kek = await deriveKek(pin, fromBase64(saltRaw));
+  const params = await readParams();
+  if (!params) throw new Error('vault not set up');
+  const kek = await deriveKek(pin, params.salt, params.iterations);
   await writeItem(DECOY_KEY, toBase64(encryptBytes(kek, generateMasterKey())));
 }
 
@@ -160,12 +205,12 @@ export async function removeDecoy(): Promise<void> {
  * one, and timing is exactly the sort of side channel that undoes a decoy.
  */
 export async function unlockVault(pin: string): Promise<UnlockResult> {
-  const [saltRaw, realWrapped, decoyWrapped] = await Promise.all([
-    readItem(SALT_KEY),
+  const [params, realWrapped, decoyWrapped] = await Promise.all([
+    readParams(),
     readItem(REAL_KEY),
     readItem(DECOY_KEY),
   ]);
-  if (!saltRaw || !realWrapped) return { ok: false, reason: 'not-set-up' };
+  if (!params || !realWrapped) return { ok: false, reason: 'not-set-up' };
 
   const attempts = await readAttempts();
   const penalty = penaltyMs(attempts.count);
@@ -174,7 +219,7 @@ export async function unlockVault(pin: string): Promise<UnlockResult> {
     return { ok: false, reason: 'throttled', retryInMs: penalty - waited };
   }
 
-  const kek = await deriveKek(pin, fromBase64(saltRaw));
+  const kek = await deriveKek(pin, params.salt, params.iterations);
 
   let real: Uint8Array | null = null;
   try {
@@ -216,9 +261,12 @@ export async function changePin(currentPin: string, nextPin: string): Promise<bo
   const result = await unlockVault(currentPin);
   if (!result.ok || result.space !== 'real') return false;
 
+  // Re-wrapping is the one moment the cost can be upgraded safely, because the
+  // master key is in hand and everything is being rewritten anyway.
   const salt = randomBytes(16);
-  const kek = await deriveKek(nextPin, salt);
-  await writeItem(SALT_KEY, toBase64(salt));
+  const iterations = DEFAULT_PBKDF2_ITERATIONS;
+  const kek = await deriveKek(nextPin, salt, iterations);
+  await writeParams({ salt, iterations });
   await writeItem(REAL_KEY, toBase64(encryptBytes(kek, result.key)));
 
   // The decoy was wrapped under the old salt and is now unopenable; drop it

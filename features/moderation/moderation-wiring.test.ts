@@ -176,6 +176,48 @@ describe('translations', () => {
     expect(missing).toEqual([]);
   });
 
+  it('resolves every key the app actually asks for', () => {
+    // The parity checks above compare catalogues to each other, so a key
+    // missing from ALL of them passes every one of them. That is not
+    // hypothetical: `private.unlocking` was referenced by the unlock button and
+    // existed nowhere, so the button read `private.unlocking` in every language
+    // while the vault was being opened — on the screen where somebody is
+    // already wondering whether the app has frozen. `onboarding.genderQuestion`
+    // and `onboarding.genderWhy` did the same on the first run.
+    //
+    // Only literal keys are checkable. `t('settings.import_' + reason)` builds
+    // its key at runtime, so the regex requires the closing quote and those
+    // calls are skipped rather than reported as broken.
+    const english = keysOf('en');
+    // i18next resolves `x_other` through `t('x')`, so a plural family counts as
+    // defining its base key.
+    const resolvable = new Set([
+      ...english,
+      ...[...english].map((k) => k.replace(/_(zero|one|two|few|many|other)$/, '')),
+    ]);
+
+    const missing: string[] = [];
+    // Only files that actually use i18next. `t` is not a reserved name — the
+    // sync registry defines `const t = (name) => ({ name })` as shorthand for a
+    // table, and every one of its 38 calls would otherwise read as a missing
+    // translation key.
+    const translated = sourceFiles('app', 'features', 'components').filter((file) =>
+      /from 'react-i18next'|from '@\/lib\/i18n'/.test(readFileSync(file, 'utf8')),
+    );
+    for (const file of translated) {
+      // Comments stripped: several files discuss key names in prose.
+      const source = readFileSync(file, 'utf8')
+        .replace(/\/\*[\s\S]*?\*\//g, '')
+        .replace(/\/\/[^\n]*/g, '');
+      for (const match of source.matchAll(/\bt\(\s*'([a-zA-Z0-9_.]+)'\s*[,)]/g)) {
+        if (!resolvable.has(match[1])) {
+          missing.push(`${match[1]} — ${file.slice(ROOT.length + 1)}`);
+        }
+      }
+    }
+    expect(missing).toEqual([]);
+  });
+
   it.each(LOCALES)('%s adds only plural forms English does not need', (locale) => {
     // Arabic has six plural categories to English's two, so extra `_zero`,
     // `_two`, `_few` and `_many` keys are correct rather than drift. Anything

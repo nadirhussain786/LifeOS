@@ -20,6 +20,7 @@ import { usePrivateStore } from '@/features/private/store/private-store';
 import { useProfileStore } from '@/features/profile/store/profile-store';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { alpha } from '@/lib/color';
+import { reportError } from '@/lib/error-reporting';
 
 /**
  * First run of the private space: choose what goes in it, choose a PIN, and be
@@ -53,22 +54,49 @@ export default function PrivateSetupScreen() {
   const toggle = (id: PrivateModuleId) =>
     setChosen((prev) => (prev.includes(id) ? prev.filter((m) => m !== id) : [...prev, id]));
 
+  /**
+   * Creates the space.
+   *
+   * The try/finally is the whole point of this shape. Every control on this
+   * screen is `disabled={busy}`, so an exception anywhere below used to leave
+   * `busy` true forever: a dead screen, no message, and no way back — not even
+   * the Back button. That is what "it doesn't come back" looked like, and it
+   * applied to a SecureStore write failing as much as to anything exotic.
+   *
+   * Key derivation is deliberately slow (PBKDF2, see vault-crypto) and takes
+   * seconds on a mid-range phone, so the failure mode and the success mode look
+   * identical for long enough that a silent hang is indistinguishable from
+   * working. Hence both the `finally` and the progress label on the button.
+   */
   const finish = async () => {
     if (pin !== confirmPin) {
       setError(t('private.pinMismatch'));
       setConfirmPin('');
       return;
     }
+
     setBusy(true);
-    const key = await setUpVault(pin);
-    // Seals a copy of the master key to the operator. No-ops when the build
-    // has no escrow key configured, in which case the vault stays E2E.
-    await uploadEscrow(key);
-    setEnabledModules(chosen);
-    setSetUpComplete(true);
-    unlock(key, 'real');
-    setBusy(false);
-    router.replace('/private');
+    setError(null);
+    try {
+      const key = await setUpVault(pin);
+      // Seals a copy of the master key to the operator. No-ops when the build
+      // has no escrow key configured, in which case the vault stays E2E.
+      await uploadEscrow(key);
+      setEnabledModules(chosen);
+      setSetUpComplete(true);
+      unlock(key, 'real');
+      router.replace('/private');
+    } catch (cause) {
+      // Named, not swallowed. Creating the space is the one action here that
+      // can fail for a reason the user cannot guess at, and "try again" with no
+      // reason attached is how somebody retries the same failure ten times.
+      reportError(cause, { screen: 'private/setup' });
+      setError(t('private.setupFailed'));
+      setConfirmPin('');
+      setStep('pin');
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -200,7 +228,13 @@ export default function PrivateSetupScreen() {
             <Button
               variant="accent"
               size="lg"
-              label={step === 'pin' ? t('common.continue') : t('private.createSpace')}
+              label={
+                busy
+                  ? t('private.creatingSpace')
+                  : step === 'pin'
+                    ? t('common.continue')
+                    : t('private.createSpace')
+              }
               disabled={
                 busy ||
                 (step === 'pin' ? pin.length < MIN_PIN_LENGTH : confirmPin.length < MIN_PIN_LENGTH)

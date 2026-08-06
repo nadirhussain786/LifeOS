@@ -1,4 +1,5 @@
 import {
+  DEFAULT_PBKDF2_ITERATIONS,
   decryptBytes,
   decryptString,
   deriveKek,
@@ -111,6 +112,36 @@ describe('key derivation', () => {
       const a = await deriveKek('482193', salt);
       const b = await deriveKek('482194', salt);
       expect(Array.from(a)).not.toEqual(Array.from(b));
+    },
+    SLOW,
+  );
+
+  it(
+    'gives a different key at a different iteration count',
+    async () => {
+      // The reason the count is stored with the vault (vault-keys' KdfParams)
+      // rather than read from a constant. Change the constant with the old
+      // vaults still on disk and this is what happens to them: same PIN, same
+      // salt, different key, unwrap fails, and the user is told their correct
+      // PIN is wrong with no way to discover why.
+      const salt = randomBytes(16);
+      const a = await deriveKek('482193', salt, 1000);
+      const b = await deriveKek('482193', salt, 2000);
+      expect(Array.from(a)).not.toEqual(Array.from(b));
+    },
+    SLOW,
+  );
+
+  it(
+    'defaults to the shipped cost when none is given',
+    async () => {
+      // Legacy vaults stored a bare salt and no params; vault-keys derives them
+      // at DEFAULT_PBKDF2_ITERATIONS, so the default and the explicit value
+      // must agree or every pre-params vault stops opening.
+      const salt = randomBytes(16);
+      const implicit = await deriveKek('482193', salt);
+      const explicit = await deriveKek('482193', salt, DEFAULT_PBKDF2_ITERATIONS);
+      expect(Array.from(implicit)).toEqual(Array.from(explicit));
     },
     SLOW,
   );

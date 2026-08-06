@@ -108,10 +108,32 @@ export function randomBytes(length: number): Uint8Array {
   return out;
 }
 
-/** Stretches a PIN into a key-encryption key. Slow by design. */
-export async function deriveKek(pin: string, salt: Uint8Array): Promise<Uint8Array> {
+/** The cost used for vaults created from now on. Existing vaults keep whatever
+ *  they were created with — see `deriveKek` and vault-keys' stored params. */
+export const DEFAULT_PBKDF2_ITERATIONS = PBKDF2_ITERATIONS;
+
+/**
+ * Stretches a PIN into a key-encryption key. Slow by design.
+ *
+ * `iterations` is a parameter rather than the constant above because the cost
+ * is a number we may well want to change: it is a guess about hardware, and the
+ * measured cost on Hermes is several seconds on a mid-range Android — enough
+ * that somebody reasonably concludes the app has hung.
+ *
+ * Changing a hardcoded cost is not a safe edit. The KEK is derived from the PIN
+ * *and* the iteration count, so lowering it would silently fail to reproduce
+ * the key for every vault already created at the old cost — locking people out
+ * of their own data with a correct PIN and no error that explains it. Storing
+ * the count with the vault (vault-keys) makes the number tunable for new
+ * vaults while old ones keep opening.
+ */
+export async function deriveKek(
+  pin: string,
+  salt: Uint8Array,
+  iterations: number = PBKDF2_ITERATIONS,
+): Promise<Uint8Array> {
   return pbkdf2Async(sha256, encoder.encode(pin.normalize('NFKC')), salt, {
-    c: PBKDF2_ITERATIONS,
+    c: iterations,
     dkLen: KEY_BYTES,
   });
 }
