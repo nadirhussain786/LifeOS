@@ -15,7 +15,12 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          # 24, not 20, for `node:sqlite` — database/schema.test.ts executes the
+          # app's real bootstrap DDL against it. That test exists because the
+          # bootstrap once shipped six statements SQLite refuses to parse and
+          # every check here passed anyway; the checks all read the SQL, and
+          # none of them ran it.
+          node-version: 24
           cache: npm
 
       - name: Install dependencies
@@ -32,3 +37,14 @@ jobs:
 
       - name: Test
         run: npm test -- --ci
+
+      # The Supabase migrations are applied by hand against a hosted database,
+      # so nothing else would catch a file that fails on first run. These two
+      # scripts existed and were never wired in here: `check` reads them,
+      # `test:sql` applies them to a real Postgres and asserts that RLS refuses
+      # what it should.
+      - name: Check migrations
+        run: npm run check:migrations
+
+      - name: Test migrations
+        run: npm run test:sql

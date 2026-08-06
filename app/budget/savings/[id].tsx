@@ -2,7 +2,7 @@ import { format } from 'date-fns';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Plus, Trash2 } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { Alert, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 
 import { GradientButton } from '@/components/ui/gradient-button';
 import { ProgressRing } from '@/components/ui/progress-ring';
@@ -19,6 +19,7 @@ import {
   useTransactions,
 } from '@/features/budget/hooks/use-budget';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { confirm } from '@/lib/dialog-store';
 
 export default function SavingsGoalDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -38,18 +39,17 @@ export default function SavingsGoalDetailScreen() {
   const remaining = Math.max(0, goal.targetCents - goal.savedCents);
 
   const confirmDelete = () => {
-    Alert.alert(
-      t('budget.deleteSavingsTitle'),
-      t('budget.deleteSavingsBody', { name: goal.name }),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: () => (removeSavingsGoal.mutate(goal.id), router.back()),
-        },
-      ],
-    );
+    void confirm({
+      title: t('budget.deleteSavingsTitle'),
+      message: t('budget.deleteSavingsBody', { name: goal.name }),
+      confirmLabel: t('common.delete'),
+      cancelLabel: t('common.cancel'),
+      destructive: true,
+    }).then(async (ok) => {
+      if (!ok) return;
+      removeSavingsGoal.mutate(goal.id);
+      router.back();
+    });
   };
 
   return (

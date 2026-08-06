@@ -1,13 +1,19 @@
 import { Link, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { AuthField } from '@/features/auth/components/auth-field';
 import { UsernameField, type UsernameStatus } from '@/features/auth/components/username-field';
 import { useAuthStore } from '@/features/auth/services/auth-store';
+import {
+  checkPassword,
+  passwordProblemKey,
+  PASSWORD_MIN_LENGTH,
+} from '@/features/auth/services/password-policy';
+import { notify } from '@/lib/dialog-store';
 
 export default function SignUpScreen() {
   const router = useRouter();
@@ -28,8 +34,12 @@ export default function SignUpScreen() {
       setError(t('auth.enterEmailPassword'));
       return;
     }
-    if (password.length < 6) {
-      setError(t('auth.passwordMin'));
+    // The account's own email and name are passed in so a password built out of
+    // them is refused — for a phone somebody else may pick up, that is the
+    // guess that actually gets tried.
+    const strength = checkPassword(password, [email, name, username]);
+    if (!strength.ok) {
+      setError(t(passwordProblemKey(strength.problem), { min: PASSWORD_MIN_LENGTH }));
       return;
     }
     // 'unavailable' means the availability probe couldn't run, which is not the
@@ -64,9 +74,16 @@ export default function SignUpScreen() {
     setBusy(false);
     // If the project requires email confirmation, there's no session yet.
     if (!useAuthStore.getState().session) {
-      Alert.alert(t('auth.checkInbox'), t('auth.confirmationSent'), [
-        { text: 'OK', onPress: () => router.replace('/(auth)/login') },
-      ]);
+      // Kept as a dialog, unlike the other confirmations: this one is an
+      // instruction to go and do something in another app, and a toast that
+      // vanishes after four seconds is the wrong carrier for it. ('OK' was
+      // also hardcoded English here, in an app that ships Arabic and Urdu.)
+      await notify({
+        title: t('auth.checkInbox'),
+        message: t('auth.confirmationSent'),
+        confirmLabel: t('common.ok'),
+      });
+      router.replace('/(auth)/login');
     }
     // Otherwise the auth gate redirects into the app automatically.
   };

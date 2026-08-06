@@ -29,9 +29,24 @@ export type GalleryPhoto = {
   createdAt: number;
 };
 
-/** The URI to render as a still (video poster if present, else the media). */
-export function displayUri(media: Pick<GalleryPhoto, 'uri' | 'thumbnailUri'>): string {
-  return media.thumbnailUri ?? media.uri;
+/**
+ * Whether this device holds the actual file.
+ *
+ * Gallery rows sync; the photo and video files do not. A row pulled from
+ * another phone carries everything *about* the media — its album, caption,
+ * favourite flag, when it was taken — and an empty `uri`, because the path it
+ * had on the other device means nothing here. That is a normal state, not an
+ * error, and the UI says "not on this device" rather than rendering a broken
+ * image. See features/sync/config/sync-tables.ts.
+ */
+export function isOnThisDevice(media: Pick<GalleryPhoto, 'uri'>): boolean {
+  return media.uri.length > 0;
+}
+
+/** The URI to render as a still (video poster if present, else the media), or
+ * null when the file lives on another device. */
+export function displayUri(media: Pick<GalleryPhoto, 'uri' | 'thumbnailUri'>): string | null {
+  return media.thumbnailUri || media.uri || null;
 }
 
 /** Formats a video duration in ms as "m:ss" (e.g. 75000 → "1:15"). */

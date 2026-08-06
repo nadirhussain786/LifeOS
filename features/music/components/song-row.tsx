@@ -1,6 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
-import { Pause, Play, Trash2, X } from 'lucide-react-native';
+import { CloudOff, Pause, Play, Trash2, X } from 'lucide-react-native';
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
@@ -10,6 +10,7 @@ import { Text } from '@/components/ui/text';
 import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { Equalizer } from '@/features/music/components/equalizer';
+import { isPlayable } from '@/features/music/services/player-controller';
 import { songGradient } from '@/features/music/utils/song-art';
 import { formatDuration } from '@/features/music/utils/format-duration';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -41,6 +42,10 @@ function SongRowComponent({
   const tint = moduleTint('music', scheme);
   const { t } = useTranslation();
   const [c1, c2, c3] = songGradient(song.id);
+  // The row synced from another device; the audio file did not. It stays
+  // visible and removable — just not playable — because the alternative is a
+  // library that silently shrinks when you sign in on a new phone.
+  const playable = isPlayable(song);
 
   const row = (
     <Pressable
@@ -50,10 +55,15 @@ function SongRowComponent({
       }}
       onLongPress={onLongPress}
       accessibilityRole="button"
-      accessibilityState={{ selected: isActive }}
-      accessibilityLabel={`${song.title}, ${song.artist ?? t('music.unknownArtist')}`}
-      accessibilityHint={t('music.playHint')}
+      accessibilityLabel={
+        playable
+          ? `${song.title}, ${song.artist ?? t('music.unknownArtist')}`
+          : `${song.title}, ${t('music.notOnThisDevice')}`
+      }
+      accessibilityHint={playable ? t('music.playHint') : undefined}
+      accessibilityState={{ selected: isActive, disabled: !playable }}
       className="flex-row items-center gap-3 px-4 py-2.5"
+      style={{ opacity: playable ? 1 : 0.55 }}
     >
       {/* Generative art thumbnail */}
       <View className="h-11 w-11 overflow-hidden rounded-xl">
@@ -67,7 +77,9 @@ function SongRowComponent({
             className="h-6 w-6 items-center justify-center rounded-full"
             style={{ backgroundColor: 'rgba(0,0,0,0.32)' }}
           >
-            {isActive && isPlaying ? (
+            {!playable ? (
+              <CloudOff size={12} color="#ffffff" />
+            ) : isActive && isPlaying ? (
               <Equalizer size={13} playing color="#ffffff" />
             ) : isActive ? (
               <Pause size={13} color="#ffffff" fill="#ffffff" />
@@ -87,7 +99,7 @@ function SongRowComponent({
           {song.title}
         </Text>
         <Text variant="caption" numberOfLines={1}>
-          {song.artist ?? t('music.unknownArtist')}
+          {playable ? (song.artist ?? t('music.unknownArtist')) : t('music.notOnThisDevice')}
         </Text>
       </View>
 

@@ -1,6 +1,6 @@
 import { format, parseISO } from 'date-fns';
 import { useRouter } from 'expo-router';
-import { Alert, Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import {
   GraduationCap,
   Minus,
@@ -36,6 +36,7 @@ import { useStudyMutations } from '@/features/study/hooks/use-study-mutations';
 import { useStudyTimerStore } from '@/features/study/store/study-timer-store';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { alpha } from '@/lib/color';
+import { confirm } from '@/lib/dialog-store';
 
 const RANGE_OPTIONS = [
   { value: 'week' as const, labelKey: 'study.rangeWeek' },
@@ -285,14 +286,16 @@ export default function StudyScreen() {
                         session.subjectId ? (subjectById.get(session.subjectId) ?? null) : null
                       }
                       onLongPress={(s) =>
-                        Alert.alert(t('study.deleteSessionTitle'), t('study.deleteSessionBody'), [
-                          { text: t('common.cancel'), style: 'cancel' },
-                          {
-                            text: t('common.delete'),
-                            style: 'destructive',
-                            onPress: () => removeSession.mutate(s.id),
-                          },
-                        ])
+                        void confirm({
+                          title: t('study.deleteSessionTitle'),
+                          message: t('study.deleteSessionBody'),
+                          confirmLabel: t('common.delete'),
+                          cancelLabel: t('common.cancel'),
+                          destructive: true,
+                        }).then(async (ok) => {
+                          if (!ok) return;
+                          removeSession.mutate(s.id);
+                        })
                       }
                     />
                   ))}

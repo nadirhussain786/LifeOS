@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import { Bell, Clock } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Platform, Pressable, ScrollView, Switch, View } from 'react-native';
+import { Platform, Pressable, ScrollView, Switch, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 import { AttributeRow } from '@/components/ui/attribute-row';
@@ -21,6 +21,7 @@ import {
 import { useJournalReminderStore } from '@/features/journal/store/journal-reminder-store';
 import { CategoryOffNotice } from '@/features/notifications/components/category-off-notice';
 import { notificationsAvailable } from '@/lib/notifications';
+import { notify } from '@/lib/dialog-store';
 
 export default function JournalReminderSettingsScreen() {
   const router = useRouter();
@@ -56,12 +57,15 @@ export default function JournalReminderSettingsScreen() {
     setSaving(false);
 
     if (draft.enabled && !newId) {
-      Alert.alert(
-        notificationsAvailable
+      void notify({
+        title: notificationsAvailable
           ? t('reminders.notificationsDisabled')
           : t('reminders.notificationsUnavailable'),
-        notificationsAvailable ? t('journal.enableNotifBody') : t('reminders.notAvailable'),
-      );
+        message: notificationsAvailable
+          ? t('journal.enableNotifBody')
+          : t('reminders.notAvailable'),
+        confirmLabel: t('common.ok'),
+      });
     }
 
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);

@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { CalendarDays, Moon, Sun, Trash2 } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
 import { StarRating } from '@/components/ui/star-rating';
@@ -17,6 +17,8 @@ import { durationBetween, formatDuration } from '@/features/sleep/services/sleep
 import { useSleepMutations } from '@/features/sleep/hooks/use-sleep-mutations';
 import { useSleepSession } from '@/features/sleep/hooks/use-sleep';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { confirm } from '@/lib/dialog-store';
+import { toast } from '@/lib/toast-store';
 
 const FELL_ASLEEP_OPTIONS = [0, 5, 10, 15, 20, 30, 45];
 
@@ -116,7 +118,7 @@ export default function SleepLogScreen() {
     const { bedtime, wakeTime, logDate } = buildTimestamps(nightDate, bed, wake);
     // Sleep can't happen in the future.
     if (wakeTime > Date.now()) {
-      Alert.alert(t('sleep.futureTitle'), t('sleep.futureBody'));
+      toast.error(t('sleep.futureBody'));
       return;
     }
     if (isEdit && existing) {
@@ -146,17 +148,17 @@ export default function SleepLogScreen() {
 
   const confirmDelete = () => {
     if (!existing) return;
-    Alert.alert(t('sleep.deleteTitle'), t('sleep.deleteBody'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('common.delete'),
-        style: 'destructive',
-        onPress: () => {
-          remove.mutate(existing.id);
-          router.back();
-        },
-      },
-    ]);
+    void confirm({
+      title: t('sleep.deleteTitle'),
+      message: t('sleep.deleteBody'),
+      confirmLabel: t('common.delete'),
+      cancelLabel: t('common.cancel'),
+      destructive: true,
+    }).then(async (ok) => {
+      if (!ok) return;
+      remove.mutate(existing.id);
+      router.back();
+    });
   };
 
   return (

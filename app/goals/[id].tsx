@@ -3,7 +3,7 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Archive, Check, Pencil, Plus, RotateCcw, TrendingUp, Trash2 } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 
 import { CelebrationOverlay } from '@/components/ui/celebration-overlay';
 import { GradientButton } from '@/components/ui/gradient-button';
@@ -25,6 +25,7 @@ import { useGoalMutations } from '@/features/goals/hooks/use-goal-mutations';
 import type { GoalPace } from '@/features/goals/types/goal.types';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { alpha } from '@/lib/color';
+import { confirm } from '@/lib/dialog-store';
 
 const PACE_META: Record<GoalPace, { labelKey: string; color: string }> = {
   ahead: { labelKey: 'goals.paceAhead', color: '#22c55e' },
@@ -64,14 +65,17 @@ export default function GoalDetailScreen() {
     timeline.hasDeadline || logs.length > 0 || milestones.some((m) => m.isCompleted);
 
   const confirmDelete = () => {
-    Alert.alert(t('goals.deleteTitle'), t('goals.deleteBody', { title: goal.title }), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('common.delete'),
-        style: 'destructive',
-        onPress: () => (mutations.remove.mutate(goal.id), router.back()),
-      },
-    ]);
+    void confirm({
+      title: t('goals.deleteTitle'),
+      message: t('goals.deleteBody', { title: goal.title }),
+      confirmLabel: t('common.delete'),
+      cancelLabel: t('common.cancel'),
+      destructive: true,
+    }).then(async (ok) => {
+      if (!ok) return;
+      mutations.remove.mutate(goal.id);
+      router.back();
+    });
   };
 
   const handleComplete = () => {

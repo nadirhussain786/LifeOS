@@ -25,11 +25,14 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AnimatedSplash } from '@/components/animated-splash';
 import { ErrorBoundary } from '@/components/error-boundary';
+import { NotificationBanner } from '@/components/ui/notification-banner';
 import { ToastHost } from '@/components/ui/toast';
 import { DevErrorBanner } from '@/components/dev/dev-error-banner';
 import { MiniPlayerBar } from '@/features/music/components/mini-player-bar';
+import { useNotificationCenter } from '@/features/notifications/hooks/use-notification-center';
 import { useNotificationNavigation } from '@/features/notifications/hooks/use-notification-navigation';
 import { applyDeliveryMode } from '@/features/notifications/services/delivery';
+import { resyncAllReminders } from '@/features/notifications/services/reminder-scheduler';
 import { syncTodayWidget } from '@/features/widgets/services/widget-data';
 import { useWidgetSync } from '@/features/widgets/hooks/use-widget-sync';
 import { useProfileStore } from '@/features/profile/store/profile-store';
@@ -42,6 +45,16 @@ import { AppLockOverlay } from '@/features/security/components/app-lock-overlay'
 import { useAppLock } from '@/features/security/hooks/use-app-lock';
 import { useAuthStore } from '@/features/auth/services/auth-store';
 import { useAuthGate } from '@/features/auth/hooks/use-auth-gate';
+import { useUsageReporter } from '@/features/analytics/hooks/use-usage-reporter';
+import { DialogHost } from '@/components/ui/dialog-host';
+import { UsageConsentCard } from '@/features/analytics/components/usage-consent-card';
+import { BlockedOverlay } from '@/features/moderation/components/blocked-overlay';
+import { useAccountStandingSync } from '@/features/moderation/hooks/use-account-standing';
+import {
+  useModuleFlagsSync,
+  useModuleRouteGuard,
+} from '@/features/module-flags/hooks/use-module-access';
+import { usePrivateAutoLock } from '@/features/private/hooks/use-private-lock';
 import { useSplashStore } from '@/hooks/use-splash-store';
 import { useSyncTrigger } from '@/features/sync/hooks/use-sync';
 import { SyncStatusBridge } from '@/features/sync/components/sync-status-bridge';
@@ -74,6 +87,13 @@ function NotificationNavigationBridge() {
   return null;
 }
 
+/** Records arriving notifications in the in-app inbox and raises the in-app
+ * banner (the OS banner is suppressed while foregrounded). Renders nothing. */
+function NotificationCenterBridge() {
+  useNotificationCenter();
+  return null;
+}
+
 /** Redirects between the auth flow and the app. Must live inside the navigation
  * tree (uses router/segments). Renders nothing. */
 function AuthGate() {
@@ -90,6 +110,20 @@ function SyncTrigger() {
 /** Refreshes the home-screen widget when tasks/habits/water change. Renders nothing. */
 function WidgetSync() {
   useWidgetSync();
+  return null;
+}
+
+/** Counts which modules get opened, and flushes the rollup on background. Must
+ * live inside the router (reads the pathname). Renders nothing. */
+function UsageReporter() {
+  useUsageReporter();
+  return null;
+}
+
+/** Keeps the account's moderation standing fresh, so an expired restriction
+ * clears itself and a blocked account can be told why. Renders nothing. */
+function AccountStandingBridge() {
+  useAccountStandingSync();
   return null;
 }
 
@@ -121,6 +155,27 @@ function AppLockController() {
   return null;
 }
 
+/** Drops the private space's key when the app leaves the foreground. Separate
+ * from the app lock on purpose: unlocking the app must not unlock the vault. */
+function PrivateAutoLock() {
+  usePrivateAutoLock();
+  return null;
+}
+
+/** Pulls the operator's module switches on launch and each foreground, so a
+ * module can be withdrawn without an app-store round trip. Renders nothing. */
+function ModuleFlagsBridge() {
+  useModuleFlagsSync();
+  return null;
+}
+
+/** Redirects off any module that is switched off or kept private and locked.
+ * Must live inside the router (reads the pathname). Renders nothing. */
+function ModuleRouteGuard() {
+  useModuleRouteGuard();
+  return null;
+}
+
 export default function RootLayout() {
   const init = useAuthStore((state) => state.init);
   const isInitialized = useAuthStore((state) => state.isInitialized);
@@ -145,6 +200,11 @@ export default function RootLayout() {
     // morning digest with today's counts on every launch — local notifications
     // carry fixed text, so this is how it stays current.
     applyDeliveryMode();
+    // Rebuild every reminder from the database. Scheduling can silently produce
+    // nothing (permission not yet granted, category off, digest mode, master
+    // switch), and nothing ever retried — so a reminder lost that way stayed
+    // lost until its item happened to be edited again. No-ops without permission.
+    void resyncAllReminders();
     // Refresh the home-screen widget's snapshot with today's counts (Android).
     syncTodayWidget();
   }, [init]);
@@ -211,10 +271,16 @@ export default function RootLayout() {
                   name="gallery/story/[period]"
                   options={{ presentation: 'fullScreenModal', animation: 'fade' }}
                 />
+                <Stack.Screen name="profile" />
                 <Stack.Screen name="settings/index" />
                 <Stack.Screen name="settings/notifications" />
                 <Stack.Screen name="settings/sync" />
+                <Stack.Screen name="settings/blocked" />
+                {/* The private space brings its own layout (screenshot block,
+                    no swipe-back), so it is registered as one route here. */}
+                <Stack.Screen name="private" />
                 <Stack.Screen name="notifications" />
+                <Stack.Screen name="search" options={{ presentation: 'modal' }} />
                 <Stack.Screen name="task/new" options={{ presentation: 'modal' }} />
                 <Stack.Screen name="note/new" options={{ presentation: 'modal' }} />
                 <Stack.Screen name="habit/new" options={{ presentation: 'modal' }} />
@@ -233,18 +299,35 @@ export default function RootLayout() {
               <AuthGate />
               <SyncTrigger />
               <SyncStatusBridge />
+              <AccountStandingBridge />
+              <UsageReporter />
               <WidgetSync />
               <LanguageBridge />
               <PushRegistrationBridge />
               <AppLockController />
+              <PrivateAutoLock />
+              <ModuleFlagsBridge />
+              <ModuleRouteGuard />
               <NotificationNavigationBridge />
+              <NotificationCenterBridge />
               <MiniPlayerBar />
               <DevErrorBanner />
             </ErrorBoundary>
             {/* Above the navigator so a toast raised by a delete outlives the
                 router.back() that immediately follows it. */}
             <ToastHost />
-            {/* On top of everything: the lock shield, then the cold-start splash. */}
+            {/* Above the toast: a dialog asks a question and a toast reports an
+                answer, so a toast must never cover the thing it is waiting on. */}
+            <DialogHost />
+            {/* Top of the screen, where the OS banner would have been. */}
+            <NotificationBanner />
+            {/* Below the overlays and above the app: nothing is collected until
+                it is answered, so it never needs to interrupt anything. */}
+            <UsageConsentCard />
+            {/* On top of everything: the block notice, the lock shield, then the
+                cold-start splash. Blocked sits under the lock deliberately —
+                the device's owner still authenticates first. */}
+            <BlockedOverlay />
             <AppLockOverlay />
             {!splashDone && (
               <AnimatedSplash

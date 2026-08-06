@@ -1,4 +1,3 @@
-import { Leaf } from 'lucide-react-native';
 import { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, {
@@ -11,14 +10,15 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import { LifeOSMark } from '@/components/ui/lifeos-mark';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 // Per-theme brand grounds — these match the native splash backgroundColor
 // (app.json expo-splash-screen light/dark), so the hand-off from the OS splash
 // to this animated one is seamless in both light and dark.
 const THEME = {
-  light: { bg: '#f8fbf9', mark: '#188b61', leaf: '#ffffff', word: '#161c19' },
-  dark: { bg: '#0e1210', mark: '#47d19f', leaf: '#0f241c', word: '#eef3f0' },
+  light: { bg: '#f8fbf9', mark: '#188b61', glyph: '#ffffff', word: '#161c19' },
+  dark: { bg: '#0e1210', mark: '#47d19f', glyph: '#0f241c', word: '#eef3f0' },
 } as const;
 
 /**
@@ -73,7 +73,9 @@ export function AnimatedSplash({ onFinish }: { onFinish: () => void }) {
     >
       <Animated.View style={markStyle}>
         <View style={[styles.mark, { backgroundColor: c.mark, shadowColor: c.mark }]}>
-          <Leaf size={40} color={c.leaf} strokeWidth={2} />
+          {/* Was a generic Lucide leaf — so the launcher icon, the native
+              splash and this one were three different marks. */}
+          <LifeOSMark size={40} color={c.glyph} layered={false} />
         </View>
       </Animated.View>
       <Animated.Text style={[styles.word, { color: c.word }, wordStyle]}>LifeOS</Animated.Text>

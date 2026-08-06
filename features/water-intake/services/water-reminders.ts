@@ -1,15 +1,7 @@
+import i18n from '@/lib/i18n';
 import { cancelNotifications, scheduleDailyNotification } from '@/lib/notifications';
+import { timeSlots } from '@/features/water-intake/services/water-schedule';
 import type { WaterReminderSettings } from '@/features/water-intake/types/water-intake.types';
-
-function timeSlots(settings: WaterReminderSettings): { hour: number; minute: number }[] {
-  const slots: { hour: number; minute: number }[] = [];
-  const startMinutes = settings.startHour * 60;
-  const endMinutes = settings.endHour * 60;
-  for (let minutes = startMinutes; minutes <= endMinutes; minutes += settings.intervalMinutes) {
-    slots.push({ hour: Math.floor(minutes / 60), minute: minutes % 60 });
-  }
-  return slots;
-}
 
 export async function cancelWaterReminders(notificationIds: string[]): Promise<void> {
   await cancelNotifications(notificationIds);
@@ -26,8 +18,8 @@ export async function scheduleWaterReminders(settings: WaterReminderSettings): P
   const ids = await Promise.all(
     slots.map((slot) =>
       scheduleDailyNotification({
-        title: 'Time to hydrate 💧',
-        body: "It's been a while — grab some water.",
+        title: i18n.t('water.reminderNotifTitle'),
+        body: i18n.t('water.reminderNotifBody'),
         hour: slot.hour,
         minute: slot.minute,
         data: { category: 'water', route: '/water-intake/history' },

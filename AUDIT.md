@@ -58,6 +58,52 @@ Verified each step with `tsc --noEmit` + `jest` (18 tests) + `expo export` (all 
 
 ---
 
+## ✅ Sync now carries the history (2026-07-30, fifth)
+
+`tsc` · `eslint` · **128** jest tests · **52** SQL tests · 9 migrations · prettier clean.
+
+**"Cloud sync" synced the definitions, not the record.** v1 covered each module's primary table — your habits, your goals, your subjects — and none of the tables holding what you actually did with them. Sign in on a second device and you got your habits back with **every streak at zero**, goals at 0%, no water history and no study sessions. Sync looked like it was working, which is the worst way for it not to.
+
+The cause was mechanical, not a scoping decision anyone would defend: the engine detects change with `updated_at` and needs a soft-delete column so a removal propagates, and **none of the history tables had either**. 15 of 38 tables synced; now 22.
+
+Added to sync: `habit_logs`, `habit_skips`, `water_intake_logs`, `goal_milestones`, `goal_progress_logs`, `study_sessions`, `journal_reflections` — plus a new **Water** entry in the per-module sync toggles, which previously had no way to be turned on or off because none of its data moved.
+
+Three things this needed beyond adding a column:
+
+- **`BACKFILL_SQL`.** A column added as `NOT NULL DEFAULT 0` leaves every existing row at 0, and the push is `WHERE updated_at > cursor` starting at 0. `0 > 0` is false — so without the backfill, all history already on the device would be permanently invisible to sync, and the bug would look exactly like sync working. Runs after `ADDITIVE_COLUMNS`, idempotent.
+- **Hard deletes became soft.** Un-ticking a habit, undoing a glass of water and deleting a progress log all removed the row outright. That cannot sync: the row is simply resurrected by the next pull from another device, silently re-ticking a habit the user cleared. All reads now filter tombstones, and re-ticking a previously-cleared day revives its row rather than inserting a duplicate alongside it.
+- **`0009_history_sync.sql`** — 7 mirror tables, RLS scoped to `user_id = auth.uid()`, and a `(user_id, updated_at)` index on each, which is exactly how the engine reads them.
+
+**`sync-contract.test.ts`** holds the line: every registered table is asserted to have `id`, `user_id`, `updated_at` and `deleted_at`, to appear in a Supabase migration, to be listed after its parent, and to have a backfill. A table registered without them doesn't error — it just never syncs — which is precisely how this gap opened.
+
+Still not synced, for reasons that are not interchangeable: **media** (`gallery_*`, `songs`, `playlists`, both attachment tables) because the rows point at files in private storage and syncing a row without its file gives another device broken references; **join tables** (`note_tag_links`, `habit_routine_items`, `playlist_songs`) which have no single-column id; **settings singletons** (`sleep_settings`, `study_settings`, `budget_settings`) keyed by `user_id` with no `id`; and `journal_prompts` (app content) / `notification_log` (device bookkeeping), which never should.
+
+---
+
+## ✅ Branding, search and notification presentation (2026-07-30, fourth)
+
+`tsc` · `eslint` · **100** jest tests · 48 SQL tests · `expo config` resolves · all 4 locales at key parity (1391 each).
+
+**The app shipped with Expo's placeholder art.** `icon.png`, `adaptive-icon.png` and `splash-icon.png` were still the `create-expo-app` output — grey concentric circles on graph paper — so every EAS build installed with a stock Expo icon and flashed the same placeholder on launch. The config had pointed at the right paths all along; the files behind them had never been replaced.
+
+`scripts/make-brand-assets.mjs` (`npm run assets`) now draws all seven from one geometry function. **Twelve** marks were drawn and compared at the size an icon is actually met at — a settings row and a status bar, not a store page — and all twelve are kept in a `MARKS` registry with `ACTIVE` selecting the one that ships, so changing the app's identity is a one-word edit and a re-run rather than a redraw.
+
+Shipping **aperture**: six blades leaving a hexagonal opening. It is the only mark in the set whose _negative space_ does the work, which is what keeps it legible at 48px, and it reads as a lens on a life rather than a letter in a box. Verified by dumping the status-bar stencil's alpha map — the opening survives at 96px.
+
+Three were discarded outright, because drawing them was the only way to find out: a ligature that read as a "6", a sunrise that came out a croissant, a leaf that came out an umbrella. `strata` nearly joined them — its nested squares rendered invisible until the hit test was reordered smallest-first, since the outer square returns on every point inside it.
+
+Shipping **modules**: four life areas as unlike shapes, two of them recessed. It says "operating system" without leaning on a letter, and the mix of solid and receded forms is the design system's own premise ("depth comes from layered surfaces, never from neomorphic bevels"). Kept but not shipped: **pulse** (cleanest silhouette, reads as a health app), **bloom** (warmest, reads as a clover), **monogram** (carries the name, but a letter in a box is the safe answer). Discarded outright, because drawing them was the only way to find out: an orbit whose node collided with its own ring, an arc that resolved into nothing when scaled down, a leaf that came out an umbrella, a sunrise that came out a cloche.
+
+Recessed layers are flattened for the Android status-bar stencil, which renders from the alpha channel alone and would otherwise fill them — giving exactly the solid white blob that icon exists to avoid. Rendered in code, not committed as opaque binaries, so the mark stays reviewable; PNG is only zlib + CRC32, so there's no image dependency. Centred on the ink's own bounding box rather than its geometry box, which is what stops it sitting visibly high-left. Colours are the same gradient the accent Button paints with.
+
+Also fixed: the Android adaptive icon had a flat white backdrop (now the gradient); the splash used one white mark on a _light_ ground in light mode (now tinted per theme); and `AnimatedSplash` drew a generic Lucide **leaf**, so the launcher icon, the native splash and the in-app splash were three different marks. `components/ui/lifeos-mark.tsx` is now the single definition, geometry-matched to the generator.
+
+**Global search.** Twelve modules, and no way to look through more than one — so anything written down was findable only if you already remembered which module you put it in, which is the memory the app exists to do for you. `searchEverything()` reads tasks, notes, habits, goals, journal, transactions, debts, subjects, songs, playlists and albums, each source isolated so one broken table costs only its own results. Ranked, not merely filtered: exact title → title prefix → word-boundary → substring → body, with recency used _only_ to break ties, so a good match never loses to a newer bad one. 14 tests pin the ranking. Reachable from Home and Hub.
+
+**Streak grace.** A streak that resets to zero on one bad day is loss aversion: it punishes hardest exactly when somebody is ill, busy or travelling, and what they stop doing is opening the app. One missed day is now survived — not counted — and a second still breaks the run. `graceUsed` surfaces it in the UI as "1 day missed — streak held", because hiding it would be the app flattering a number at the user's expense. Writing the tests surfaced a real bug in the first attempt: the walk ran off the start of history and spent the grace day there, mislabelling healthy streaks and nearly letting two empty days extend a run. Fixed by stopping at the first-ever log.
+
+---
+
 ## ✅ Split group lifecycle (2026-07-30, third)
 
 `tsc` · `eslint` · 65 jest tests · 48 SQL tests · 8 migrations — all green.

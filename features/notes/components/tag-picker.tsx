@@ -2,13 +2,14 @@ import * as Haptics from 'expo-haptics';
 import { Plus } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, TextInput, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import type { NoteTag } from '@/features/notes/types/note.types';
 import { cn } from '@/lib/utils';
+import { confirm } from '@/lib/dialog-store';
 
 type Props = {
   tags: NoteTag[];
@@ -35,10 +36,16 @@ export function TagPicker({ tags, selectedTagIds, onToggle, onCreateTag, onDelet
   };
 
   const confirmDelete = (tag: NoteTag) => {
-    Alert.alert(t('notes.deleteTagTitle'), t('notes.deleteTagBody', { name: tag.name }), [
-      { text: t('common.cancel'), style: 'cancel' },
-      { text: t('common.delete'), style: 'destructive', onPress: () => onDeleteTag(tag.id) },
-    ]);
+    void confirm({
+      title: t('notes.deleteTagTitle'),
+      message: t('notes.deleteTagBody', { name: tag.name }),
+      confirmLabel: t('common.delete'),
+      cancelLabel: t('common.cancel'),
+      destructive: true,
+    }).then(async (ok) => {
+      if (!ok) return;
+      onDeleteTag(tag.id);
+    });
   };
 
   return (

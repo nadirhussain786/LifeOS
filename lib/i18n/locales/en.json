@@ -36,7 +36,8 @@
     "markDone": "Mark “{{name}}” as done",
     "markNotDone": "Mark “{{name}}” as not done",
     "more": "More actions",
-    "undo": "Undo"
+    "undo": "Undo",
+    "ok": "OK"
   },
   "reminder": {
     "in1Hour": "In 1 hour",
@@ -175,7 +176,9 @@
     "notifyAtNineAm": "Notify me at 9:00 AM that day",
     "addNotes": "Add notes…",
     "deletedToast": "“{{title}}” deleted.",
-    "archivedToast": "“{{title}}” archived."
+    "archivedToast": "“{{title}}” archived.",
+    "reminderDueNow": "It’s due now.",
+    "reminderDueToday": "Due today."
   },
   "buckets": {
     "overdue": "Overdue",
@@ -245,7 +248,9 @@
     "streakDays_other": "{{count}}d streak",
     "withoutDays_one": "{{count}}d without",
     "withoutDays_other": "{{count}}d without",
-    "quickLog": "Log “{{name}}”"
+    "quickLog": "Log “{{name}}”",
+    "reminderBody": "Time to check in on this habit.",
+    "streakHeld": "1 day missed — streak held"
   },
   "habitType": {
     "boolean": "Yes / No",
@@ -284,7 +289,9 @@
     "enableNotifBody": "Enable notifications for LifeOS in your device settings to get a journal reminder.",
     "reminderSummary": "You'll get a nudge to write today's entry every day at {{time}}.",
     "writeAFewWords": "Write a few words…",
-    "reminderSettings": "Reminder settings"
+    "reminderSettings": "Reminder settings",
+    "reminderNotifTitle": "Journal 📖",
+    "reminderNotifBody": "Take a minute to write today’s entry."
   },
   "mood": {
     "notSet": "Not set",
@@ -371,7 +378,9 @@
     "writeSomething": "Write something…",
     "unarchive": "Unarchive",
     "unarchiveNamed": "Unarchive “{{name}}”",
-    "deletedToast": "“{{title}}” deleted."
+    "deletedToast": "“{{title}}” deleted.",
+    "reminderTitle": "Note reminder",
+    "reminderBody": "Take a look at this note."
   },
   "budget": {
     "title": "Budget",
@@ -489,7 +498,11 @@
     "contributions": "Contributions",
     "noContributions": "No contributions yet — add your first deposit above.",
     "other": "Other",
-    "spent": "Spent"
+    "spent": "Spent",
+    "debtReminderOweTitle": "You owe {{name}}",
+    "debtReminderOwedTitle": "{{name}} owes you",
+    "debtReminderOweBody": "{{amount}} due {{date}} — time to pay it back.",
+    "debtReminderOwedBody": "{{amount}} due {{date}} — time to collect."
   },
   "debtStatus": {
     "settled": "Settled",
@@ -563,7 +576,10 @@
     "import_notabackup": "That is not a LifeOS backup file.",
     "import_failed": "The restore failed and nothing was changed.",
     "importMissingMedia_one": "{{count}} photo or audio file is missing — media is not stored in the backup.",
-    "importMissingMedia_other": "{{count}} photo and audio files are missing — media is not stored in the backup."
+    "importMissingMedia_other": "{{count}} photo and audio files are missing — media is not stored in the backup.",
+    "terms": "Terms of Service",
+    "support": "Contact support",
+    "supportSubtitle": "Questions, appeals, and data requests"
   },
   "auth": {
     "welcomeBack": "Welcome back",
@@ -573,6 +589,13 @@
     "newHere": "New here?",
     "email": "Email",
     "password": "Password",
+    "passwordProblem": {
+      "too_short": "Use at least {{min}} characters. A few ordinary words you’ll remember beats a short, clever one.",
+      "too_common": "That password appears on every list attackers try first. Pick something else.",
+      "too_simple": "That’s a straight run of characters. Mix in something less predictable.",
+      "contains_identity": "Don’t build your password out of your name or email — anyone holding your phone already knows both.",
+      "too_long": "That’s longer than the 72 bytes we can actually hash. Shorten it."
+    },
     "name": "Name",
     "forgotPassword": "Forgot password?",
     "continueGuest": "Continue without an account",
@@ -945,7 +968,8 @@
     "openNowPlaying": "Open now playing",
     "nextTrack": "Next track",
     "hidePlayer": "Hide player",
-    "playHint": "Plays this song"
+    "playHint": "Plays this song",
+    "notOnThisDevice": "Not on this device"
   },
   "albumCategory": {
     "gym": "Gym Progress",
@@ -1050,7 +1074,8 @@
     "subjectEmpty": "Add your first photo to start tracking.",
     "subjectNeedsSecond": "Add one more photo to see your change.",
     "playProgression": "Play",
-    "viewInAll": "View"
+    "viewInAll": "View",
+    "notOnThisDevice": "Not on this device"
   },
   "timeline": {
     "title": "Timeline",
@@ -1082,7 +1107,9 @@
     "habitNamedCompleted": "{{name}} completed",
     "habitCompleted": "Habit completed",
     "journalWritten": "Journal written",
-    "drankWater": "Drank {{amount}}ml of water"
+    "drankWater": "Drank {{amount}}ml of water",
+    "reminderStartingNow": "Starting now.",
+    "reminderStartingIn": "Starting in {{count}} minutes."
   },
   "water": {
     "title": "Water",
@@ -1107,7 +1134,9 @@
     "nudgeSummary": "You'll get a nudge every {{interval}} between {{start}} and {{end}}.",
     "checkTimesTitle": "Check your times",
     "checkTimesBody": "The start of your reminder window needs to be before the end.",
-    "enableForReminders": "Enable notifications for LifeOS in your device settings to get water reminders."
+    "enableForReminders": "Enable notifications for LifeOS in your device settings to get water reminders.",
+    "reminderNotifTitle": "Time to hydrate 💧",
+    "reminderNotifBody": "It’s been a while — grab some water."
   },
   "hubSection": {
     "growth": "Focus & Growth",
@@ -1204,7 +1233,19 @@
     "exactAlarm": "Allow exact reminder timing",
     "exactAlarmDescription": "Android holds reminders back by up to 15 minutes unless LifeOS is allowed under “Alarms & reminders”.",
     "exactAlarmFailedTitle": "Couldn't open it",
-    "exactAlarmFailedBody": "Find it under Settings › Apps › Special app access › Alarms & reminders."
+    "exactAlarmFailedBody": "Find it under Settings › Apps › Special app access › Alarms & reminders.",
+    "digestTitle": "Good morning ☀️",
+    "digestEmpty": "Nothing pressing today — enjoy the calm.",
+    "digestBody": "Today: {{summary}}. Tap to plan your day.",
+    "digestTasks_one": "{{count}} task due",
+    "digestTasks_other": "{{count}} tasks due",
+    "digestHabits_one": "{{count}} habit to go",
+    "digestHabits_other": "{{count}} habits to go",
+    "digestMoney_one": "{{count}} money reminder",
+    "digestMoney_other": "{{count}} money reminders",
+    "digestJournal": "journal to write",
+    "digestWater": "water to drink",
+    "statusOverBudget": "At this device’s limit of {{limit}} queued reminders — some may not fire. Reduce hydration reminders or turn off a category."
   },
   "notifCategory": {
     "tasks": {
@@ -1254,6 +1295,10 @@
     "streak": {
       "label": "Streaks & wins",
       "description": "Streak-at-risk warnings and celebrations"
+    },
+    "split": {
+      "label": "Shared groups",
+      "description": "When somebody adds an expense or records a payment in a group you are in."
     }
   },
   "sync": {
@@ -1285,7 +1330,9 @@
     "notConfiguredTitle": "This build has no Supabase credentials",
     "notConfiguredBody": "Accounts and cloud sync are switched off — everything still works offline. For an EAS build, set these in the environment the build profile uses, then rebuild.",
     "envMissing": "missing",
-    "failedToast": "Sync didn’t finish. Your data is safe on this device."
+    "failedToast": "Sync didn’t finish. Your data is safe on this device.",
+    "privateSyncWarning": "Turning this on uploads your private space so it can sync across your devices. It stays encrypted in transit and at rest.",
+    "mediaNote": "Gallery and Music sync your albums, playlists and details — not the photo, video and audio files themselves. Those stay on the device that imported them, and appear elsewhere as “Not on this device”."
   },
   "syncModule": {
     "tasks": "Tasks",
@@ -1296,7 +1343,11 @@
     "goals": "Goals",
     "sleep": "Sleep",
     "study": "Study",
-    "budget": "Budget"
+    "budget": "Budget",
+    "water": "Water",
+    "gallery": "Gallery",
+    "music": "Music",
+    "private": "Private space"
   },
   "security": {
     "locked": "LifeOS is locked",
@@ -1406,7 +1457,8 @@
       "expired": "This invitation has expired. Ask for a new one.",
       "already_accepted": "This invitation has already been used.",
       "member_unavailable": "Your place in the group is no longer available. Ask to be added again.",
-      "error": "Something went wrong. Try again in a moment."
+      "error": "Something went wrong. Try again in a moment.",
+      "blocked": "You blocked whoever sent this invitation. Unblock them in Settings → Blocked accounts to join."
     },
     "groupCreated": "“{{name}}” created.",
     "currencyNote": "This group settles in {{currency}}.",
@@ -1459,5 +1511,256 @@
     "unknown": "That did not work. Please try again.",
     "title": "That did not work",
     "detail": "Details: {{code}}"
+  },
+  "search": {
+    "title": "Search",
+    "placeholder": "Search everything…",
+    "promptTitle": "Search across LifeOS",
+    "promptBody": "Tasks, notes, habits, goals, journal entries, money, study, music and albums — all at once.",
+    "noResultsTitle": "Nothing for “{{query}}”",
+    "noResultsBody": "Try a shorter word, or part of one.",
+    "resultCount_one": "{{count}} result",
+    "resultCount_other": "{{count}} results",
+    "kind": {
+      "task": "Task",
+      "note": "Note",
+      "habit": "Habit",
+      "goal": "Goal",
+      "journal": "Journal",
+      "transaction": "Money",
+      "debt": "Debt",
+      "subject": "Subject",
+      "song": "Song",
+      "playlist": "Playlist",
+      "album": "Album",
+      "group": "Group"
+    }
+  },
+  "moderation": {
+    "blockedTitle": "This account is blocked",
+    "blockedBody": "Your LifeOS account has been blocked. Cloud sync and shared groups are paused.",
+    "blockedUntil": "Your LifeOS account is blocked until {{date}}. Cloud sync and shared groups are paused until then.",
+    "reason": "Reason",
+    "appeal": "Appeal this decision",
+    "appealSubject": "LifeOS account appeal",
+    "restrictedTitle": "Account restricted",
+    "restrictedBody": "You can't create groups or send invites right now. Everything else works as usual.",
+    "wipedTitle": "This device was cleared",
+    "wipedBody": "Your data was removed from this phone. Anything that had synced is still on our servers and comes back if the block is lifted.",
+    "wipedUnsaved": "These modules had sync switched off, so they were never uploaded and could not be recovered: {{modules}}.",
+    "wipedNothingSaved": "Nothing could be uploaded before this device was cleared, so local data was not recovered.",
+    "blockTitle": "Block {{name}}?",
+    "blockBody": "They won't be able to add you to a group or send you an invitation, and you won't be able to add them. You'll both stay in any group you already share — leave the group if you want out of it.",
+    "block": "Block",
+    "blocked": "{{name}} is blocked",
+    "unblock": "Unblock",
+    "unblocked": "{{name}} is unblocked",
+    "blockedAccounts": "Blocked accounts",
+    "blockedAccountsSubtitle": "People you've blocked",
+    "blockedEmpty": "You haven't blocked anyone",
+    "blockedEmptyBody": "Blocking someone stops them adding you to shared groups or inviting you.",
+    "blockAfterReport": "Block them too?",
+    "blockAfterReportBody": "We'll review your report. You can also stop them contacting you now.",
+    "notNow": "Not now",
+    "someone": "This person",
+    "reportMember": "Report",
+    "reportGroupLabel": "Group: {{name}}"
+  },
+  "usage": {
+    "title": "Usage statistics",
+    "description": "Share anonymous counts of which modules you open. No content, ever.",
+    "consentTitle": "Help improve LifeOS?",
+    "consentBody": "Share a daily count of which modules you opened and how many records you saved. Nothing else.",
+    "consentNever": "No titles, no text, no amounts, no file names — the counts contain nothing that could be turned back into what you wrote.",
+    "consentAccept": "Share counts",
+    "consentDecline": "No thanks"
+  },
+  "gender": {
+    "female": "Woman",
+    "male": "Man",
+    "nonBinary": "Non-binary",
+    "preferNotToSay": "Prefer not to say"
+  },
+  "private": {
+    "sectionLabel": "Private",
+    "entryLabel": "Private space",
+    "entrySubtitleNew": "A PIN-locked, encrypted area of the app",
+    "entrySubtitleSetUp": "Locked — enter your PIN to open",
+    "spaceTitle": "Private space",
+    "spaceSubtitle": "Encrypted on this device. Locks itself when you leave.",
+    "spaceSettings": "Private space settings",
+    "lockNow": "Lock now",
+    "setupTitle": "Set up your private space",
+    "setupBody": "Pick what belongs in here. Everything you add is encrypted and locked behind your PIN, and hidden from the rest of the app — search, exports and notifications included.",
+    "suggestionNote": "These are only suggestions. Turn on anything you want, whatever you answered earlier.",
+    "choosePin": "Choose a PIN",
+    "confirmPin": "Enter it again",
+    "pinHint": "At least {{count}} digits. This is separate from your app lock.",
+    "confirmPinHint": "Just to be sure you'll remember it.",
+    "pinMismatch": "Those didn't match. Try again.",
+    "noRecoveryWarning": "There is no way to reset this PIN. If you forget it, you lose access to everything in your private space and we cannot restore it for you.",
+    "createSpace": "Create private space",
+    "unlockTitle": "Private space",
+    "unlockBody": "Enter your PIN to continue.",
+    "unlock": "Unlock",
+    "unlocking": "Unlocking…",
+    "wrongPin": "That PIN didn't work.",
+    "throttled": "Too many attempts. Try again in about {{minutes}} min.",
+    "digitsEntered": "{{count}} digits entered",
+    "decoyNotice": "You're in the decoy space. Anything you add here stays here.",
+    "itemCount_one": "{{count}} item",
+    "itemCount_other": "{{count}} items",
+    "days_one": "{{count}} day",
+    "days_other": "{{count}} days",
+    "vaultTitle": "Vault",
+    "vaultSubtitle": "Photos and files, encrypted",
+    "vaultEmptyTitle": "Nothing in here yet",
+    "vaultEmptyBody": "Anything you add is encrypted on this device and never appears in your phone's gallery.",
+    "addFromLibrary": "Add photos",
+    "takePhoto": "Take a photo",
+    "tooLargeTitle": "Some files were too large",
+    "tooLargeBody_one": "{{count}} file was over {{mb}} MB and wasn't added.",
+    "tooLargeBody_other": "{{count}} files were over {{mb}} MB and weren't added.",
+    "deleteItem": "Delete this item?",
+    "deleteItemBody": "The file and its record are erased. This can't be undone.",
+    "cycleTitle": "Cycle",
+    "cycleSubtitle": "Period and symptom tracking",
+    "dayOfCycle": "Day of cycle",
+    "averageCycle": "Average cycle",
+    "estimatedNext": "Next period around {{date}}, estimated from your own history.",
+    "needMoreCycles": "Log a few cycles and an estimate will appear here.",
+    "flow": "Flow",
+    "flow_spotting": "Spotting",
+    "flow_light": "Light",
+    "flow_medium": "Medium",
+    "flow_heavy": "Heavy",
+    "symptoms": "Symptoms",
+    "symptom_cramps": "Cramps",
+    "symptom_headache": "Headache",
+    "symptom_bloating": "Bloating",
+    "symptom_fatigue": "Fatigue",
+    "symptom_backPain": "Back pain",
+    "symptom_nausea": "Nausea",
+    "symptom_tender": "Tenderness",
+    "symptom_acne": "Acne",
+    "symptom_cravings": "Cravings",
+    "symptom_insomnia": "Trouble sleeping",
+    "logToday": "Log today",
+    "recentPeriods": "Recent periods",
+    "allEntries": "All entries",
+    "recoveryTitle": "Recovery",
+    "recoverySubtitle": "Urges, triggers and streaks",
+    "target_porn": "Porn",
+    "target_masturbation": "Masturbation",
+    "target_alcohol": "Alcohol",
+    "target_smoking": "Smoking",
+    "target_vaping": "Vaping",
+    "target_gambling": "Gambling",
+    "target_other": "Other",
+    "currentStreak": "Current streak",
+    "longestStreak": "Longest streak",
+    "noRelapses": "No relapses",
+    "urgesResisted": "Urges resisted",
+    "relapsesLogged": "Relapses logged",
+    "watchFor": "Watch for",
+    "watchForHint": "These came up most often before a relapse.",
+    "howStrong": "How strong was it?",
+    "triggers": "Triggers",
+    "trigger_stress": "Stress",
+    "trigger_boredom": "Boredom",
+    "trigger_loneliness": "Loneliness",
+    "trigger_tired": "Tired",
+    "trigger_anxious": "Anxious",
+    "trigger_celebration": "Celebrating",
+    "trigger_social": "Social",
+    "trigger_lateNight": "Late night",
+    "resisted": "Resisted",
+    "relapsed": "Relapsed",
+    "intimacyTitle": "Us",
+    "intimacySubtitle": "A relationship diary nobody else reads",
+    "howWasToday": "How was today?",
+    "whatHappened": "What happened",
+    "intimacyTag_closeness": "Closeness",
+    "intimacyTag_conflict": "Conflict",
+    "intimacyTag_apology": "Apology",
+    "intimacyTag_distance": "Distance",
+    "intimacyTag_goodTalk": "Good talk",
+    "intimacyTag_plans": "Plans",
+    "intimacyTag_gratitude": "Gratitude",
+    "intimacyTag_boundaries": "Boundaries",
+    "intimacyNotePlaceholder": "Write as much or as little as you want…",
+    "saveEntry": "Save entry",
+    "notePlaceholder": "Add a note (optional)",
+    "history": "History",
+    "longPressDelete": "Long press to delete",
+    "deleteEntry": "Delete this entry?",
+    "deleteEntryBody": "It's erased for good. This can't be undone.",
+    "whatIsInHere": "What's in here",
+    "turnOffTitle": "Turn this off?",
+    "turnOffBody": "Everything recorded in this module is deleted. This can't be undone.",
+    "turnOffConfirm": "Turn off and delete",
+    "security": "Security",
+    "changePin": "Change PIN",
+    "changePinHint": "You'll need your current PIN",
+    "enterCurrentPin": "Enter your current PIN.",
+    "enterNewPin": "Choose a new PIN.",
+    "setDecoy": "Set up a decoy PIN",
+    "removeDecoy": "Remove decoy PIN",
+    "removeDecoyTitle": "Remove the decoy?",
+    "removeDecoyBody": "Anything saved in the decoy space becomes unreadable.",
+    "decoyExplainer": "A second PIN that opens a separate, empty private space — for when you're asked to unlock.",
+    "decoyHint": "Choose a PIN you'd be willing to give someone.",
+    "dangerZone": "Danger zone",
+    "destroySpace": "Delete private space",
+    "destroyHint": "Erases the keys and everything inside, permanently",
+    "destroyTitle": "Delete your private space?",
+    "destroyBody": "Every note, entry and file inside is erased, along with the keys. There is no way back.",
+    "destroyAgainTitle": "Really delete everything?",
+    "destroyAgainBody": "This is permanent and immediate.",
+    "destroyConfirm": "Delete everything",
+    "moveModules": "Keep other modules private",
+    "moveModulesNote": "These move into this space: hidden from the Hub, locked behind your PIN, and left out of search and exports. Their existing data stays in the app's normal storage, so this hides them rather than re-encrypting them.",
+    "operatorNotice": "For safety and abuse investigations, LifeOS staff can access private space contents. Every access is logged. See the privacy policy."
+  },
+  "moduleFlags": {
+    "unavailable": "Temporarily unavailable",
+    "defaultMessage": "This module is switched off right now. Your data is safe and will be here when it returns."
+  },
+  "profile": {
+    "title": "Profile",
+    "settingsSubtitle": "Your photo, name and account",
+    "guestTitle": "You're in guest mode",
+    "guestBody": "Create an account to set a profile picture and sync across devices.",
+    "changePhoto": "Change photo",
+    "removePhoto": "Remove photo",
+    "removePhotoBody": "Your profile picture will be deleted.",
+    "photoVisibility": "Your photo and name are visible to people you share expense groups with. Nothing else in LifeOS is.",
+    "avatarFailedTitle": "Couldn't upload photo",
+    "avatarFailedBody": "Check your connection and try again.",
+    "displayName": "Display name",
+    "account": "Account",
+    "username": "Username",
+    "noUsername": "Not set",
+    "email": "Email",
+    "standing": "Account standing",
+    "standing_active": "Good",
+    "standing_throttled": "Slowed",
+    "standing_restricted": "Restricted",
+    "standing_blocked": "Blocked"
+  },
+  "sharing": {
+    "viewerNotice": "Screenshots are blocked and this can't be saved or forwarded. Your name is shown across it. Nothing stops someone photographing the screen with another device.",
+    "report": "Report this content",
+    "reportTitle": "Report content",
+    "reportSent": "Report sent. We’ll review it.",
+    "reportRateLimited": "You've reported a lot recently. Try again later.",
+    "reason_spam": "Spam",
+    "reason_harassment": "Harassment or abuse",
+    "reason_sexual_content": "Unwanted sexual content",
+    "reason_impersonation": "Impersonation",
+    "reason_other": "Something else",
+    "reportEvidenceNote": "The item you’re reporting is sent with this report so it can be reviewed. Nothing else from this space is.",
+    "reportSubmit": "Send report",
+    "reportNotePlaceholder": "Anything else we should know? (optional)"
   }
 }

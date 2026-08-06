@@ -36,7 +36,8 @@
     "markDone": "“{{name}}” کو مکمل نشان زد کریں",
     "markNotDone": "“{{name}}” کو نامکمل نشان زد کریں",
     "more": "مزید اختیارات",
-    "undo": "واپس"
+    "undo": "واپس",
+    "ok": "ٹھیک ہے"
   },
   "reminder": {
     "in1Hour": "ایک گھنٹے میں",
@@ -175,7 +176,9 @@
     "notifyAtNineAm": "اس دن صبح 9:00 بجے مجھے مطلع کریں",
     "addNotes": "نوٹس شامل کریں…",
     "deletedToast": "“{{title}}” حذف ہو گیا۔",
-    "archivedToast": "“{{title}}” محفوظ ہو گیا۔"
+    "archivedToast": "“{{title}}” محفوظ ہو گیا۔",
+    "reminderDueNow": "ابھی کرنا ہے۔",
+    "reminderDueToday": "آج کرنا ہے۔"
   },
   "buckets": {
     "overdue": "مدت گزر گئی",
@@ -245,7 +248,9 @@
     "streakDays_other": "{{count}} دن کا تسلسل",
     "withoutDays_one": "{{count}} دن سے نہیں",
     "withoutDays_other": "{{count}} دن سے نہیں",
-    "quickLog": "“{{name}}” درج کریں"
+    "quickLog": "“{{name}}” درج کریں",
+    "reminderBody": "اس عادت پر توجہ دینے کا وقت۔",
+    "streakHeld": "1 دن رہ گیا — تسلسل برقرار"
   },
   "habitType": {
     "boolean": "ہاں / نہیں",
@@ -284,7 +289,9 @@
     "enableNotifBody": "جرنل یاد دہانی حاصل کرنے کے لیے اپنی ڈیوائس کی ترتیبات میں LifeOS کے لیے اطلاعات فعال کریں۔",
     "reminderSummary": "آپ کو ہر روز {{time}} پر آج کی انٹری لکھنے کی یاد دہانی ملے گی۔",
     "writeAFewWords": "چند الفاظ لکھیں…",
-    "reminderSettings": "یاد دہانی کی ترتیبات"
+    "reminderSettings": "یاد دہانی کی ترتیبات",
+    "reminderNotifTitle": "جرنل 📖",
+    "reminderNotifBody": "ایک منٹ نکال کر آج کی بات لکھیں۔"
   },
   "mood": {
     "notSet": "مقرر نہیں",
@@ -371,7 +378,9 @@
     "writeSomething": "کچھ لکھیں…",
     "unarchive": "محفوظ شدہ سے نکالیں",
     "unarchiveNamed": "“{{name}}” کو محفوظ شدہ سے نکالیں",
-    "deletedToast": "“{{title}}” حذف ہو گیا۔"
+    "deletedToast": "“{{title}}” حذف ہو گیا۔",
+    "reminderTitle": "نوٹ یاد دہانی",
+    "reminderBody": "اس نوٹ پر ایک نظر ڈالیں۔"
   },
   "budget": {
     "title": "بجٹ",
@@ -489,7 +498,11 @@
     "contributions": "شراکتیں",
     "noContributions": "ابھی کوئی شراکت نہیں — اوپر اپنی پہلی جمع رقم شامل کریں۔",
     "other": "دیگر",
-    "spent": "خرچ شدہ"
+    "spent": "خرچ شدہ",
+    "debtReminderOweTitle": "آپ کو {{name}} کو دینا ہے",
+    "debtReminderOwedTitle": "{{name}} کو آپ کو دینا ہے",
+    "debtReminderOweBody": "{{amount}}، {{date}} تک — واپس کرنے کا وقت۔",
+    "debtReminderOwedBody": "{{amount}}، {{date}} تک — وصول کرنے کا وقت۔"
   },
   "debtStatus": {
     "settled": "طے شدہ",
@@ -563,7 +576,10 @@
     "import_notabackup": "یہ LifeOS بیک اپ فائل نہیں ہے۔",
     "import_failed": "بحالی ناکام رہی اور کچھ تبدیل نہیں ہوا۔",
     "importMissingMedia_one": "{{count}} میڈیا فائل غائب ہے — بیک اپ میں میڈیا محفوظ نہیں ہوتا۔",
-    "importMissingMedia_other": "{{count}} میڈیا فائلیں غائب ہیں — بیک اپ میں میڈیا محفوظ نہیں ہوتا۔"
+    "importMissingMedia_other": "{{count}} میڈیا فائلیں غائب ہیں — بیک اپ میں میڈیا محفوظ نہیں ہوتا۔",
+    "terms": "سروس کی شرائط",
+    "support": "سپورٹ سے رابطہ",
+    "supportSubtitle": "سوالات، اپیلیں اور ڈیٹا کی درخواستیں"
   },
   "auth": {
     "welcomeBack": "خوش آمدید",
@@ -573,6 +589,13 @@
     "newHere": "نئے ہیں؟",
     "email": "ای میل",
     "password": "پاس ورڈ",
+    "passwordProblem": {
+      "too_short": "کم از کم {{min}} حروف استعمال کریں۔ چند عام الفاظ جو آپ کو یاد رہیں، مختصر چالاک لفظ سے بہتر ہیں۔",
+      "too_common": "یہ پاس ورڈ ہر اُس فہرست میں ہے جو حملہ آور سب سے پہلے آزماتے ہیں۔ کوئی اور منتخب کریں۔",
+      "too_simple": "یہ حروف کی سیدھی ترتیب ہے۔ کچھ کم قابلِ اندازہ شامل کریں۔",
+      "contains_identity": "اپنا پاس ورڈ اپنے نام یا ای میل سے نہ بنائیں — جو آپ کا فون پکڑے وہ دونوں پہلے سے جانتا ہے۔",
+      "too_long": "یہ اُن 72 بائٹس سے لمبا ہے جنہیں ہم واقعی ہیش کر سکتے ہیں۔ اسے مختصر کریں۔"
+    },
     "name": "نام",
     "forgotPassword": "پاس ورڈ بھول گئے؟",
     "continueGuest": "بغیر اکاؤنٹ کے جاری رکھیں",
@@ -945,7 +968,8 @@
     "openNowPlaying": "ابھی چل رہا ہے کھولیں",
     "nextTrack": "اگلا ٹریک",
     "hidePlayer": "پلیئر چھپائیں",
-    "playHint": "یہ گانا چلاتا ہے"
+    "playHint": "یہ گانا چلاتا ہے",
+    "notOnThisDevice": "اس ڈیوائس پر نہیں"
   },
   "albumCategory": {
     "gym": "جم کی پیش رفت",
@@ -1050,7 +1074,8 @@
     "subjectEmpty": "ٹریکنگ شروع کرنے کے لیے پہلی تصویر شامل کریں۔",
     "subjectNeedsSecond": "اپنی تبدیلی دیکھنے کے لیے ایک اور تصویر شامل کریں۔",
     "playProgression": "چلائیں",
-    "viewInAll": "دیکھیں"
+    "viewInAll": "دیکھیں",
+    "notOnThisDevice": "اس ڈیوائس پر نہیں"
   },
   "timeline": {
     "title": "ٹائم لائن",
@@ -1082,7 +1107,9 @@
     "habitNamedCompleted": "{{name}} مکمل",
     "habitCompleted": "عادت مکمل",
     "journalWritten": "جرنل لکھا گیا",
-    "drankWater": "{{amount}} ملی لیٹر پانی پیا"
+    "drankWater": "{{amount}} ملی لیٹر پانی پیا",
+    "reminderStartingNow": "ابھی شروع ہو رہا ہے۔",
+    "reminderStartingIn": "{{count}} منٹ میں شروع۔"
   },
   "water": {
     "title": "پانی",
@@ -1107,7 +1134,9 @@
     "nudgeSummary": "{{start}} اور {{end}} کے درمیان ہر {{interval}} بعد آپ کو یاد دہانی ملے گی۔",
     "checkTimesTitle": "اپنے اوقات دیکھیں",
     "checkTimesBody": "یاد دہانی کی مدت کا آغاز اختتام سے پہلے ہونا چاہیے۔",
-    "enableForReminders": "پانی کی یاد دہانیاں پانے کے لیے ڈیوائس کی ترتیبات میں LifeOS کے نوٹیفکیشن فعال کریں۔"
+    "enableForReminders": "پانی کی یاد دہانیاں پانے کے لیے ڈیوائس کی ترتیبات میں LifeOS کے نوٹیفکیشن فعال کریں۔",
+    "reminderNotifTitle": "پانی پینے کا وقت 💧",
+    "reminderNotifBody": "کافی دیر ہو گئی — تھوڑا پانی پیئیں۔"
   },
   "hubSection": {
     "growth": "توجہ اور ترقی",
@@ -1204,7 +1233,19 @@
     "exactAlarm": "یاد دہانی کا وقت بالکل درست رکھیں",
     "exactAlarmDescription": "جب تک LifeOS کو «الارم اور یاد دہانیاں» میں اجازت نہ ہو، اینڈرائیڈ یاد دہانیاں 15 منٹ تک روک سکتا ہے۔",
     "exactAlarmFailedTitle": "کھولا نہیں جا سکا",
-    "exactAlarmFailedBody": "اسے ترتیبات › ایپس › خصوصی رسائی › الارم اور یاد دہانیاں میں تلاش کریں۔"
+    "exactAlarmFailedBody": "اسے ترتیبات › ایپس › خصوصی رسائی › الارم اور یاد دہانیاں میں تلاش کریں۔",
+    "digestTitle": "صبح بخیر ☀️",
+    "digestEmpty": "آج کچھ خاص نہیں — سکون سے رہیں۔",
+    "digestBody": "آج: {{summary}}۔ دن کی منصوبہ بندی کے لیے ٹیپ کریں۔",
+    "digestTasks_one": "{{count}} کام باقی",
+    "digestTasks_other": "{{count}} کام باقی",
+    "digestHabits_one": "{{count}} عادت باقی",
+    "digestHabits_other": "{{count}} عادات باقی",
+    "digestMoney_one": "{{count}} رقم کی یاد دہانی",
+    "digestMoney_other": "{{count}} رقم کی یاد دہانیاں",
+    "digestJournal": "جرنل لکھنا ہے",
+    "digestWater": "پانی پینا ہے",
+    "statusOverBudget": "اس ڈیوائس کی {{limit}} یاد دہانیوں کی حد پر — کچھ نہیں آ سکتیں۔ پانی کی یاد دہانیاں کم کریں یا کوئی زمرہ بند کریں۔"
   },
   "notifCategory": {
     "tasks": {
@@ -1254,6 +1295,10 @@
     "streak": {
       "label": "سلسلے اور کامیابیاں",
       "description": "سلسلہ ٹوٹنے کی وارننگ اور جشن"
+    },
+    "split": {
+      "label": "مشترکہ گروپس",
+      "description": "جب آپ کے کسی گروپ میں کوئی خرچ شامل کرے یا ادائیگی درج کرے۔"
     }
   },
   "sync": {
@@ -1285,7 +1330,9 @@
     "notConfiguredTitle": "اس بلڈ میں Supabase کی اسناد نہیں ہیں",
     "notConfiguredBody": "اکاؤنٹس اور کلاؤڈ سنک بند ہیں — آف لائن سب کچھ پھر بھی کام کرتا ہے۔ EAS بلڈ کے لیے یہ اقدار اُس ماحول میں سیٹ کریں جو بلڈ پروفائل استعمال کرتا ہے، پھر دوبارہ بلڈ کریں۔",
     "envMissing": "موجود نہیں",
-    "failedToast": "سِنک مکمل نہیں ہوا۔ آپ کا ڈیٹا اس ڈیوائس پر محفوظ ہے۔"
+    "failedToast": "سِنک مکمل نہیں ہوا۔ آپ کا ڈیٹا اس ڈیوائس پر محفوظ ہے۔",
+    "privateSyncWarning": "اسے آن کرنے سے آپ کی نجی جگہ اپ لوڈ ہو جائے گی تاکہ آپ کے ڈیوائسز کے درمیان سِنک ہو سکے۔ یہ منتقلی اور اسٹوریج دونوں میں انکرپٹڈ رہتی ہے۔",
+    "mediaNote": "گیلری اور موسیقی آپ کے البمز، پلے لسٹس اور تفصیلات سنک کرتے ہیں — تصویر، ویڈیو اور آڈیو فائلیں خود نہیں۔ وہ اُسی ڈیوائس پر رہتی ہیں جس نے انہیں درآمد کیا، اور دوسری جگہ ”اس ڈیوائس پر نہیں“ کے طور پر دکھتی ہیں۔"
   },
   "syncModule": {
     "tasks": "کام",
@@ -1296,7 +1343,11 @@
     "goals": "اہداف",
     "sleep": "نیند",
     "study": "مطالعہ",
-    "budget": "بجٹ"
+    "budget": "بجٹ",
+    "water": "پانی",
+    "gallery": "گیلری",
+    "music": "موسیقی",
+    "private": "نجی جگہ"
   },
   "security": {
     "locked": "LifeOS لاک ہے",
@@ -1406,7 +1457,8 @@
       "expired": "یہ دعوت ختم ہو چکی ہے۔ نئی دعوت طلب کریں۔",
       "already_accepted": "یہ دعوت پہلے استعمال ہو چکی ہے۔",
       "member_unavailable": "گروپ میں آپ کی جگہ اب دستیاب نہیں۔ دوبارہ شامل کرنے کو کہیں۔",
-      "error": "کچھ غلط ہو گیا۔ ذرا دیر بعد کوشش کریں۔"
+      "error": "کچھ غلط ہو گیا۔ ذرا دیر بعد کوشش کریں۔",
+      "blocked": "اس دعوت بھیجنے والے کو آپ نے بلاک کیا ہے۔ شامل ہونے کے لیے سیٹنگز ← بلاک شدہ اکاؤنٹس میں جا کر ان بلاک کریں۔"
     },
     "groupCreated": "“{{name}}” بن گیا۔",
     "currencyNote": "یہ گروپ {{currency}} میں حساب کرتا ہے۔",
@@ -1459,5 +1511,256 @@
     "unknown": "یہ نہیں ہو سکا۔ براہِ کرم دوبارہ کوشش کریں۔",
     "title": "یہ نہیں ہو سکا",
     "detail": "تفصیلات: {{code}}"
+  },
+  "search": {
+    "title": "تلاش",
+    "placeholder": "سب کچھ تلاش کریں…",
+    "promptTitle": "پورے LifeOS میں تلاش کریں",
+    "promptBody": "کام، نوٹس، عادات، اہداف، جرنل، رقم، پڑھائی، موسیقی اور البمز — سب ایک ساتھ۔",
+    "noResultsTitle": "“{{query}}” کے لیے کچھ نہیں",
+    "noResultsBody": "کوئی چھوٹا لفظ یا اس کا حصہ آزمائیں۔",
+    "resultCount_one": "{{count}} نتیجہ",
+    "resultCount_other": "{{count}} نتائج",
+    "kind": {
+      "task": "کام",
+      "note": "نوٹ",
+      "habit": "عادت",
+      "goal": "ہدف",
+      "journal": "جرنل",
+      "transaction": "رقم",
+      "debt": "قرض",
+      "subject": "مضمون",
+      "song": "گانا",
+      "playlist": "پلے لسٹ",
+      "album": "البم",
+      "group": "گروپ"
+    }
+  },
+  "moderation": {
+    "blockedTitle": "یہ اکاؤنٹ بلاک ہے",
+    "blockedBody": "آپ کا LifeOS اکاؤنٹ بلاک کر دیا گیا ہے۔ کلاؤڈ سِنک اور مشترکہ گروپس روک دیے گئے ہیں۔",
+    "blockedUntil": "آپ کا LifeOS اکاؤنٹ {{date}} تک بلاک ہے۔ اس وقت تک کلاؤڈ سِنک اور مشترکہ گروپس بند رہیں گے۔",
+    "reason": "وجہ",
+    "appeal": "اس فیصلے پر اپیل کریں",
+    "appealSubject": "LifeOS اکاؤنٹ اپیل",
+    "restrictedTitle": "اکاؤنٹ محدود",
+    "restrictedBody": "آپ فی الحال گروپ نہیں بنا سکتے یا دعوت نہیں بھیج سکتے۔ باقی سب کچھ معمول کے مطابق کام کرتا ہے۔",
+    "wipedTitle": "یہ ڈیوائس صاف کر دی گئی",
+    "wipedBody": "آپ کا ڈیٹا اس فون سے ہٹا دیا گیا۔ جو کچھ سنک ہو چکا تھا وہ ہمارے سرورز پر ہے اور بلاک ہٹنے پر واپس آ جائے گا۔",
+    "wipedUnsaved": "ان ماڈیولز میں سنک بند تھا، اس لیے وہ کبھی اپ لوڈ نہیں ہوئے اور واپس نہیں لائے جا سکے: {{modules}}۔",
+    "wipedNothingSaved": "یہ ڈیوائس صاف ہونے سے پہلے کچھ بھی اپ لوڈ نہ ہو سکا، اس لیے مقامی ڈیٹا واپس نہیں آیا۔",
+    "blockTitle": "{{name}} کو بلاک کریں؟",
+    "blockBody": "وہ آپ کو کسی گروپ میں شامل نہیں کر سکیں گے اور نہ دعوت بھیج سکیں گے، اور آپ انہیں شامل نہیں کر سکیں گے۔ جس گروپ میں آپ دونوں پہلے سے ہیں اس میں دونوں رہیں گے — نکلنا ہو تو گروپ چھوڑ دیں۔",
+    "block": "بلاک کریں",
+    "blocked": "{{name}} کو بلاک کر دیا گیا",
+    "unblock": "ان بلاک کریں",
+    "unblocked": "{{name}} کو ان بلاک کر دیا گیا",
+    "blockedAccounts": "بلاک شدہ اکاؤنٹس",
+    "blockedAccountsSubtitle": "وہ لوگ جنہیں آپ نے بلاک کیا",
+    "blockedEmpty": "آپ نے کسی کو بلاک نہیں کیا",
+    "blockedEmptyBody": "کسی کو بلاک کرنے سے وہ آپ کو مشترکہ گروپس میں شامل یا دعوت نہیں دے سکتے۔",
+    "blockAfterReport": "انہیں بلاک بھی کریں؟",
+    "blockAfterReportBody": "ہم آپ کی رپورٹ کا جائزہ لیں گے۔ آپ ابھی انہیں رابطہ کرنے سے روک بھی سکتے ہیں۔",
+    "notNow": "ابھی نہیں",
+    "someone": "یہ شخص",
+    "reportMember": "رپورٹ کریں",
+    "reportGroupLabel": "گروپ: {{name}}"
+  },
+  "usage": {
+    "title": "استعمال کے اعداد و شمار",
+    "description": "صرف یہ گمنام شمار بھیجیں کہ آپ کون سے ماڈیول کھولتے ہیں۔ مواد کبھی نہیں۔",
+    "consentTitle": "LifeOS بہتر بنانے میں مدد کریں؟",
+    "consentBody": "روزانہ یہ گنتی شیئر کریں کہ آپ نے کون سے ماڈیول کھولے اور کتنے ریکارڈ محفوظ کیے۔ اس کے علاوہ کچھ نہیں۔",
+    "consentNever": "کوئی عنوان نہیں، کوئی متن نہیں، کوئی رقم نہیں، کوئی فائل نام نہیں — ان گنتیوں سے یہ معلوم نہیں ہو سکتا کہ آپ نے کیا لکھا۔",
+    "consentAccept": "گنتی شیئر کریں",
+    "consentDecline": "نہیں، شکریہ"
+  },
+  "gender": {
+    "female": "خاتون",
+    "male": "مرد",
+    "nonBinary": "نان بائنری",
+    "preferNotToSay": "بتانا نہیں چاہتا/چاہتی"
+  },
+  "private": {
+    "sectionLabel": "نجی",
+    "entryLabel": "نجی جگہ",
+    "entrySubtitleNew": "پن سے محفوظ، انکرپٹڈ حصہ",
+    "entrySubtitleSetUp": "مقفل — کھولنے کے لیے پن درج کریں",
+    "spaceTitle": "نجی جگہ",
+    "spaceSubtitle": "اسی ڈیوائس پر انکرپٹڈ۔ آپ کے جاتے ہی خود مقفل ہو جاتی ہے۔",
+    "spaceSettings": "نجی جگہ کی ترتیبات",
+    "lockNow": "ابھی مقفل کریں",
+    "setupTitle": "اپنی نجی جگہ بنائیں",
+    "setupBody": "منتخب کریں کہ یہاں کیا رکھنا ہے۔ جو کچھ آپ شامل کریں گے وہ انکرپٹ ہو کر آپ کے پن کے پیچھے محفوظ رہے گا اور باقی ایپ سے پوشیدہ رہے گا — تلاش، ایکسپورٹ اور اطلاعات سمیت۔",
+    "suggestionNote": "یہ صرف تجاویز ہیں۔ آپ نے پہلے جو بھی جواب دیا ہو، جو چاہیں آن کر سکتے ہیں۔",
+    "choosePin": "پن منتخب کریں",
+    "confirmPin": "دوبارہ درج کریں",
+    "pinHint": "کم از کم {{count}} ہندسے۔ یہ ایپ لاک سے الگ ہے۔",
+    "confirmPinHint": "صرف اس بات کی تصدیق کے لیے کہ آپ کو یاد رہے گا۔",
+    "pinMismatch": "دونوں مختلف ہیں۔ دوبارہ کوشش کریں۔",
+    "noRecoveryWarning": "اس پن کو ری سیٹ کرنے کا کوئی طریقہ نہیں۔ اگر آپ بھول گئے تو نجی جگہ تک آپ کی رسائی ختم ہو جائے گی اور ہم اسے بحال نہیں کر سکتے۔",
+    "createSpace": "نجی جگہ بنائیں",
+    "unlockTitle": "نجی جگہ",
+    "unlockBody": "جاری رکھنے کے لیے اپنا پن درج کریں۔",
+    "unlock": "غیر مقفل کریں",
+    "unlocking": "کھولا جا رہا ہے…",
+    "wrongPin": "یہ پن کام نہیں کر رہا۔",
+    "throttled": "بہت زیادہ کوششیں۔ تقریباً {{minutes}} منٹ بعد دوبارہ کوشش کریں۔",
+    "digitsEntered": "{{count}} ہندسے درج ہوئے",
+    "decoyNotice": "آپ ڈیکوائے جگہ میں ہیں۔ یہاں شامل کی گئی ہر چیز یہیں رہے گی۔",
+    "itemCount_one": "{{count}} آئٹم",
+    "itemCount_other": "{{count}} آئٹمز",
+    "days_one": "{{count}} دن",
+    "days_other": "{{count}} دن",
+    "vaultTitle": "والٹ",
+    "vaultSubtitle": "تصاویر اور فائلیں، انکرپٹڈ",
+    "vaultEmptyTitle": "ابھی یہاں کچھ نہیں",
+    "vaultEmptyBody": "جو کچھ آپ شامل کریں گے وہ اسی ڈیوائس پر انکرپٹ ہوگا اور فون کی گیلری میں کبھی نظر نہیں آئے گا۔",
+    "addFromLibrary": "تصاویر شامل کریں",
+    "takePhoto": "تصویر لیں",
+    "tooLargeTitle": "کچھ فائلیں بہت بڑی تھیں",
+    "tooLargeBody_one": "{{count}} فائل {{mb}} MB سے بڑی تھی اور شامل نہیں ہوئی۔",
+    "tooLargeBody_other": "{{count}} فائلیں {{mb}} MB سے بڑی تھیں اور شامل نہیں ہوئیں۔",
+    "deleteItem": "یہ آئٹم حذف کریں؟",
+    "deleteItemBody": "فائل اور اس کا ریکارڈ مٹ جائے گا۔ اسے واپس نہیں لایا جا سکتا۔",
+    "cycleTitle": "سائیکل",
+    "cycleSubtitle": "ماہواری اور علامات کا ریکارڈ",
+    "dayOfCycle": "سائیکل کا دن",
+    "averageCycle": "اوسط سائیکل",
+    "estimatedNext": "اگلی ماہواری تقریباً {{date}} کے آس پاس، آپ کی اپنی تاریخ کے مطابق اندازہ۔",
+    "needMoreCycles": "چند سائیکل ریکارڈ کریں، پھر یہاں اندازہ ظاہر ہوگا۔",
+    "flow": "بہاؤ",
+    "flow_spotting": "ہلکے دھبے",
+    "flow_light": "ہلکا",
+    "flow_medium": "درمیانہ",
+    "flow_heavy": "زیادہ",
+    "symptoms": "علامات",
+    "symptom_cramps": "مروڑ",
+    "symptom_headache": "سر درد",
+    "symptom_bloating": "پیٹ پھولنا",
+    "symptom_fatigue": "تھکن",
+    "symptom_backPain": "کمر درد",
+    "symptom_nausea": "متلی",
+    "symptom_tender": "حساسیت",
+    "symptom_acne": "کیل مہاسے",
+    "symptom_cravings": "کھانے کی طلب",
+    "symptom_insomnia": "نیند کی دشواری",
+    "logToday": "آج کا اندراج",
+    "recentPeriods": "حالیہ ماہواری",
+    "allEntries": "تمام اندراجات",
+    "recoveryTitle": "ریکوری",
+    "recoverySubtitle": "طلب، محرکات اور تسلسل",
+    "target_porn": "فحش مواد",
+    "target_masturbation": "مشت زنی",
+    "target_alcohol": "شراب",
+    "target_smoking": "سگریٹ",
+    "target_vaping": "ویپنگ",
+    "target_gambling": "جوا",
+    "target_other": "دیگر",
+    "currentStreak": "موجودہ تسلسل",
+    "longestStreak": "سب سے طویل تسلسل",
+    "noRelapses": "کوئی واپسی نہیں",
+    "urgesResisted": "طلب پر قابو",
+    "relapsesLogged": "ریکارڈ شدہ واپسیاں",
+    "watchFor": "ان سے ہوشیار",
+    "watchForHint": "واپسی سے پہلے یہ سب سے زیادہ سامنے آئے۔",
+    "howStrong": "کتنی شدید تھی؟",
+    "triggers": "محرکات",
+    "trigger_stress": "دباؤ",
+    "trigger_boredom": "بوریت",
+    "trigger_loneliness": "تنہائی",
+    "trigger_tired": "تھکن",
+    "trigger_anxious": "بے چینی",
+    "trigger_celebration": "جشن",
+    "trigger_social": "محفل",
+    "trigger_lateNight": "رات دیر تک",
+    "resisted": "قابو پایا",
+    "relapsed": "واپسی ہوئی",
+    "intimacyTitle": "ہم",
+    "intimacySubtitle": "رشتے کی ڈائری جو کوئی اور نہیں پڑھتا",
+    "howWasToday": "آج کا دن کیسا رہا؟",
+    "whatHappened": "کیا ہوا",
+    "intimacyTag_closeness": "قربت",
+    "intimacyTag_conflict": "اختلاف",
+    "intimacyTag_apology": "معذرت",
+    "intimacyTag_distance": "دوری",
+    "intimacyTag_goodTalk": "اچھی بات چیت",
+    "intimacyTag_plans": "منصوبے",
+    "intimacyTag_gratitude": "شکرگزاری",
+    "intimacyTag_boundaries": "حدود",
+    "intimacyNotePlaceholder": "جتنا چاہیں لکھیں، یا مختصر رکھیں…",
+    "saveEntry": "محفوظ کریں",
+    "notePlaceholder": "نوٹ شامل کریں (اختیاری)",
+    "history": "تاریخ",
+    "longPressDelete": "حذف کرنے کے لیے دبائے رکھیں",
+    "deleteEntry": "یہ اندراج حذف کریں؟",
+    "deleteEntryBody": "یہ مستقل مٹ جائے گا۔ واپس نہیں آ سکتا۔",
+    "whatIsInHere": "یہاں کیا ہے",
+    "turnOffTitle": "اسے بند کریں؟",
+    "turnOffBody": "اس ماڈیول کا سارا ریکارڈ حذف ہو جائے گا۔ واپس نہیں آ سکتا۔",
+    "turnOffConfirm": "بند کریں اور حذف کریں",
+    "security": "سیکیورٹی",
+    "changePin": "پن تبدیل کریں",
+    "changePinHint": "آپ کو موجودہ پن درکار ہوگا",
+    "enterCurrentPin": "اپنا موجودہ پن درج کریں۔",
+    "enterNewPin": "نیا پن منتخب کریں۔",
+    "setDecoy": "ڈیکوائے پن بنائیں",
+    "removeDecoy": "ڈیکوائے پن ہٹائیں",
+    "removeDecoyTitle": "ڈیکوائے ہٹائیں؟",
+    "removeDecoyBody": "ڈیکوائے جگہ میں محفوظ ہر چیز ناقابلِ مطالعہ ہو جائے گی۔",
+    "decoyExplainer": "دوسرا پن جو ایک الگ، خالی نجی جگہ کھولتا ہے — جب آپ سے کھولنے کو کہا جائے۔",
+    "decoyHint": "ایسا پن منتخب کریں جو آپ کسی کو دینے میں ہچکچائیں نہیں۔",
+    "dangerZone": "خطرناک حصہ",
+    "destroySpace": "نجی جگہ حذف کریں",
+    "destroyHint": "چابیاں اور اندر کا سب کچھ مستقل مٹا دیتا ہے",
+    "destroyTitle": "اپنی نجی جگہ حذف کریں؟",
+    "destroyBody": "اندر موجود ہر نوٹ، اندراج اور فائل چابیوں سمیت مٹ جائے گی۔ واپسی کا کوئی راستہ نہیں۔",
+    "destroyAgainTitle": "واقعی سب کچھ حذف کریں؟",
+    "destroyAgainBody": "یہ مستقل اور فوری ہے۔",
+    "destroyConfirm": "سب حذف کریں",
+    "moveModules": "دیگر ماڈیولز نجی رکھیں",
+    "moveModulesNote": "یہ اس جگہ منتقل ہو جائیں گے: ہب سے پوشیدہ، آپ کے پن سے مقفل، اور تلاش و ایکسپورٹ سے باہر۔ ان کا موجودہ ڈیٹا ایپ کے عام اسٹوریج میں ہی رہے گا، یعنی یہ انہیں چھپاتا ہے، دوبارہ انکرپٹ نہیں کرتا۔",
+    "operatorNotice": "حفاظت اور بدسلوکی کی تحقیقات کے لیے LifeOS کا عملہ نجی جگہ کے مواد تک رسائی حاصل کر سکتا ہے۔ ہر رسائی ریکارڈ کی جاتی ہے۔ پرائیویسی پالیسی دیکھیں۔"
+  },
+  "moduleFlags": {
+    "unavailable": "عارضی طور پر دستیاب نہیں",
+    "defaultMessage": "یہ ماڈیول فی الحال بند ہے۔ آپ کا ڈیٹا محفوظ ہے اور واپسی پر یہیں ملے گا۔"
+  },
+  "profile": {
+    "title": "پروفائل",
+    "settingsSubtitle": "آپ کی تصویر، نام اور اکاؤنٹ",
+    "guestTitle": "آپ مہمان موڈ میں ہیں",
+    "guestBody": "پروفائل تصویر لگانے اور ڈیوائسز کے درمیان سِنک کے لیے اکاؤنٹ بنائیں۔",
+    "changePhoto": "تصویر تبدیل کریں",
+    "removePhoto": "تصویر ہٹائیں",
+    "removePhotoBody": "آپ کی پروفائل تصویر حذف ہو جائے گی۔",
+    "photoVisibility": "آپ کی تصویر اور نام صرف اُن لوگوں کو نظر آتے ہیں جن کے ساتھ آپ اخراجات کے گروپس شیئر کرتے ہیں۔ LifeOS میں اور کچھ نہیں۔",
+    "avatarFailedTitle": "تصویر اپ لوڈ نہیں ہو سکی",
+    "avatarFailedBody": "اپنا کنکشن چیک کر کے دوبارہ کوشش کریں۔",
+    "displayName": "ظاہری نام",
+    "account": "اکاؤنٹ",
+    "username": "صارف نام",
+    "noUsername": "مقرر نہیں",
+    "email": "ای میل",
+    "standing": "اکاؤنٹ کی حیثیت",
+    "standing_active": "ٹھیک",
+    "standing_throttled": "سست",
+    "standing_restricted": "محدود",
+    "standing_blocked": "بلاک"
+  },
+  "sharing": {
+    "viewerNotice": "اسکرین شاٹ بند ہے اور اسے محفوظ یا آگے بھیجا نہیں جا سکتا۔ آپ کا نام اس پر دکھایا گیا ہے۔ تاہم کوئی دوسری ڈیوائس سے اسکرین کی تصویر لے سکتا ہے، اسے روکا نہیں جا سکتا۔",
+    "report": "اس مواد کی شکایت کریں",
+    "reportTitle": "مواد کی شکایت",
+    "reportSent": "شکایت بھیج دی گئی۔ ہم جائزہ لیں گے۔",
+    "reportRateLimited": "آپ نے حال ہی میں بہت شکایات کی ہیں۔ بعد میں کوشش کریں۔",
+    "reason_spam": "اسپام",
+    "reason_harassment": "ہراسانی یا بدسلوکی",
+    "reason_sexual_content": "ناپسندیدہ جنسی مواد",
+    "reason_impersonation": "جعلی شناخت",
+    "reason_other": "کچھ اور",
+    "reportEvidenceNote": "جس چیز کی آپ شکایت کر رہے ہیں وہ جائزے کے لیے ساتھ بھیجی جائے گی۔ اس جگہ سے اور کچھ نہیں۔",
+    "reportSubmit": "رپورٹ بھیجیں",
+    "reportNotePlaceholder": "کچھ اور بتانا چاہیں گے؟ (اختیاری)"
   }
 }

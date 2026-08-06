@@ -1,4 +1,5 @@
 import { setNoteReminderNotificationId } from '@/features/notes/services/notes-repository';
+import i18n from '@/lib/i18n';
 import { cancelNotification, scheduleOneTimeNotification } from '@/lib/notifications';
 import type { Note } from '@/features/notes/types/note.types';
 
@@ -14,8 +15,8 @@ export async function syncNoteReminder(note: Note): Promise<void> {
   }
 
   const id = await scheduleOneTimeNotification({
-    title: note.title || 'Note reminder',
-    body: 'Take a look at this note.',
+    title: note.title || i18n.t('notes.reminderTitle'),
+    body: i18n.t('notes.reminderBody'),
     date: note.reminderAt,
     data: { category: 'notes', route: '/note/[id]', params: { id: note.id } },
   });

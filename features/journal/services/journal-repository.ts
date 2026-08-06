@@ -60,6 +60,19 @@ export function getEntryByDate(entryDate: string): JournalEntry | null {
   return row ? toEntry(row) : null;
 }
 
+/** Most recent entries, newest first — what global search reads. Bounded
+ *  because search runs on every keystroke and a journal has no natural end. */
+export function listRecentJournalEntries(limit = 400): JournalEntry[] {
+  return getDb()
+    .select()
+    .from(journalEntries)
+    .where(and(eq(journalEntries.userId, LOCAL_USER_ID), isNull(journalEntries.deletedAt)))
+    .orderBy(desc(journalEntries.entryDate))
+    .limit(limit)
+    .all()
+    .map(toEntry);
+}
+
 /** Inclusive date range, most recent first — the Timeline's paging unit. */
 export function listEntriesBetween(startDate: string, endDate: string): JournalEntry[] {
   return getDb()
@@ -164,24 +177,28 @@ function seedDefaultPrompts() {
 /** Seeds the five default reflection prompts on first use — system prompts have `userId: null`. */
 export function listPrompts(): JournalPrompt[] {
   const db = getDb();
-  const existing = db
+  const all = db
     .select()
     .from(journalPrompts)
-    .where(or(isNull(journalPrompts.userId), eq(journalPrompts.userId, LOCAL_USER_ID)))
+    .where(
+      and(
+        or(isNull(journalPrompts.userId), eq(journalPrompts.userId, LOCAL_USER_ID)),
+        isNull(journalPrompts.deletedAt),
+      ),
+    )
     .all();
 
-  if (existing.length === 0) {
+  // Scoped to the system prompts specifically. "Are there any prompts at all"
+  // was the same question until custom prompts started syncing: a second device
+  // that pulls a custom prompt before this first runs would find a non-empty
+  // table and never seed the five defaults, leaving the user with whichever
+  // single prompt happened to arrive first.
+  if (!all.some((row) => row.userId === null)) {
     seedDefaultPrompts();
-    return db
-      .select()
-      .from(journalPrompts)
-      .where(or(isNull(journalPrompts.userId), eq(journalPrompts.userId, LOCAL_USER_ID)))
-      .orderBy(journalPrompts.sortOrder)
-      .all()
-      .map(toPrompt);
+    all.push(...db.select().from(journalPrompts).where(isNull(journalPrompts.userId)).all());
   }
 
-  return existing
+  return all
     .filter((row) => row.isActive)
     .sort((a, b) => a.sortOrder - b.sortOrder)
     .map(toPrompt);
@@ -210,13 +227,18 @@ export function createPrompt(text: string): JournalPrompt {
       isActive: true,
       sortOrder: prompt.sortOrder,
       createdAt: now,
+      updatedAt: now,
     })
     .run();
   return prompt;
 }
 
 export function deactivatePrompt(id: string) {
-  getDb().update(journalPrompts).set({ isActive: false }).where(eq(journalPrompts.id, id)).run();
+  getDb()
+    .update(journalPrompts)
+    .set({ isActive: false, updatedAt: Date.now() })
+    .where(eq(journalPrompts.id, id))
+    .run();
 }
 
 function toReflection(row: typeof journalReflections.$inferSelect): JournalReflection {
@@ -227,7 +249,7 @@ export function listReflectionsForEntry(entryId: string): JournalReflection[] {
   return getDb()
     .select()
     .from(journalReflections)
-    .where(eq(journalReflections.entryId, entryId))
+    .where(and(eq(journalReflections.entryId, entryId), isNull(journalReflections.deletedAt)))
     .all()
     .map(toReflection);
 }
@@ -242,14 +264,23 @@ export function upsertReflection(entryId: string, promptId: string, answerText: 
 
   if (existing) {
     db.update(journalReflections)
-      .set({ answerText })
+      .set({ answerText, deletedAt: null, updatedAt: Date.now() })
       .where(eq(journalReflections.id, existing.id))
       .run();
     return;
   }
 
+  const now = Date.now();
   db.insert(journalReflections)
-    .values({ id: generateId(), entryId, promptId, answerText, createdAt: Date.now() })
+    .values({
+      id: generateId(),
+      entryId,
+      promptId,
+      answerText,
+      userId: LOCAL_USER_ID,
+      createdAt: now,
+      updatedAt: now,
+    })
     .run();
 }
 
@@ -292,15 +323,16 @@ export function addAttachment(
   };
   getDb()
     .insert(journalAttachments)
-    .values({ ...attachment, userId: LOCAL_USER_ID })
+    .values({ ...attachment, userId: LOCAL_USER_ID, updatedAt: attachment.createdAt })
     .run();
   return attachment;
 }
 
 export function deleteAttachment(id: string) {
+  const now = Date.now();
   getDb()
     .update(journalAttachments)
-    .set({ deletedAt: Date.now() })
+    .set({ deletedAt: now, updatedAt: now })
     .where(eq(journalAttachments.id, id))
     .run();
 }

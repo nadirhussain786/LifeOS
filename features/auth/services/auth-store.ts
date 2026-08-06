@@ -31,6 +31,11 @@ export type AuthProfile = {
   /** Unique account name. Null until claimed — sign-up creates the account
    *  first and claims the name after, so a lost race never blocks sign-up. */
   username: string | null;
+  /** Storage path, not a URL — see features/profile/services/avatar.ts. */
+  avatarPath: string | null;
+  /** Cache-buster: the storage URL is stable, so without this every device
+   *  keeps rendering the previous picture forever. */
+  avatarUpdatedAt: number | null;
 };
 
 /** Outcome of claiming a name. 'taken' is a normal result, not an error: two
@@ -70,6 +75,8 @@ type AuthState = {
   continueAsGuest: () => void;
   loadProfile: () => Promise<void>;
   updateDisplayName: (displayName: string) => Promise<AuthResult>;
+  /** Re-reads the profile row after an avatar change. */
+  refreshProfile: () => Promise<void>;
   /** Whether `candidate` is well-formed and unclaimed by anyone else — or
    * whether the question could not be answered at all. */
   isUsernameAvailable: (candidate: string) => Promise<UsernameAvailability>;
@@ -197,7 +204,7 @@ export const useAuthStore = create<AuthState>()(
         await ensureProfileRow();
         const { data } = await supabase
           .from('profiles')
-          .select('id, email, display_name, username')
+          .select('id, email, display_name, username, avatar_path, avatar_updated_at')
           .eq('id', user.id)
           .maybeSingle();
         set({
@@ -209,8 +216,16 @@ export const useAuthStore = create<AuthState>()(
               (user.user_metadata?.display_name as string | undefined) ??
               null,
             username: data?.username ?? null,
+            avatarPath: data?.avatar_path ?? null,
+            avatarUpdatedAt: data?.avatar_updated_at ?? null,
           },
         });
+      },
+
+      /** Re-reads the profile row. loadProfile already does exactly this, so
+       *  this is an alias that says what the caller means at the call site. */
+      refreshProfile: async () => {
+        await get().loadProfile();
       },
 
       updateDisplayName: async (displayName) => {

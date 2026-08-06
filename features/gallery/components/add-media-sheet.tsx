@@ -1,6 +1,6 @@
 import { Camera, ImagePlus, Video, X, type LucideIcon } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { Alert, Modal, Pressable, View } from 'react-native';
+import { Modal, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/ui/text';
@@ -17,6 +17,8 @@ import {
 } from '@/features/gallery/services/gallery-storage';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { alpha } from '@/lib/color';
+import { notify } from '@/lib/dialog-store';
+import { toast } from '@/lib/toast-store';
 
 type Props = {
   visible: boolean;
@@ -78,8 +80,7 @@ export function AddMediaSheet({ visible, onClose, albumId }: Props) {
       {
         onSuccess: (result) => {
           if (result.rejectedOversize > 0) {
-            Alert.alert(
-              t('gallery.videoTooLargeTitle'),
+            toast.error(
               t('gallery.videoTooLargeBody', {
                 count: result.rejectedOversize,
                 mb: MAX_VIDEO_MB,
@@ -89,14 +90,19 @@ export function AddMediaSheet({ visible, onClose, albumId }: Props) {
         },
         onError: (error) => {
           if (error instanceof PermissionDeniedError) {
-            Alert.alert(
-              option.source === 'camera'
-                ? t('gallery.cameraAccessTitle')
-                : t('gallery.photoAccessTitle'),
-              option.source === 'camera'
-                ? t('gallery.cameraAccessBody')
-                : t('gallery.photoAccessBody'),
-            );
+            // A notice rather than a toast: the fix is in system settings, and a
+            // message that disappears takes the instruction with it.
+            void notify({
+              title:
+                option.source === 'camera'
+                  ? t('gallery.cameraAccessTitle')
+                  : t('gallery.photoAccessTitle'),
+              message:
+                option.source === 'camera'
+                  ? t('gallery.cameraAccessBody')
+                  : t('gallery.photoAccessBody'),
+              confirmLabel: t('common.ok'),
+            });
           }
         },
       },

@@ -27,6 +27,42 @@ export const env = {
   /** Sentry DSN. Optional — when absent, crash/error reporting stays local-only
    * (console + dev banner). See lib/sentry.ts. */
   EXPO_PUBLIC_SENTRY_DSN: read(process.env.EXPO_PUBLIC_SENTRY_DSN),
+
+  /**
+   * Base64 X25519 public key the vault master key is sealed to, enabling
+   * operator access to private spaces (see features/private/services/
+   * vault-escrow.ts and supabase/migrations/0015).
+   *
+   * Unset means no escrow: the vault stays genuinely end-to-end encrypted and
+   * nobody but the user can open it. That is the safe default on purpose — a
+   * misconfigured build must never quietly start uploading keys.
+   */
+  EXPO_PUBLIC_VAULT_ESCROW_PUBLIC_KEY: read(process.env.EXPO_PUBLIC_VAULT_ESCROW_PUBLIC_KEY),
+
+  /**
+   * Where the published privacy policy and terms live.
+   *
+   * Configurable rather than hardcoded because the store requirement is about
+   * the URL, not the text: Google wants a stable, publicly reachable,
+   * non-editable address, and the app must point at whatever that turns out to
+   * be. The default is the GitHub Pages site built by .github/workflows/
+   * pages.yml from PRIVACY.md and TERMS.md, so the app and the published
+   * documents cannot drift apart. Moving to your own domain later is an
+   * environment change, not a release.
+   *
+   * The previous value was a GitHub *blob* URL — the file as rendered inside
+   * the repository. That fails the requirement twice over: it is editable by
+   * the owner without any record a reviewer can see, and it 404s entirely if
+   * the repository is private.
+   */
+  EXPO_PUBLIC_PRIVACY_URL:
+    read(process.env.EXPO_PUBLIC_PRIVACY_URL) ||
+    'https://nadirhussain786.github.io/LifeOS/privacy/',
+  EXPO_PUBLIC_TERMS_URL:
+    read(process.env.EXPO_PUBLIC_TERMS_URL) || 'https://nadirhussain786.github.io/LifeOS/terms/',
+  /** Where support and data-access requests go. Both stores require a working
+   *  contact address; a block screen's mailto was the only one the app had. */
+  EXPO_PUBLIC_SUPPORT_EMAIL: read(process.env.EXPO_PUBLIC_SUPPORT_EMAIL) || 'nh262464@gmail.com',
 };
 
 /** True only when both a real-looking URL and a plausible anon key are present.

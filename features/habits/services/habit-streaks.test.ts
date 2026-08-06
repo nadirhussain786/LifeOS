@@ -58,10 +58,33 @@ describe('calculateHabitStreaks — current streak', () => {
     expect(r.currentStreak).toBe(2); // today not logged yet, but not a miss
   });
 
-  it('breaks the streak on a real miss', () => {
+  it('forgives ONE missed day rather than resetting to zero', () => {
+    // A streak that dies on one bad day punishes hardest when somebody is ill,
+    // busy or travelling — and what they usually stop doing is opening the app,
+    // not the habit. The miss is survived, never counted.
     const logs = [log(ASOF), log(daysAgo(1)), /* miss day 2 */ log(daysAgo(3))];
     const r = calculateHabitStreaks(daily, logs, [], ASOF);
+    expect(r.currentStreak).toBe(3);
+    expect(r.graceUsed).toBe(true);
+  });
+
+  it('breaks the streak on a second miss', () => {
+    const logs = [log(ASOF), /* miss 1 */ log(daysAgo(2)), /* miss 3 */ log(daysAgo(4))];
+    const r = calculateHabitStreaks(daily, logs, [], ASOF);
     expect(r.currentStreak).toBe(2);
+  });
+
+  it('does not report a grace day that was never needed', () => {
+    const logs = [log(ASOF), log(daysAgo(1)), log(daysAgo(2))];
+    expect(calculateHabitStreaks(daily, logs, [], ASOF).graceUsed).toBe(false);
+  });
+
+  it('will not spend the grace day to invent a streak from nothing', () => {
+    // Two empty days before the first log must not become a run of 1.
+    const logs = [log(daysAgo(3))];
+    const r = calculateHabitStreaks(daily, logs, [], ASOF);
+    expect(r.currentStreak).toBe(0);
+    expect(r.graceUsed).toBe(false);
   });
 
   it('treats an excused skip as transparent', () => {
@@ -79,14 +102,28 @@ describe('calculateHabitStreaks — current streak', () => {
 });
 
 describe('calculateHabitStreaks — best streak', () => {
-  it('finds an older longer run after a recent lapse', () => {
+  it('carries a single lapse into the run it interrupted', () => {
     const logs = [
-      log(ASOF), // current run = 1
-      // miss yesterday
+      log(ASOF),
+      // one missed day — forgiven
       log(daysAgo(2)),
       log(daysAgo(3)),
       log(daysAgo(4)),
-      log(daysAgo(5)), // older run = 4
+      log(daysAgo(5)),
+    ];
+    const r = calculateHabitStreaks(daily, logs, [], ASOF);
+    expect(r.currentStreak).toBe(5);
+    expect(r.graceUsed).toBe(true);
+  });
+
+  it('finds an older longer run after a lapse the grace day could not cover', () => {
+    const logs = [
+      log(ASOF), // current run = 1
+      // two missed days — beyond grace
+      log(daysAgo(3)),
+      log(daysAgo(4)),
+      log(daysAgo(5)),
+      log(daysAgo(6)), // older run = 4
     ];
     const r = calculateHabitStreaks(daily, logs, [], ASOF);
     expect(r.currentStreak).toBe(1);

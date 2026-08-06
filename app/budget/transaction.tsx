@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { CalendarDays, Trash2 } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
 import { Segmented } from '@/components/ui/segmented';
@@ -26,6 +26,7 @@ import {
 } from '@/features/budget/hooks/use-budget';
 import type { BudgetAccount, TransactionType } from '@/features/budget/types/budget.types';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { confirm } from '@/lib/dialog-store';
 
 const ACCOUNT_OPTIONS = ACCOUNTS.map((a) => ({ value: a.id, label: a.label }));
 const TYPE_TINT: Record<TransactionType, string> = {
@@ -122,14 +123,17 @@ export default function TransactionScreen() {
 
   const confirmDelete = () => {
     if (!existing) return;
-    Alert.alert(t('budget.deleteTransactionTitle'), t('budget.deleteEntryBody'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('common.delete'),
-        style: 'destructive',
-        onPress: () => (removeTransaction.mutate(existing.id), router.back()),
-      },
-    ]);
+    void confirm({
+      title: t('budget.deleteTransactionTitle'),
+      message: t('budget.deleteEntryBody'),
+      confirmLabel: t('common.delete'),
+      cancelLabel: t('common.cancel'),
+      destructive: true,
+    }).then(async (ok) => {
+      if (!ok) return;
+      removeTransaction.mutate(existing.id);
+      router.back();
+    });
   };
 
   const tint = TYPE_TINT[type];

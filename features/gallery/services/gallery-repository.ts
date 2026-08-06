@@ -5,7 +5,7 @@ import { galleryAlbums, galleryPhotos } from '@/database/schema';
 import { deleteMediaFiles } from '@/features/gallery/services/gallery-storage';
 import { generateId } from '@/lib/id';
 import { LOCAL_USER_ID } from '@/lib/local-user';
-import { displayUri } from '@/features/gallery/types/gallery.types';
+import { displayUri, isOnThisDevice } from '@/features/gallery/types/gallery.types';
 import type {
   AlbumCategory,
   AlbumWithCover,
@@ -74,14 +74,18 @@ export function listAlbumsWithCover(): AlbumWithCover[] {
 
   return albums.map((album) => {
     const albumPhotos = byAlbum.get(album.id) ?? [];
+    // The thumbnails need actual pixels, so they are chosen from the media this
+    // device holds. An album synced from another phone still counts all its
+    // photos — it just has no picture to show for them yet.
+    const renderable = albumPhotos.filter(isOnThisDevice);
     // Explicit cover, else the most recent photo (photos already sorted desc).
     const cover = album.coverPhotoId
-      ? (albumPhotos.find((p) => p.id === album.coverPhotoId) ?? albumPhotos[0])
-      : albumPhotos[0];
+      ? (renderable.find((p) => p.id === album.coverPhotoId) ?? renderable[0])
+      : renderable[0];
     const videoCount = albumPhotos.reduce((n, p) => n + (p.mediaType === 'video' ? 1 : 0), 0);
     // Sorted takenAt DESC, so the ends of the album are its ends in time.
-    const latest = albumPhotos[0] ?? null;
-    const first = albumPhotos[albumPhotos.length - 1] ?? null;
+    const latest = renderable[0] ?? null;
+    const first = renderable[renderable.length - 1] ?? null;
     return {
       ...album,
       coverUri: cover ? displayUri(cover) : null,
@@ -132,7 +136,13 @@ export function updateAlbum(
  * than being destroyed — the images are precious progress records). */
 export function deleteAlbum(id: string) {
   const db = getDb();
-  db.update(galleryAlbums).set({ deletedAt: Date.now() }).where(eq(galleryAlbums.id, id)).run();
+  // See deletePlaylist: the tombstone only travels if `updatedAt` moves with it.
+  // No `syncStatus` here — unlike gallery_photos, this table does not carry the
+  // column. The engine keys off `updated_at`, so the tombstone still travels.
+  db.update(galleryAlbums)
+    .set({ deletedAt: Date.now(), updatedAt: Date.now() })
+    .where(eq(galleryAlbums.id, id))
+    .run();
   db.update(galleryPhotos)
     .set({ albumId: null, updatedAt: Date.now() })
     .where(eq(galleryPhotos.albumId, id))
@@ -217,14 +227,19 @@ export function togglePhotoFavorite(id: string, isFavorite: boolean) {
 export function deletePhoto(id: string) {
   const photo = getPhoto(id);
   const db = getDb();
+  const now = Date.now();
   db.update(galleryPhotos)
-    .set({ deletedAt: Date.now(), syncStatus: 'pending' })
+    .set({ deletedAt: now, updatedAt: now, syncStatus: 'pending' })
     .where(eq(galleryPhotos.id, id))
     .run();
-  // Clear any album cover that pointed at this photo.
+  // Clear any album cover that pointed at this photo. `updatedAt` matters: the
+  // album row syncs, and without the bump the other device keeps a cover
+  // pointing at a photo that no longer exists.
   db.update(galleryAlbums)
-    .set({ coverPhotoId: null })
+    .set({ coverPhotoId: null, updatedAt: now })
     .where(eq(galleryAlbums.coverPhotoId, id))
     .run();
-  if (photo) deleteMediaFiles(photo.uri, photo.thumbnailUri);
+  // A row pulled from another device has no bytes here — `uri` is '' and there
+  // is nothing on disk to free.
+  if (photo?.uri) deleteMediaFiles(photo.uri, photo.thumbnailUri);
 }

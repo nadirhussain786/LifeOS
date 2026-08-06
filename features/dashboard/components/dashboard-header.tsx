@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { Bell, Settings } from 'lucide-react-native';
+import { Bell, Search, Settings } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -37,6 +37,17 @@ export function DashboardHeader() {
         </Text>
       </View>
       <View className="flex-row items-center gap-2">
+        {/* Search sits first because it is the most-reached-for control on a
+            home screen fronting twelve modules. */}
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => router.push('/search')}
+          hitSlop={8}
+          accessibilityLabel={t('search.title')}
+          className="h-11 w-11 items-center justify-center rounded-full border border-border bg-surface"
+        >
+          <Search color={colors[scheme].foreground} size={20} />
+        </Pressable>
         <Pressable
           accessibilityRole="button"
           onPress={() => router.push('/notifications')}

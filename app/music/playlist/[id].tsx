@@ -4,7 +4,7 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { ListMusic, Play, Plus, Trash2 } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, TextInput, View } from 'react-native';
+import { Pressable, TextInput, View } from 'react-native';
 
 import { EmptyState } from '@/components/ui/empty-state';
 import { ScreenHeader } from '@/components/ui/screen-header';
@@ -19,6 +19,7 @@ import {
   usePlaylistSongs,
 } from '@/features/music/hooks/use-playlists';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { confirm } from '@/lib/dialog-store';
 
 const AUTOSAVE_DELAY_MS = 500;
 
@@ -52,21 +53,17 @@ export default function PlaylistDetailScreen() {
   if (!playlist) return null;
 
   const handleDeletePlaylist = () => {
-    Alert.alert(
-      t('music.deletePlaylistTitle'),
-      t('music.deletePlaylistBody', { name: playlist.name }),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: () => {
-            remove.mutate(playlist.id);
-            router.back();
-          },
-        },
-      ],
-    );
+    void confirm({
+      title: t('music.deletePlaylistTitle'),
+      message: t('music.deletePlaylistBody', { name: playlist.name }),
+      confirmLabel: t('common.delete'),
+      cancelLabel: t('common.cancel'),
+      destructive: true,
+    }).then(async (ok) => {
+      if (!ok) return;
+      remove.mutate(playlist.id);
+      router.back();
+    });
   };
 
   return (

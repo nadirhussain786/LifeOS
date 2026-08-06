@@ -36,7 +36,8 @@
     "markDone": "“{{name}}” को पूर्ण चिह्नित करें",
     "markNotDone": "“{{name}}” को अपूर्ण चिह्नित करें",
     "more": "और विकल्प",
-    "undo": "पूर्ववत"
+    "undo": "पूर्ववत",
+    "ok": "ठीक है"
   },
   "reminder": {
     "in1Hour": "1 घंटे में",
@@ -175,7 +176,9 @@
     "notifyAtNineAm": "उस दिन सुबह 9:00 बजे मुझे सूचित करें",
     "addNotes": "नोट्स जोड़ें…",
     "deletedToast": "“{{title}}” हटाया गया।",
-    "archivedToast": "“{{title}}” संग्रहीत।"
+    "archivedToast": "“{{title}}” संग्रहीत।",
+    "reminderDueNow": "अभी करना है।",
+    "reminderDueToday": "आज करना है।"
   },
   "buckets": {
     "overdue": "अतिदेय",
@@ -245,7 +248,9 @@
     "streakDays_other": "{{count}} दिन की लय",
     "withoutDays_one": "{{count}} दिन से नहीं",
     "withoutDays_other": "{{count}} दिन से नहीं",
-    "quickLog": "“{{name}}” दर्ज करें"
+    "quickLog": "“{{name}}” दर्ज करें",
+    "reminderBody": "इस आदत पर ध्यान देने का समय।",
+    "streakHeld": "1 दिन छूटा — लय बनी रही"
   },
   "habitType": {
     "boolean": "हां / नहीं",
@@ -284,7 +289,9 @@
     "enableNotifBody": "जर्नल अनुस्मारक पाने के लिए अपनी डिवाइस सेटिंग्स में LifeOS के लिए सूचनाएं सक्षम करें।",
     "reminderSummary": "आपको हर दिन {{time}} बजे आज की प्रविष्टि लिखने का अनुस्मारक मिलेगा।",
     "writeAFewWords": "कुछ शब्द लिखें…",
-    "reminderSettings": "अनुस्मारक सेटिंग्स"
+    "reminderSettings": "अनुस्मारक सेटिंग्स",
+    "reminderNotifTitle": "जर्नल 📖",
+    "reminderNotifBody": "एक मिनट निकालकर आज की बात लिखें।"
   },
   "mood": {
     "notSet": "सेट नहीं",
@@ -371,7 +378,9 @@
     "writeSomething": "कुछ लिखें…",
     "unarchive": "संग्रह से निकालें",
     "unarchiveNamed": "“{{name}}” को संग्रह से निकालें",
-    "deletedToast": "“{{title}}” हटाया गया।"
+    "deletedToast": "“{{title}}” हटाया गया।",
+    "reminderTitle": "नोट अनुस्मारक",
+    "reminderBody": "इस नोट पर एक नज़र डालें।"
   },
   "budget": {
     "title": "बजट",
@@ -489,7 +498,11 @@
     "contributions": "योगदान",
     "noContributions": "अभी कोई योगदान नहीं — ऊपर अपनी पहली जमा जोड़ें।",
     "other": "अन्य",
-    "spent": "खर्च"
+    "spent": "खर्च",
+    "debtReminderOweTitle": "आपको {{name}} को देना है",
+    "debtReminderOwedTitle": "{{name}} को आपको देना है",
+    "debtReminderOweBody": "{{amount}}, {{date}} तक — लौटाने का समय।",
+    "debtReminderOwedBody": "{{amount}}, {{date}} तक — वसूलने का समय।"
   },
   "debtStatus": {
     "settled": "निपटाया गया",
@@ -563,7 +576,10 @@
     "import_notabackup": "यह LifeOS बैकअप फ़ाइल नहीं है।",
     "import_failed": "पुनर्स्थापना विफल रही और कुछ नहीं बदला।",
     "importMissingMedia_one": "{{count}} मीडिया फ़ाइल गायब है — बैकअप में मीडिया संग्रहीत नहीं होता।",
-    "importMissingMedia_other": "{{count}} मीडिया फ़ाइलें गायब हैं — बैकअप में मीडिया संग्रहीत नहीं होता।"
+    "importMissingMedia_other": "{{count}} मीडिया फ़ाइलें गायब हैं — बैकअप में मीडिया संग्रहीत नहीं होता।",
+    "terms": "सेवा की शर्तें",
+    "support": "सहायता से संपर्क करें",
+    "supportSubtitle": "सवाल, अपील और डेटा अनुरोध"
   },
   "auth": {
     "welcomeBack": "वापसी पर स्वागत है",
@@ -573,6 +589,13 @@
     "newHere": "नए हैं?",
     "email": "ईमेल",
     "password": "पासवर्ड",
+    "passwordProblem": {
+      "too_short": "कम से कम {{min}} अक्षर उपयोग करें। कुछ सामान्य शब्द जो आपको याद रहें, छोटे चतुर शब्द से बेहतर हैं।",
+      "too_common": "यह पासवर्ड हर उस सूची में है जिसे हमलावर सबसे पहले आज़माते हैं। कुछ और चुनें।",
+      "too_simple": "यह अक्षरों की सीधी शृंखला है। कुछ कम अनुमान लगाने योग्य मिलाएँ।",
+      "contains_identity": "अपना पासवर्ड अपने नाम या ईमेल से न बनाएँ — आपका फ़ोन पकड़ने वाला दोनों पहले से जानता है।",
+      "too_long": "यह उन 72 बाइट्स से लंबा है जिन्हें हम वास्तव में हैश कर सकते हैं। इसे छोटा करें।"
+    },
     "name": "नाम",
     "forgotPassword": "पासवर्ड भूल गए?",
     "continueGuest": "बिना खाते के जारी रखें",
@@ -945,7 +968,8 @@
     "openNowPlaying": "अभी चल रहा है खोलें",
     "nextTrack": "अगला ट्रैक",
     "hidePlayer": "प्लेयर छिपाएँ",
-    "playHint": "यह गाना चलाता है"
+    "playHint": "यह गाना चलाता है",
+    "notOnThisDevice": "इस डिवाइस पर नहीं"
   },
   "albumCategory": {
     "gym": "जिम प्रगति",
@@ -1050,7 +1074,8 @@
     "subjectEmpty": "ट्रैकिंग शुरू करने के लिए पहली तस्वीर जोड़ें।",
     "subjectNeedsSecond": "अपना बदलाव देखने के लिए एक और तस्वीर जोड़ें।",
     "playProgression": "चलाएँ",
-    "viewInAll": "देखें"
+    "viewInAll": "देखें",
+    "notOnThisDevice": "इस डिवाइस पर नहीं"
   },
   "timeline": {
     "title": "टाइमलाइन",
@@ -1082,7 +1107,9 @@
     "habitNamedCompleted": "{{name}} पूर्ण",
     "habitCompleted": "आदत पूर्ण",
     "journalWritten": "जर्नल लिखा गया",
-    "drankWater": "{{amount}} मिली पानी पिया"
+    "drankWater": "{{amount}} मिली पानी पिया",
+    "reminderStartingNow": "अभी शुरू हो रहा है।",
+    "reminderStartingIn": "{{count}} मिनट में शुरू।"
   },
   "water": {
     "title": "पानी",
@@ -1107,7 +1134,9 @@
     "nudgeSummary": "{{start}} और {{end}} के बीच हर {{interval}} में आपको याद दिलाया जाएगा।",
     "checkTimesTitle": "अपने समय जाँचें",
     "checkTimesBody": "याद दिलाने की अवधि की शुरुआत अंत से पहले होनी चाहिए।",
-    "enableForReminders": "पानी की याद पाने के लिए डिवाइस सेटिंग्स में LifeOS के नोटिफ़िकेशन चालू करें।"
+    "enableForReminders": "पानी की याद पाने के लिए डिवाइस सेटिंग्स में LifeOS के नोटिफ़िकेशन चालू करें।",
+    "reminderNotifTitle": "पानी पीने का समय 💧",
+    "reminderNotifBody": "काफ़ी देर हो गई — थोड़ा पानी पिएँ।"
   },
   "hubSection": {
     "growth": "फ़ोकस और विकास",
@@ -1204,7 +1233,19 @@
     "exactAlarm": "रिमाइंडर का समय सटीक रखें",
     "exactAlarmDescription": "जब तक LifeOS को “अलार्म और रिमाइंडर” में अनुमति न हो, Android रिमाइंडर 15 मिनट तक रोक सकता है।",
     "exactAlarmFailedTitle": "खोला नहीं जा सका",
-    "exactAlarmFailedBody": "इसे सेटिंग › ऐप्स › विशेष ऐप एक्सेस › अलार्म और रिमाइंडर में देखें।"
+    "exactAlarmFailedBody": "इसे सेटिंग › ऐप्स › विशेष ऐप एक्सेस › अलार्म और रिमाइंडर में देखें।",
+    "digestTitle": "सुप्रभात ☀️",
+    "digestEmpty": "आज कुछ ख़ास नहीं — आराम कीजिए।",
+    "digestBody": "आज: {{summary}}। दिन की योजना बनाने के लिए टैप करें।",
+    "digestTasks_one": "{{count}} काम बाकी",
+    "digestTasks_other": "{{count}} काम बाकी",
+    "digestHabits_one": "{{count}} आदत बाकी",
+    "digestHabits_other": "{{count}} आदतें बाकी",
+    "digestMoney_one": "{{count}} पैसे का अनुस्मारक",
+    "digestMoney_other": "{{count}} पैसे के अनुस्मारक",
+    "digestJournal": "जर्नल लिखना है",
+    "digestWater": "पानी पीना है",
+    "statusOverBudget": "इस डिवाइस की {{limit}} अनुस्मारक की सीमा पर — कुछ नहीं आ सकते। पानी के अनुस्मारक घटाएँ या कोई श्रेणी बंद करें।"
   },
   "notifCategory": {
     "tasks": {
@@ -1254,6 +1295,10 @@
     "streak": {
       "label": "सिलसिले और जीत",
       "description": "सिलसिला टूटने की चेतावनी और जश्न"
+    },
+    "split": {
+      "label": "साझा समूह",
+      "description": "जब आपके किसी समूह में कोई खर्च जोड़े या भुगतान दर्ज करे।"
     }
   },
   "sync": {
@@ -1285,7 +1330,9 @@
     "notConfiguredTitle": "इस बिल्ड में Supabase क्रेडेंशियल नहीं हैं",
     "notConfiguredBody": "खाते और क्लाउड सिंक बंद हैं — ऑफ़लाइन सब कुछ फिर भी चलता है। EAS बिल्ड के लिए ये मान उस एनवायरनमेंट में सेट करें जिसे बिल्ड प्रोफ़ाइल उपयोग करती है, फिर दोबारा बिल्ड करें।",
     "envMissing": "अनुपस्थित",
-    "failedToast": "सिंक पूरा नहीं हुआ। आपका डेटा इस डिवाइस पर सुरक्षित है।"
+    "failedToast": "सिंक पूरा नहीं हुआ। आपका डेटा इस डिवाइस पर सुरक्षित है।",
+    "privateSyncWarning": "इसे चालू करने पर आपका निजी स्थान अपलोड होगा ताकि वह आपके डिवाइसों में सिंक हो सके। यह ट्रांज़िट और स्टोरेज दोनों में एन्क्रिप्टेड रहता है।",
+    "mediaNote": "गैलरी और संगीत आपके एल्बम, प्लेलिस्ट और विवरण सिंक करते हैं — फ़ोटो, वीडियो और ऑडियो फ़ाइलें स्वयं नहीं। वे उसी डिवाइस पर रहती हैं जिसने उन्हें आयात किया, और अन्यत्र “इस डिवाइस पर नहीं” के रूप में दिखती हैं।"
   },
   "syncModule": {
     "tasks": "कार्य",
@@ -1296,7 +1343,11 @@
     "goals": "लक्ष्य",
     "sleep": "नींद",
     "study": "अध्ययन",
-    "budget": "बजट"
+    "budget": "बजट",
+    "water": "पानी",
+    "gallery": "गैलरी",
+    "music": "संगीत",
+    "private": "निजी स्थान"
   },
   "security": {
     "locked": "LifeOS लॉक है",
@@ -1406,7 +1457,8 @@
       "expired": "यह निमंत्रण समाप्त हो गया है। नया मांगें।",
       "already_accepted": "यह निमंत्रण पहले इस्तेमाल हो चुका है।",
       "member_unavailable": "समूह में आपकी जगह अब उपलब्ध नहीं है। दोबारा जोड़ने को कहें।",
-      "error": "कुछ गड़बड़ हुई। थोड़ी देर बाद कोशिश करें।"
+      "error": "कुछ गड़बड़ हुई। थोड़ी देर बाद कोशिश करें।",
+      "blocked": "यह न्योता भेजने वाले को आपने ब्लॉक किया है। शामिल होने के लिए सेटिंग्स → ब्लॉक किए गए खाते में जाकर अनब्लॉक करें।"
     },
     "groupCreated": "“{{name}}” बन गया।",
     "currencyNote": "यह समूह {{currency}} में हिसाब करता है।",
@@ -1459,5 +1511,256 @@
     "unknown": "यह नहीं हो सका। कृपया फिर कोशिश करें।",
     "title": "यह नहीं हो सका",
     "detail": "विवरण: {{code}}"
+  },
+  "search": {
+    "title": "खोज",
+    "placeholder": "सब कुछ खोजें…",
+    "promptTitle": "पूरे LifeOS में खोजें",
+    "promptBody": "काम, नोट्स, आदतें, लक्ष्य, जर्नल, पैसे, पढ़ाई, संगीत और एल्बम — सब एक साथ।",
+    "noResultsTitle": "“{{query}}” के लिए कुछ नहीं",
+    "noResultsBody": "कोई छोटा शब्द या उसका हिस्सा आज़माएँ।",
+    "resultCount_one": "{{count}} परिणाम",
+    "resultCount_other": "{{count}} परिणाम",
+    "kind": {
+      "task": "काम",
+      "note": "नोट",
+      "habit": "आदत",
+      "goal": "लक्ष्य",
+      "journal": "जर्नल",
+      "transaction": "पैसे",
+      "debt": "उधार",
+      "subject": "विषय",
+      "song": "गाना",
+      "playlist": "प्लेलिस्ट",
+      "album": "एल्बम",
+      "group": "समूह"
+    }
+  },
+  "moderation": {
+    "blockedTitle": "यह खाता अवरुद्ध है",
+    "blockedBody": "आपका LifeOS खाता अवरुद्ध कर दिया गया है। क्लाउड सिंक और साझा समूह रोक दिए गए हैं।",
+    "blockedUntil": "आपका LifeOS खाता {{date}} तक अवरुद्ध है। तब तक क्लाउड सिंक और साझा समूह बंद रहेंगे।",
+    "reason": "कारण",
+    "appeal": "इस निर्णय के विरुद्ध अपील करें",
+    "appealSubject": "LifeOS खाता अपील",
+    "restrictedTitle": "खाता प्रतिबंधित",
+    "restrictedBody": "आप अभी समूह नहीं बना सकते या निमंत्रण नहीं भेज सकते। बाकी सब सामान्य रूप से काम करता है।",
+    "wipedTitle": "यह डिवाइस साफ़ कर दिया गया",
+    "wipedBody": "आपका डेटा इस फ़ोन से हटा दिया गया। जो कुछ सिंक हो चुका था वह हमारे सर्वर पर है और ब्लॉक हटने पर वापस आ जाएगा।",
+    "wipedUnsaved": "इन मॉड्यूल में सिंक बंद था, इसलिए वे कभी अपलोड नहीं हुए और उन्हें वापस नहीं लाया जा सका: {{modules}}।",
+    "wipedNothingSaved": "यह डिवाइस साफ़ होने से पहले कुछ भी अपलोड नहीं हो सका, इसलिए स्थानीय डेटा वापस नहीं आया।",
+    "blockTitle": "{{name}} को ब्लॉक करें?",
+    "blockBody": "वे आपको किसी ग्रुप में नहीं जोड़ पाएंगे और न ही न्योता भेज पाएंगे, और आप उन्हें नहीं जोड़ पाएंगे। जिस ग्रुप में आप दोनों पहले से हैं, उसमें दोनों बने रहेंगे — बाहर निकलना हो तो ग्रुप छोड़ दें।",
+    "block": "ब्लॉक करें",
+    "blocked": "{{name}} ब्लॉक कर दिए गए",
+    "unblock": "अनब्लॉक करें",
+    "unblocked": "{{name}} अनब्लॉक कर दिए गए",
+    "blockedAccounts": "ब्लॉक किए गए खाते",
+    "blockedAccountsSubtitle": "वे लोग जिन्हें आपने ब्लॉक किया",
+    "blockedEmpty": "आपने किसी को ब्लॉक नहीं किया है",
+    "blockedEmptyBody": "किसी को ब्लॉक करने पर वे आपको साझा ग्रुप में नहीं जोड़ सकते और न ही न्योता भेज सकते हैं।",
+    "blockAfterReport": "उन्हें ब्लॉक भी करें?",
+    "blockAfterReportBody": "हम आपकी रिपोर्ट देखेंगे। आप अभी उन्हें संपर्क करने से रोक भी सकते हैं।",
+    "notNow": "अभी नहीं",
+    "someone": "यह व्यक्ति",
+    "reportMember": "रिपोर्ट करें",
+    "reportGroupLabel": "ग्रुप: {{name}}"
+  },
+  "usage": {
+    "title": "उपयोग आँकड़े",
+    "description": "आप कौन से मॉड्यूल खोलते हैं, इसकी गुमनाम गिनती साझा करें। सामग्री कभी नहीं।",
+    "consentTitle": "LifeOS बेहतर बनाने में मदद करें?",
+    "consentBody": "रोज़ाना यह गिनती साझा करें कि आपने कौन से मॉड्यूल खोले और कितने रिकॉर्ड सहेजे। इसके अलावा कुछ नहीं।",
+    "consentNever": "कोई शीर्षक नहीं, कोई टेक्स्ट नहीं, कोई रकम नहीं, कोई फ़ाइल नाम नहीं — इन गिनतियों से यह पता नहीं चल सकता कि आपने क्या लिखा।",
+    "consentAccept": "गिनती साझा करें",
+    "consentDecline": "नहीं, धन्यवाद"
+  },
+  "gender": {
+    "female": "महिला",
+    "male": "पुरुष",
+    "nonBinary": "नॉन-बाइनरी",
+    "preferNotToSay": "नहीं बताना चाहते"
+  },
+  "private": {
+    "sectionLabel": "निजी",
+    "entryLabel": "निजी स्थान",
+    "entrySubtitleNew": "पिन से सुरक्षित, एन्क्रिप्टेड हिस्सा",
+    "entrySubtitleSetUp": "लॉक — खोलने के लिए पिन डालें",
+    "spaceTitle": "निजी स्थान",
+    "spaceSubtitle": "इसी डिवाइस पर एन्क्रिप्टेड। आपके जाते ही अपने आप लॉक हो जाता है।",
+    "spaceSettings": "निजी स्थान सेटिंग्स",
+    "lockNow": "अभी लॉक करें",
+    "setupTitle": "अपना निजी स्थान बनाएँ",
+    "setupBody": "चुनें कि यहाँ क्या रखना है। आप जो भी जोड़ेंगे वह एन्क्रिप्ट होकर आपके पिन के पीछे रहेगा और बाकी ऐप से छिपा रहेगा — खोज, एक्सपोर्ट और सूचनाएँ सहित।",
+    "suggestionNote": "ये सिर्फ़ सुझाव हैं। आपने पहले जो भी उत्तर दिया हो, जो चाहें चालू करें।",
+    "choosePin": "पिन चुनें",
+    "confirmPin": "फिर से डालें",
+    "pinHint": "कम से कम {{count}} अंक। यह आपके ऐप लॉक से अलग है।",
+    "confirmPinHint": "बस यह पक्का करने के लिए कि आपको याद रहेगा।",
+    "pinMismatch": "दोनों मेल नहीं खाए। फिर कोशिश करें।",
+    "noRecoveryWarning": "इस पिन को रीसेट करने का कोई तरीक़ा नहीं है। भूल गए तो निजी स्थान तक आपकी पहुँच चली जाएगी और हम उसे बहाल नहीं कर सकते।",
+    "createSpace": "निजी स्थान बनाएँ",
+    "unlockTitle": "निजी स्थान",
+    "unlockBody": "जारी रखने के लिए अपना पिन डालें।",
+    "unlock": "अनलॉक करें",
+    "unlocking": "खोला जा रहा है…",
+    "wrongPin": "यह पिन काम नहीं आया।",
+    "throttled": "बहुत सारी कोशिशें। लगभग {{minutes}} मिनट बाद फिर कोशिश करें।",
+    "digitsEntered": "{{count}} अंक दर्ज",
+    "decoyNotice": "आप डिकॉय स्थान में हैं। यहाँ जोड़ी गई हर चीज़ यहीं रहेगी।",
+    "itemCount_one": "{{count}} आइटम",
+    "itemCount_other": "{{count}} आइटम",
+    "days_one": "{{count}} दिन",
+    "days_other": "{{count}} दिन",
+    "vaultTitle": "वॉल्ट",
+    "vaultSubtitle": "फ़ोटो और फ़ाइलें, एन्क्रिप्टेड",
+    "vaultEmptyTitle": "अभी यहाँ कुछ नहीं",
+    "vaultEmptyBody": "आप जो भी जोड़ेंगे वह इसी डिवाइस पर एन्क्रिप्ट होगा और फ़ोन की गैलरी में कभी नहीं दिखेगा।",
+    "addFromLibrary": "फ़ोटो जोड़ें",
+    "takePhoto": "फ़ोटो लें",
+    "tooLargeTitle": "कुछ फ़ाइलें बहुत बड़ी थीं",
+    "tooLargeBody_one": "{{count}} फ़ाइल {{mb}} MB से बड़ी थी और नहीं जोड़ी गई।",
+    "tooLargeBody_other": "{{count}} फ़ाइलें {{mb}} MB से बड़ी थीं और नहीं जोड़ी गईं।",
+    "deleteItem": "यह आइटम हटाएँ?",
+    "deleteItemBody": "फ़ाइल और उसका रिकॉर्ड मिट जाएगा। इसे वापस नहीं लाया जा सकता।",
+    "cycleTitle": "चक्र",
+    "cycleSubtitle": "पीरियड और लक्षणों का रिकॉर्ड",
+    "dayOfCycle": "चक्र का दिन",
+    "averageCycle": "औसत चक्र",
+    "estimatedNext": "अगला पीरियड लगभग {{date}} के आसपास, आपके अपने इतिहास से अनुमान।",
+    "needMoreCycles": "कुछ चक्र दर्ज करें, फिर यहाँ अनुमान दिखेगा।",
+    "flow": "प्रवाह",
+    "flow_spotting": "हल्के धब्बे",
+    "flow_light": "हल्का",
+    "flow_medium": "मध्यम",
+    "flow_heavy": "अधिक",
+    "symptoms": "लक्षण",
+    "symptom_cramps": "ऐंठन",
+    "symptom_headache": "सिरदर्द",
+    "symptom_bloating": "पेट फूलना",
+    "symptom_fatigue": "थकान",
+    "symptom_backPain": "कमर दर्द",
+    "symptom_nausea": "मिचली",
+    "symptom_tender": "संवेदनशीलता",
+    "symptom_acne": "मुँहासे",
+    "symptom_cravings": "खाने की तलब",
+    "symptom_insomnia": "नींद न आना",
+    "logToday": "आज दर्ज करें",
+    "recentPeriods": "हाल के पीरियड",
+    "allEntries": "सभी प्रविष्टियाँ",
+    "recoveryTitle": "रिकवरी",
+    "recoverySubtitle": "तलब, ट्रिगर और सिलसिला",
+    "target_porn": "पोर्न",
+    "target_masturbation": "हस्तमैथुन",
+    "target_alcohol": "शराब",
+    "target_smoking": "धूम्रपान",
+    "target_vaping": "वेपिंग",
+    "target_gambling": "जुआ",
+    "target_other": "अन्य",
+    "currentStreak": "मौजूदा सिलसिला",
+    "longestStreak": "सबसे लंबा सिलसिला",
+    "noRelapses": "कोई रिलैप्स नहीं",
+    "urgesResisted": "तलब पर काबू",
+    "relapsesLogged": "दर्ज रिलैप्स",
+    "watchFor": "इनसे सावधान",
+    "watchForHint": "रिलैप्स से पहले ये सबसे ज़्यादा सामने आए।",
+    "howStrong": "कितनी तेज़ थी?",
+    "triggers": "ट्रिगर",
+    "trigger_stress": "तनाव",
+    "trigger_boredom": "ऊब",
+    "trigger_loneliness": "अकेलापन",
+    "trigger_tired": "थकान",
+    "trigger_anxious": "बेचैनी",
+    "trigger_celebration": "जश्न",
+    "trigger_social": "महफ़िल",
+    "trigger_lateNight": "देर रात",
+    "resisted": "काबू पाया",
+    "relapsed": "रिलैप्स हुआ",
+    "intimacyTitle": "हम",
+    "intimacySubtitle": "रिश्ते की डायरी जो कोई और नहीं पढ़ता",
+    "howWasToday": "आज का दिन कैसा रहा?",
+    "whatHappened": "क्या हुआ",
+    "intimacyTag_closeness": "नज़दीकी",
+    "intimacyTag_conflict": "मतभेद",
+    "intimacyTag_apology": "माफ़ी",
+    "intimacyTag_distance": "दूरी",
+    "intimacyTag_goodTalk": "अच्छी बातचीत",
+    "intimacyTag_plans": "योजनाएँ",
+    "intimacyTag_gratitude": "कृतज्ञता",
+    "intimacyTag_boundaries": "सीमाएँ",
+    "intimacyNotePlaceholder": "जितना चाहें लिखें, या छोटा रखें…",
+    "saveEntry": "सहेजें",
+    "notePlaceholder": "नोट जोड़ें (वैकल्पिक)",
+    "history": "इतिहास",
+    "longPressDelete": "हटाने के लिए दबाए रखें",
+    "deleteEntry": "यह प्रविष्टि हटाएँ?",
+    "deleteEntryBody": "यह हमेशा के लिए मिट जाएगी। वापस नहीं आ सकती।",
+    "whatIsInHere": "यहाँ क्या है",
+    "turnOffTitle": "इसे बंद करें?",
+    "turnOffBody": "इस मॉड्यूल का सारा रिकॉर्ड हट जाएगा। वापस नहीं आ सकता।",
+    "turnOffConfirm": "बंद करें और हटाएँ",
+    "security": "सुरक्षा",
+    "changePin": "पिन बदलें",
+    "changePinHint": "आपको मौजूदा पिन चाहिए होगा",
+    "enterCurrentPin": "अपना मौजूदा पिन डालें।",
+    "enterNewPin": "नया पिन चुनें।",
+    "setDecoy": "डिकॉय पिन बनाएँ",
+    "removeDecoy": "डिकॉय पिन हटाएँ",
+    "removeDecoyTitle": "डिकॉय हटाएँ?",
+    "removeDecoyBody": "डिकॉय स्थान में सहेजा सब कुछ अपठनीय हो जाएगा।",
+    "decoyExplainer": "दूसरा पिन जो एक अलग, ख़ाली निजी स्थान खोलता है — जब आपसे खोलने को कहा जाए।",
+    "decoyHint": "ऐसा पिन चुनें जो आप किसी को देने में झिझकें नहीं।",
+    "dangerZone": "ख़तरनाक क्षेत्र",
+    "destroySpace": "निजी स्थान हटाएँ",
+    "destroyHint": "चाबियाँ और अंदर का सब कुछ हमेशा के लिए मिटा देता है",
+    "destroyTitle": "अपना निजी स्थान हटाएँ?",
+    "destroyBody": "अंदर का हर नोट, प्रविष्टि और फ़ाइल चाबियों सहित मिट जाएगी। वापसी का कोई रास्ता नहीं।",
+    "destroyAgainTitle": "वाक़ई सब कुछ हटाएँ?",
+    "destroyAgainBody": "यह स्थायी और तत्काल है।",
+    "destroyConfirm": "सब हटाएँ",
+    "moveModules": "दूसरे मॉड्यूल निजी रखें",
+    "moveModulesNote": "ये इस स्थान में चले जाएँगे: हब से छिपे, आपके पिन से लॉक, और खोज व एक्सपोर्ट से बाहर। इनका मौजूदा डेटा ऐप के सामान्य स्टोरेज में ही रहेगा — यानी यह इन्हें छिपाता है, दोबारा एन्क्रिप्ट नहीं करता।",
+    "operatorNotice": "सुरक्षा और दुरुपयोग की जाँच के लिए LifeOS स्टाफ़ निजी स्थान की सामग्री तक पहुँच सकता है। हर पहुँच दर्ज की जाती है। गोपनीयता नीति देखें।"
+  },
+  "moduleFlags": {
+    "unavailable": "फ़िलहाल उपलब्ध नहीं",
+    "defaultMessage": "यह मॉड्यूल अभी बंद है। आपका डेटा सुरक्षित है और वापस आने पर यहीं मिलेगा।"
+  },
+  "profile": {
+    "title": "प्रोफ़ाइल",
+    "settingsSubtitle": "आपकी फ़ोटो, नाम और खाता",
+    "guestTitle": "आप गेस्ट मोड में हैं",
+    "guestBody": "प्रोफ़ाइल फ़ोटो लगाने और डिवाइसों में सिंक के लिए खाता बनाएँ।",
+    "changePhoto": "फ़ोटो बदलें",
+    "removePhoto": "फ़ोटो हटाएँ",
+    "removePhotoBody": "आपकी प्रोफ़ाइल फ़ोटो हटा दी जाएगी।",
+    "photoVisibility": "आपकी फ़ोटो और नाम केवल उन लोगों को दिखते हैं जिनके साथ आप ख़र्च समूह साझा करते हैं। LifeOS में और कुछ नहीं।",
+    "avatarFailedTitle": "फ़ोटो अपलोड नहीं हुई",
+    "avatarFailedBody": "अपना कनेक्शन जाँचकर फिर कोशिश करें।",
+    "displayName": "प्रदर्शित नाम",
+    "account": "खाता",
+    "username": "उपयोगकर्ता नाम",
+    "noUsername": "सेट नहीं",
+    "email": "ईमेल",
+    "standing": "खाते की स्थिति",
+    "standing_active": "ठीक",
+    "standing_throttled": "धीमा",
+    "standing_restricted": "प्रतिबंधित",
+    "standing_blocked": "अवरुद्ध"
+  },
+  "sharing": {
+    "viewerNotice": "स्क्रीनशॉट बंद है और इसे सहेजा या आगे नहीं भेजा जा सकता। आपका नाम इस पर दिखाया गया है। फिर भी कोई दूसरे डिवाइस से स्क्रीन की फ़ोटो ले सकता है — इसे रोका नहीं जा सकता।",
+    "report": "इस सामग्री की रिपोर्ट करें",
+    "reportTitle": "सामग्री की रिपोर्ट",
+    "reportSent": "रिपोर्ट भेजी गई। हम समीक्षा करेंगे।",
+    "reportRateLimited": "आपने हाल ही में बहुत रिपोर्टें की हैं। बाद में कोशिश करें।",
+    "reason_spam": "स्पैम",
+    "reason_harassment": "उत्पीड़न या दुर्व्यवहार",
+    "reason_sexual_content": "अवांछित यौन सामग्री",
+    "reason_impersonation": "किसी और का रूप धरना",
+    "reason_other": "कुछ और",
+    "reportEvidenceNote": "जिस चीज़ की आप रिपोर्ट कर रहे हैं वह समीक्षा के लिए साथ भेजी जाएगी। इस स्थान से और कुछ नहीं।",
+    "reportSubmit": "रिपोर्ट भेजें",
+    "reportNotePlaceholder": "कुछ और बताना चाहेंगे? (वैकल्पिक)"
   }
 }

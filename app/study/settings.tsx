@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import { Minus, Plus, Trash2 } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
 import { ScreenHeader } from '@/components/ui/screen-header';
@@ -13,6 +13,7 @@ import { formatStudyDuration } from '@/features/study/services/study-stats';
 import { useStudyMutations } from '@/features/study/hooks/use-study-mutations';
 import { useStudySettings, useStudySubjects } from '@/features/study/hooks/use-study';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { confirm } from '@/lib/dialog-store';
 
 const STUDY_TINT = '#8b5cf6';
 
@@ -94,10 +95,16 @@ export default function StudySettingsScreen() {
   };
 
   const confirmRemove = (id: string, name: string) => {
-    Alert.alert(t('study.deleteSubjectTitle'), t('study.deleteSubjectBody', { name }), [
-      { text: t('common.cancel'), style: 'cancel' },
-      { text: t('common.delete'), style: 'destructive', onPress: () => removeSubject.mutate(id) },
-    ]);
+    void confirm({
+      title: t('study.deleteSubjectTitle'),
+      message: t('study.deleteSubjectBody', { name }),
+      confirmLabel: t('common.delete'),
+      cancelLabel: t('common.cancel'),
+      destructive: true,
+    }).then(async (ok) => {
+      if (!ok) return;
+      removeSubject.mutate(id);
+    });
   };
 
   return (

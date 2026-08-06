@@ -10,7 +10,7 @@ import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
 import { moduleTint } from '@/constants/design-tokens';
-import { colors } from '@/constants/theme';
+import { colors, streakColor } from '@/constants/theme';
 import { QuickLogSheet } from '@/features/habits/components/quick-log-sheet';
 import { StreakHeatmap } from '@/features/habits/components/streak-heatmap';
 import { useHabit, useHabitLogs } from '@/features/habits/hooks/use-habit';
@@ -122,6 +122,14 @@ export default function HabitDetailScreen() {
             <Text variant="caption">
               {habit.type === 'negative' ? t('habits.daysWithout') : t('habits.currentStreak')}
             </Text>
+            {/* Said out loud rather than hidden. The streak survived a missed
+                day, and pretending otherwise would be the app lying to make a
+                number look better. */}
+            {streaks.graceUsed ? (
+              <Text variant="caption" style={{ color: streakColor[scheme] }}>
+                {t('habits.streakHeld')}
+              </Text>
+            ) : null}
           </View>
           <View className="flex-1 items-center gap-1 rounded-2xl border border-border bg-card py-4 shadow-e1">
             <Text

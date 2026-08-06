@@ -12,6 +12,7 @@ import {
   Sparkles,
   StickyNote,
   Target,
+  Users,
   Wallet,
 } from 'lucide-react-native';
 
@@ -34,7 +35,8 @@ export type NotificationCategory =
   | 'notes'
   | 'goals'
   | 'digest'
-  | 'streak';
+  | 'streak'
+  | 'split';
 
 export type NotificationCategoryMeta = {
   labelKey: string;
@@ -135,6 +137,23 @@ export const CATEGORY_META: Record<NotificationCategory, NotificationCategoryMet
     tint: '#a855f7',
     bypassQuietHours: false,
   },
+  /**
+   * Shared expense groups. The only category that arrives as a PUSH rather than
+   * being scheduled on-device — somebody else's action, on their phone, is what
+   * triggers it. It had no category at all before, so a group push pinged the
+   * device and then left no trace anywhere in the app: not in the inbox, not in
+   * the badge, and with no way to switch it off short of the OS.
+   *
+   * bypassQuietHours is false: another person adding an expense at 1am is not
+   * worth waking somebody for.
+   */
+  split: {
+    labelKey: 'notifCategory.split.label',
+    descriptionKey: 'notifCategory.split.description',
+    icon: Users,
+    tint: '#0d9488',
+    bypassQuietHours: false,
+  },
 };
 
 /** Ordered list of the categories users actually toggle in settings (excludes
@@ -152,6 +171,7 @@ export const CATEGORY_ORDER: NotificationCategory[] = [
   'goals',
   'digest',
   'streak',
+  'split',
 ];
 
 /** Categories that actually schedule something today and therefore get a
@@ -176,7 +196,7 @@ export type NotificationPayload = {
   logId?: string;
 };
 
-export type NotificationRepeat = 'none' | 'daily';
+export type NotificationRepeat = 'none' | 'daily' | 'weekly';
 
 /** A row from notification_log, shaped for the inbox UI. */
 export type LoggedNotification = {
@@ -189,19 +209,9 @@ export type LoggedNotification = {
   params: Record<string, string> | null;
   scheduledAt: number;
   repeats: NotificationRepeat;
+  /** When it actually arrived, or null if it hasn't yet. */
+  deliveredAt: number | null;
   readAt: number | null;
   canceledAt: number | null;
   createdAt: number;
 };
-
-export type LoggedNotificationStatus = 'scheduled' | 'delivered' | 'canceled';
-
-export function notificationStatus(
-  row: Pick<LoggedNotification, 'scheduledAt' | 'canceledAt' | 'repeats'>,
-  now: number,
-): LoggedNotificationStatus {
-  if (row.canceledAt) return 'canceled';
-  // A daily reminder is always "scheduled" — its scheduledAt is just the next fire.
-  if (row.repeats === 'daily') return 'scheduled';
-  return row.scheduledAt > now ? 'scheduled' : 'delivered';
-}

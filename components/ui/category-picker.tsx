@@ -2,12 +2,13 @@ import * as Haptics from 'expo-haptics';
 import { Plus } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, TextInput, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import { cn } from '@/lib/utils';
+import { confirm } from '@/lib/dialog-store';
 
 export type CategoryOption = {
   id: string;
@@ -57,14 +58,16 @@ export function CategoryPicker({
   };
 
   const confirmDelete = (category: CategoryOption) => {
-    Alert.alert(t('category.deleteTitle'), t('category.deleteBody', { name: category.name }), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('common.delete'),
-        style: 'destructive',
-        onPress: () => onDeleteCategory(category.id),
-      },
-    ]);
+    void confirm({
+      title: t('category.deleteTitle'),
+      message: t('category.deleteBody', { name: category.name }),
+      confirmLabel: t('common.delete'),
+      cancelLabel: t('common.cancel'),
+      destructive: true,
+    }).then(async (ok) => {
+      if (!ok) return;
+      onDeleteCategory(category.id);
+    });
   };
 
   // The assigned category may have been soft-deleted elsewhere and dropped
