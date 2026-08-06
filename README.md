@@ -419,10 +419,9 @@ implies away:
   generic name on a domain nobody here owns. Both stores only require
   uniqueness, so it will work; it is worth knowing it cannot be changed once
   either store has accepted a build under it.
-- **The published policy URLs are unreachable until Pages is switched on.**
-  `.github/workflows/pages.yml` publishes PRIVACY.md and TERMS.md, but the
-  repository must be public and Settings → Pages set to "GitHub Actions" first.
-  Until then the two links in Settings 404.
+- **The published policy URLs are live only after `pages.yml` has run once.**
+  It publishes PRIVACY.md and TERMS.md, and enables Pages itself on first run
+  (`enablement: true`). Until that run completes, the two links in Settings 404.
 - **The governing-law clause in TERMS.md is an unfilled placeholder.**
 
 ---

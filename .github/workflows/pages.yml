@@ -93,7 +93,17 @@ jobs:
           baseurl: /LifeOS
           YAML
 
+      # `enablement: true` turns Pages on for the repository if it is off,
+      # rather than failing with "Get Pages site failed. Please verify that the
+      # repository has Pages enabled" — which is what the first run of this
+      # workflow did, and which needs somebody to go and click a setting whose
+      # name does not appear anywhere in the error.
+      #
+      # Needs `pages: write` (declared above) and a repository where Pages is
+      # available at all: public, or private on a plan that includes it.
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       - uses: actions/jekyll-build-pages@v1
         with:
