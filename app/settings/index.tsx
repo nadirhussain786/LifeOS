@@ -25,7 +25,7 @@ import {
 } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Linking, Pressable, ScrollView, Switch, View } from 'react-native';
+import { Linking, Pressable, ScrollView, Switch, View } from 'react-native';
 
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { SettingsRow } from '@/components/ui/settings-row';
@@ -35,6 +35,7 @@ import { exportAllData } from '@/lib/data-export';
 import { importDataFromFile } from '@/lib/data-import';
 import { clearAllData } from '@/lib/data-management';
 import { queryClient } from '@/lib/query-client';
+import { confirm, notify } from '@/lib/dialog-store';
 import { toast } from '@/lib/toast-store';
 import { isVaultSetUp } from '@/features/private/services/vault-keys';
 import { useProfileStore } from '@/features/profile/store/profile-store';
@@ -97,7 +98,11 @@ export default function SettingsScreen() {
   const toggleAppLock = async (next: boolean) => {
     if (next) {
       if (!bioAvailable) {
-        Alert.alert(t('settings.setUpBiometricsTitle'), t('settings.setUpBiometricsBody'));
+        void notify({
+          title: t('settings.setUpBiometricsTitle'),
+          message: t('settings.setUpBiometricsBody'),
+          confirmLabel: t('common.ok'),
+        });
         return;
       }
       // Confirm the person can actually authenticate before arming the lock.
@@ -113,7 +118,7 @@ export default function SettingsScreen() {
     try {
       await exportAllData();
     } catch {
-      Alert.alert(t('settings.exportFailedTitle'), t('settings.exportFailedBody'));
+      toast.error(t('settings.exportFailedBody'));
     } finally {
       setIsExporting(false);
     }
@@ -124,52 +129,52 @@ export default function SettingsScreen() {
    * older file can never destroy newer work — see lib/data-import.ts.
    */
   const handleImport = () => {
-    Alert.alert(t('settings.importTitle'), t('settings.importBody'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('settings.chooseFile'),
-        onPress: async () => {
-          setIsImporting(true);
-          try {
-            const result = await importDataFromFile();
-            if (!result.ok) {
-              if (result.reason === 'cancelled') return;
-              // Reasons are kebab-case; the i18n keys can't be.
-              toast.error(t('settings.import_' + result.reason.replace(/-/g, '')));
-              return;
-            }
-            queryClient.clear();
-            toast.success(t('settings.importDone', { rows: result.rows }));
-            // Media files were never in the JSON, so say so plainly rather than
-            // letting it surface later as broken thumbnails.
-            if (result.missingMedia > 0) {
-              setTimeout(
-                () => toast.info(t('settings.importMissingMedia', { count: result.missingMedia })),
-                3400,
-              );
-            }
-          } finally {
-            setIsImporting(false);
-          }
-        },
-      },
-    ]);
+    void confirm({
+      title: t('settings.importTitle'),
+      message: t('settings.importBody'),
+      confirmLabel: t('settings.chooseFile'),
+      cancelLabel: t('common.cancel'),
+    }).then(async (ok) => {
+      if (!ok) return;
+      setIsImporting(true);
+      try {
+        const result = await importDataFromFile();
+        if (!result.ok) {
+          if (result.reason === 'cancelled') return;
+          // Reasons are kebab-case; the i18n keys can't be.
+          toast.error(t('settings.import_' + result.reason.replace(/-/g, '')));
+          return;
+        }
+        queryClient.clear();
+        toast.success(t('settings.importDone', { rows: result.rows }));
+        // Media files were never in the JSON, so say so plainly rather than
+        // letting it surface later as broken thumbnails.
+        if (result.missingMedia > 0) {
+          setTimeout(
+            () => toast.info(t('settings.importMissingMedia', { count: result.missingMedia })),
+            3400,
+          );
+        }
+      } finally {
+        setIsImporting(false);
+      }
+    });
   };
 
   const handleClearData = () => {
-    Alert.alert(t('settings.clearTitle'), t('settings.clearBody'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('settings.deleteEverything'),
-        style: 'destructive',
-        onPress: () => {
-          clearAllData();
-          queryClient.clear();
-          void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-          toast.success(t('settings.clearedBody'));
-        },
-      },
-    ]);
+    void confirm({
+      title: t('settings.clearTitle'),
+      message: t('settings.clearBody'),
+      confirmLabel: t('settings.deleteEverything'),
+      cancelLabel: t('common.cancel'),
+      destructive: true,
+    }).then(async (ok) => {
+      if (!ok) return;
+      clearAllData();
+      queryClient.clear();
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      toast.success(t('settings.clearedBody'));
+    });
   };
 
   /**
@@ -183,7 +188,11 @@ export default function SettingsScreen() {
     const directionChanged = await setLanguage(language);
     if (!directionChanged) return;
     if (await reloadForDirectionChange()) return;
-    Alert.alert(t('settings.restartTitle'), t('settings.restartBody'));
+    void notify({
+      title: t('settings.restartTitle'),
+      message: t('settings.restartBody'),
+      confirmLabel: t('common.ok'),
+    });
   };
 
   return (

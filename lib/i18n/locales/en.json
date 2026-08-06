@@ -36,7 +36,8 @@
     "markDone": "Mark “{{name}}” as done",
     "markNotDone": "Mark “{{name}}” as not done",
     "more": "More actions",
-    "undo": "Undo"
+    "undo": "Undo",
+    "ok": "OK"
   },
   "reminder": {
     "in1Hour": "In 1 hour",

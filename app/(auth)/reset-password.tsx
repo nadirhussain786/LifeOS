@@ -2,7 +2,7 @@ import { useURL } from 'expo-linking';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
@@ -15,6 +15,7 @@ import {
 } from '@/features/auth/services/password-policy';
 import { useSplashStore } from '@/hooks/use-splash-store';
 import { supabase } from '@/lib/supabase';
+import { toast } from '@/lib/toast-store';
 
 /** Pulls the recovery tokens out of a Supabase reset link (they arrive in the
  * URL hash fragment, e.g. lifeos://reset-password#access_token=...&type=recovery). */
@@ -94,9 +95,10 @@ export default function ResetPasswordScreen() {
       setError(result.error);
       return;
     }
-    Alert.alert(t('auth.passwordUpdated'), t('auth.allSet'), [
-      { text: t('common.continue'), onPress: () => router.replace('/(tabs)') },
-    ]);
+    // Straight in, with the confirmation trailing. A dialog whose only button
+    // is "Continue" asks the user to acknowledge something they just did.
+    toast.success(t('auth.allSet'));
+    router.replace('/(tabs)');
   };
 
   return (

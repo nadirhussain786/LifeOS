@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import { Bell, Minus, Plus, Target } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, ScrollView, Switch, View } from 'react-native';
+import { Pressable, ScrollView, Switch, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 import { AttributeRow } from '@/components/ui/attribute-row';
@@ -23,6 +23,8 @@ import {
 } from '@/features/water-intake/store/water-settings-store';
 import { REMINDER_INTERVALS_MIN } from '@/features/water-intake/types/water-intake.types';
 import { notificationsAvailable } from '@/lib/notifications';
+import { notify } from '@/lib/dialog-store';
+import { toast } from '@/lib/toast-store';
 
 function formatHour(hour: number) {
   const period = hour < 12 ? 'AM' : 'PM';
@@ -81,7 +83,7 @@ export default function WaterSettingsScreen() {
 
   const handleSave = async () => {
     if (draft.enabled && draft.startHour >= draft.endHour) {
-      Alert.alert(t('water.checkTimesTitle'), t('water.checkTimesBody'));
+      toast.error(t('water.checkTimesBody'));
       return;
     }
 
@@ -91,12 +93,15 @@ export default function WaterSettingsScreen() {
     setSaving(false);
 
     if (draft.enabled && newIds.length === 0) {
-      Alert.alert(
-        notificationsAvailable
+      void notify({
+        title: notificationsAvailable
           ? t('reminders.notificationsDisabled')
           : t('reminders.notificationsUnavailable'),
-        notificationsAvailable ? t('water.enableForReminders') : t('reminders.notAvailable'),
-      );
+        message: notificationsAvailable
+          ? t('water.enableForReminders')
+          : t('reminders.notAvailable'),
+        confirmLabel: t('common.ok'),
+      });
     }
 
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);

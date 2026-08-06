@@ -46,6 +46,7 @@ import { useAppLock } from '@/features/security/hooks/use-app-lock';
 import { useAuthStore } from '@/features/auth/services/auth-store';
 import { useAuthGate } from '@/features/auth/hooks/use-auth-gate';
 import { useUsageReporter } from '@/features/analytics/hooks/use-usage-reporter';
+import { DialogHost } from '@/components/ui/dialog-host';
 import { UsageConsentCard } from '@/features/analytics/components/usage-consent-card';
 import { BlockedOverlay } from '@/features/moderation/components/blocked-overlay';
 import { useAccountStandingSync } from '@/features/moderation/hooks/use-account-standing';
@@ -315,6 +316,9 @@ export default function RootLayout() {
             {/* Above the navigator so a toast raised by a delete outlives the
                 router.back() that immediately follows it. */}
             <ToastHost />
+            {/* Above the toast: a dialog asks a question and a toast reports an
+                answer, so a toast must never cover the thing it is waiting on. */}
+            <DialogHost />
             {/* Top of the screen, where the OS banner would have been. */}
             <NotificationBanner />
             {/* Below the overlays and above the app: nothing is collected until

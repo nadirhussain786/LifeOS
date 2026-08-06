@@ -3,7 +3,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { CheckCircle2, Pencil, RotateCcw, Trash2 } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
 import { GradientButton } from '@/components/ui/gradient-button';
@@ -16,6 +16,7 @@ import { statusLabel, statusTint } from '@/features/budget/services/debt-status'
 import { formatMoney, parseAmountToCents } from '@/features/budget/services/money';
 import { useDebtMutations, useDebts } from '@/features/budget/hooks/use-debts';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { confirm } from '@/lib/dialog-store';
 
 export default function DebtDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -41,18 +42,17 @@ export default function DebtDetailScreen() {
   };
 
   const confirmDelete = () => {
-    Alert.alert(
-      t('budget.deleteIouTitle'),
-      t('budget.deleteIouBody', { name: debt.counterparty }),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: () => (removeDebt.mutate(debt.id), router.back()),
-        },
-      ],
-    );
+    void confirm({
+      title: t('budget.deleteIouTitle'),
+      message: t('budget.deleteIouBody', { name: debt.counterparty }),
+      confirmLabel: t('common.delete'),
+      cancelLabel: t('common.cancel'),
+      destructive: true,
+    }).then(async (ok) => {
+      if (!ok) return;
+      removeDebt.mutate(debt.id);
+      router.back();
+    });
   };
 
   return (

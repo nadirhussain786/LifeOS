@@ -1,13 +1,14 @@
 import { format } from 'date-fns';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 import { Text } from '@/components/ui/text';
 import { moduleTints } from '@/constants/design-tokens';
 import { colors, habitDoneColor } from '@/constants/theme';
 import type { TimelineEvent, TimelineEventType } from '@/features/timeline/types/timeline.types';
+import { confirm } from '@/lib/dialog-store';
 
 // Each event wears the design-system identity tint of the module it came from
 // (Journal violet, Water cyan, Calendar blue, Habits/Tasks' "done" green) so an
@@ -35,18 +36,16 @@ export function TimelineEventRow({ event, onDeleteCalendarEvent }: Props) {
   const isCalendarEvent = event.type === 'calendar_event';
 
   const confirmDelete = () => {
-    Alert.alert(
-      t('timeline.deleteEventTitle'),
-      t('timeline.deleteEventBody', { title: event.title }),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: () => onDeleteCalendarEvent?.(event.sourceId),
-        },
-      ],
-    );
+    void confirm({
+      title: t('timeline.deleteEventTitle'),
+      message: t('timeline.deleteEventBody', { title: event.title }),
+      confirmLabel: t('common.delete'),
+      cancelLabel: t('common.cancel'),
+      destructive: true,
+    }).then(async (ok) => {
+      if (!ok) return;
+      onDeleteCalendarEvent?.(event.sourceId);
+    });
   };
 
   return (

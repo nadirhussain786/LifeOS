@@ -1,6 +1,6 @@
 import { UserX } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, RefreshControl, ScrollView, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 
 import { EmptyState } from '@/components/ui/empty-state';
 import { QueryError } from '@/components/ui/query-error';
@@ -11,6 +11,7 @@ import { colors } from '@/constants/theme';
 import { useBlockedAccounts, useBlockMutations } from '@/features/moderation/hooks/use-blocks';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { errorKind } from '@/lib/supabase-error';
+import { confirm } from '@/lib/dialog-store';
 import { toast } from '@/lib/toast-store';
 
 /**
@@ -34,20 +35,21 @@ export default function BlockedAccountsScreen() {
   const { unblock } = useBlockMutations();
 
   const confirmUnblock = (userId: string, label: string) =>
-    Alert.alert(t('moderation.unblock'), t('moderation.blockedEmptyBody'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('moderation.unblock'),
-        onPress: () =>
-          unblock.mutate(userId, {
-            onSuccess: (result) =>
-              result.ok
-                ? toast.success(t('moderation.unblocked', { name: label }))
-                : toast.error(t('errors.unknown')),
-            onError: (error) => toast.error(t(`errors.${errorKind(error)}`)),
-          }),
-      },
-    ]);
+    void confirm({
+      title: t('moderation.unblock'),
+      message: t('moderation.blockedEmptyBody'),
+      confirmLabel: t('moderation.unblock'),
+      cancelLabel: t('common.cancel'),
+    }).then(async (ok) => {
+      if (!ok) return;
+      unblock.mutate(userId, {
+        onSuccess: (result) =>
+          result.ok
+            ? toast.success(t('moderation.unblocked', { name: label }))
+            : toast.error(t('errors.unknown')),
+        onError: (error) => toast.error(t(`errors.${errorKind(error)}`)),
+      });
+    });
 
   const accounts = query.data ?? [];
 

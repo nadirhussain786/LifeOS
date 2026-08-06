@@ -5,7 +5,6 @@ import { Flag, Mail, Send, Trash2, UserPlus } from 'lucide-react-native';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -33,6 +32,7 @@ import {
 } from '@/features/split/hooks/use-split';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { errorKind } from '@/lib/supabase-error';
+import { chooseAction, confirm } from '@/lib/dialog-store';
 import { toast } from '@/lib/toast-store';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -130,18 +130,19 @@ export default function SplitMembersScreen() {
             amount: formatMoney(Math.abs(net), currency),
           });
 
-    Alert.alert(t('split.removeMemberTitle'), body, [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('common.remove'),
-        style: 'destructive',
-        onPress: () =>
-          removeMember.mutate(memberId, {
-            onSuccess: () => toast.success(t('split.memberRemoved', { name: label })),
-            onError: (error) => toast.error(t(`errors.${errorKind(error)}`)),
-          }),
-      },
-    ]);
+    void confirm({
+      title: t('split.removeMemberTitle'),
+      message: body,
+      confirmLabel: t('common.remove'),
+      cancelLabel: t('common.cancel'),
+      destructive: true,
+    }).then(async (ok) => {
+      if (!ok) return;
+      removeMember.mutate(memberId, {
+        onSuccess: () => toast.success(t('split.memberRemoved', { name: label })),
+        onError: (error) => toast.error(t(`errors.${errorKind(error)}`)),
+      });
+    });
   };
 
   const applyBlock = (userId: string, label: string) =>
@@ -188,23 +189,32 @@ export default function SplitMembersScreen() {
       return;
     }
     const userId = member.userId;
-    Alert.alert(label, undefined, [
-      { text: t('moderation.reportMember'), onPress: () => openReport(member, label) },
-      {
-        text: t('moderation.block'),
-        style: 'destructive',
-        onPress: () =>
-          Alert.alert(t('moderation.blockTitle', { name: label }), t('moderation.blockBody'), [
-            { text: t('common.cancel'), style: 'cancel' },
-            {
-              text: t('moderation.block'),
-              style: 'destructive',
-              onPress: () => applyBlock(userId, label),
-            },
-          ]),
-      },
-      { text: t('common.cancel'), style: 'cancel' },
-    ]);
+    // A real menu rather than a three-button alert. Android's native dialog
+    // caps at three and drops the rest silently, which is what pushed this
+    // into that shape; chooseAction has no such ceiling, so adding a fourth
+    // action here later will not quietly lose one.
+    void chooseAction({
+      title: label,
+      actions: [
+        { id: 'report', label: t('moderation.reportMember') },
+        { id: 'block', label: t('moderation.block'), destructive: true },
+      ],
+      cancelLabel: t('common.cancel'),
+    }).then(async (choice) => {
+      if (choice === 'report') {
+        openReport(member, label);
+        return;
+      }
+      if (choice !== 'block') return;
+      const ok = await confirm({
+        title: t('moderation.blockTitle', { name: label }),
+        message: t('moderation.blockBody'),
+        confirmLabel: t('moderation.block'),
+        cancelLabel: t('common.cancel'),
+        destructive: true,
+      });
+      if (ok) applyBlock(userId, label);
+    });
   };
 
   return (
@@ -397,14 +407,16 @@ export default function SplitMembersScreen() {
         // spam is not the same as never hearing from someone again.
         onBlock={(userId) => {
           const label = reportTarget?.label ?? t('moderation.someone');
-          Alert.alert(t('moderation.blockAfterReport'), t('moderation.blockAfterReportBody'), [
-            { text: t('moderation.notNow'), style: 'cancel' },
-            {
-              text: t('moderation.block'),
-              style: 'destructive',
-              onPress: () => applyBlock(userId, label),
-            },
-          ]);
+          void confirm({
+            title: t('moderation.blockAfterReport'),
+            message: t('moderation.blockAfterReportBody'),
+            confirmLabel: t('moderation.block'),
+            cancelLabel: t('moderation.notNow'),
+            destructive: true,
+          }).then(async (ok) => {
+            if (!ok) return;
+            applyBlock(userId, label);
+          });
         }}
       />
     </View>

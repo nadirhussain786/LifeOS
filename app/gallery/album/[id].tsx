@@ -9,7 +9,7 @@ import {
 } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 
 import { EmptyState } from '@/components/ui/empty-state';
 import { ScreenHeader } from '@/components/ui/screen-header';
@@ -23,6 +23,7 @@ import { useAlbum, usePhotosByAlbum } from '@/features/gallery/hooks/use-gallery
 import { useGalleryMutations } from '@/features/gallery/hooks/use-gallery-mutations';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { alpha } from '@/lib/color';
+import { confirm } from '@/lib/dialog-store';
 
 export default function AlbumDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -43,14 +44,17 @@ export default function AlbumDetailScreen() {
   const addPhotos = () => setAddOpen(true);
 
   const confirmDelete = () => {
-    Alert.alert(t('gallery.deleteAlbumTitle'), t('gallery.deleteAlbumBody', { name: album.name }), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('gallery.deleteAlbum'),
-        style: 'destructive',
-        onPress: () => (removeAlbum.mutate(album.id), router.back()),
-      },
-    ]);
+    void confirm({
+      title: t('gallery.deleteAlbumTitle'),
+      message: t('gallery.deleteAlbumBody', { name: album.name }),
+      confirmLabel: t('gallery.deleteAlbum'),
+      cancelLabel: t('common.cancel'),
+      destructive: true,
+    }).then(async (ok) => {
+      if (!ok) return;
+      removeAlbum.mutate(album.id);
+      router.back();
+    });
   };
 
   return (

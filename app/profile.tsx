@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import { Camera, LogOut, ShieldCheck, Trash2, UserCircle } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
 import { ScreenHeader } from '@/components/ui/screen-header';
@@ -20,6 +20,8 @@ import {
 } from '@/features/profile/services/avatar';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { alpha } from '@/lib/color';
+import { confirm } from '@/lib/dialog-store';
+import { toast } from '@/lib/toast-store';
 
 /**
  * The account's own profile.
@@ -56,26 +58,26 @@ export default function ProfileScreen() {
     const result = await pickAndUploadAvatar();
     if (result.ok) await refreshProfile();
     else if (result.error === 'upload-failed') {
-      Alert.alert(t('profile.avatarFailedTitle'), t('profile.avatarFailedBody'));
+      toast.error(t('profile.avatarFailedBody'));
     }
     setBusy(false);
   };
 
   const clearAvatar = () =>
-    Alert.alert(t('profile.removePhoto'), t('profile.removePhotoBody'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('common.delete'),
-        style: 'destructive',
-        onPress: () => {
-          void (async () => {
-            setBusy(true);
-            if (await removeAvatar()) await refreshProfile();
-            setBusy(false);
-          })();
-        },
-      },
-    ]);
+    void confirm({
+      title: t('profile.removePhoto'),
+      message: t('profile.removePhotoBody'),
+      confirmLabel: t('common.delete'),
+      cancelLabel: t('common.cancel'),
+      destructive: true,
+    }).then(async (ok) => {
+      if (!ok) return;
+      void (async () => {
+        setBusy(true);
+        if (await removeAvatar()) await refreshProfile();
+        setBusy(false);
+      })();
+    });
 
   const saveName = async () => {
     if (!name.trim() || name.trim() === profile?.displayName) return;
@@ -220,10 +222,15 @@ export default function ProfileScreen() {
               label={t('sync.signOut')}
               chevron={false}
               onPress={() =>
-                Alert.alert(t('sync.signOutTitle'), t('sync.signOutBody'), [
-                  { text: t('common.cancel'), style: 'cancel' },
-                  { text: t('sync.signOut'), onPress: () => void signOut() },
-                ])
+                void confirm({
+                  title: t('sync.signOutTitle'),
+                  message: t('sync.signOutBody'),
+                  confirmLabel: t('sync.signOut'),
+                  cancelLabel: t('common.cancel'),
+                }).then(async (ok) => {
+                  if (!ok) return;
+                  void signOut();
+                })
               }
             />
             <SettingsRow

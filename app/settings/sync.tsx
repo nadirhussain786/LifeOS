@@ -10,7 +10,7 @@ import {
   UserCircle,
 } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, ScrollView, Switch, View } from 'react-native';
+import { Pressable, ScrollView, Switch, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
 import { ScreenHeader } from '@/components/ui/screen-header';
@@ -24,6 +24,8 @@ import { syncNow } from '@/features/sync/services/sync-engine';
 import { useSyncStore } from '@/features/sync/store/sync-store';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { envDiagnostics, isSupabaseConfigured } from '@/lib/env';
+import { confirm } from '@/lib/dialog-store';
+import { toast } from '@/lib/toast-store';
 
 function SectionLabel({ children }: { children: string }) {
   return (
@@ -130,24 +132,30 @@ export default function SyncSettingsScreen() {
   };
 
   const handleSignOut = () => {
-    Alert.alert(t('sync.signOutTitle'), t('sync.signOutBody'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      { text: t('sync.signOut'), style: 'destructive', onPress: () => void signOut() },
-    ]);
+    void confirm({
+      title: t('sync.signOutTitle'),
+      message: t('sync.signOutBody'),
+      confirmLabel: t('sync.signOut'),
+      cancelLabel: t('common.cancel'),
+      destructive: true,
+    }).then(async (ok) => {
+      if (!ok) return;
+      void signOut();
+    });
   };
 
   const handleDeleteAccount = () => {
-    Alert.alert(t('sync.deleteAccountTitle'), t('sync.deleteAccountBody'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('sync.deleteAccount'),
-        style: 'destructive',
-        onPress: async () => {
-          const result = await deleteAccount();
-          if (!result.ok) Alert.alert(t('sync.deleteFailedTitle'), result.error);
-        },
-      },
-    ]);
+    void confirm({
+      title: t('sync.deleteAccountTitle'),
+      message: t('sync.deleteAccountBody'),
+      confirmLabel: t('sync.deleteAccount'),
+      cancelLabel: t('common.cancel'),
+      destructive: true,
+    }).then(async (ok) => {
+      if (!ok) return;
+      const result = await deleteAccount();
+      if (!result.ok) toast.error(result.error);
+    });
   };
 
   const syncedLabel =

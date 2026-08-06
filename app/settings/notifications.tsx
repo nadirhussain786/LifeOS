@@ -4,7 +4,7 @@ import * as Haptics from 'expo-haptics';
 import { AlarmClock, BellRing, Send, Stethoscope } from 'lucide-react-native';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Linking, Platform, Pressable, ScrollView, Switch, View } from 'react-native';
+import { Linking, Platform, Pressable, ScrollView, Switch, View } from 'react-native';
 
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Segmented } from '@/components/ui/segmented';
@@ -36,6 +36,7 @@ import {
   type NotificationDiagnostics,
 } from '@/lib/notifications';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { confirm, notify } from '@/lib/dialog-store';
 import { toast } from '@/lib/toast-store';
 
 function SectionLabel({ children }: { children: string }) {
@@ -147,20 +148,23 @@ export default function NotificationSettingsScreen() {
       toast.success(t('notif.testSentBody'));
       return;
     }
-    Alert.alert(
-      t('notif.testFailedTitle'),
-      result.reason === 'denied'
-        ? t('notif.testFailedDenied')
-        : result.reason === 'unavailable'
-          ? t('notif.notAvailable')
-          : t('notif.testFailedError'),
-      result.reason === 'denied'
-        ? [
-            { text: t('common.cancel'), style: 'cancel' },
-            { text: t('notif.openSystemSettings'), onPress: () => void Linking.openSettings() },
-          ]
-        : undefined,
-    );
+    // Denied is the only reason with a fix the user can act on, so it is the
+    // only one that offers a way to act. The others are a statement of fact.
+    if (result.reason === 'denied') {
+      void confirm({
+        title: t('notif.testFailedTitle'),
+        message: t('notif.testFailedDenied'),
+        confirmLabel: t('notif.openSystemSettings'),
+        cancelLabel: t('common.cancel'),
+      }).then((ok) => ok && void Linking.openSettings());
+      return;
+    }
+    void notify({
+      title: t('notif.testFailedTitle'),
+      message:
+        result.reason === 'unavailable' ? t('notif.notAvailable') : t('notif.testFailedError'),
+      confirmLabel: t('common.ok'),
+    });
   };
 
   // Any change to delivery mode, digest time, quiet hours or the master switch
@@ -463,10 +467,11 @@ export default function NotificationSettingsScreen() {
                   Haptics.selectionAsync();
                   void openExactAlarmSettings().then((opened) => {
                     if (!opened)
-                      Alert.alert(
-                        t('notif.exactAlarmFailedTitle'),
-                        t('notif.exactAlarmFailedBody'),
-                      );
+                      void notify({
+                        title: t('notif.exactAlarmFailedTitle'),
+                        message: t('notif.exactAlarmFailedBody'),
+                        confirmLabel: t('common.ok'),
+                      });
                   });
                 }}
                 className="flex-row items-center gap-3 border-t border-border py-3.5"

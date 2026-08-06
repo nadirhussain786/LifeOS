@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Flag, HandCoins, LogOut, Plus, Receipt, Trash2, UserPlus } from 'lucide-react-native';
 import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, RefreshControl, ScrollView, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 
 import { EmptyState } from '@/components/ui/empty-state';
 import { QueryError } from '@/components/ui/query-error';
@@ -26,6 +26,7 @@ import {
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { alpha } from '@/lib/color';
 import { errorMessageKey } from '@/lib/supabase-error';
+import { confirm } from '@/lib/dialog-store';
 import { toast } from '@/lib/toast-store';
 
 export default function SplitGroupScreen() {
@@ -63,25 +64,22 @@ export default function SplitGroupScreen() {
    * else loses it from their list too, so it asks first and says as much.
    */
   const confirmDeleteGroup = () => {
-    Alert.alert(
-      t('split.deleteGroupTitle', { name: data?.group?.name ?? '' }),
-      t('split.deleteGroupBody'),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: () =>
-            deleteGroup.mutate(undefined, {
-              onSuccess: () => {
-                toast.success(t('split.groupDeleted', { name: data?.group?.name ?? '' }));
-                router.replace('/split');
-              },
-              onError: (e) => toast.error(t(errorMessageKey(e))),
-            }),
+    void confirm({
+      title: t('split.deleteGroupTitle', { name: data?.group?.name ?? '' }),
+      message: t('split.deleteGroupBody'),
+      confirmLabel: t('common.delete'),
+      cancelLabel: t('common.cancel'),
+      destructive: true,
+    }).then(async (ok) => {
+      if (!ok) return;
+      deleteGroup.mutate(undefined, {
+        onSuccess: () => {
+          toast.success(t('split.groupDeleted', { name: data?.group?.name ?? '' }));
+          router.replace('/split');
         },
-      ],
-    );
+        onError: (e) => toast.error(t(errorMessageKey(e))),
+      });
+    });
   };
 
   /** Leaving keeps your history in the group — the member row is tombstoned,
@@ -89,25 +87,22 @@ export default function SplitGroupScreen() {
   const confirmLeave = () => {
     if (!me) return;
     const settled = (mine?.netCents ?? 0) === 0;
-    Alert.alert(
-      t('split.leaveTitle'),
-      settled ? t('split.leaveBody') : t('split.leaveUnsettledBody'),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('split.leave'),
-          style: 'destructive',
-          onPress: () =>
-            removeMember.mutate(me.id, {
-              onSuccess: () => {
-                toast.success(t('split.leftGroup'));
-                router.replace('/split');
-              },
-              onError: (e) => toast.error(t(errorMessageKey(e))),
-            }),
+    void confirm({
+      title: t('split.leaveTitle'),
+      message: settled ? t('split.leaveBody') : t('split.leaveUnsettledBody'),
+      confirmLabel: t('split.leave'),
+      cancelLabel: t('common.cancel'),
+      destructive: true,
+    }).then(async (ok) => {
+      if (!ok) return;
+      removeMember.mutate(me.id, {
+        onSuccess: () => {
+          toast.success(t('split.leftGroup'));
+          router.replace('/split');
         },
-      ],
-    );
+        onError: (e) => toast.error(t(errorMessageKey(e))),
+      });
+    });
   };
 
   if (isError) {

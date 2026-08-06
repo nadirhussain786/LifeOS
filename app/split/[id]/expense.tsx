@@ -6,7 +6,6 @@ import { CalendarDays, Check, Trash2 } from 'lucide-react-native';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -27,6 +26,7 @@ import { useGroupDetail, useSplitMutations } from '@/features/split/hooks/use-sp
 import { splitEvenly } from '@/features/split/services/split-math';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { alpha } from '@/lib/color';
+import { confirm } from '@/lib/dialog-store';
 import { toast } from '@/lib/toast-store';
 
 type Mode = 'equal' | 'exact';
@@ -199,20 +199,21 @@ export default function SplitExpenseScreen() {
    *  rather than becoming a quietly-undoable toast. */
   const confirmDelete = () => {
     if (!existing) return;
-    Alert.alert(t('split.deleteExpenseTitle'), t('split.deleteExpenseBody'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('common.delete'),
-        style: 'destructive',
-        onPress: () =>
-          removeExpense.mutate(existing.id, {
-            onSuccess: () => {
-              toast.success(t('split.expenseDeleted'));
-              router.back();
-            },
-          }),
-      },
-    ]);
+    void confirm({
+      title: t('split.deleteExpenseTitle'),
+      message: t('split.deleteExpenseBody'),
+      confirmLabel: t('common.delete'),
+      cancelLabel: t('common.cancel'),
+      destructive: true,
+    }).then(async (ok) => {
+      if (!ok) return;
+      removeExpense.mutate(existing.id, {
+        onSuccess: () => {
+          toast.success(t('split.expenseDeleted'));
+          router.back();
+        },
+      });
+    });
   };
 
   const memberName = (memberId: string) => {

@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import { BellOff, Moon, Pause, Play, Square, SkipForward } from 'lucide-react-native';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, BackHandler, Pressable, View } from 'react-native';
+import { BackHandler, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CelebrationOverlay } from '@/components/ui/celebration-overlay';
@@ -31,6 +31,8 @@ import {
   useStudyTimerStore,
 } from '@/features/study/store/study-timer-store';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { confirm } from '@/lib/dialog-store';
+import { toast } from '@/lib/toast-store';
 
 const FOCUS_TINT = '#8b5cf6';
 const BREAK_TINT = '#22c55e';
@@ -123,10 +125,13 @@ export default function StudyTimerScreen() {
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
       if (savedRef.current || reflectOpen) return false;
       if (!useStudyTimerStore.getState().active) return false;
-      Alert.alert(t('study.leaveFocusTitle'), t('study.leaveFocusBody'), [
-        { text: t('study.keepFocusing'), style: 'cancel' },
-        { text: t('study.endSession'), style: 'destructive', onPress: requestFinish },
-      ]);
+      void confirm({
+        title: t('study.leaveFocusTitle'),
+        message: t('study.leaveFocusBody'),
+        confirmLabel: t('study.endSession'),
+        cancelLabel: t('study.keepFocusing'),
+        destructive: true,
+      }).then((ok) => ok && requestFinish());
       return true; // handled — don't pop the screen
     });
     return () => subscription.remove();
@@ -154,16 +159,16 @@ export default function StudyTimerScreen() {
   };
 
   const promptSystemDnd = () => {
-    Alert.alert(t('study.silencePhoneTitle'), t('study.silencePhoneBody'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('study.openDndSettings'),
-        onPress: async () => {
-          const opened = await openSystemDoNotDisturb();
-          if (!opened) Alert.alert(t('study.dndUnavailableTitle'), t('study.dndUnavailableBody'));
-        },
-      },
-    ]);
+    void confirm({
+      title: t('study.silencePhoneTitle'),
+      message: t('study.silencePhoneBody'),
+      confirmLabel: t('study.openDndSettings'),
+      cancelLabel: t('common.cancel'),
+    }).then(async (ok) => {
+      if (!ok) return;
+      const opened = await openSystemDoNotDisturb();
+      if (!opened) toast.info(t('study.dndUnavailableBody'));
+    });
   };
 
   // Phase-completion handling.

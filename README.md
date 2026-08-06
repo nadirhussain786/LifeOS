@@ -7,7 +7,7 @@ you create an account and switch sync on, module by module.
 Built with Expo (React Native), SQLite on the device, and Supabase (Postgres +
 Row Level Security) as the optional backend.
 
-> **Status: pre-release.** The code typechecks, lints, and passes 263 unit tests
+> **Status: pre-release.** The code typechecks, lints, and passes 288 unit tests
 > plus 173 assertions against a real Postgres. **None of it has been observed
 > running on a physical device**, and no Supabase project has been created yet.
 > Notifications and widgets cannot run in Expo Go at all — they need a dev
@@ -242,7 +242,7 @@ Full detail in [docs/OPERATIONS.md](docs/OPERATIONS.md).
 ## Testing
 
 ```bash
-npm test              # 263 unit tests
+npm test              # 288 unit tests
 npm run typecheck     # tsc --noEmit
 npm run lint          # eslint
 npm run test:sql      # 173 assertions against real Postgres (PGlite, no Docker)

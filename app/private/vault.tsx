@@ -2,7 +2,7 @@ import { Image } from 'expo-image';
 import { Camera, ImagePlus, Trash2 } from 'lucide-react-native';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Dimensions, Pressable, View } from 'react-native';
+import { Dimensions, Pressable, View } from 'react-native';
 
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
@@ -18,6 +18,8 @@ import {
 } from '@/features/private/services/vault-items';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { alpha } from '@/lib/color';
+import { confirm } from '@/lib/dialog-store';
+import { toast } from '@/lib/toast-store';
 
 const TINT = privateModule('vault')?.tint ?? '#7c6cf0';
 const GAP = 8;
@@ -54,10 +56,7 @@ export default function VaultScreen() {
           reload();
         }
         if (rejectedOversize > 0) {
-          Alert.alert(
-            t('private.tooLargeTitle'),
-            t('private.tooLargeBody', { count: rejectedOversize, mb: MAX_VAULT_MB }),
-          );
+          toast.error(t('private.tooLargeBody', { count: rejectedOversize, mb: MAX_VAULT_MB }));
         }
       } finally {
         setBusy(false);
@@ -67,18 +66,18 @@ export default function VaultScreen() {
   );
 
   const confirmDelete = (item: VaultItem) =>
-    Alert.alert(t('private.deleteItem'), t('private.deleteItemBody'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('common.delete'),
-        style: 'destructive',
-        onPress: () => {
-          removeVaultItem(item);
-          setSelected(null);
-          reload();
-        },
-      },
-    ]);
+    void confirm({
+      title: t('private.deleteItem'),
+      message: t('private.deleteItemBody'),
+      confirmLabel: t('common.delete'),
+      cancelLabel: t('common.cancel'),
+      destructive: true,
+    }).then(async (ok) => {
+      if (!ok) return;
+      removeVaultItem(item);
+      setSelected(null);
+      reload();
+    });
 
   return (
     <PrivateScreen

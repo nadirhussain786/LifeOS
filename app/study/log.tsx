@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { CalendarDays, Clock, Minus, Plus } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
 import { StarRating } from '@/components/ui/star-rating';
@@ -17,6 +17,7 @@ import { formatStudyDuration } from '@/features/study/services/study-stats';
 import { useStudySubjects } from '@/features/study/hooks/use-study';
 import { useStudyMutations } from '@/features/study/hooks/use-study-mutations';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { toast } from '@/lib/toast-store';
 
 const QUICK_MINUTES = [15, 25, 50, 90];
 
@@ -60,7 +61,7 @@ export default function StudyLogScreen() {
       milliseconds: 0,
     }).getTime();
     if (startedAt > Date.now()) {
-      Alert.alert(t('study.futureTitle'), t('study.futureBody'));
+      toast.error(t('study.futureBody'));
       return;
     }
     logSession.mutate({

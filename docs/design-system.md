@@ -271,9 +271,23 @@ interactive; state is encoded in form as well as color.
 | FAB            | [`components/ui/fab.tsx`](../components/ui/fab.tsx)                       | Accent gradient, 56pt, scale-on-press                                                                            |
 | Tab bar        | [`components/ui/tab-bar.tsx`](../components/ui/tab-bar.tsx)               | Bottom navigation                                                                                                |
 | Section header | [`components/ui/section-header.tsx`](../components/ui/section-header.tsx) | Title + optional action link                                                                                     |
+| Toast          | [`components/ui/toast.tsx`](../components/ui/toast.tsx)                   | Transient feedback; carries undo. Sits above the tab bar, never over it                                          |
+| Dialog         | [`components/ui/dialog-host.tsx`](../components/ui/dialog-host.tsx)       | Confirm / notice / action menu. Bottom-anchored, scrim-dismissible                                               |
 
 **States at a glance:** focus grows a 4px accent halo on inputs; disabled =
 `opacity-40`; pressed = spring scale 0.96; destructive confirms before acting.
+
+**Asking and telling.** These are different jobs and use different components.
+A question — anything that needs a decision before it happens — is a dialog
+(`confirm`, `notify`, `chooseAction` in [`lib/dialog-store.ts`](../lib/dialog-store.ts)).
+A report of something that already happened is a toast, and if it can be taken
+back, the toast carries the undo rather than a dialog asking first: a
+confirmation is dismissed reflexively, an undo is not.
+
+`Alert.alert` is not used anywhere and a test enforces that. The OS dialog
+ignores the type scale, the tokens, the spacing and the layout direction —
+which is not cosmetic in an app shipping Arabic and Urdu — renders differently
+per platform, and drops buttons past the third on Android without saying so.
 **Empty states** always offer the next step and a single accent CTA.
 **Loading** uses shimmer skeletons that mirror the real layout — never a spinner
 where content will land.

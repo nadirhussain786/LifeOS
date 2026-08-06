@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, Switch, View } from 'react-native';
+import { Pressable, Switch, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
@@ -25,6 +25,7 @@ import {
 } from '@/features/private/services/vault-keys';
 import { usePrivateStore } from '@/features/private/store/private-store';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { confirm } from '@/lib/dialog-store';
 
 /** Ordinary Hub modules that may be moved behind the vault. Settings is
  * excluded by `canBePrivate` — hiding it would take away the screen holding
@@ -65,47 +66,47 @@ export default function PrivateSettingsScreen() {
       return;
     }
     // Turning a module off deletes what is in it — say so before, not after.
-    Alert.alert(t('private.turnOffTitle'), t('private.turnOffBody'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('private.turnOffConfirm'),
-        style: 'destructive',
-        onPress: () => {
-          deleteModuleRecords(id);
-          toggleModule(id);
-        },
-      },
-    ]);
+    void confirm({
+      title: t('private.turnOffTitle'),
+      message: t('private.turnOffBody'),
+      confirmLabel: t('private.turnOffConfirm'),
+      cancelLabel: t('common.cancel'),
+      destructive: true,
+    }).then(async (ok) => {
+      if (!ok) return;
+      deleteModuleRecords(id);
+      toggleModule(id);
+    });
   };
 
   const destroy = () =>
-    Alert.alert(t('private.destroyTitle'), t('private.destroyBody'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('private.destroyConfirm'),
-        style: 'destructive',
-        onPress: () => {
-          // Second confirmation: this is genuinely unrecoverable, and one
-          // mis-tap should not be enough to trigger it.
-          Alert.alert(t('private.destroyAgainTitle'), t('private.destroyAgainBody'), [
-            { text: t('common.cancel'), style: 'cancel' },
-            {
-              text: t('private.destroyConfirm'),
-              style: 'destructive',
-              onPress: () => {
-                void (async () => {
-                  deleteAllPrivateRecords();
-                  deleteAllVaultFiles();
-                  await destroyVaultKeys();
-                  reset();
-                  router.replace('/(tabs)/hub');
-                })();
-              },
-            },
-          ]);
-        },
-      },
-    ]);
+    void confirm({
+      title: t('private.destroyTitle'),
+      message: t('private.destroyBody'),
+      confirmLabel: t('private.destroyConfirm'),
+      cancelLabel: t('common.cancel'),
+      destructive: true,
+    }).then(async (ok) => {
+      if (!ok) return;
+      // Second confirmation: this is genuinely unrecoverable, and one
+      // mis-tap should not be enough to trigger it.
+      void confirm({
+        title: t('private.destroyAgainTitle'),
+        message: t('private.destroyAgainBody'),
+        confirmLabel: t('private.destroyConfirm'),
+        cancelLabel: t('common.cancel'),
+        destructive: true,
+      }).then(async (ok) => {
+        if (!ok) return;
+        void (async () => {
+          deleteAllPrivateRecords();
+          deleteAllVaultFiles();
+          await destroyVaultKeys();
+          reset();
+          router.replace('/(tabs)/hub');
+        })();
+      });
+    });
 
   if (mode !== 'menu') {
     const isChange = mode === 'change-current' || mode === 'change-next';
@@ -271,16 +272,16 @@ export default function PrivateSettingsScreen() {
               accessibilityRole="button"
               onPress={() => {
                 if (decoyExists) {
-                  Alert.alert(t('private.removeDecoyTitle'), t('private.removeDecoyBody'), [
-                    { text: t('common.cancel'), style: 'cancel' },
-                    {
-                      text: t('common.delete'),
-                      style: 'destructive',
-                      onPress: () => {
-                        void removeDecoy().then(() => setDecoyExists(false));
-                      },
-                    },
-                  ]);
+                  void confirm({
+                    title: t('private.removeDecoyTitle'),
+                    message: t('private.removeDecoyBody'),
+                    confirmLabel: t('common.delete'),
+                    cancelLabel: t('common.cancel'),
+                    destructive: true,
+                  }).then(async (ok) => {
+                    if (!ok) return;
+                    void removeDecoy().then(() => setDecoyExists(false));
+                  });
                 } else {
                   setMode('decoy');
                 }

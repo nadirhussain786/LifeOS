@@ -1,7 +1,7 @@
 import { format, parseISO } from 'date-fns';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, TextInput, View } from 'react-native';
+import { Pressable, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
@@ -24,6 +24,7 @@ import {
 } from '@/features/private/services/cycle-math';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { alpha } from '@/lib/color';
+import { confirm } from '@/lib/dialog-store';
 
 const FLOWS: Flow[] = ['spotting', 'light', 'medium', 'heavy'];
 const TINT = privateModule('cycle')?.tint ?? '#e0518a';
@@ -64,17 +65,17 @@ export default function CycleScreen() {
   }, [flow, symptoms, note, reload]);
 
   const confirmDelete = (id: string) =>
-    Alert.alert(t('private.deleteEntry'), t('private.deleteEntryBody'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('common.delete'),
-        style: 'destructive',
-        onPress: () => {
-          removeCycleEntry(id);
-          reload();
-        },
-      },
-    ]);
+    void confirm({
+      title: t('private.deleteEntry'),
+      message: t('private.deleteEntryBody'),
+      confirmLabel: t('common.delete'),
+      cancelLabel: t('common.cancel'),
+      destructive: true,
+    }).then(async (ok) => {
+      if (!ok) return;
+      removeCycleEntry(id);
+      reload();
+    });
 
   return (
     <PrivateScreen

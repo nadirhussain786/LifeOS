@@ -1,7 +1,7 @@
 import { format, parseISO } from 'date-fns';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
@@ -21,6 +21,7 @@ import {
 } from '@/features/private/services/recovery-math';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { alpha } from '@/lib/color';
+import { confirm } from '@/lib/dialog-store';
 
 const TARGETS: RecoveryTarget[] = [
   'porn',
@@ -67,17 +68,17 @@ export default function RecoveryScreen() {
   );
 
   const confirmDelete = (id: string) =>
-    Alert.alert(t('private.deleteEntry'), t('private.deleteEntryBody'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('common.delete'),
-        style: 'destructive',
-        onPress: () => {
-          removeRecoveryEntry(id);
-          reload();
-        },
-      },
-    ]);
+    void confirm({
+      title: t('private.deleteEntry'),
+      message: t('private.deleteEntryBody'),
+      confirmLabel: t('common.delete'),
+      cancelLabel: t('common.cancel'),
+      destructive: true,
+    }).then(async (ok) => {
+      if (!ok) return;
+      removeRecoveryEntry(id);
+      reload();
+    });
 
   const forTarget = entries.filter((e) => e.target === target);
 
