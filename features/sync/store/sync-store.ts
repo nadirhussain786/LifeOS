@@ -6,16 +6,64 @@ import { defaultModuleFlags, type SyncModule } from '@/features/sync/config/sync
 
 export type SyncStatus = 'idle' | 'syncing' | 'error';
 
+/**
+ * A position in one table's `(updated_at, key)` order — see the header comment
+ * in ../services/sync-engine.ts for why a bare timestamp is not enough.
+ */
+export type SyncCursor = { at: number; key: string };
+
+/** Namespaced so push and pull positions for a table share one map. */
+export function cursorKey(kind: 'push' | 'pull', table: string): string {
+  return `${kind}:${table}`;
+}
+
+/**
+ * Reads a stored cursor, tolerating the shape used before cursors became pairs.
+ * A legacy numeric cursor names a timestamp with no tie-break, so it is read as
+ * "the very start of that millisecond" — the engine may re-send a handful of
+ * rows it already sent, which the upsert absorbs. The opposite rounding would
+ * skip them.
+ */
+export function parseCursor(value: unknown): SyncCursor {
+  if (typeof value === 'number') return { at: value, key: '' };
+  if (value && typeof value === 'object' && 'at' in value) {
+    const cursor = value as SyncCursor;
+    return { at: Number(cursor.at) || 0, key: String(cursor.key ?? '') };
+  }
+  return { at: 0, key: '' };
+}
+
+/** The pre-pair cursor shape, kept only so an upgrading device does not start
+ * from zero and re-download an entire account. */
+type LegacyCursors = {
+  pushCursors?: Record<string, number>;
+  pullCursors?: Record<string, number>;
+};
+
+function migrateCursors(saved: LegacyCursors | undefined): Record<string, SyncCursor> {
+  const out: Record<string, SyncCursor> = {};
+  for (const [table, at] of Object.entries(saved?.pushCursors ?? {})) {
+    out[cursorKey('push', table)] = parseCursor(at);
+  }
+  for (const [table, at] of Object.entries(saved?.pullCursors ?? {})) {
+    out[cursorKey('pull', table)] = parseCursor(at);
+  }
+  return out;
+}
+
 type SyncState = {
   /** Master switch for background sync (manual "Sync now" still works). */
   autoSync: boolean;
   /** Per-module allow-sync consent. */
   modules: Record<SyncModule, boolean>;
-  /** Per-table high-water marks (max updated_at seen) so each sync only moves
-   * the delta. Keyed by table name. */
-  pushCursors: Record<string, number>;
-  pullCursors: Record<string, number>;
+  /** Per-table high-water marks, keyed by `cursorKey()`, so each sync only
+   * moves the delta. */
+  cursors: Record<string, SyncCursor>;
   lastSyncedAt: number | null;
+  /** Set after a failure; automatic syncs are skipped until it passes. Manual
+   * "Sync now" ignores it. */
+  nextAttemptAt: number | null;
+  consecutiveFailures: number;
   /** The uid whose data currently lives in the local ('local') DB. Used to
    * detect an account switch on a shared device and wipe before the new
    * account's first sync, so one user's data never bleeds into another's. */
@@ -31,9 +79,12 @@ type SyncState = {
 
   setAutoSync: (on: boolean) => void;
   setModuleEnabled: (module: SyncModule, on: boolean) => void;
-  setCursor: (kind: 'push' | 'pull', table: string, value: number) => void;
+  /** Writes a whole run's cursors in one update — see the CursorBatch comment
+   * in the engine for why this is not per-table. */
+  commitCursors: (cursors: Map<string, SyncCursor>) => void;
   setLastSyncedAt: (ts: number) => void;
   setStatus: (status: SyncStatus, error?: string | null) => void;
+  setNextAttemptAt: (at: number | null) => void;
   setLastUserId: (uid: string | null) => void;
   /** Wipes cursors — used on account switch so the next sync is a full pull. */
   resetCursors: () => void;
@@ -44,9 +95,10 @@ export const useSyncStore = create<SyncState>()(
     (set) => ({
       autoSync: true,
       modules: defaultModuleFlags(),
-      pushCursors: {},
-      pullCursors: {},
+      cursors: {},
       lastSyncedAt: null,
+      nextAttemptAt: null,
+      consecutiveFailures: 0,
       lastUserId: null,
       status: 'idle',
       lastError: null,
@@ -54,15 +106,26 @@ export const useSyncStore = create<SyncState>()(
 
       setAutoSync: (autoSync) => set({ autoSync }),
       setModuleEnabled: (module, on) => set((s) => ({ modules: { ...s.modules, [module]: on } })),
-      setCursor: (kind, table, value) =>
-        set((s) => {
-          const key = kind === 'push' ? 'pushCursors' : 'pullCursors';
-          return { [key]: { ...s[key], [table]: value } } as Partial<SyncState>;
-        }),
+      commitCursors: (cursors) =>
+        set((s) => ({ cursors: { ...s.cursors, ...Object.fromEntries(cursors) } })),
       setLastSyncedAt: (lastSyncedAt) => set({ lastSyncedAt }),
-      setStatus: (status, lastError = null) => set({ status, lastError }),
+      setStatus: (status, lastError = null) =>
+        set((s) => ({
+          status,
+          lastError,
+          // The failure counter drives the backoff, so it has to move with the
+          // status rather than alongside it — a run that succeeds clears the
+          // debt of every run that failed before it.
+          consecutiveFailures:
+            status === 'error'
+              ? s.consecutiveFailures + 1
+              : status === 'idle'
+                ? 0
+                : s.consecutiveFailures,
+        })),
+      setNextAttemptAt: (nextAttemptAt) => set({ nextAttemptAt }),
       setLastUserId: (lastUserId) => set({ lastUserId }),
-      resetCursors: () => set({ pushCursors: {}, pullCursors: {} }),
+      resetCursors: () => set({ cursors: {}, nextAttemptAt: null, consecutiveFailures: 0 }),
     }),
     {
       name: 'sync-store',
@@ -71,21 +134,23 @@ export const useSyncStore = create<SyncState>()(
       partialize: (s) => ({
         autoSync: s.autoSync,
         modules: s.modules,
-        pushCursors: s.pushCursors,
-        pullCursors: s.pullCursors,
+        cursors: s.cursors,
         lastSyncedAt: s.lastSyncedAt,
+        nextAttemptAt: s.nextAttemptAt,
+        consecutiveFailures: s.consecutiveFailures,
         lastUserId: s.lastUserId,
       }),
       onRehydrateStorage: () => () => {
         useSyncStore.setState({ hydrated: true });
       },
-      // Backfill any module added in a later release.
       merge: (persisted, current) => {
-        const saved = persisted as Partial<SyncState> | undefined;
+        const saved = persisted as (Partial<SyncState> & LegacyCursors) | undefined;
         return {
           ...current,
           ...saved,
+          // Backfill any module added in a later release.
           modules: { ...defaultModuleFlags(), ...(saved?.modules ?? {}) },
+          cursors: { ...migrateCursors(saved), ...(saved?.cursors ?? {}) },
         };
       },
     },

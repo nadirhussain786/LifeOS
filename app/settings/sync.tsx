@@ -10,12 +10,13 @@ import {
   UserCircle,
 } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, ScrollView, Switch, View } from 'react-native';
+import { Pressable, ScrollView, Switch, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
+import { useUsageStore } from '@/features/analytics/store/usage-store';
 import { useAuthStore } from '@/features/auth/services/auth-store';
 import { SYNC_MODULES } from '@/features/sync/config/sync-tables';
 import { useSyncStatus } from '@/features/sync/hooks/use-sync';
@@ -23,6 +24,8 @@ import { syncNow } from '@/features/sync/services/sync-engine';
 import { useSyncStore } from '@/features/sync/store/sync-store';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { envDiagnostics, isSupabaseConfigured } from '@/lib/env';
+import { confirm } from '@/lib/dialog-store';
+import { toast } from '@/lib/toast-store';
 
 function SectionLabel({ children }: { children: string }) {
   return (
@@ -48,6 +51,8 @@ export default function SyncSettingsScreen() {
   const setAutoSync = useSyncStore((s) => s.setAutoSync);
   const modules = useSyncStore((s) => s.modules);
   const setModuleEnabled = useSyncStore((s) => s.setModuleEnabled);
+  const usageEnabled = useUsageStore((s) => s.enabled);
+  const setUsageEnabled = useUsageStore((s) => s.setEnabled);
 
   // Guest: no account — invite sign-in, explain data stays local.
   if (!session) {
@@ -121,28 +126,36 @@ export default function SyncSettingsScreen() {
 
   const handleSyncNow = () => {
     Haptics.selectionAsync();
-    void syncNow();
+    // Forced: somebody who just pressed the button gets a request even if the
+    // throttle or the post-failure backoff would have skipped this one.
+    void syncNow({ force: true });
   };
 
   const handleSignOut = () => {
-    Alert.alert(t('sync.signOutTitle'), t('sync.signOutBody'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      { text: t('sync.signOut'), style: 'destructive', onPress: () => void signOut() },
-    ]);
+    void confirm({
+      title: t('sync.signOutTitle'),
+      message: t('sync.signOutBody'),
+      confirmLabel: t('sync.signOut'),
+      cancelLabel: t('common.cancel'),
+      destructive: true,
+    }).then(async (ok) => {
+      if (!ok) return;
+      void signOut();
+    });
   };
 
   const handleDeleteAccount = () => {
-    Alert.alert(t('sync.deleteAccountTitle'), t('sync.deleteAccountBody'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('sync.deleteAccount'),
-        style: 'destructive',
-        onPress: async () => {
-          const result = await deleteAccount();
-          if (!result.ok) Alert.alert(t('sync.deleteFailedTitle'), result.error);
-        },
-      },
-    ]);
+    void confirm({
+      title: t('sync.deleteAccountTitle'),
+      message: t('sync.deleteAccountBody'),
+      confirmLabel: t('sync.deleteAccount'),
+      cancelLabel: t('common.cancel'),
+      destructive: true,
+    }).then(async (ok) => {
+      if (!ok) return;
+      const result = await deleteAccount();
+      if (!result.ok) toast.error(result.error);
+    });
   };
 
   const syncedLabel =
@@ -240,6 +253,29 @@ export default function SyncSettingsScreen() {
           <Text variant="caption" className="px-1">
             {t('sync.whatSyncsNote')}
           </Text>
+          {/* Said plainly, because "Gallery: on" otherwise reads as a promise
+              that the photos themselves are backed up. They are not. */}
+          <Text variant="caption" className="px-1">
+            {t('sync.mediaNote')}
+          </Text>
+        </View>
+
+        {/* Usage statistics — disclosed and switchable, per PRIVACY.md */}
+        <View className="gap-2">
+          <SectionLabel>{t('usage.title')}</SectionLabel>
+          <View className="rounded-2xl border border-border bg-card px-4 py-3.5">
+            <View className="flex-row items-center justify-between">
+              <View className="flex-1 pe-3">
+                <Text className="font-sora-medium text-foreground">{t('usage.title')}</Text>
+                <Text variant="caption">{t('usage.description')}</Text>
+              </View>
+              <Switch
+                value={usageEnabled}
+                onValueChange={setUsageEnabled}
+                trackColor={{ true: theme.accent, false: theme.border }}
+              />
+            </View>
+          </View>
         </View>
 
         {/* Sign out */}

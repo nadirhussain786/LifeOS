@@ -5,7 +5,7 @@ import { CalendarDays, Heart, Trash2, X } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image } from 'expo-image';
-import { Alert, Dimensions, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Dimensions, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
@@ -16,6 +16,7 @@ import { usePhoto } from '@/features/gallery/hooks/use-gallery';
 import { useGalleryMutations } from '@/features/gallery/hooks/use-gallery-mutations';
 import { formatDuration } from '@/features/gallery/types/gallery.types';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { confirm } from '@/lib/dialog-store';
 
 export default function PhotoDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -72,14 +73,17 @@ export default function PhotoDetailScreen() {
   };
 
   const confirmDelete = () => {
-    Alert.alert(t('gallery.deletePhotoTitle'), t('gallery.deletePhotoBody'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('common.delete'),
-        style: 'destructive',
-        onPress: () => (removePhoto.mutate(photo.id), router.back()),
-      },
-    ]);
+    void confirm({
+      title: t('gallery.deletePhotoTitle'),
+      message: t('gallery.deletePhotoBody'),
+      confirmLabel: t('common.delete'),
+      cancelLabel: t('common.cancel'),
+      destructive: true,
+    }).then(async (ok) => {
+      if (!ok) return;
+      removePhoto.mutate(photo.id);
+      router.back();
+    });
   };
 
   return (

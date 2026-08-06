@@ -76,7 +76,13 @@ export default function JournalEntryScreen() {
     const permission = await Location.requestForegroundPermissionsAsync();
     if (!permission.granted) return;
 
-    const position = await Location.getCurrentPositionAsync({});
+    // Lowest accuracy on purpose. The only use of this is a reverse-geocode to
+    // "city, region", which coarse location answers exactly as well — and the
+    // manifest blocks ACCESS_FINE_LOCATION, so asking for a precise fix would
+    // request something the app cannot be granted.
+    const position = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.Low,
+    });
     const [place] = await Location.reverseGeocodeAsync(position.coords).catch(() => []);
     const label = place
       ? [place.city, place.region].filter(Boolean).join(', ')

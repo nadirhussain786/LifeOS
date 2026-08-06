@@ -1,0 +1,111 @@
+import { File } from 'expo-file-system';
+import * as ImagePicker from 'expo-image-picker';
+
+import { useAuthStore } from '@/features/auth/services/auth-store';
+import { isSupabaseConfigured } from '@/lib/env';
+import { supabase } from '@/lib/supabase';
+
+/**
+ * Profile pictures, in Supabase Storage.
+ *
+ * The stored value is a *path*, not a URL (0013). A public bucket today can
+ * become a signed-URL bucket tomorrow without every profile row turning into a
+ * dead link — and the choice of which is a policy decision that should not be
+ * baked into thirty thousand database rows.
+ *
+ * The path is always `<uid>/avatar.jpg`. Keying on the user id means the
+ * storage policy is a one-line prefix check, and re-uploading replaces rather
+ * than accumulating: an avatar changed weekly for a year is one object, not
+ * fifty-two.
+ */
+export const AVATAR_BUCKET = 'avatars';
+
+function avatarPath(uid: string): string {
+  return `${uid}/avatar.jpg`;
+}
+
+export type AvatarResult =
+  | { ok: true; path: string }
+  | { ok: false; error: 'cancelled' | 'not-signed-in' | 'upload-failed' };
+
+/**
+ * Picks an image and uploads it.
+ *
+ * `exif: false` matters more than it looks: a photo straight from the camera
+ * roll carries GPS coordinates, and a profile picture is the single most
+ * public thing in the app. Stripping it here means a user's home address does
+ * not travel with their face.
+ */
+export async function pickAndUploadAvatar(): Promise<AvatarResult> {
+  const uid = useAuthStore.getState().user?.id;
+  if (!uid || !isSupabaseConfigured) return { ok: false, error: 'not-signed-in' };
+
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ['images'],
+    allowsEditing: true,
+    aspect: [1, 1],
+    quality: 0.85,
+    exif: false,
+  });
+  if (result.canceled || result.assets.length === 0) return { ok: false, error: 'cancelled' };
+
+  const asset = result.assets[0];
+  const file = new File(asset.uri);
+  if (!file.exists) return { ok: false, error: 'upload-failed' };
+
+  try {
+    const path = avatarPath(uid);
+    const { error } = await supabase.storage.from(AVATAR_BUCKET).upload(path, file.bytesSync(), {
+      contentType: 'image/jpeg',
+      // One object per user, replaced in place.
+      upsert: true,
+    });
+    if (error) return { ok: false, error: 'upload-failed' };
+
+    // `avatar_updated_at` is a cache-buster: the storage URL never changes, so
+    // without it every device keeps showing the previous picture indefinitely.
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({ avatar_path: path, avatar_updated_at: Date.now() })
+      .eq('id', uid);
+    if (profileError) return { ok: false, error: 'upload-failed' };
+
+    return { ok: true, path };
+  } catch {
+    return { ok: false, error: 'upload-failed' };
+  }
+}
+
+export async function removeAvatar(): Promise<boolean> {
+  const uid = useAuthStore.getState().user?.id;
+  if (!uid || !isSupabaseConfigured) return false;
+
+  try {
+    await supabase.storage.from(AVATAR_BUCKET).remove([avatarPath(uid)]);
+    const { error } = await supabase
+      .from('profiles')
+      .update({ avatar_path: null, avatar_updated_at: Date.now() })
+      .eq('id', uid);
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+/** Public URL for a stored avatar, with the cache-buster appended. */
+export function avatarUrl(path: string | null, updatedAt: number | null): string | null {
+  if (!path || !isSupabaseConfigured) return null;
+  const { data } = supabase.storage.from(AVATAR_BUCKET).getPublicUrl(path);
+  if (!data?.publicUrl) return null;
+  return updatedAt ? `${data.publicUrl}?v=${updatedAt}` : data.publicUrl;
+}
+
+/** Initials fallback, so a profile without a picture still reads as a person
+ * rather than an empty circle. */
+export function initialsFor(name: string | null, email: string | null): string {
+  const source = name?.trim() || email?.split('@')[0] || '';
+  const parts = source.split(/[\s._-]+/).filter(Boolean);
+  if (parts.length === 0) return '?';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}

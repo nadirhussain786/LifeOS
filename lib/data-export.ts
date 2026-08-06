@@ -1,7 +1,10 @@
+import { getTableName } from 'drizzle-orm';
 import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 
 import { getDb } from '@/database/client';
+import { HUB_SECTIONS } from '@/features/hub/config/modules';
+import { privatisedModules } from '@/features/private/store/private-store';
 import {
   budgetDebts,
   budgetSettings,
@@ -42,51 +45,103 @@ import {
   waterIntakeLogs,
 } from '@/database/schema';
 
+/**
+ * Every table the export covers, keyed by the name it takes in the JSON.
+ *
+ * A map rather than a literal object of queries, so the set of tables and the
+ * decision to *run* each query are separate — which is what makes skipping a
+ * privatised module possible without hand-maintaining a second list of what to
+ * skip. lib/data-coverage.test.ts asserts every schema table appears here.
+ */
+const EXPORT_TABLES = {
+  taskCategories,
+  tasks,
+  noteCategories,
+  notes,
+  noteTags,
+  noteTagLinks,
+  noteAttachments,
+  habitCategories,
+  habits,
+  habitLogs,
+  habitSkips,
+  habitRoutines,
+  habitRoutineItems,
+  journalEntries,
+  journalPrompts,
+  journalReflections,
+  journalAttachments,
+  entryLinks,
+  calendarEvents,
+  waterIntakeLogs,
+  songs,
+  playlists,
+  playlistSongs,
+  goals,
+  goalMilestones,
+  goalProgressLogs,
+  sleepSessions,
+  sleepSettings,
+  studySubjects,
+  studySessions,
+  studySettings,
+  budgetTransactions,
+  savingsGoals,
+  budgetSettings,
+  budgetDebts,
+  galleryAlbums,
+  galleryPhotos,
+} as const;
+
+/**
+ * SQL table names belonging to modules the user has moved behind the vault.
+ *
+ * Note this ignores whether the vault is currently unlocked. Somebody who has
+ * chosen to keep their journal private has not asked for it to be excluded
+ * *while locked* — they have asked for it not to end up in a JSON file that
+ * lands in Files, a chat, or a cloud drive. Making the contents of a backup
+ * depend on whether a PIN happened to be entered five minutes earlier would
+ * also produce two silently different exports from the same button.
+ */
+function privatisedTables(): Set<string> {
+  const privatised = privatisedModules();
+  if (privatised.length === 0) return new Set();
+
+  const tables = new Set<string>();
+  for (const section of HUB_SECTIONS) {
+    for (const module of section.modules) {
+      if (privatised.includes(module.id)) {
+        for (const table of module.tables) tables.add(table);
+      }
+    }
+  }
+  return tables;
+}
+
 /** Dumps every table to a single JSON file and opens the native share sheet —
  * the closest thing this local-only app has to a backup, since there's no
- * real account/cloud sync to restore from yet. */
+ * real account/cloud sync to restore from yet.
+ *
+ * `private_entries` is never here: see lib/data-coverage.test.ts. */
 export async function exportAllData(): Promise<void> {
   const db = getDb();
-  const data = {
-    exportedAt: new Date().toISOString(),
-    taskCategories: db.select().from(taskCategories).all(),
-    tasks: db.select().from(tasks).all(),
-    noteCategories: db.select().from(noteCategories).all(),
-    notes: db.select().from(notes).all(),
-    noteTags: db.select().from(noteTags).all(),
-    noteTagLinks: db.select().from(noteTagLinks).all(),
-    noteAttachments: db.select().from(noteAttachments).all(),
-    habitCategories: db.select().from(habitCategories).all(),
-    habits: db.select().from(habits).all(),
-    habitLogs: db.select().from(habitLogs).all(),
-    habitSkips: db.select().from(habitSkips).all(),
-    habitRoutines: db.select().from(habitRoutines).all(),
-    habitRoutineItems: db.select().from(habitRoutineItems).all(),
-    journalEntries: db.select().from(journalEntries).all(),
-    journalPrompts: db.select().from(journalPrompts).all(),
-    journalReflections: db.select().from(journalReflections).all(),
-    journalAttachments: db.select().from(journalAttachments).all(),
-    entryLinks: db.select().from(entryLinks).all(),
-    calendarEvents: db.select().from(calendarEvents).all(),
-    waterIntakeLogs: db.select().from(waterIntakeLogs).all(),
-    songs: db.select().from(songs).all(),
-    playlists: db.select().from(playlists).all(),
-    playlistSongs: db.select().from(playlistSongs).all(),
-    goals: db.select().from(goals).all(),
-    goalMilestones: db.select().from(goalMilestones).all(),
-    goalProgressLogs: db.select().from(goalProgressLogs).all(),
-    sleepSessions: db.select().from(sleepSessions).all(),
-    sleepSettings: db.select().from(sleepSettings).all(),
-    studySubjects: db.select().from(studySubjects).all(),
-    studySessions: db.select().from(studySessions).all(),
-    studySettings: db.select().from(studySettings).all(),
-    budgetTransactions: db.select().from(budgetTransactions).all(),
-    savingsGoals: db.select().from(savingsGoals).all(),
-    budgetSettings: db.select().from(budgetSettings).all(),
-    budgetDebts: db.select().from(budgetDebts).all(),
-    galleryAlbums: db.select().from(galleryAlbums).all(),
-    galleryPhotos: db.select().from(galleryPhotos).all(),
-  };
+  const skip = privatisedTables();
+
+  const data: Record<string, unknown> = { exportedAt: new Date().toISOString() };
+  const omitted: string[] = [];
+
+  for (const [key, table] of Object.entries(EXPORT_TABLES)) {
+    if (skip.has(getTableName(table))) {
+      omitted.push(key);
+      continue;
+    }
+    data[key] = db.select().from(table).all();
+  }
+
+  // Recorded in the file itself. An export that quietly contains less than the
+  // user expects is how somebody wipes a device believing they have a backup —
+  // so the gap is stated, by name, in the thing they keep.
+  if (omitted.length > 0) data.omittedPrivateModules = omitted;
 
   const file = new File(Paths.cache, `lifeos-export-${Date.now()}.json`);
   if (file.exists) file.delete();

@@ -9,13 +9,38 @@ import { listSongs } from '@/features/music/services/songs-repository';
 import { listNotes } from '@/features/notes/services/notes-repository';
 import { listStudySubjects } from '@/features/study/services/study-repository';
 import { listTasks } from '@/features/tasks/services/tasks-repository';
+import { HUB_SECTIONS } from '@/features/hub/config/modules';
+import { usePrivateStore } from '@/features/private/store/private-store';
 import {
   compareResults,
   scoreMatch,
   snippet,
   type SearchResult,
+  type SearchResultKind,
 } from '@/features/search/services/global-search';
 import { reportError } from '@/lib/error-reporting';
+
+/**
+ * Which result kinds must not appear, because their module is privatised and
+ * the vault is locked.
+ *
+ * Derived from the Hub registry's `searchKinds` rather than a second list here,
+ * so a module cannot be privatised in one place and forgotten in the other.
+ */
+function hiddenSearchKinds(): Set<SearchResultKind> {
+  const { privatised, key } = usePrivateStore.getState();
+  if (privatised.length === 0 || key !== null) return new Set();
+
+  const hidden = new Set<SearchResultKind>();
+  for (const section of HUB_SECTIONS) {
+    for (const module of section.modules) {
+      if (privatised.includes(module.id)) {
+        for (const kind of module.searchKinds) hidden.add(kind);
+      }
+    }
+  }
+  return hidden;
+}
 
 /**
  * Reads every module and returns what matches.
@@ -31,6 +56,18 @@ import { reportError } from '@/lib/error-reporting';
  */
 export function searchEverything(query: string, limit = 40): SearchResult[] {
   if (query.trim().length < 2) return [];
+
+  /**
+   * Result kinds belonging to a module the user has moved behind the vault and
+   * has not unlocked.
+   *
+   * Filtered at the end rather than by skipping sources: the sources are the
+   * per-module reads, and one of them silently not running is a much easier
+   * thing to get subtly wrong than one predicate applied to a finished list.
+   * Search is also the highest-consequence leak in the app — a title is enough
+   * to give the whole thing away — so the check wants to be somewhere obvious.
+   */
+  const hiddenKinds = hiddenSearchKinds();
 
   const results: SearchResult[] = [];
   const collect = (name: string, run: () => SearchResult[]) => {
@@ -217,5 +254,8 @@ export function searchEverything(query: string, limit = 40): SearchResult[] {
       .filter((r) => r.score > 0),
   );
 
-  return results.sort(compareResults).slice(0, limit);
+  return results
+    .filter((result) => !hiddenKinds.has(result.kind))
+    .sort(compareResults)
+    .slice(0, limit);
 }

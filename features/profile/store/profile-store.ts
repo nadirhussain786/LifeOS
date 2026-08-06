@@ -11,8 +11,20 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 export type FocusArea =
   'habits' | 'tasks' | 'journal' | 'water' | 'sleep' | 'fitness' | 'goals' | 'budget' | 'study';
 
+/**
+ * Asked once during onboarding, and used for exactly one thing: which private
+ * modules to offer first. It is a *suggestion input*, never a gate — a trans
+ * man tracking a cycle and a woman tracking urges are both real people, and
+ * every private module stays reachable regardless of the answer.
+ *
+ * Deliberately never synced and never sent anywhere. It buys nothing on the
+ * server and is a liability if it leaks.
+ */
+export type Gender = 'female' | 'male' | 'non_binary' | 'prefer_not_to_say';
+
 type ProfileState = {
   name: string;
+  gender: Gender | null;
   focusAreas: FocusArea[];
   onboardingComplete: boolean;
   appLockEnabled: boolean;
@@ -21,10 +33,12 @@ type ProfileState = {
   hydrated: boolean;
 
   setName: (name: string) => void;
+  setGender: (gender: Gender | null) => void;
   setFocusAreas: (areas: FocusArea[]) => void;
   setAppLockEnabled: (enabled: boolean) => void;
   completeOnboarding: (data: {
     name: string;
+    gender: Gender | null;
     focusAreas: FocusArea[];
     appLockEnabled: boolean;
   }) => void;
@@ -35,18 +49,26 @@ export const useProfileStore = create<ProfileState>()(
   persist(
     (set) => ({
       name: '',
+      gender: null,
       focusAreas: [],
       onboardingComplete: false,
       appLockEnabled: false,
       hydrated: false,
 
       setName: (name) => set({ name }),
+      setGender: (gender) => set({ gender }),
       setFocusAreas: (focusAreas) => set({ focusAreas }),
       setAppLockEnabled: (appLockEnabled) => set({ appLockEnabled }),
-      completeOnboarding: ({ name, focusAreas, appLockEnabled }) =>
-        set({ name: name.trim(), focusAreas, appLockEnabled, onboardingComplete: true }),
+      completeOnboarding: ({ name, gender, focusAreas, appLockEnabled }) =>
+        set({ name: name.trim(), gender, focusAreas, appLockEnabled, onboardingComplete: true }),
       reset: () =>
-        set({ name: '', focusAreas: [], onboardingComplete: false, appLockEnabled: false }),
+        set({
+          name: '',
+          gender: null,
+          focusAreas: [],
+          onboardingComplete: false,
+          appLockEnabled: false,
+        }),
     }),
     {
       name: 'lifeos-profile',

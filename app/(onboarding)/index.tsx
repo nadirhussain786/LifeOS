@@ -17,8 +17,8 @@ import { ArrowBack } from '@/components/ui/directional-icon';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
-import { FOCUS_AREAS, focusTint } from '@/features/profile/constants';
-import type { FocusArea } from '@/features/profile/store/profile-store';
+import { FOCUS_AREAS, GENDER_OPTIONS, focusTint } from '@/features/profile/constants';
+import type { FocusArea, Gender } from '@/features/profile/store/profile-store';
 import { useProfileStore } from '@/features/profile/store/profile-store';
 import {
   authenticate,
@@ -29,7 +29,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { alpha } from '@/lib/color';
 
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 5;
 
 export default function OnboardingScreen() {
   const router = useRouter();
@@ -41,6 +41,7 @@ export default function OnboardingScreen() {
 
   const [step, setStep] = useState(0);
   const [name, setName] = useState('');
+  const [gender, setGender] = useState<Gender | null>(null);
   const [focus, setFocus] = useState<FocusArea[]>([]);
   const [bioAvailable, setBioAvailable] = useState(false);
   const [bioLabel, setBioLabel] = useState('Biometrics');
@@ -54,7 +55,7 @@ export default function OnboardingScreen() {
     setFocus((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
 
   const finish = (appLockEnabled: boolean) => {
-    completeOnboarding({ name, focusAreas: focus, appLockEnabled });
+    completeOnboarding({ name, gender, focusAreas: focus, appLockEnabled });
     router.replace('/(tabs)');
   };
 
@@ -147,6 +148,49 @@ export default function OnboardingScreen() {
           {step === 2 ? (
             <View className="flex-1 gap-5 pt-8">
               <View className="gap-2">
+                <Text variant="micro">{t('onboarding.aboutYou')}</Text>
+                <Text className="font-sora-extrabold text-3xl tracking-tight text-foreground">
+                  {t('onboarding.genderQuestion')}
+                </Text>
+                {/* Says what it is for, because an app asking this without a
+                    reason is an app people close. */}
+                <Text variant="muted">{t('onboarding.genderWhy')}</Text>
+              </View>
+              <View className="gap-2.5">
+                {GENDER_OPTIONS.map((option) => {
+                  const selected = gender === option.id;
+                  return (
+                    <Pressable
+                      accessibilityRole="radio"
+                      accessibilityState={{ selected }}
+                      key={option.id}
+                      onPress={() => setGender(selected ? null : option.id)}
+                      className="flex-row items-center justify-between rounded-2xl border px-4 py-4"
+                      style={{
+                        borderColor: selected ? colors[scheme].accent : colors[scheme].border,
+                        backgroundColor: selected
+                          ? alpha(colors[scheme].accent, 0.12)
+                          : 'transparent',
+                      }}
+                    >
+                      <Text
+                        className="font-sora-medium"
+                        style={{
+                          color: selected ? colors[scheme].accent : colors[scheme].foreground,
+                        }}
+                      >
+                        {t(option.labelKey)}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </View>
+          ) : null}
+
+          {step === 3 ? (
+            <View className="flex-1 gap-5 pt-8">
+              <View className="gap-2">
                 <Text variant="micro">{t('dashboard.yourFocus')}</Text>
                 <Text className="font-sora-extrabold text-3xl tracking-tight text-foreground">
                   {t('onboarding.whatMatters')}
@@ -186,7 +230,7 @@ export default function OnboardingScreen() {
             </View>
           ) : null}
 
-          {step === 3 ? (
+          {step === 4 ? (
             <View className="flex-1 justify-center gap-6">
               <View className="h-20 w-20 items-center justify-center rounded-3xl bg-surface">
                 <ShieldCheck size={36} color={colors[scheme].accent} strokeWidth={1.8} />
@@ -229,11 +273,19 @@ export default function OnboardingScreen() {
           <Button
             variant="accent"
             size="lg"
-            label={focus.length ? t('common.continue') : t('onboarding.skipForNow')}
+            label={gender ? t('common.continue') : t('onboarding.skipForNow')}
             onPress={() => setStep(3)}
           />
         ) : null}
         {step === 3 ? (
+          <Button
+            variant="accent"
+            size="lg"
+            label={focus.length ? t('common.continue') : t('onboarding.skipForNow')}
+            onPress={() => setStep(4)}
+          />
+        ) : null}
+        {step === 4 ? (
           bioAvailable ? (
             <>
               <Button

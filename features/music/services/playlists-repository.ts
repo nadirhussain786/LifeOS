@@ -7,8 +7,11 @@ import { LOCAL_USER_ID } from '@/lib/local-user';
 import type { Playlist } from '@/features/music/types/music.types';
 
 function songCountFor(playlistId: string): number {
-  return getDb().select().from(playlistSongs).where(eq(playlistSongs.playlistId, playlistId)).all()
-    .length;
+  return getDb()
+    .select()
+    .from(playlistSongs)
+    .where(and(eq(playlistSongs.playlistId, playlistId), isNull(playlistSongs.deletedAt)))
+    .all().length;
 }
 
 function toPlaylist(row: typeof playlists.$inferSelect): Playlist {
@@ -78,11 +81,21 @@ export function renamePlaylist(id: string, name: string) {
 
 export function deletePlaylist(id: string) {
   const db = getDb();
+  // `updatedAt` matters as much as `deletedAt`: the push selects
+  // `WHERE (updated_at, id) > cursor`, so a tombstone that leaves updated_at at
+  // the row's last edit is never picked up. The delete then stays local, and the
+  // next pull writes the playlist back onto the device that deleted it.
   db.update(playlists)
-    .set({ deletedAt: Date.now(), syncStatus: 'pending' })
+    .set({ deletedAt: Date.now(), updatedAt: Date.now(), syncStatus: 'pending' })
     .where(eq(playlists.id, id))
     .run();
-  db.delete(playlistSongs).where(eq(playlistSongs.playlistId, id)).run();
+  // Soft, like the playlist itself: playlist membership syncs now, and a hard
+  // DELETE leaves nothing for the engine to push, so the next pull would put
+  // every song back into the playlist that was just emptied.
+  db.update(playlistSongs)
+    .set({ deletedAt: Date.now(), updatedAt: Date.now() })
+    .where(and(eq(playlistSongs.playlistId, id), isNull(playlistSongs.deletedAt)))
+    .run();
 }
 
 /** Ordered song ids for one playlist. */
@@ -90,7 +103,7 @@ export function listPlaylistSongIds(playlistId: string): string[] {
   return getDb()
     .select()
     .from(playlistSongs)
-    .where(eq(playlistSongs.playlistId, playlistId))
+    .where(and(eq(playlistSongs.playlistId, playlistId), isNull(playlistSongs.deletedAt)))
     .orderBy(playlistSongs.position)
     .all()
     .map((row) => row.songId);
@@ -98,36 +111,57 @@ export function listPlaylistSongIds(playlistId: string): string[] {
 
 export function addSongToPlaylist(playlistId: string, songId: string) {
   const db = getDb();
+  const now = Date.now();
   const existing = db
     .select()
     .from(playlistSongs)
     .where(and(eq(playlistSongs.playlistId, playlistId), eq(playlistSongs.songId, songId)))
     .get();
-  if (existing) return;
+
+  // A row may exist but be soft-deleted from an earlier removal. Reviving it
+  // keeps the derived id — and therefore the server row — stable.
+  if (existing) {
+    if (existing.deletedAt === null) return;
+    db.update(playlistSongs)
+      .set({ deletedAt: null, updatedAt: now })
+      .where(and(eq(playlistSongs.playlistId, playlistId), eq(playlistSongs.songId, songId)))
+      .run();
+    return;
+  }
 
   const maxPosition = db
     .select()
     .from(playlistSongs)
-    .where(eq(playlistSongs.playlistId, playlistId))
+    .where(and(eq(playlistSongs.playlistId, playlistId), isNull(playlistSongs.deletedAt)))
     .all()
     .reduce((max, row) => Math.max(max, row.position), -1);
   db.insert(playlistSongs)
-    .values({ playlistId, songId, position: maxPosition + 1 })
+    .values({
+      id: `${playlistId}:${songId}`,
+      userId: LOCAL_USER_ID,
+      playlistId,
+      songId,
+      position: maxPosition + 1,
+      updatedAt: now,
+    })
     .run();
 }
 
 export function removeSongFromPlaylist(playlistId: string, songId: string) {
+  const now = Date.now();
   getDb()
-    .delete(playlistSongs)
+    .update(playlistSongs)
+    .set({ deletedAt: now, updatedAt: now })
     .where(and(eq(playlistSongs.playlistId, playlistId), eq(playlistSongs.songId, songId)))
     .run();
 }
 
 export function reorderPlaylistSongs(playlistId: string, orderedSongIds: string[]) {
   const db = getDb();
+  const now = Date.now();
   orderedSongIds.forEach((songId, index) => {
     db.update(playlistSongs)
-      .set({ position: index })
+      .set({ position: index, updatedAt: now })
       .where(and(eq(playlistSongs.playlistId, playlistId), eq(playlistSongs.songId, songId)))
       .run();
   });

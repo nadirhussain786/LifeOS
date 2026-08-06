@@ -121,7 +121,10 @@ async function configureAudioMode() {
 function loadIndex(index: number, autoplay: boolean) {
   const { queue } = usePlayerStore.getState();
   const song = queue[index];
-  if (!song) return;
+  // `playQueue` keeps unplayable songs out of the queue; this is the backstop
+  // for any other path in. `replace('')` puts the native player into an error
+  // state it does not recover from.
+  if (!song || !isPlayable(song)) return;
 
   const p = ensurePlayer();
   usePlayerStore.getState().setIndex(index);
@@ -169,16 +172,31 @@ function shuffleAround(songs: Song[], startIndex: number): Song[] {
 /** Starts playing `songs` as a fresh queue beginning at `startIndex` —
  * called whenever a screen taps a song to play (library, playlist detail). */
 export async function playQueue(songs: Song[], startIndex: number) {
-  if (songs.length === 0) return;
+  // Songs sync as rows; the audio files do not. A song pulled from another
+  // device has an empty `uri` and nothing to play, so it is filtered out here
+  // rather than at every call site — the queue is the one place that has to be
+  // certain every entry can actually be loaded. Skipping the index forward
+  // keeps the tapped song playing when the ones before it were unavailable.
+  const requested = songs[startIndex];
+  const playable = songs.filter(isPlayable);
+  if (playable.length === 0) return;
+  const index = requested && isPlayable(requested) ? playable.indexOf(requested) : 0;
+
   await configureAudioMode();
   // A dismissed bar comes back as soon as something new starts playing.
   usePlayerUiStore.getState().setHidden(false);
 
   const { shuffle } = usePlayerStore.getState();
-  const queue = shuffle ? shuffleAround(songs, startIndex) : songs;
-  const newIndex = shuffle ? 0 : startIndex;
-  usePlayerStore.getState().setQueue(songs, queue, newIndex);
+  const queue = shuffle ? shuffleAround(playable, index) : playable;
+  const newIndex = shuffle ? 0 : index;
+  usePlayerStore.getState().setQueue(playable, queue, newIndex);
   loadIndex(newIndex, true);
+}
+
+/** Whether this device holds the audio file — see `isOnThisDevice` in the
+ * gallery for the same idea on the other media module. */
+export function isPlayable(song: Song): boolean {
+  return song.uri.length > 0;
 }
 
 /** Turns shuffle on and plays the whole set from a random starting point —

@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import { BellOff, CheckCheck, Clock, Trash2 } from 'lucide-react-native';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
@@ -20,6 +20,7 @@ import {
 import { notificationStatus } from '@/features/notifications/services/notification-status';
 import { alpha } from '@/lib/color';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { confirm } from '@/lib/dialog-store';
 
 function NotificationRow({
   item,
@@ -121,10 +122,16 @@ export default function NotificationsInboxScreen() {
   };
 
   const confirmClear = () => {
-    Alert.alert(t('notif.clearAllTitle'), t('notif.clearAllBody'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      { text: t('notif.clear'), style: 'destructive', onPress: () => clearAll.mutate() },
-    ]);
+    void confirm({
+      title: t('notif.clearAllTitle'),
+      message: t('notif.clearAllBody'),
+      confirmLabel: t('notif.clear'),
+      cancelLabel: t('common.cancel'),
+      destructive: true,
+    }).then(async (ok) => {
+      if (!ok) return;
+      clearAll.mutate();
+    });
   };
 
   if (notifications.length === 0) {

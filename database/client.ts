@@ -1,6 +1,7 @@
 import { drizzle } from 'drizzle-orm/expo-sqlite';
 import { openDatabaseSync } from 'expo-sqlite';
 
+import { bootstrapDatabase } from '@/database/bootstrap';
 import * as schema from '@/database/schema';
 
 type Database = ReturnType<typeof drizzle<typeof schema>>;
@@ -26,33 +27,17 @@ let rawInstance: RawDatabase | null = null;
  * Revisit generated migrations once the schema needs versioned changes
  * shipped to existing users' devices.
  */
-/**
- * Adds columns introduced after a table's initial CREATE TABLE IF NOT EXISTS
- * to any database that already has that table from an earlier install —
- * see schema.ts's ADDITIVE_COLUMNS for why this exists instead of a real
- * migrator.
- */
-function applyAdditiveColumns(sqliteDb: ReturnType<typeof openDatabaseSync>) {
-  for (const [table, columns] of Object.entries(schema.ADDITIVE_COLUMNS)) {
-    const existing = new Set(
-      sqliteDb.getAllSync<{ name: string }>(`PRAGMA table_info(${table})`).map((row) => row.name),
-    );
-    for (const column of columns) {
-      if (!existing.has(column.name)) sqliteDb.execSync(column.ddl);
-    }
-  }
-}
-
 export function getDb(): Database {
   if (!instance) {
     const sqliteDb = openDatabaseSync('lifeos.db');
-    sqliteDb.execSync(schema.TABLE_BOOTSTRAP_SQL);
-    applyAdditiveColumns(sqliteDb);
-    // Must follow the ALTERs and precede anything that reads the data: a column
-    // added with a default leaves every existing row at that default, which for
-    // `updated_at` means invisible to the sync engine forever.
-    sqliteDb.execSync(schema.BACKFILL_SQL);
-    sqliteDb.execSync(schema.INDEX_BOOTSTRAP_SQL);
+    // Write-ahead logging. Sync writes a page of pulled rows in one transaction
+    // while the UI is reading the same tables; under the default rollback
+    // journal those readers block for the length of the write. It is also
+    // markedly faster for the many small writes the app makes.
+    sqliteDb.execSync('PRAGMA journal_mode = WAL');
+    // The steps, and why they are in this order, are in database/bootstrap.ts —
+    // which exists so a test can run exactly this against a real SQLite.
+    bootstrapDatabase(sqliteDb);
     rawInstance = sqliteDb;
     instance = drizzle(sqliteDb, { schema });
   }

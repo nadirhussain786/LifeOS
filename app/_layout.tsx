@@ -45,6 +45,16 @@ import { AppLockOverlay } from '@/features/security/components/app-lock-overlay'
 import { useAppLock } from '@/features/security/hooks/use-app-lock';
 import { useAuthStore } from '@/features/auth/services/auth-store';
 import { useAuthGate } from '@/features/auth/hooks/use-auth-gate';
+import { useUsageReporter } from '@/features/analytics/hooks/use-usage-reporter';
+import { DialogHost } from '@/components/ui/dialog-host';
+import { UsageConsentCard } from '@/features/analytics/components/usage-consent-card';
+import { BlockedOverlay } from '@/features/moderation/components/blocked-overlay';
+import { useAccountStandingSync } from '@/features/moderation/hooks/use-account-standing';
+import {
+  useModuleFlagsSync,
+  useModuleRouteGuard,
+} from '@/features/module-flags/hooks/use-module-access';
+import { usePrivateAutoLock } from '@/features/private/hooks/use-private-lock';
 import { useSplashStore } from '@/hooks/use-splash-store';
 import { useSyncTrigger } from '@/features/sync/hooks/use-sync';
 import { SyncStatusBridge } from '@/features/sync/components/sync-status-bridge';
@@ -103,6 +113,20 @@ function WidgetSync() {
   return null;
 }
 
+/** Counts which modules get opened, and flushes the rollup on background. Must
+ * live inside the router (reads the pathname). Renders nothing. */
+function UsageReporter() {
+  useUsageReporter();
+  return null;
+}
+
+/** Keeps the account's moderation standing fresh, so an expired restriction
+ * clears itself and a blocked account can be told why. Renders nothing. */
+function AccountStandingBridge() {
+  useAccountStandingSync();
+  return null;
+}
+
 /** Applies the persisted language to i18next once the store hydrates / changes. */
 /** Registers this device for group push once there is a session, and releases
  *  it on sign-out so a shared phone stops receiving a previous account's
@@ -128,6 +152,27 @@ function LanguageBridge() {
 /** Raises the app-lock shield on cold start / when returning from background. */
 function AppLockController() {
   useAppLock();
+  return null;
+}
+
+/** Drops the private space's key when the app leaves the foreground. Separate
+ * from the app lock on purpose: unlocking the app must not unlock the vault. */
+function PrivateAutoLock() {
+  usePrivateAutoLock();
+  return null;
+}
+
+/** Pulls the operator's module switches on launch and each foreground, so a
+ * module can be withdrawn without an app-store round trip. Renders nothing. */
+function ModuleFlagsBridge() {
+  useModuleFlagsSync();
+  return null;
+}
+
+/** Redirects off any module that is switched off or kept private and locked.
+ * Must live inside the router (reads the pathname). Renders nothing. */
+function ModuleRouteGuard() {
+  useModuleRouteGuard();
   return null;
 }
 
@@ -226,9 +271,14 @@ export default function RootLayout() {
                   name="gallery/story/[period]"
                   options={{ presentation: 'fullScreenModal', animation: 'fade' }}
                 />
+                <Stack.Screen name="profile" />
                 <Stack.Screen name="settings/index" />
                 <Stack.Screen name="settings/notifications" />
                 <Stack.Screen name="settings/sync" />
+                <Stack.Screen name="settings/blocked" />
+                {/* The private space brings its own layout (screenshot block,
+                    no swipe-back), so it is registered as one route here. */}
+                <Stack.Screen name="private" />
                 <Stack.Screen name="notifications" />
                 <Stack.Screen name="search" options={{ presentation: 'modal' }} />
                 <Stack.Screen name="task/new" options={{ presentation: 'modal' }} />
@@ -249,10 +299,15 @@ export default function RootLayout() {
               <AuthGate />
               <SyncTrigger />
               <SyncStatusBridge />
+              <AccountStandingBridge />
+              <UsageReporter />
               <WidgetSync />
               <LanguageBridge />
               <PushRegistrationBridge />
               <AppLockController />
+              <PrivateAutoLock />
+              <ModuleFlagsBridge />
+              <ModuleRouteGuard />
               <NotificationNavigationBridge />
               <NotificationCenterBridge />
               <MiniPlayerBar />
@@ -261,9 +316,18 @@ export default function RootLayout() {
             {/* Above the navigator so a toast raised by a delete outlives the
                 router.back() that immediately follows it. */}
             <ToastHost />
+            {/* Above the toast: a dialog asks a question and a toast reports an
+                answer, so a toast must never cover the thing it is waiting on. */}
+            <DialogHost />
             {/* Top of the screen, where the OS banner would have been. */}
             <NotificationBanner />
-            {/* On top of everything: the lock shield, then the cold-start splash. */}
+            {/* Below the overlays and above the app: nothing is collected until
+                it is answered, so it never needs to interrupt anything. */}
+            <UsageConsentCard />
+            {/* On top of everything: the block notice, the lock shield, then the
+                cold-start splash. Blocked sits under the lock deliberately —
+                the device's owner still authenticates first. */}
+            <BlockedOverlay />
             <AppLockOverlay />
             {!splashDone && (
               <AnimatedSplash
