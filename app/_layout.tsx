@@ -47,6 +47,7 @@ import { useAuthStore } from '@/features/auth/services/auth-store';
 import { useAuthGate } from '@/features/auth/hooks/use-auth-gate';
 import { useUsageReporter } from '@/features/analytics/hooks/use-usage-reporter';
 import { DialogHost } from '@/components/ui/dialog-host';
+import { Grain } from '@/components/ui/grain';
 import { UsageConsentCard } from '@/features/analytics/components/usage-consent-card';
 import { BlockedOverlay } from '@/features/moderation/components/blocked-overlay';
 import { useAccountStandingSync } from '@/features/moderation/hooks/use-account-standing';
@@ -313,6 +314,11 @@ export default function RootLayout() {
               <MiniPlayerBar />
               <DevErrorBanner />
             </ErrorBoundary>
+            {/* Directly above the navigator and below every overlay: the grain
+                is a property of the app's surface, so it sits over the content
+                but must never fall across a dialog, a toast or the lock shield
+                — those are separate planes floating in front of it. */}
+            <Grain />
             {/* Above the navigator so a toast raised by a delete outlives the
                 router.back() that immediately follows it. */}
             <ToastHost />
