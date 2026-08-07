@@ -10,8 +10,8 @@ import { BarChart, type BarDatum } from '@/components/ui/bar-chart';
 import { EmptyState } from '@/components/ui/empty-state';
 import { QueryError } from '@/components/ui/query-error';
 import { Fab } from '@/components/ui/fab';
-import { HeroCard } from '@/components/ui/hero-card';
-import { ProgressRing } from '@/components/ui/progress-ring';
+import { ProgressBar } from '@/components/ui/progress-bar';
+import { StatHero } from '@/components/ui/stat-hero';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Segmented } from '@/components/ui/segmented';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -93,39 +93,20 @@ export default function SleepScreen() {
             </View>
           ) : (
             <>
-              <HeroCard tint={sleepTint}>
-                <View className="items-center gap-3">
-                  <ProgressRing
-                    progress={lastNightRatio}
-                    size={172}
-                    strokeWidth={14}
-                    color="#ffffff"
-                    trackColor={alpha('#ffffff', 0.25)}
-                  >
-                    <View className="items-center">
-                      <Text
-                        className="font-sora-extrabold text-3xl"
-                        style={{ color: '#ffffff', fontVariant: ['tabular-nums'] }}
-                      >
-                        {latest ? formatDuration(latest.durationMinutes) : '—'}
-                      </Text>
-                      <Text style={{ color: alpha('#ffffff', 0.8), fontSize: 12 }}>
-                        {t('sleep.ofGoal', { duration: formatDuration(goalMinutes) })}
-                      </Text>
-                    </View>
-                  </ProgressRing>
-                  {latest && (
-                    <View className="flex-row items-center gap-2">
-                      <Moon size={14} color={alpha('#ffffff', 0.85)} />
-                      <Text style={{ color: alpha('#ffffff', 0.9) }}>
-                        {t('sleep.lastNight', {
-                          date: format(parseISO(latest.logDate), 'EEE, MMM d'),
-                        })}
-                      </Text>
-                    </View>
-                  )}
-                </View>
-              </HeroCard>
+              <StatHero
+                eyebrow={
+                  latest
+                    ? t('sleep.lastNight', {
+                        date: format(parseISO(latest.logDate), 'EEE, MMM d'),
+                      })
+                    : t('sleep.lastNightEyebrow', { defaultValue: 'Last night' })
+                }
+                value={latest ? formatDuration(latest.durationMinutes) : '—'}
+                caption={t('sleep.ofGoal', { duration: formatDuration(goalMinutes) })}
+                tint={sleepTint}
+                icon={Moon}
+                aside={<ProgressBar progress={lastNightRatio} color={sleepTint} height={6} />}
+              />
 
               <SleepStatsRow stats={stats} />
 

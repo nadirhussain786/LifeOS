@@ -18,8 +18,8 @@ import { BarChart, type BarDatum } from '@/components/ui/bar-chart';
 import { EmptyState } from '@/components/ui/empty-state';
 import { QueryError } from '@/components/ui/query-error';
 import { GradientButton } from '@/components/ui/gradient-button';
-import { HeroCard } from '@/components/ui/hero-card';
-import { ProgressRing } from '@/components/ui/progress-ring';
+import { ProgressBar } from '@/components/ui/progress-bar';
+import { StatHero } from '@/components/ui/stat-hero';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Segmented } from '@/components/ui/segmented';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -152,29 +152,14 @@ export default function StudyScreen() {
             </Pressable>
           )}
 
-          <HeroCard tint={studyTint}>
-            <View className="items-center gap-1">
-              <ProgressRing
-                progress={todayRatio}
-                size={168}
-                strokeWidth={14}
-                color="#ffffff"
-                trackColor={alpha('#ffffff', 0.25)}
-              >
-                <View className="items-center">
-                  <Text
-                    className="font-sora-extrabold text-3xl"
-                    style={{ color: '#ffffff', fontVariant: ['tabular-nums'] }}
-                  >
-                    {formatStudyDuration(stats.todaySeconds)}
-                  </Text>
-                  <Text style={{ color: alpha('#ffffff', 0.8), fontSize: 12 }}>
-                    {t('study.ofToday', { duration: formatStudyDuration(dailyGoalSeconds) })}
-                  </Text>
-                </View>
-              </ProgressRing>
-            </View>
-          </HeroCard>
+          <StatHero
+            eyebrow={t('study.today')}
+            value={formatStudyDuration(stats.todaySeconds)}
+            caption={t('study.ofToday', { duration: formatStudyDuration(dailyGoalSeconds) })}
+            tint={studyTint}
+            icon={GraduationCap}
+            aside={<ProgressBar progress={todayRatio} color={studyTint} height={6} />}
+          />
 
           {/* Start a session */}
           <View className={cardClass({ padding: 'md', elevation: 'e1' }, 'gap-3')}>
