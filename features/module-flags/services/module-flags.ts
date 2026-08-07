@@ -2,6 +2,7 @@ import {
   useModuleFlagsStore,
   type ModuleFlag,
 } from '@/features/module-flags/store/module-flags-store';
+import { resyncAllReminders } from '@/features/notifications/services/reminder-scheduler';
 import { isSupabaseConfigured } from '@/lib/env';
 import { supabase } from '@/lib/supabase';
 
@@ -43,8 +44,31 @@ async function runRefresh(): Promise<void> {
         message: typeof row.message === 'string' && row.message.length > 0 ? row.message : null,
       };
     }
+    const before = disabledSet(useModuleFlagsStore.getState().flags);
     useModuleFlagsStore.getState().setFlags(flags);
+    const after = disabledSet(flags);
+
+    // A module the operator has just pulled may still have a fortnight of its
+    // reminders queued with the OS, and those keep firing — pointing at a
+    // screen the guard now redirects away from. Rebuilding drops them (see
+    // notification-visibility.ts), and rebuilding on the way back restores
+    // them. Only on an actual change: a resync cancels and re-schedules
+    // everything the app owns, which is not something to do on every
+    // foreground.
+    if (!sameSet(before, after)) void resyncAllReminders();
   } catch {
     // Keep whatever we already had — see the note above.
   }
+}
+
+function disabledSet(flags: Record<string, ModuleFlag>): Set<string> {
+  return new Set(
+    Object.entries(flags)
+      .filter(([, flag]) => !flag.enabled)
+      .map(([module]) => module),
+  );
+}
+
+function sameSet(a: Set<string>, b: Set<string>): boolean {
+  return a.size === b.size && [...a].every((value) => b.has(value));
 }

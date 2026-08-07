@@ -25,6 +25,7 @@ import {
   setUpDecoy,
 } from '@/features/private/services/vault-keys';
 import { usePrivateStore } from '@/features/private/store/private-store';
+import { resyncAllReminders } from '@/features/notifications/services/reminder-scheduler';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { confirm } from '@/lib/dialog-store';
 
@@ -48,6 +49,8 @@ export default function PrivateSettingsScreen() {
   const toggleModule = usePrivateStore((s) => s.toggleModule);
   const privatised = usePrivateStore((s) => s.privatised);
   const togglePrivatised = usePrivateStore((s) => s.togglePrivatised);
+  const hiddenFromSettings = usePrivateStore((s) => s.hiddenFromSettings);
+  const setHiddenFromSettings = usePrivateStore((s) => s.setHiddenFromSettings);
   const reset = usePrivateStore((s) => s.reset);
 
   const [mode, setMode] = useState<Mode>('menu');
@@ -77,6 +80,27 @@ export default function PrivateSettingsScreen() {
       if (!ok) return;
       deleteModuleRecords(id);
       toggleModule(id);
+    });
+  };
+
+  /**
+   * Turning this on is the one setting in the app that can make the app appear
+   * to have lost a feature, so it is gated behind a dialog that states the
+   * replacement gesture rather than a subtitle nobody reads. Turning it back off
+   * needs no confirmation — restoring a visible row cannot lock anyone out.
+   */
+  const toggleHidden = (next: boolean) => {
+    if (!next) {
+      setHiddenFromSettings(false);
+      return;
+    }
+    void confirm({
+      title: t('private.hideRowTitle'),
+      message: t('private.hideRowBody'),
+      confirmLabel: t('private.hideRowConfirm'),
+      cancelLabel: t('common.cancel'),
+    }).then((ok) => {
+      if (ok) setHiddenFromSettings(true);
     });
   };
 
@@ -234,7 +258,17 @@ export default function PrivateSettingsScreen() {
               </View>
               <Switch
                 value={privatised.includes(module.id)}
-                onValueChange={() => togglePrivatised(module.id)}
+                onValueChange={() => {
+                  togglePrivatised(module.id);
+                  // Reminders already sitting in the OS queue carry the text
+                  // they were scheduled with, and the OS will not let us edit
+                  // it. Making a module private has to rebuild them or the
+                  // next fortnight of notifications keeps naming its contents
+                  // on the lock screen — the switch would appear to work and
+                  // quietly not. The rebuild also restores the real text when
+                  // the switch goes back the other way.
+                  void resyncAllReminders();
+                }}
                 trackColor={{ true: theme.accent, false: theme.border }}
               />
             </View>
@@ -260,6 +294,23 @@ export default function PrivateSettingsScreen() {
         <View className="gap-3">
           <Text variant="micro">{t('private.security')}</Text>
           <View className="gap-2">
+            {/*
+              Offered only from the real space, for the same reason the decoy row
+              is: inside the decoy, a switch that hides the way in would be one
+              more thing that behaves differently there.
+            */}
+            <View className={cardClass({ padding: 'rowLg' }, 'flex-row items-center gap-3')}>
+              <View className="flex-1">
+                <Text className="font-sora-medium text-foreground">{t('private.hideRow')}</Text>
+                <Text variant="caption">{t('private.hideRowHint')}</Text>
+              </View>
+              <Switch
+                value={hiddenFromSettings}
+                onValueChange={toggleHidden}
+                trackColor={{ true: theme.accent, false: theme.border }}
+              />
+            </View>
+
             <Pressable
               accessibilityRole="button"
               onPress={() => setMode('change-current')}

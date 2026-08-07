@@ -1245,7 +1245,9 @@
     "digestMoney_other": "{{count}} money reminders",
     "digestJournal": "journal to write",
     "digestWater": "water to drink",
-    "statusOverBudget": "At this device’s limit of {{limit}} queued reminders — some may not fire. Reduce hydration reminders or turn off a category."
+    "statusOverBudget": "At this device’s limit of {{limit}} queued reminders — some may not fire. Reduce hydration reminders or turn off a category.",
+    "redactedTitle": "LifeOS",
+    "redactedBody": "You have a reminder."
   },
   "notifCategory": {
     "tasks": {
@@ -1720,6 +1722,11 @@
     "destroyConfirm": "Delete everything",
     "moveModules": "Keep other modules private",
     "moveModulesNote": "These move into this space: hidden from the Hub, locked behind your PIN, and left out of search and exports. Their existing data stays in the app's normal storage, so this hides them rather than re-encrypting them.",
+    "hideRow": "Hide from Settings",
+    "hideRowHint": "Removes the private space row. Long-press the version number under Settings → About to get back in.",
+    "hideRowTitle": "Hide the way in?",
+    "hideRowBody": "The private space row disappears from Settings. To get back in, long-press the version number under Settings → About. Nothing is deleted and nothing else changes — try the gesture once now, so you know it works.",
+    "hideRowConfirm": "Hide it",
     "operatorNotice": "For safety and abuse investigations, LifeOS staff can access private space contents. Every access is logged. See the privacy policy."
   },
   "moduleFlags": {

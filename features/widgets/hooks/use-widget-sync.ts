@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
 
+import { useModuleFlagsStore } from '@/features/module-flags/store/module-flags-store';
+import { usePrivateStore } from '@/features/private/store/private-store';
 import { syncTodayWidget } from '@/features/widgets/services/widget-data';
 import { queryClient } from '@/lib/query-client';
 
@@ -13,6 +15,14 @@ const WATCHED = new Set(['tasks', 'habits', 'water-intake']);
  * widget module — which removes the features↔widgets cycle. Debounced so a
  * burst of cache updates triggers a single refresh. Mounted once at root;
  * no-ops off Android (syncTodayWidget guards on platform).
+ *
+ * It also watches the two switches that can hide a row entirely — the user's
+ * privatised list and the operator's flags. Those change no query data at all,
+ * so without this the home screen would keep displaying a module's counts after
+ * it was moved behind the vault, until something unrelated happened to
+ * invalidate a task. Subscribed here rather than called from the settings screen
+ * so every path that can flip them is covered, including a flag arriving from
+ * the server while the app sits in the foreground.
  */
 export function useWidgetSync() {
   useEffect(() => {
@@ -22,14 +32,24 @@ export function useWidgetSync() {
       timer = setTimeout(() => void syncTodayWidget(), 500);
     };
 
-    const unsubscribe = queryClient.getQueryCache().subscribe((event) => {
+    const unsubscribeCache = queryClient.getQueryCache().subscribe((event) => {
       const key = event.query.queryKey?.[0];
       if (typeof key === 'string' && WATCHED.has(key)) schedule();
     });
 
+    const unsubscribePrivate = usePrivateStore.subscribe((state, previous) => {
+      if (state.privatised !== previous.privatised) schedule();
+    });
+
+    const unsubscribeFlags = useModuleFlagsStore.subscribe((state, previous) => {
+      if (state.flags !== previous.flags) schedule();
+    });
+
     return () => {
       if (timer) clearTimeout(timer);
-      unsubscribe();
+      unsubscribeCache();
+      unsubscribePrivate();
+      unsubscribeFlags();
     };
   }, []);
 }

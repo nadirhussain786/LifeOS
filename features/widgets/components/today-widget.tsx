@@ -52,7 +52,8 @@ function Row({ color, text, uri }: { color: HexColor; text: string; uri: string 
 }
 
 export function TodayWidget({ snapshot }: { snapshot: TodaySnapshot }) {
-  const { tasksDue, habitsLeft, waterMl, waterGoalMl } = snapshot;
+  const { tasksDue, habitsLeft, waterMl, waterGoalMl, show } = snapshot;
+  const anyVisible = show.tasks || show.habits || show.water;
 
   return (
     <FlexWidget
@@ -73,21 +74,40 @@ export function TodayWidget({ snapshot }: { snapshot: TodaySnapshot }) {
         text="TODAY"
         style={{ fontSize: 12, color: C.muted, fontFamily: 'sans-serif-medium', letterSpacing: 1 }}
       />
-      <Row
-        color={C.tasks}
-        uri={WIDGET_LINKS.tasks}
-        text={`${tasksDue} ${tasksDue === 1 ? 'task' : 'tasks'} due`}
-      />
-      <Row
-        color={C.habits}
-        uri={WIDGET_LINKS.habits}
-        text={`${habitsLeft} ${habitsLeft === 1 ? 'habit' : 'habits'} left`}
-      />
-      <Row
-        color={C.water}
-        uri={WIDGET_LINKS.water}
-        text={`${liters(waterMl)} / ${liters(waterGoalMl)} L water`}
-      />
+      {show.tasks ? (
+        <Row
+          color={C.tasks}
+          uri={WIDGET_LINKS.tasks}
+          text={`${tasksDue} ${tasksDue === 1 ? 'task' : 'tasks'} due`}
+        />
+      ) : null}
+      {show.habits ? (
+        <Row
+          color={C.habits}
+          uri={WIDGET_LINKS.habits}
+          text={`${habitsLeft} ${habitsLeft === 1 ? 'habit' : 'habits'} left`}
+        />
+      ) : null}
+      {show.water ? (
+        <Row
+          color={C.water}
+          uri={WIDGET_LINKS.water}
+          text={`${liters(waterMl)} / ${liters(waterGoalMl)} L water`}
+        />
+      ) : null}
+      {/*
+        Every row hidden. This is what a widget shows when all three modules are
+        private, switched off, or simply not synced yet, and it deliberately
+        reads the same in all of those cases — "your habits are hidden" would
+        announce on the home screen exactly what hiding them was meant to
+        prevent. It stays tappable, so it is still a way into the app.
+      */}
+      {anyVisible ? null : (
+        <TextWidget
+          text="Open LifeOS"
+          style={{ fontSize: 15, color: C.muted, fontFamily: 'sans-serif-medium', marginTop: 6 }}
+        />
+      )}
     </FlexWidget>
   );
 }

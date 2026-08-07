@@ -40,6 +40,7 @@ import { queryClient } from '@/lib/query-client';
 import { confirm, notify } from '@/lib/dialog-store';
 import { toast } from '@/lib/toast-store';
 import { isVaultSetUp } from '@/features/private/services/vault-keys';
+import { usePrivateStore } from '@/features/private/store/private-store';
 import { useProfileStore } from '@/features/profile/store/profile-store';
 import {
   authenticate,
@@ -86,6 +87,21 @@ export default function SettingsScreen() {
   // Decides whether the private-space row leads to setup or the PIN pad. Says
   // nothing about what is inside, only whether a space exists.
   const [privateSetUp, setPrivateSetUp] = useState(false);
+  const privateHidden = usePrivateStore((state) => state.hiddenFromSettings);
+
+  /**
+   * The way into the private space.
+   *
+   * Called by the visible row and — always, hidden or not — by a long-press on
+   * the version number. Wired up unconditionally on purpose: a gesture that
+   * only starts working once it is the only way in is a gesture nobody has ever
+   * successfully performed, and the first attempt would be made by someone who
+   * had just locked themselves out.
+   */
+  const openPrivateSpace = () => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.push(privateSetUp ? '/private/unlock' : '/private/setup');
+  };
 
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
@@ -307,26 +323,33 @@ export default function SettingsScreen() {
                 />
               }
             />
-            {/*
-              The one visible entry point to the private space. Its *existence*
-              is not the secret — its contents are, and those need a separate
-              PIN. Hiding this row too would leave no way back in, which is a
-              worse failure than an onlooker knowing the feature exists at all.
-            */}
             <SettingsRow
               icon={UserCircle}
               label={t('profile.title')}
               subtitle={t('profile.settingsSubtitle')}
               onPress={() => router.push('/profile')}
             />
-            <SettingsRow
-              icon={EyeOff}
-              label={t('private.entryLabel')}
-              subtitle={
-                privateSetUp ? t('private.entrySubtitleSetUp') : t('private.entrySubtitleNew')
-              }
-              onPress={() => router.push(privateSetUp ? '/private/unlock' : '/private/setup')}
-            />
+            {/*
+              The visible entry point to the private space. Its *existence* is
+              normally treated as safe to disclose — the contents are the secret
+              and they need a separate PIN — so this row is shown by default,
+              because a feature with no visible way in is a feature people lose.
+
+              It can be removed from inside the space itself, for the case the
+              default does not cover: somebody scrolling your Settings while you
+              watch. When it is gone, the long-press on the version number below
+              is the way back, and the toggle that hides it says so.
+            */}
+            {privateHidden ? null : (
+              <SettingsRow
+                icon={EyeOff}
+                label={t('private.entryLabel')}
+                subtitle={
+                  privateSetUp ? t('private.entrySubtitleSetUp') : t('private.entrySubtitleNew')
+                }
+                onPress={openPrivateSpace}
+              />
+            )}
           </View>
         </View>
 
@@ -364,11 +387,20 @@ export default function SettingsScreen() {
         <View className="gap-2">
           <SectionLabel>{t('settings.about')}</SectionLabel>
           <View className={cardClass({ padding: 'none' }, 'px-4')}>
+            {/*
+              Long-press re-enters the private space. Chosen because it is the
+              one row in Settings that is unambiguously inert — nobody
+              long-presses a version number by accident, and nobody exploring
+              somebody else's phone thinks to. It carries no chevron, no hint and
+              no button role, so the row is indistinguishable from the version
+              number it was before.
+            */}
             <SettingsRow
               icon={Info}
               label={t('settings.version')}
               value={Constants.expoConfig?.version ?? '1.0.0'}
               isFirst
+              onLongPress={openPrivateSpace}
             />
             <SettingsRow
               icon={Database}

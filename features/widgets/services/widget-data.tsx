@@ -9,6 +9,7 @@ import {
   type TodaySnapshot,
 } from '@/features/widgets/services/widget-snapshot';
 import { listHabitsWithToday } from '@/features/habits/services/habits-repository';
+import { moduleMayBeNamed } from '@/features/notifications/services/notification-visibility';
 import { listTasks } from '@/features/tasks/services/tasks-repository';
 import { getDailyTotal } from '@/features/water-intake/services/water-intake-repository';
 import { useWaterSettingsStore } from '@/features/water-intake/store/water-settings-store';
@@ -19,32 +20,50 @@ import { toDateKey } from '@/lib/date';
  * JS context (where SQLite is available) — never from the headless widget task
  * handler. Each source is guarded so a not-yet-created table can't sink the
  * whole snapshot.
+ *
+ * Each row is also gated on its module, using the same rule as a lock-screen
+ * reminder (`moduleMayBeNamed`): a module the operator has pulled, or one the
+ * user has moved behind the vault, contributes nothing. A hidden row is not
+ * read at all rather than read and then dropped — the count itself never
+ * reaches the file the headless handler can see.
  */
 export function buildTodaySnapshot(): TodaySnapshot {
+  const show = {
+    tasks: moduleMayBeNamed('tasks'),
+    habits: moduleMayBeNamed('habits'),
+    water: moduleMayBeNamed('water'),
+  };
+
   let tasksDue = 0;
   let habitsLeft = 0;
   let waterMl = 0;
 
-  try {
-    tasksDue = listTasks('active', 'due-date').filter(
-      (t) => t.dueDate != null && isToday(t.dueDate),
-    ).length;
-  } catch {
-    /* table not ready */
+  if (show.tasks) {
+    try {
+      tasksDue = listTasks('active', 'due-date').filter(
+        (t) => t.dueDate != null && isToday(t.dueDate),
+      ).length;
+    } catch {
+      /* table not ready */
+    }
   }
-  try {
-    habitsLeft = listHabitsWithToday().filter((h) => h.todayStatus === 'not_yet').length;
-  } catch {
-    /* table not ready */
+  if (show.habits) {
+    try {
+      habitsLeft = listHabitsWithToday().filter((h) => h.todayStatus === 'not_yet').length;
+    } catch {
+      /* table not ready */
+    }
   }
-  try {
-    waterMl = getDailyTotal(toDateKey(new Date()));
-  } catch {
-    /* table not ready */
+  if (show.water) {
+    try {
+      waterMl = getDailyTotal(toDateKey(new Date()));
+    } catch {
+      /* table not ready */
+    }
   }
-  const waterGoalMl = useWaterSettingsStore.getState().goalMl ?? 2000;
+  const waterGoalMl = show.water ? (useWaterSettingsStore.getState().goalMl ?? 2000) : 0;
 
-  return { tasksDue, habitsLeft, waterMl, waterGoalMl, updatedAt: Date.now() };
+  return { tasksDue, habitsLeft, waterMl, waterGoalMl, show, updatedAt: Date.now() };
 }
 
 /**
