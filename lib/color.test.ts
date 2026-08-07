@@ -244,3 +244,30 @@ describe('readableTint memoisation', () => {
     expect(readableTint('#22c55e', 'light')).not.toBe(readableTint('#22c55e', 'dark'));
   });
 });
+
+describe('progress ring halo geometry', () => {
+  // The ring's glow is a wider stroke on the same circle, so the radius has to
+  // reserve half of the widest halo. Get that wrong and the halo clips against
+  // the SVG bounds, which reads as the ring being sliced flat — worse than no
+  // glow. These are the sizes the app actually renders; the invariant is
+  // arithmetic, so it belongs in a test rather than in a comment.
+  const HALO_OUTER = 2.2;
+  const RINGS = [
+    { size: 80, strokeWidth: 8 }, // dashboard hero, three up
+    { size: 158, strokeWidth: 13 }, // goal detail
+    { size: 160, strokeWidth: 12 }, // ProgressRing default
+    { size: 168, strokeWidth: 14 }, // study
+    { size: 172, strokeWidth: 14 }, // sleep
+  ];
+
+  it.each(RINGS)(
+    'halo stays inside the viewport at $size/$strokeWidth',
+    ({ size, strokeWidth }) => {
+      const outer = strokeWidth * HALO_OUTER;
+      const radius = (size - outer) / 2;
+      expect(radius + outer / 2).toBeLessThanOrEqual(size / 2);
+      // And the arc must still be a ring, not a filled disc.
+      expect(radius).toBeGreaterThan(strokeWidth);
+    },
+  );
+});
