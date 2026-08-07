@@ -4,6 +4,7 @@ import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RefreshControl, ScrollView, View } from 'react-native';
 
+import { Defer } from '@/components/ui/defer';
 import { Fab } from '@/components/ui/fab';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
@@ -84,25 +85,41 @@ export default function DashboardScreen() {
           />
         }
       >
+        {/* Above the fold: the greeting and the hero that answers "what now?".
+            These mount immediately — they are the reason the screen exists. */}
         <DashboardHeader />
         <TodayFocusCard />
         <FocusShortcuts />
 
-        <WidgetSection label={t('dashboard.today')} ids={FULL_SECTIONS[0].ids} />
+        {/* Everything below competes with the hero for the first frame and is
+            mostly off-screen at launch, so it waits one frame. Each section
+            holds its approximate height meanwhile, so the scrollbar and any
+            restored scroll position don't jump as they arrive. */}
+        <Defer placeholderHeight={220}>
+          <WidgetSection label={t('dashboard.today')} ids={FULL_SECTIONS[0].ids} />
+        </Defer>
 
-        <View className="gap-3">
-          <Text variant="micro" className="px-1">
-            {t('dashboard.wellbeing')}
-          </Text>
-          <View className="flex-row gap-3">
-            <WaterTile />
-            <MoodTile />
+        <Defer placeholderHeight={140}>
+          <View className="gap-3">
+            <Text variant="micro" className="px-1">
+              {t('dashboard.wellbeing')}
+            </Text>
+            <View className="flex-row gap-3">
+              <WaterTile />
+              <MoodTile />
+            </View>
           </View>
-        </View>
+        </Defer>
 
-        <WidgetSection label={t('dashboard.forYou')} ids={FULL_SECTIONS[1].ids} />
+        <Defer placeholderHeight={220}>
+          <WidgetSection label={t('dashboard.forYou')} ids={FULL_SECTIONS[1].ids} />
+        </Defer>
 
-        {leftovers.length > 0 ? <WidgetSection label={t('tabs.more')} ids={leftovers} /> : null}
+        {leftovers.length > 0 ? (
+          <Defer placeholderHeight={160}>
+            <WidgetSection label={t('tabs.more')} ids={leftovers} />
+          </Defer>
+        ) : null}
       </ScrollView>
 
       <Fab onPress={() => sheetRef.current?.present()} />
