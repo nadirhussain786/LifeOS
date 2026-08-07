@@ -6,9 +6,9 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-na
 
 import { cardClass } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
-import { radius, resolveTint } from '@/constants/design-tokens';
+import { radius } from '@/constants/design-tokens';
 import type { HubModule } from '@/features/hub/config/modules';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useTheme } from '@/hooks/use-theme';
 import { alpha, glowShadow, tintGradientTriple } from '@/lib/color';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -26,12 +26,12 @@ type Props = {
  */
 export function ModuleCard({ module, onPress }: Props) {
   const { t } = useTranslation();
-  const scheme = useColorScheme() ?? 'light';
+  const { resolve } = useTheme();
   const { icon: Icon, titleKey, subtitleKey, status } = module;
   // Resolved per theme rather than read off `.light` — the whole gradient,
   // glow and icon chip derive from this one value, so a light-column tint here
   // was the entire Hub grid failing to retune on dark.
-  const tint = resolveTint(module.tint, scheme);
+  const tint = resolve(module.tint);
   const isReady = status === 'ready';
   const scale = useSharedValue(1);
   const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));

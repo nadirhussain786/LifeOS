@@ -6,8 +6,8 @@ import { Text } from '@/components/ui/text';
 import { categoryMetaFor } from '@/features/budget/config/budget-config';
 import { formatMoney } from '@/features/budget/services/money';
 import type { BudgetTransaction } from '@/features/budget/types/budget.types';
-import { ledgerTints, resolveTint } from '@/constants/design-tokens';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { ledgerTints } from '@/constants/design-tokens';
+import { useTheme } from '@/hooks/use-theme';
 
 const SIGN: Record<BudgetTransaction['type'], string> = { income: '+', expense: '−', savings: '→' };
 
@@ -18,7 +18,7 @@ type Props = {
 };
 
 export function TransactionRow({ transaction, currency, onPress }: Props) {
-  const scheme = useColorScheme() ?? 'light';
+  const { scheme, resolve } = useTheme();
   const meta = categoryMetaFor(transaction.type, transaction.category, scheme);
   const Icon = meta.icon;
 
@@ -42,10 +42,7 @@ export function TransactionRow({ transaction, currency, onPress }: Props) {
           {meta.label} · {transaction.account} · {format(transaction.occurredAt, 'MMM d')}
         </Text>
       </View>
-      <Text
-        className="font-sora-bold"
-        style={{ color: resolveTint(ledgerTints[transaction.type], scheme) }}
-      >
+      <Text className="font-sora-bold" style={{ color: resolve(ledgerTints[transaction.type]) }}>
         {SIGN[transaction.type]}
         {formatMoney(transaction.amountCents, currency)}
       </Text>
