@@ -5,13 +5,10 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { accentGradient } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-
-// Same gradient as the accent Button — the FAB and primary CTAs should read
-// as the same signature brand surface wherever they appear.
-const ACCENT_GRADIENT = ['#22c58e', '#0b6b4f'] as const;
 
 type Props = {
   onPress: () => void;
@@ -58,7 +55,7 @@ export function Fab({ onPress, accessibilityLabel = 'Quick actions' }: Props) {
       ]}
     >
       <LinearGradient
-        colors={ACCENT_GRADIENT}
+        colors={accentGradient}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFillObject}

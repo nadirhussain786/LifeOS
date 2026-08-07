@@ -34,6 +34,14 @@ export const colors = {
     destructive: tokens.light.error,
     success: tokens.light.success,
     successForeground: tokens.light.successForeground,
+    // `warning` and `info` were missing from this bridge entirely, so the two
+    // semantics with no key here were the two that screens kept re-typing as
+    // raw hex (#f59e0b, #0ea5e9). A token nobody can reach is a token nobody
+    // uses.
+    warning: tokens.light.warning,
+    warningForeground: tokens.light.warningForeground,
+    info: tokens.light.info,
+    infoForeground: tokens.light.infoForeground,
     accent: tokens.light.accent,
     accentForeground: tokens.light.accentForeground,
   },
@@ -49,6 +57,10 @@ export const colors = {
     destructive: tokens.dark.error,
     success: tokens.dark.success,
     successForeground: tokens.dark.successForeground,
+    warning: tokens.dark.warning,
+    warningForeground: tokens.dark.warningForeground,
+    info: tokens.dark.info,
+    infoForeground: tokens.dark.infoForeground,
     accent: tokens.dark.accent,
     accentForeground: tokens.dark.accentForeground,
   },

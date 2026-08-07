@@ -13,6 +13,7 @@ import {
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { cardClass } from '@/components/ui/card';
 import { ArrowBack } from '@/components/ui/directional-icon';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
@@ -139,7 +140,7 @@ export default function OnboardingScreen() {
                 autoFocus
                 returnKeyType="next"
                 onSubmitEditing={() => name.trim() && setStep(2)}
-                className="rounded-2xl border border-border bg-card px-4 py-4 text-lg text-foreground"
+                className={cardClass({ padding: 'none' }, 'px-4 py-4 text-lg text-foreground')}
                 style={{ fontFamily: 'Sora_400Regular' }}
               />
             </View>

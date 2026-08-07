@@ -51,8 +51,23 @@ const emerald = {
   dark: '#47d19f', // --accent (dark)
   onLight: '#ffffff',
   onDark: '#0f241c',
-  gradient: ['#22c58e', '#0b6b4f'] as const, // matches Button accent gradient
+  gradient: ['#22c58e', '#0b6b4f'] as const,
 } as const;
+
+/**
+ * The brand CTA gradient — deeper than the flat `--accent` at both ends, so it
+ * reads as genuine depth rather than a two-tone sticker.
+ *
+ * Exported because the Button and the FAB both paint it, and both used to hold
+ * their own copy of the pair while this one sat here unread, its comment
+ * claiming it "matches Button accent gradient" with nothing enforcing that.
+ * Every surface that paints the brand CTA takes it from here.
+ */
+export const accentGradient = emerald.gradient;
+
+/** The glow cast by an accent CTA. Its own name because it is the shadow under
+ *  the gradient, not the gradient's own stops. */
+export const accentGlow = emerald.light;
 
 // ---------------------------------------------------------------------------
 // SEMANTIC COLOR — resolved per theme. Mirrors global.css CSS variables.
@@ -165,9 +180,92 @@ export const moduleTints = {
   study: { light: '#6d28d9', dark: '#8b5cf6' },
   gallery: { light: '#a21caf', dark: '#e879f9' }, // plum — visible change over time
   music: { light: '#4d7c0f', dark: '#a3e635' }, // lime — the one gap left on the wheel
+  // Yellow — the sticky-note association is too strong to spend on another hue.
+  // The dark value is the #eab308 the Hub had hardcoded, which is fine on a
+  // near-black card; the light one is the same hue darkened until it clears 3:1
+  // on white (the raw yellow ran at 1.92:1, the least legible value in the app).
+  // Caveat worth knowing: at 48°/45° this is the tightest pairing in the table —
+  // 27° from fitness and only a few degrees from `warning` in dark. Yellow is
+  // structurally crowded and the wheel is full; retune here if Notes and a
+  // caution state ever end up adjacent.
+  notes: { light: '#a48404', dark: '#eab308' },
+
+  // The private space. These lived in features/private/config/private-modules.ts
+  // as single hexes with no dark variant — the same failure Gallery and Music
+  // had, in the one part of the app nobody screenshots. The light values already
+  // clear 3:1 on a white card (3.35–3.99) so they carry over unchanged; only the
+  // dark siblings are new.
+  //
+  // KNOWN COLLISION, deliberately left as-is for now: the Hub renders the
+  // private section in the SAME grid as the regular modules once the vault is
+  // open, and all four of these sit inside the 30° exclusion of an existing
+  // hue — recovery is 4° from habit, intimacy 6° from fitness, vault 8° from
+  // sleep, cycle 14° from goals. Re-hueing four private modules is a design
+  // call, not a mechanical one; see the note in docs/design-system.md.
+  vault: { light: '#7c6cf0', dark: '#a99cf7' }, // periwinkle — the locked space
+  cycle: { light: '#e0518a', dark: '#f08cb2' }, // pink — cycle tracking
+  recovery: { light: '#2f9e73', dark: '#57c79a' }, // green — streaks, repair
+  intimacy: { light: '#d4653f', dark: '#e89370' }, // terracotta — warmth
+
+  // Settings is chrome, not a life area, and is the one entry that must NOT
+  // read as a colored module — it takes the emerald-biased neutral so it sits
+  // quiet at the bottom of the Hub. It was a flat #737373, which is the only
+  // grey in the app with no green bias and read as a different family.
+  settings: { light: neutral[500], dark: neutral[400] },
 } as const;
 
 export type ModuleName = keyof typeof moduleTints;
+
+/**
+ * A tint that has been designed for both themes.
+ *
+ * Any registry that carries a per-entry color (the Hub, the private space)
+ * should hold one of these rather than a bare hex — a single value means the
+ * light column silently gets used on dark grounds too, which is exactly how
+ * the Hub grid ended up never retuning.
+ */
+export type TintPair = { readonly light: string; readonly dark: string };
+
+/** Resolve a `TintPair` for the active theme. */
+export function resolveTint(pair: TintPair, theme: ThemeName): string {
+  return pair[theme];
+}
+
+/**
+ * The budget ledger's three-way colour: money in, money out, money set aside.
+ *
+ * Derived from the semantic set rather than given its own hexes, because that
+ * is what these already meant — income was `#22c55e`, a hand-typed green that
+ * is neither `success.light` nor `success.dark`. The triad was written out
+ * three times (the transaction form, the transaction row and the reports
+ * charts) and `app/budget/index.tsx` managed to use the raw pair for a progress
+ * bar and the real tokens for the caption two lines below it, so one state
+ * rendered in two different reds.
+ *
+ * Consequence worth knowing: "income green" and "task completed green" are now
+ * the same green on purpose. They are the same idea — this went well — and the
+ * design system's whole position on semantic colour is that it means one thing.
+ */
+export const ledgerTints = {
+  income: { light: colors.light.success, dark: colors.dark.success },
+  expense: { light: colors.light.error, dark: colors.dark.error },
+  savings: { light: colors.light.info, dark: colors.dark.info },
+} as const satisfies Record<string, TintPair>;
+
+/**
+ * How a goal is tracking against its own deadline: ahead, on track, behind.
+ *
+ * A ladder, not three unrelated colours — and deliberately the semantic set
+ * rather than module tints, because "behind" has to read as caution wherever
+ * it appears. `none` takes the neutral: a goal with no pace yet is not a
+ * warning about anything.
+ */
+export const paceTints = {
+  ahead: { light: colors.light.success, dark: colors.dark.success },
+  on_track: { light: colors.light.info, dark: colors.dark.info },
+  behind: { light: colors.light.warning, dark: colors.dark.warning },
+  none: moduleTints.settings,
+} as const satisfies Record<string, TintPair>;
 
 /** Resolve a module tint for the active theme in one call. */
 export function moduleTint(name: ModuleName, theme: ThemeName): string {
@@ -303,7 +401,8 @@ export const radius = {
   md: 12,
   lg: 16,
   xl: 20,
-  '2xl': 28,
+  '2xl': 28, // the card radius — every resting card surface in the app
+  '3xl': 32, // large squares only (80pt+ icon plinths, 160pt media tiles)
   full: 9999,
 } as const;
 

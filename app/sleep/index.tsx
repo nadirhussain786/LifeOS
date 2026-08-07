@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 
+import { cardClass } from '@/components/ui/card';
 import { BarChart, type BarDatum } from '@/components/ui/bar-chart';
 import { EmptyState } from '@/components/ui/empty-state';
 import { QueryError } from '@/components/ui/query-error';
@@ -16,6 +17,7 @@ import { Segmented } from '@/components/ui/segmented';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
 import { moduleTint } from '@/constants/design-tokens';
+import { colors } from '@/constants/theme';
 import { SleepSessionCard } from '@/features/sleep/components/sleep-session-card';
 import { SleepStatsRow } from '@/features/sleep/components/sleep-stats-row';
 import { SleepTrackerCard } from '@/features/sleep/components/sleep-tracker-card';
@@ -127,7 +129,7 @@ export default function SleepScreen() {
 
               <SleepStatsRow stats={stats} />
 
-              <View className="gap-3 rounded-2xl border border-border bg-card p-4 shadow-e1">
+              <View className={cardClass({ padding: 'md', elevation: 'e1' }, 'gap-3')}>
                 <View className="flex-row items-center justify-between">
                   <Text variant="subheading">{t('sleep.trend')}</Text>
                   <View style={{ width: 160 }}>
@@ -158,7 +160,12 @@ export default function SleepScreen() {
               </View>
 
               {stats.avgBedtimeMinutes !== null && stats.avgWakeMinutes !== null && (
-                <View className="flex-row items-center justify-around rounded-2xl border border-border bg-card p-4 shadow-e1">
+                <View
+                  className={cardClass(
+                    { padding: 'md', elevation: 'e1' },
+                    'flex-row items-center justify-around',
+                  )}
+                >
                   <View className="items-center gap-1">
                     <Moon size={18} color={sleepTint} />
                     <Text className="font-sora-bold text-foreground">
@@ -168,7 +175,7 @@ export default function SleepScreen() {
                   </View>
                   <View className="h-10 w-px bg-border" />
                   <View className="items-center gap-1">
-                    <Sun size={18} color="#f59e0b" />
+                    <Sun size={18} color={colors[scheme].warning} />
                     <Text className="font-sora-bold text-foreground">
                       {formatClock(stats.avgWakeMinutes)}
                     </Text>
@@ -178,7 +185,7 @@ export default function SleepScreen() {
                     <>
                       <View className="h-10 w-px bg-border" />
                       <View className="items-center gap-1">
-                        <Hourglass size={18} color="#22c55e" />
+                        <Hourglass size={18} color={colors[scheme].success} />
                         <Text className="font-sora-bold text-foreground">
                           {formatDuration(stats.avgFellAsleepMinutes)}
                         </Text>

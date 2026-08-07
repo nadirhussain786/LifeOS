@@ -31,7 +31,7 @@ const MAX_SEGMENTS = 8;
 
 /** Shared half-width tile shell — a resting card that floats on e1. */
 function tileClass() {
-  return 'flex-1 gap-3 rounded-3xl border border-border bg-card p-4 shadow-e1';
+  return 'flex-1 gap-3 rounded-2xl border border-border bg-card p-4 shadow-e1';
 }
 
 export function WaterTile() {

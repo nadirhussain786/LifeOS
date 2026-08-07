@@ -1,5 +1,6 @@
 import { Droplets, HeartHandshake, Lock, ShieldCheck, type LucideIcon } from 'lucide-react-native';
 
+import { moduleTints, type TintPair } from '@/constants/design-tokens';
 import type { Gender } from '@/features/profile/store/profile-store';
 
 /**
@@ -34,7 +35,8 @@ export type PrivateModule = {
   titleKey: string;
   subtitleKey: string;
   icon: LucideIcon;
-  tint: string;
+  /** Designed for both themes — resolve with `resolveTint(m.tint, scheme)`. */
+  tint: TintPair;
   /** Whose setup list this is pre-ticked on. Never an access check. */
   suggestFor: Gender[];
   route: string;
@@ -46,7 +48,7 @@ export const PRIVATE_MODULES: PrivateModule[] = [
     titleKey: 'private.vaultTitle',
     subtitleKey: 'private.vaultSubtitle',
     icon: Lock,
-    tint: '#7c6cf0',
+    tint: moduleTints.vault,
     // The one everybody wants, whoever they are.
     suggestFor: ['female', 'male', 'non_binary', 'prefer_not_to_say'],
     route: '/private/vault',
@@ -56,7 +58,7 @@ export const PRIVATE_MODULES: PrivateModule[] = [
     titleKey: 'private.cycleTitle',
     subtitleKey: 'private.cycleSubtitle',
     icon: Droplets,
-    tint: '#e0518a',
+    tint: moduleTints.cycle,
     suggestFor: ['female'],
     route: '/private/cycle',
   },
@@ -65,7 +67,7 @@ export const PRIVATE_MODULES: PrivateModule[] = [
     titleKey: 'private.recoveryTitle',
     subtitleKey: 'private.recoverySubtitle',
     icon: ShieldCheck,
-    tint: '#2f9e73',
+    tint: moduleTints.recovery,
     suggestFor: ['male'],
     route: '/private/recovery',
   },
@@ -74,7 +76,7 @@ export const PRIVATE_MODULES: PrivateModule[] = [
     titleKey: 'private.intimacyTitle',
     subtitleKey: 'private.intimacySubtitle',
     icon: HeartHandshake,
-    tint: '#d4653f',
+    tint: moduleTints.intimacy,
     suggestFor: ['female', 'male', 'non_binary'],
     route: '/private/intimacy',
   },

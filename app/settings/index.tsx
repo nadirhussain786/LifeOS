@@ -27,7 +27,9 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Linking, Pressable, ScrollView, Switch, View } from 'react-native';
 
+import { cardClass } from '@/components/ui/card';
 import { ScreenHeader } from '@/components/ui/screen-header';
+import { moduleTints } from '@/constants/design-tokens';
 import { SettingsRow } from '@/components/ui/settings-row';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
@@ -197,14 +199,18 @@ export default function SettingsScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <ScreenHeader title={t('settings.title')} eyebrow={t('settings.eyebrow')} tint="#737373" />
+      <ScreenHeader
+        title={t('settings.title')}
+        eyebrow={t('settings.eyebrow')}
+        tint={moduleTints.settings}
+      />
       <ScrollView
         contentContainerClassName="gap-6 px-5 py-4 pb-10"
         showsVerticalScrollIndicator={false}
       >
         <View className="gap-2">
           <SectionLabel>{t('settings.appearance')}</SectionLabel>
-          <View className="flex-row gap-2 rounded-2xl border border-border bg-card p-2">
+          <View className={cardClass({ padding: 'none' }, 'flex-row gap-2 p-2')}>
             {THEME_OPTIONS.map((option) => {
               const selected = themePreference === option.value;
               const Icon = option.icon;
@@ -240,7 +246,7 @@ export default function SettingsScreen() {
               );
             })}
           </View>
-          <View className="rounded-2xl border border-border bg-card px-4">
+          <View className={cardClass({ padding: 'none' }, 'px-4')}>
             <SettingsRow
               icon={Languages}
               label={t('settings.language')}
@@ -253,7 +259,7 @@ export default function SettingsScreen() {
 
         <View className="gap-2">
           <SectionLabel>{t('settings.notifications')}</SectionLabel>
-          <View className="rounded-2xl border border-border bg-card px-4">
+          <View className={cardClass({ padding: 'none' }, 'px-4')}>
             <SettingsRow
               icon={Bell}
               label={t('settings.notifications')}
@@ -281,7 +287,7 @@ export default function SettingsScreen() {
 
         <View className="gap-2">
           <SectionLabel>{t('settings.privacy')}</SectionLabel>
-          <View className="rounded-2xl border border-border bg-card px-4">
+          <View className={cardClass({ padding: 'none' }, 'px-4')}>
             <SettingsRow
               icon={LockKeyhole}
               label={t('settings.appLock')}
@@ -326,7 +332,7 @@ export default function SettingsScreen() {
 
         <View className="gap-2">
           <SectionLabel>{t('settings.data')}</SectionLabel>
-          <View className="rounded-2xl border border-border bg-card px-4">
+          <View className={cardClass({ padding: 'none' }, 'px-4')}>
             <SettingsRow
               icon={Download}
               label={isExporting ? t('settings.preparingExport') : t('settings.exportData')}
@@ -357,7 +363,7 @@ export default function SettingsScreen() {
 
         <View className="gap-2">
           <SectionLabel>{t('settings.about')}</SectionLabel>
-          <View className="rounded-2xl border border-border bg-card px-4">
+          <View className={cardClass({ padding: 'none' }, 'px-4')}>
             <SettingsRow
               icon={Info}
               label={t('settings.version')}

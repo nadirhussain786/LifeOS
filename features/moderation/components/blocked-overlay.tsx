@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Linking, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { cardClass } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
@@ -64,7 +65,7 @@ export function BlockedOverlay() {
         </View>
 
         {standing?.reason ? (
-          <View className="w-full rounded-2xl border border-border bg-card px-4 py-3">
+          <View className={cardClass({ padding: 'row' }, 'w-full')}>
             <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
               {t('moderation.reason')}
             </Text>
@@ -75,7 +76,7 @@ export function BlockedOverlay() {
         {/* What the wipe cost, said specifically. A vague "your data was
             removed" is what turns a moderation action into a support thread. */}
         {wipeOutcome ? (
-          <View className="w-full gap-1 rounded-2xl border border-border bg-card px-4 py-3">
+          <View className={cardClass({ padding: 'row' }, 'w-full gap-1')}>
             <Text variant="caption" className="font-sora-semibold uppercase tracking-wide">
               {t('moderation.wipedTitle')}
             </Text>

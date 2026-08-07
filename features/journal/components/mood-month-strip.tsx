@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
+import { cardClass } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import { MOOD_TINT } from '@/features/journal/constants';
@@ -43,7 +44,7 @@ export function MoodMonthStrip({ monthAnchor, entries, onSelectDate }: Props) {
   const leadingBlanks = getDay(start);
 
   return (
-    <View className="gap-2 rounded-2xl border border-border bg-card p-4 shadow-e1">
+    <View className={cardClass({ padding: 'md', elevation: 'e1' }, 'gap-2')}>
       <Text variant="micro" className="font-sora-semibold">
         {format(monthAnchor, 'MMMM')}
       </Text>

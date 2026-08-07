@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, Switch, View } from 'react-native';
 
+import { cardClass } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
@@ -191,7 +192,7 @@ export default function PrivateSettingsScreen() {
     <PrivateScreen title={t('private.spaceSettings')} tint={theme.accent}>
       <View className="gap-3">
         <Text variant="micro">{t('private.whatIsInHere')}</Text>
-        <View className="rounded-2xl border border-border bg-card px-4">
+        <View className={cardClass({ padding: 'none' }, 'px-4')}>
           {PRIVATE_MODULES.map((module, index) => (
             <View
               key={module.id}
@@ -217,7 +218,7 @@ export default function PrivateSettingsScreen() {
 
       <View className="gap-3">
         <Text variant="micro">{t('private.moveModules')}</Text>
-        <View className="rounded-2xl border border-border bg-card px-4">
+        <View className={cardClass({ padding: 'none' }, 'px-4')}>
           {MOVABLE_MODULES.map((module, index) => (
             <View
               key={module.id}
@@ -262,7 +263,7 @@ export default function PrivateSettingsScreen() {
             <Pressable
               accessibilityRole="button"
               onPress={() => setMode('change-current')}
-              className="rounded-2xl border border-border bg-card px-4 py-3.5"
+              className={cardClass({ padding: 'rowLg' })}
             >
               <Text className="font-sora-medium text-foreground">{t('private.changePin')}</Text>
               <Text variant="caption">{t('private.changePinHint')}</Text>
@@ -286,7 +287,7 @@ export default function PrivateSettingsScreen() {
                   setMode('decoy');
                 }
               }}
-              className="rounded-2xl border border-border bg-card px-4 py-3.5"
+              className={cardClass({ padding: 'rowLg' })}
             >
               <Text className="font-sora-medium text-foreground">
                 {decoyExists ? t('private.removeDecoy') : t('private.setDecoy')}

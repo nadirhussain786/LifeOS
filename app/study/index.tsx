@@ -13,6 +13,7 @@ import {
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { cardClass } from '@/components/ui/card';
 import { BarChart, type BarDatum } from '@/components/ui/bar-chart';
 import { EmptyState } from '@/components/ui/empty-state';
 import { QueryError } from '@/components/ui/query-error';
@@ -176,7 +177,7 @@ export default function StudyScreen() {
           </HeroCard>
 
           {/* Start a session */}
-          <View className="gap-3 rounded-2xl border border-border bg-card p-4 shadow-e1">
+          <View className={cardClass({ padding: 'md', elevation: 'e1' }, 'gap-3')}>
             <Text variant="subheading">{t('study.startFocusing')}</Text>
             <SubjectPicker
               subjects={subjects}
@@ -244,7 +245,7 @@ export default function StudyScreen() {
 
               <StudyInsightsCard insights={insights} />
 
-              <View className="gap-3 rounded-2xl border border-border bg-card p-4 shadow-e1">
+              <View className={cardClass({ padding: 'md', elevation: 'e1' }, 'gap-3')}>
                 <View className="flex-row items-center justify-between">
                   <Text variant="subheading">{t('study.focusTime')}</Text>
                   <View style={{ width: 160 }}>
@@ -269,7 +270,7 @@ export default function StudyScreen() {
               </View>
 
               {breakdown.length > 0 && (
-                <View className="gap-3 rounded-2xl border border-border bg-card p-4 shadow-e1">
+                <View className={cardClass({ padding: 'md', elevation: 'e1' }, 'gap-3')}>
                   <Text variant="subheading">{t('study.bySubjectThisWeek')}</Text>
                   <SubjectBreakdownList breakdown={breakdown} />
                 </View>

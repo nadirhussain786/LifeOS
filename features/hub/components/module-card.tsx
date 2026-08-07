@@ -4,8 +4,11 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
+import { cardClass } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
+import { radius, resolveTint } from '@/constants/design-tokens';
 import type { HubModule } from '@/features/hub/config/modules';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { alpha, glowShadow, tintGradientTriple } from '@/lib/color';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -23,7 +26,12 @@ type Props = {
  */
 export function ModuleCard({ module, onPress }: Props) {
   const { t } = useTranslation();
-  const { icon: Icon, titleKey, subtitleKey, tint, status } = module;
+  const scheme = useColorScheme() ?? 'light';
+  const { icon: Icon, titleKey, subtitleKey, status } = module;
+  // Resolved per theme rather than read off `.light` — the whole gradient,
+  // glow and icon chip derive from this one value, so a light-column tint here
+  // was the entire Hub grid failing to retune on dark.
+  const tint = resolveTint(module.tint, scheme);
   const isReady = status === 'ready';
   const scale = useSharedValue(1);
   const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
@@ -37,7 +45,7 @@ export function ModuleCard({ module, onPress }: Props) {
   if (!isReady) {
     return (
       <View
-        className="flex-1 gap-3 rounded-3xl border border-border bg-card p-4"
+        className={cardClass({ padding: 'md' }, 'flex-1 gap-3')}
         style={{ opacity: 0.6, minHeight: 130 }}
       >
         <View className="flex-row items-start justify-between">
@@ -64,6 +72,10 @@ export function ModuleCard({ module, onPress }: Props) {
   }
 
   const [c1, c2, c3] = tintGradientTriple(tint);
+  // White is safe on any tintGradient — the gradient darkens its own base until
+  // it is (see inkSafe in lib/color.ts). Before that, this tile's 12px subtitle
+  // ran at 3.36–4.47:1 on thirteen of the sixteen module tints.
+  const ink = '#ffffff';
 
   return (
     <AnimatedPressable
@@ -73,9 +85,13 @@ export function ModuleCard({ module, onPress }: Props) {
       accessibilityRole="button"
       accessibilityLabel={t(titleKey)}
       accessibilityHint={t('hub.openHint', { title: t(titleKey) })}
-      style={[animatedStyle, { flex: 1, borderRadius: 24, minHeight: 130 }, glowShadow(tint, 0.28)]}
+      style={[
+        animatedStyle,
+        { flex: 1, borderRadius: radius['2xl'], minHeight: 130 },
+        glowShadow(tint, 0.28),
+      ]}
     >
-      <View style={{ flex: 1, borderRadius: 24, overflow: 'hidden' }}>
+      <View style={{ flex: 1, borderRadius: radius['2xl'], overflow: 'hidden' }}>
         <LinearGradient
           colors={[c1, c2, c3]}
           start={{ x: 0, y: 0 }}
@@ -109,15 +125,15 @@ export function ModuleCard({ module, onPress }: Props) {
 
           <View
             className="h-11 w-11 items-center justify-center rounded-2xl"
-            style={{ backgroundColor: alpha('#ffffff', 0.22) }}
+            style={{ backgroundColor: alpha(ink, 0.22) }}
           >
-            <Icon color="#ffffff" size={22} strokeWidth={2.2} />
+            <Icon color={ink} size={22} strokeWidth={2.2} />
           </View>
           <View className="mt-auto gap-0.5">
-            <Text className="font-sora-bold text-base" style={{ color: '#ffffff' }}>
+            <Text className="font-sora-bold text-base" style={{ color: ink }}>
               {t(titleKey)}
             </Text>
-            <Text numberOfLines={1} style={{ color: alpha('#ffffff', 0.85), fontSize: 12 }}>
+            <Text numberOfLines={1} style={{ color: alpha(ink, 0.85), fontSize: 12 }}>
               {t(subtitleKey)}
             </Text>
           </View>

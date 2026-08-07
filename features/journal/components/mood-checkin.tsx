@@ -11,6 +11,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 
+import { cardClass } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
 import { moduleTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
@@ -196,7 +197,7 @@ export function MoodCheckin({
   const reasons = new Set(moodReasons ?? []);
 
   return (
-    <View className="gap-5 rounded-2xl border border-border bg-card p-4 shadow-e1">
+    <View className={cardClass({ padding: 'md', elevation: 'e1' }, 'gap-5')}>
       <View className="flex-row justify-between" accessibilityRole="radiogroup">
         {MOODS.map((option) => (
           <MoodButton

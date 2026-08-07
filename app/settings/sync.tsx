@@ -12,8 +12,10 @@ import {
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, Switch, View } from 'react-native';
 
+import { cardClass } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ScreenHeader } from '@/components/ui/screen-header';
+import { moduleTints } from '@/constants/design-tokens';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import { useUsageStore } from '@/features/analytics/store/usage-store';
@@ -58,12 +60,16 @@ export default function SyncSettingsScreen() {
   if (!session) {
     return (
       <View className="flex-1 bg-background">
-        <ScreenHeader title={t('sync.title')} eyebrow={t('sync.eyebrow')} tint="#737373" />
+        <ScreenHeader
+          title={t('sync.title')}
+          eyebrow={t('sync.eyebrow')}
+          tint={moduleTints.settings}
+        />
         <ScrollView
           contentContainerClassName="gap-6 px-5 py-4 pb-12"
           showsVerticalScrollIndicator={false}
         >
-          <View className="items-center gap-3 rounded-2xl border border-border bg-card p-6">
+          <View className={cardClass({ padding: 'none' }, 'items-center gap-3 p-6')}>
             <View
               className="h-14 w-14 items-center justify-center rounded-2xl"
               style={{ backgroundColor: theme.muted }}
@@ -93,7 +99,7 @@ export default function SyncSettingsScreen() {
           {!isSupabaseConfigured && (
             <View className="gap-2">
               <SectionLabel>{t('sync.buildConfig')}</SectionLabel>
-              <View className="gap-2 rounded-2xl border border-border bg-card p-4">
+              <View className={cardClass({ padding: 'md' }, 'gap-2')}>
                 <View className="flex-row items-center gap-2">
                   <TriangleAlert size={16} color={theme.destructive} />
                   <Text className="font-sora-semibold text-foreground">
@@ -174,7 +180,11 @@ export default function SyncSettingsScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <ScreenHeader title={t('sync.title')} eyebrow={t('sync.eyebrow')} tint="#737373" />
+      <ScreenHeader
+        title={t('sync.title')}
+        eyebrow={t('sync.eyebrow')}
+        tint={moduleTints.settings}
+      />
       <ScrollView
         contentContainerClassName="gap-6 px-5 py-4 pb-12"
         showsVerticalScrollIndicator={false}
@@ -182,7 +192,7 @@ export default function SyncSettingsScreen() {
         {/* Account */}
         <View className="gap-2">
           <SectionLabel>{t('sync.account')}</SectionLabel>
-          <View className="flex-row items-center gap-3 rounded-2xl border border-border bg-card p-4">
+          <View className={cardClass({ padding: 'md' }, 'flex-row items-center gap-3')}>
             <View
               className="h-11 w-11 items-center justify-center rounded-full"
               style={{ backgroundColor: theme.muted }}
@@ -201,7 +211,7 @@ export default function SyncSettingsScreen() {
         {/* Sync status */}
         <View className="gap-2">
           <SectionLabel>{t('sync.sync')}</SectionLabel>
-          <View className="gap-3 rounded-2xl border border-border bg-card p-4">
+          <View className={cardClass({ padding: 'md' }, 'gap-3')}>
             <View className="flex-row items-center gap-2">
               <StatusIcon size={16} color={statusColor} />
               <Text className="flex-1 font-sora-medium text-foreground">{syncedLabel}</Text>
@@ -229,7 +239,7 @@ export default function SyncSettingsScreen() {
         {/* What syncs */}
         <View className="gap-2">
           <SectionLabel>{t('sync.whatSyncs')}</SectionLabel>
-          <View className="rounded-2xl border border-border bg-card px-4">
+          <View className={cardClass({ padding: 'none' }, 'px-4')}>
             {SYNC_MODULES.map((mod, index) => (
               <View
                 key={mod.key}
@@ -263,7 +273,7 @@ export default function SyncSettingsScreen() {
         {/* Usage statistics — disclosed and switchable, per PRIVACY.md */}
         <View className="gap-2">
           <SectionLabel>{t('usage.title')}</SectionLabel>
-          <View className="rounded-2xl border border-border bg-card px-4 py-3.5">
+          <View className={cardClass({ padding: 'rowLg' })}>
             <View className="flex-row items-center justify-between">
               <View className="flex-1 pe-3">
                 <Text className="font-sora-medium text-foreground">{t('usage.title')}</Text>
