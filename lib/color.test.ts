@@ -216,3 +216,31 @@ describe('gradient surfaces carry white text', () => {
     }
   });
 });
+
+describe('readableTint memoisation', () => {
+  it('returns the same value on repeat calls', () => {
+    // The cache is keyed on colour + theme + ratio; a miss on any of those
+    // would silently return a different shade for the same input.
+    for (const theme of THEMES) {
+      for (const hex of ['#eab308', '#22c55e', '#8b5cf6']) {
+        const first = readableTint(hex, theme);
+        expect(readableTint(hex, theme)).toBe(first);
+        expect(readableTint(hex, theme)).toBe(first);
+      }
+    }
+  });
+
+  it('does not confuse different ratios for the same colour', () => {
+    // 3:1 and 4.5:1 want different shades of the same hue. A cache keyed only
+    // on colour+theme would hand the graphics bar a body-text colour.
+    const graphic = readableTint('#eab308', 'light', 3);
+    const text = readableTint('#eab308', 'light', 4.5);
+    expect(contrastRatio(graphic, colors.light.card)).toBeGreaterThanOrEqual(3);
+    expect(contrastRatio(text, colors.light.card)).toBeGreaterThanOrEqual(AA_TEXT);
+    expect(graphic).not.toBe(text);
+  });
+
+  it('does not confuse the two themes', () => {
+    expect(readableTint('#22c55e', 'light')).not.toBe(readableTint('#22c55e', 'dark'));
+  });
+});

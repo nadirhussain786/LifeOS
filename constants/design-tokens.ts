@@ -362,8 +362,26 @@ const moduleTintsOnCard: Record<ThemeName, Record<ModuleName, string>> = {
  * and so cannot be precomputed.
  */
 export function readableTint(hex: string, theme: ThemeName, minRatio = 4.5): string {
-  return readableOn(hex, colors[theme].card, minRatio);
+  const key = `${hex}|${theme}|${minRatio}`;
+  const hit = readableTintCache.get(key);
+  if (hit !== undefined) return hit;
+  const value = readableOn(hex, colors[theme].card, minRatio);
+  readableTintCache.set(key, value);
+  return value;
 }
+
+/**
+ * `readableOn` walks up to twenty mixes looking for the first shade that
+ * clears the ratio, and this is called from render — once per habit row, once
+ * per note card, on every re-render and every frame of a list scroll. The
+ * module tints get the same treatment by being precomputed at module load;
+ * user-chosen colours can't be, because they aren't known until the row exists.
+ *
+ * Unbounded on purpose. The key space is (colour the user picked) × 2 themes ×
+ * (the two ratios anything asks for), and the palette they pick from has six
+ * entries — this tops out at a few dozen strings for the life of the process.
+ */
+const readableTintCache = new Map<string, string>();
 
 /** Categorical chart palette — ordered so adjacent series stay distinct.
  *  Feed the light or dark row to charts based on the active theme. */
