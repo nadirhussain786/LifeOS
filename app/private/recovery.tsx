@@ -1,12 +1,18 @@
 import { format, parseISO } from 'date-fns';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 
-import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
-import { colors } from '@/constants/theme';
 import { ChipRow, PrivateScreen } from '@/features/private/components/private-screen';
+import { tinted, useVaultTheme } from '@/features/private/components/vault-theme';
+import {
+  StatStrip,
+  VaultButton,
+  VaultField,
+  VaultLabel,
+  Well,
+} from '@/features/private/components/well';
 import { privateModule } from '@/features/private/config/private-modules';
 import {
   addRecoveryEntry,
@@ -19,8 +25,6 @@ import {
   type RecoveryTarget,
   type Trigger,
 } from '@/features/private/services/recovery-math';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { alpha } from '@/lib/color';
 import { confirm } from '@/lib/dialog-store';
 
 const TARGETS: RecoveryTarget[] = [
@@ -35,8 +39,7 @@ const TARGETS: RecoveryTarget[] = [
 const TINT = privateModule('recovery')?.tint ?? '#2f9e73';
 
 export default function RecoveryScreen() {
-  const scheme = useColorScheme() ?? 'light';
-  const theme = colors[scheme];
+  const vault = useVaultTheme();
   const { t } = useTranslation();
 
   // See cycle.tsx: explicit reload rather than a counter dependency.
@@ -87,23 +90,23 @@ export default function RecoveryScreen() {
       title={t('private.recoveryTitle')}
       subtitle={t('private.recoverySubtitle')}
       tint={TINT}
+      stamp={t('private.stampRecovery')}
       footer={
-        <View className="flex-row gap-2">
-          <View className="flex-1">
-            <Button
-              variant="accent"
-              size="lg"
+        <View style={{ flexDirection: 'row', gap: 10 }}>
+          <View style={{ flex: 1 }}>
+            <VaultButton
               label={t('private.resisted')}
+              tint={TINT}
               onPress={() => log('resisted')}
             />
           </View>
-          <View className="flex-1">
-            {/* Not styled as a failure. A relapse being easy and unjudged to
+          <View style={{ flex: 1 }}>
+            {/* Not styled as a failure — same weight, same shape, a neutral
+                grey rather than an alarm. A relapse being easy and unjudged to
                 record is the difference between honest data and a deleted app. */}
-            <Button
-              variant="secondary"
-              size="lg"
+            <VaultButton
               label={t('private.relapsed')}
+              tint={vault.mute}
               onPress={() => log('relapsed')}
             />
           </View>
@@ -120,15 +123,19 @@ export default function RecoveryScreen() {
                 accessibilityRole="radio"
                 accessibilityState={{ selected: active }}
                 onPress={() => setTarget(option)}
-                className="rounded-full border px-4 py-2"
                 style={{
-                  borderColor: active ? TINT : theme.border,
-                  backgroundColor: active ? alpha(TINT, 0.12) : 'transparent',
+                  borderRadius: 999,
+                  paddingHorizontal: 16,
+                  minHeight: 38,
+                  justifyContent: 'center',
+                  backgroundColor: active ? tinted(TINT, 0.22) : vault.well,
+                  borderTopWidth: 1,
+                  borderTopColor: active ? tinted(TINT, 0.4) : vault.wellEdge,
                 }}
               >
                 <Text
                   className="font-sora-medium text-sm"
-                  style={{ color: active ? TINT : theme.foreground }}
+                  style={{ color: active ? TINT : vault.mute }}
                 >
                   {t(`private.target_${option}`)}
                 </Text>
@@ -138,49 +145,59 @@ export default function RecoveryScreen() {
         </View>
       </ScrollView>
 
-      <View className="flex-row gap-3">
-        <View
-          className="flex-1 gap-1 rounded-2xl px-4 py-3.5"
-          style={{ backgroundColor: alpha(TINT, 0.12) }}
-        >
-          <Text variant="caption">{t('private.currentStreak')}</Text>
-          <Text className="font-sora-extrabold text-2xl" style={{ color: TINT }}>
-            {stats.currentStreak === null
-              ? t('private.noRelapses')
-              : t('private.days', { count: stats.currentStreak })}
-          </Text>
-        </View>
-        <View className="flex-1 gap-1 rounded-2xl border border-border px-4 py-3.5">
-          <Text variant="caption">{t('private.longestStreak')}</Text>
-          <Text className="font-sora-extrabold text-2xl text-foreground">
-            {t('private.days', { count: stats.longestStreak })}
-          </Text>
-        </View>
-      </View>
+      {/* The streak is the number this module exists for, so it is the only
+          one set large. The rest are context, not headlines. */}
+      <StatStrip
+        tint={TINT}
+        items={[
+          {
+            label: t('private.currentStreak'),
+            value:
+              stats.currentStreak === null
+                ? t('private.noRelapses')
+                : t('private.days', { count: stats.currentStreak }),
+          },
+          {
+            label: t('private.longestStreak'),
+            value: t('private.days', { count: stats.longestStreak }),
+          },
+        ]}
+      />
 
-      <View className="flex-row gap-3">
-        <View className="flex-1 gap-1 rounded-2xl border border-border px-4 py-3">
-          <Text variant="caption">{t('private.urgesResisted')}</Text>
-          <Text className="font-sora-semibold text-lg text-foreground">{stats.resisted}</Text>
+      <Well style={{ flexDirection: 'row' }}>
+        <View style={{ flex: 1, gap: 2 }}>
+          <Text className="text-[11px]" style={{ color: vault.faint }}>
+            {t('private.urgesResisted')}
+          </Text>
+          <Text className="font-sora-semibold text-lg" style={{ color: vault.ink }}>
+            {stats.resisted}
+          </Text>
         </View>
-        <View className="flex-1 gap-1 rounded-2xl border border-border px-4 py-3">
-          <Text variant="caption">{t('private.relapsesLogged')}</Text>
-          <Text className="font-sora-semibold text-lg text-foreground">{stats.relapsed}</Text>
+        <View style={{ width: 1, backgroundColor: vault.line, marginHorizontal: 14 }} />
+        <View style={{ flex: 1, gap: 2 }}>
+          <Text className="text-[11px]" style={{ color: vault.faint }}>
+            {t('private.relapsesLogged')}
+          </Text>
+          <Text className="font-sora-semibold text-lg" style={{ color: vault.ink }}>
+            {stats.relapsed}
+          </Text>
         </View>
-      </View>
+      </Well>
 
       {stats.topRelapseTriggers.length > 0 ? (
-        <View className="gap-2 rounded-2xl border border-border bg-card px-4 py-3.5">
-          <Text variant="micro">{t('private.watchFor')}</Text>
-          <Text className="text-foreground">
+        <Well style={{ gap: 7 }}>
+          <VaultLabel>{t('private.watchFor')}</VaultLabel>
+          <Text className="text-sm" style={{ color: vault.ink, lineHeight: 20 }}>
             {stats.topRelapseTriggers.map((x) => t(`private.trigger_${x.trigger}`)).join(' · ')}
           </Text>
-          <Text variant="caption">{t('private.watchForHint')}</Text>
-        </View>
+          <Text className="text-xs" style={{ color: vault.faint, lineHeight: 17 }}>
+            {t('private.watchForHint')}
+          </Text>
+        </Well>
       ) : null}
 
       <View className="gap-3">
-        <Text variant="micro">{t('private.howStrong')}</Text>
+        <VaultLabel>{t('private.howStrong')}</VaultLabel>
         <View className="flex-row gap-2">
           {[1, 2, 3, 4, 5].map((level) => {
             const active = intensity === level;
@@ -192,14 +209,12 @@ export default function RecoveryScreen() {
                 onPress={() => setIntensity(level)}
                 className="flex-1 items-center rounded-2xl border py-3"
                 style={{
-                  borderColor: active ? TINT : theme.border,
-                  backgroundColor: active ? alpha(TINT, 0.12) : 'transparent',
+                  backgroundColor: active ? tinted(TINT, 0.22) : vault.well,
+                  borderTopWidth: 1,
+                  borderTopColor: active ? tinted(TINT, 0.4) : vault.wellEdge,
                 }}
               >
-                <Text
-                  className="font-sora-medium"
-                  style={{ color: active ? TINT : theme.foreground }}
-                >
+                <Text className="font-sora-medium" style={{ color: active ? TINT : vault.mute }}>
                   {level}
                 </Text>
               </Pressable>
@@ -209,7 +224,7 @@ export default function RecoveryScreen() {
       </View>
 
       <View className="gap-3">
-        <Text variant="micro">{t('private.triggers')}</Text>
+        <VaultLabel>{t('private.triggers')}</VaultLabel>
         <ChipRow
           options={TRIGGERS}
           selected={triggers}
@@ -221,45 +236,59 @@ export default function RecoveryScreen() {
         />
       </View>
 
-      <TextInput
+      <VaultField
         value={note}
         onChangeText={setNote}
         placeholder={t('private.notePlaceholder')}
-        placeholderTextColor={theme.mutedForeground}
+        accessibilityLabel={t('private.notePlaceholder')}
         multiline
-        className="min-h-[80px] rounded-2xl border border-border bg-card px-4 py-3 text-foreground"
-        style={{ fontFamily: 'Sora_400Regular', textAlignVertical: 'top' }}
+        tint={TINT}
+        containerStyle={{ minHeight: 84 }}
       />
 
       {forTarget.length > 0 ? (
         <View className="gap-3">
-          <Text variant="micro">{t('private.history')}</Text>
+          <VaultLabel>{t('private.history')}</VaultLabel>
           {forTarget.slice(0, 20).map((entry) => (
-            <Pressable
-              key={entry.id}
-              onLongPress={() => confirmDelete(entry.id)}
-              accessibilityRole="button"
-              accessibilityHint={t('private.longPressDelete')}
-              className="gap-1 rounded-2xl border border-border bg-card px-4 py-3"
-            >
-              <View className="flex-row items-center justify-between">
-                <Text className="font-sora-medium text-foreground">
-                  {format(parseISO(entry.date), 'd MMM yyyy')}
-                </Text>
-                <Text
-                  variant="caption"
-                  style={{ color: entry.outcome === 'resisted' ? TINT : theme.mutedForeground }}
+            <Well key={entry.id}>
+              <Pressable
+                onLongPress={() => confirmDelete(entry.id)}
+                accessibilityRole="button"
+                accessibilityLabel={format(parseISO(entry.date), 'd MMM yyyy')}
+                accessibilityHint={t('private.longPressDelete')}
+                style={{ gap: 4 }}
+              >
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
                 >
-                  {t(`private.${entry.outcome}`)}
-                </Text>
-              </View>
-              {entry.triggers.length > 0 ? (
-                <Text variant="caption">
-                  {entry.triggers.map((x) => t(`private.trigger_${x}`)).join(' · ')}
-                </Text>
-              ) : null}
-              {entry.note ? <Text variant="caption">{entry.note}</Text> : null}
-            </Pressable>
+                  <Text className="font-sora-medium text-sm" style={{ color: vault.ink }}>
+                    {format(parseISO(entry.date), 'd MMM yyyy')}
+                  </Text>
+                  {/* A relapse is muted, never red. The colour of this word is
+                      the whole difference between a log and a verdict. */}
+                  <Text
+                    className="text-xs"
+                    style={{ color: entry.outcome === 'resisted' ? TINT : vault.faint }}
+                  >
+                    {t(`private.${entry.outcome}`)}
+                  </Text>
+                </View>
+                {entry.triggers.length > 0 ? (
+                  <Text className="text-xs" style={{ color: vault.mute, lineHeight: 17 }}>
+                    {entry.triggers.map((x) => t(`private.trigger_${x}`)).join(' · ')}
+                  </Text>
+                ) : null}
+                {entry.note ? (
+                  <Text className="text-xs" style={{ color: vault.mute, lineHeight: 17 }}>
+                    {entry.note}
+                  </Text>
+                ) : null}
+              </Pressable>
+            </Well>
           ))}
         </View>
       ) : null}

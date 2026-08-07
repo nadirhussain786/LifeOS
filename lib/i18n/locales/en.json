@@ -1725,7 +1725,15 @@
     "operatorNotice": "For safety and abuse investigations, LifeOS staff can access private space contents. Every access is logged. See the privacy policy.",
     "setupFailed": "Couldn't create your private space. Nothing was saved — try again.",
     "unlockFailed": "Couldn't open your private space. Your PIN is fine; something went wrong on this device. Try again.",
-    "creatingSpace": "Creating your space…"
+    "creatingSpace": "Creating your space…",
+    "stampUnlocked": "Unlocked",
+    "stampVault": "Sealed",
+    "stampCycle": "Private",
+    "stampRecovery": "Private",
+    "stampIntimacy": "Private",
+    "stampEmpty": "Empty",
+    "stampNewSpace": "New space",
+    "groundClaim": "Everything here is encrypted on this device and locks when you leave the app."
   },
   "moduleFlags": {
     "unavailable": "Temporarily unavailable",

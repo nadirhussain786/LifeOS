@@ -5,10 +5,10 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
-import { colors } from '@/constants/theme';
 import { PinPad } from '@/features/private/components/pin-pad';
+import { tinted, useVaultTheme } from '@/features/private/components/vault-theme';
+import { VaultButton, VaultStamp } from '@/features/private/components/well';
 import {
   PRIVATE_MODULES,
   suggestedFor,
@@ -18,8 +18,6 @@ import { isEscrowConfigured, uploadEscrow } from '@/features/private/services/va
 import { MIN_PIN_LENGTH, setUpVault } from '@/features/private/services/vault-keys';
 import { usePrivateStore } from '@/features/private/store/private-store';
 import { useProfileStore } from '@/features/profile/store/profile-store';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { alpha } from '@/lib/color';
 import { reportError } from '@/lib/error-reporting';
 
 /**
@@ -30,13 +28,16 @@ import { reportError } from '@/lib/error-reporting';
  * a credential destroys data with no recovery path, and burying that would be
  * the single worst thing this feature could do to somebody.
  */
+/** Setup is the vault's own front door, so it is lit by the vault module's
+ *  colour rather than by the app's brand accent. */
+const VAULT_TINT = '#7c6cf0';
+
 type Step = 'modules' | 'pin' | 'confirm';
 
 export default function PrivateSetupScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const scheme = useColorScheme() ?? 'light';
-  const theme = colors[scheme];
+  const vault = useVaultTheme();
   const { t } = useTranslation();
 
   const gender = useProfileStore((s) => s.gender);
@@ -101,18 +102,39 @@ export default function PrivateSetupScreen() {
 
   return (
     <View
-      className="flex-1 bg-background px-6"
-      style={{ paddingTop: insets.top + 20, paddingBottom: insets.bottom + 16 }}
+      style={{
+        flex: 1,
+        backgroundColor: vault.void,
+        paddingHorizontal: 24,
+        paddingTop: insets.top + 20,
+        paddingBottom: insets.bottom + 16,
+      }}
     >
       {step === 'modules' ? (
         <>
           <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="gap-6 pb-6">
             <View className="gap-3">
-              <View className="h-16 w-16 items-center justify-center rounded-3xl bg-surface">
-                <ShieldCheck size={30} color={theme.accent} strokeWidth={1.8} />
+              <View
+                style={{
+                  width: 60,
+                  height: 60,
+                  borderRadius: 22,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: tinted(VAULT_TINT, 0.16),
+                }}
+              >
+                <ShieldCheck size={28} color={VAULT_TINT} strokeWidth={1.8} />
               </View>
-              <Text variant="heading">{t('private.setupTitle')}</Text>
-              <Text variant="muted">{t('private.setupBody')}</Text>
+              <Text
+                className="font-sora-extrabold text-[27px]"
+                style={{ color: vault.ink, letterSpacing: -0.6 }}
+              >
+                {t('private.setupTitle')}
+              </Text>
+              <Text className="text-sm" style={{ color: vault.mute, lineHeight: 21 }}>
+                {t('private.setupBody')}
+              </Text>
             </View>
 
             <View className="gap-2.5">
@@ -127,19 +149,25 @@ export default function PrivateSetupScreen() {
                     onPress={() => toggle(module.id)}
                     className="flex-row items-center gap-3 rounded-2xl border px-4 py-3.5"
                     style={{
-                      borderColor: selected ? module.tint : theme.border,
-                      backgroundColor: selected ? alpha(module.tint, 0.1) : 'transparent',
+                      borderWidth: 0,
+                      borderTopWidth: 1,
+                      borderTopColor: selected ? tinted(module.tint, 0.45) : vault.wellEdge,
+                      backgroundColor: selected ? tinted(module.tint, 0.16) : vault.well,
                     }}
                   >
                     <View
                       className="h-10 w-10 items-center justify-center rounded-xl"
-                      style={{ backgroundColor: alpha(module.tint, 0.16) }}
+                      style={{ backgroundColor: tinted(module.tint, 0.2) }}
                     >
                       <Icon size={20} color={module.tint} strokeWidth={1.9} />
                     </View>
                     <View className="flex-1">
-                      <Text className="font-sora-medium text-foreground">{t(module.titleKey)}</Text>
-                      <Text variant="caption">{t(module.subtitleKey)}</Text>
+                      <Text className="font-sora-medium text-sm" style={{ color: vault.ink }}>
+                        {t(module.titleKey)}
+                      </Text>
+                      <Text className="text-xs" style={{ color: vault.faint, lineHeight: 16 }}>
+                        {t(module.subtitleKey)}
+                      </Text>
                     </View>
                   </Pressable>
                 );
@@ -147,7 +175,7 @@ export default function PrivateSetupScreen() {
             </View>
 
             {/* Says out loud that the list is not decided by the gender answer. */}
-            <Text variant="caption" className="px-1">
+            <Text className="px-1 text-xs" style={{ color: vault.faint, lineHeight: 17 }}>
               {t('private.suggestionNote')}
             </Text>
 
@@ -164,21 +192,29 @@ export default function PrivateSetupScreen() {
             */}
             {isEscrowConfigured() ? (
               <View
-                className="flex-row items-start gap-2.5 rounded-2xl border px-4 py-3"
-                style={{ borderColor: alpha(theme.destructive, 0.4) }}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'flex-start',
+                  gap: 10,
+                  borderRadius: 16,
+                  paddingHorizontal: 16,
+                  paddingVertical: 13,
+                  backgroundColor: tinted(vault.alarm, 0.1),
+                  borderTopWidth: 1,
+                  borderTopColor: tinted(vault.alarm, 0.3),
+                }}
               >
-                <TriangleAlert size={18} color={theme.destructive} strokeWidth={2} />
-                <Text variant="caption" className="flex-1">
+                <TriangleAlert size={17} color={vault.alarm} strokeWidth={2} />
+                <Text className="flex-1 text-xs" style={{ color: vault.mute, lineHeight: 17 }}>
                   {t('private.operatorNotice')}
                 </Text>
               </View>
             ) : null}
           </ScrollView>
 
-          <Button
-            variant="accent"
-            size="lg"
+          <VaultButton
             label={t('common.continue')}
+            tint={VAULT_TINT}
             disabled={chosen.length === 0}
             onPress={() => setStep('pin')}
           />
@@ -189,10 +225,17 @@ export default function PrivateSetupScreen() {
         <>
           <View className="flex-1 items-center justify-center gap-7">
             <View className="items-center gap-2">
-              <Text variant="heading">
+              <VaultStamp label={t('private.stampNewSpace')} tint={tinted(VAULT_TINT, 0.85)} />
+              <Text
+                className="font-sora-extrabold text-[24px]"
+                style={{ color: vault.ink, letterSpacing: -0.5 }}
+              >
                 {step === 'pin' ? t('private.choosePin') : t('private.confirmPin')}
               </Text>
-              <Text variant="muted" className="text-center">
+              <Text
+                className="text-center text-xs"
+                style={{ color: vault.faint, lineHeight: 18, maxWidth: 260 }}
+              >
                 {error ??
                   (step === 'pin'
                     ? t('private.pinHint', { count: MIN_PIN_LENGTH })
@@ -209,15 +252,25 @@ export default function PrivateSetupScreen() {
               }}
               disabled={busy}
               dotCount={MIN_PIN_LENGTH}
+              tint={VAULT_TINT}
             />
 
             {step === 'pin' ? (
               <View
-                className="flex-row items-start gap-2.5 rounded-2xl border px-4 py-3"
-                style={{ borderColor: alpha(theme.destructive, 0.4) }}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'flex-start',
+                  gap: 10,
+                  borderRadius: 16,
+                  paddingHorizontal: 16,
+                  paddingVertical: 13,
+                  backgroundColor: tinted(vault.alarm, 0.1),
+                  borderTopWidth: 1,
+                  borderTopColor: tinted(vault.alarm, 0.3),
+                }}
               >
-                <TriangleAlert size={18} color={theme.destructive} strokeWidth={2} />
-                <Text variant="caption" className="flex-1">
+                <TriangleAlert size={17} color={vault.alarm} strokeWidth={2} />
+                <Text className="flex-1 text-xs" style={{ color: vault.mute, lineHeight: 17 }}>
                   {t('private.noRecoveryWarning')}
                 </Text>
               </View>
@@ -225,9 +278,7 @@ export default function PrivateSetupScreen() {
           </View>
 
           <View className="gap-2">
-            <Button
-              variant="accent"
-              size="lg"
+            <VaultButton
               label={
                 busy
                   ? t('private.creatingSpace')
@@ -235,6 +286,7 @@ export default function PrivateSetupScreen() {
                     ? t('common.continue')
                     : t('private.createSpace')
               }
+              tint={VAULT_TINT}
               disabled={
                 busy ||
                 (step === 'pin' ? pin.length < MIN_PIN_LENGTH : confirmPin.length < MIN_PIN_LENGTH)
@@ -244,10 +296,10 @@ export default function PrivateSetupScreen() {
                 else void finish();
               }}
             />
-            <Button
-              variant="ghost"
-              size="lg"
-              label={t('common.back')}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('common.back')}
+              accessibilityState={{ disabled: busy }}
               disabled={busy}
               onPress={() => {
                 setError(null);
@@ -259,7 +311,15 @@ export default function PrivateSetupScreen() {
                   setStep('modules');
                 }
               }}
-            />
+              style={{ minHeight: 48, alignItems: 'center', justifyContent: 'center' }}
+            >
+              <Text
+                className="font-sora-medium text-sm"
+                style={{ color: vault.mute, opacity: busy ? 0.4 : 1 }}
+              >
+                {t('common.back')}
+              </Text>
+            </Pressable>
           </View>
         </>
       ) : null}

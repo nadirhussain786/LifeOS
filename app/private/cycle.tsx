@@ -1,12 +1,18 @@
 import { format, parseISO } from 'date-fns';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, TextInput, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
-import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
-import { colors } from '@/constants/theme';
 import { ChipRow, PrivateScreen } from '@/features/private/components/private-screen';
+import { tinted, useVaultTheme } from '@/features/private/components/vault-theme';
+import {
+  StatStrip,
+  VaultButton,
+  VaultField,
+  VaultLabel,
+  Well,
+} from '@/features/private/components/well';
 import { privateModule } from '@/features/private/config/private-modules';
 import {
   addCycleEntry,
@@ -22,16 +28,13 @@ import {
   type Flow,
   type Symptom,
 } from '@/features/private/services/cycle-math';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { alpha } from '@/lib/color';
 import { confirm } from '@/lib/dialog-store';
 
 const FLOWS: Flow[] = ['spotting', 'light', 'medium', 'heavy'];
 const TINT = privateModule('cycle')?.tint ?? '#e0518a';
 
 export default function CycleScreen() {
-  const scheme = useColorScheme() ?? 'light';
-  const theme = colors[scheme];
+  const vault = useVaultTheme();
   const { t } = useTranslation();
 
   // Entries are held in state and reloaded explicitly rather than derived
@@ -82,50 +85,43 @@ export default function CycleScreen() {
       title={t('private.cycleTitle')}
       subtitle={t('private.cycleSubtitle')}
       tint={TINT}
+      stamp={t('private.stampCycle')}
       footer={
-        <Button
-          variant="accent"
-          size="lg"
+        <VaultButton
           label={t('private.logToday')}
+          tint={TINT}
           disabled={!flow && symptoms.length === 0 && !note.trim()}
           onPress={save}
         />
       }
     >
-      {/* Summary */}
-      <View className="flex-row gap-3">
-        <View
-          className="flex-1 gap-1 rounded-2xl px-4 py-3.5"
-          style={{ backgroundColor: alpha(TINT, 0.12) }}
-        >
-          <Text variant="caption">{t('private.dayOfCycle')}</Text>
-          <Text className="font-sora-extrabold text-2xl" style={{ color: TINT }}>
-            {currentDay ?? '—'}
-          </Text>
-        </View>
-        <View className="flex-1 gap-1 rounded-2xl border border-border px-4 py-3.5">
-          <Text variant="caption">{t('private.averageCycle')}</Text>
-          <Text className="font-sora-extrabold text-2xl text-foreground">
-            {average ? t('private.days', { count: average }) : '—'}
-          </Text>
-        </View>
-      </View>
+      {/* The two figures this module exists to answer, set on the ground. */}
+      <StatStrip
+        tint={TINT}
+        items={[
+          { label: t('private.dayOfCycle'), value: currentDay ? String(currentDay) : '—' },
+          {
+            label: t('private.averageCycle'),
+            value: average ? t('private.days', { count: average }) : '—',
+          },
+        ]}
+      />
 
       {nextStart ? (
-        <Text variant="caption" className="px-1">
+        <Text className="text-xs" style={{ color: vault.faint, lineHeight: 17 }}>
           {/* Explicitly an estimate from her own history — see cycle-math.ts
               for why this module makes no medical claims. */}
           {t('private.estimatedNext', { date: format(parseISO(nextStart), 'd MMM') })}
         </Text>
       ) : (
-        <Text variant="caption" className="px-1">
+        <Text className="text-xs" style={{ color: vault.faint, lineHeight: 17 }}>
           {t('private.needMoreCycles')}
         </Text>
       )}
 
       {/* Today's log */}
       <View className="gap-3">
-        <Text variant="micro">{t('private.flow')}</Text>
+        <VaultLabel>{t('private.flow')}</VaultLabel>
         <View className="flex-row gap-2">
           {FLOWS.map((option) => {
             const active = flow === option;
@@ -135,15 +131,20 @@ export default function CycleScreen() {
                 accessibilityRole="radio"
                 accessibilityState={{ selected: active }}
                 onPress={() => setFlow(active ? null : option)}
-                className="flex-1 items-center rounded-2xl border py-3"
                 style={{
-                  borderColor: active ? TINT : theme.border,
-                  backgroundColor: active ? alpha(TINT, 0.12) : 'transparent',
+                  flex: 1,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minHeight: 46,
+                  borderRadius: 14,
+                  backgroundColor: active ? tinted(TINT, 0.22) : vault.well,
+                  borderTopWidth: 1,
+                  borderTopColor: active ? tinted(TINT, 0.4) : vault.wellEdge,
                 }}
               >
                 <Text
                   className="font-sora-medium text-sm"
-                  style={{ color: active ? TINT : theme.foreground }}
+                  style={{ color: active ? TINT : vault.mute }}
                 >
                   {t(`private.flow_${option}`)}
                 </Text>
@@ -154,7 +155,7 @@ export default function CycleScreen() {
       </View>
 
       <View className="gap-3">
-        <Text variant="micro">{t('private.symptoms')}</Text>
+        <VaultLabel>{t('private.symptoms')}</VaultLabel>
         <ChipRow
           options={SYMPTOMS}
           selected={symptoms}
@@ -166,62 +167,80 @@ export default function CycleScreen() {
         />
       </View>
 
-      <TextInput
+      <VaultField
         value={note}
         onChangeText={setNote}
         placeholder={t('private.notePlaceholder')}
-        placeholderTextColor={theme.mutedForeground}
+        accessibilityLabel={t('private.notePlaceholder')}
         multiline
-        className="min-h-[88px] rounded-2xl border border-border bg-card px-4 py-3 text-foreground"
-        style={{ fontFamily: 'Sora_400Regular', textAlignVertical: 'top' }}
+        tint={TINT}
+        containerStyle={{ minHeight: 92 }}
       />
 
       {/* History */}
       {periods.length > 0 ? (
         <View className="gap-3">
-          <Text variant="micro">{t('private.recentPeriods')}</Text>
+          <VaultLabel>{t('private.recentPeriods')}</VaultLabel>
           {periods.slice(0, 6).map((period) => (
-            <View
+            <Well
               key={period.start}
-              className="flex-row items-center justify-between rounded-2xl border border-border bg-card px-4 py-3"
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
             >
-              <Text className="font-sora-medium text-foreground">
+              <Text className="font-sora-medium text-sm" style={{ color: vault.ink }}>
                 {format(parseISO(period.start), 'd MMM yyyy')}
               </Text>
-              <Text variant="caption">{t('private.days', { count: period.days })}</Text>
-            </View>
+              <Text className="text-xs" style={{ color: vault.faint }}>
+                {t('private.days', { count: period.days })}
+              </Text>
+            </Well>
           ))}
         </View>
       ) : null}
 
       {entries.length > 0 ? (
         <View className="gap-3">
-          <Text variant="micro">{t('private.allEntries')}</Text>
+          <VaultLabel>{t('private.allEntries')}</VaultLabel>
           {entries.slice(0, 20).map((entry) => (
-            <Pressable
-              key={entry.id}
-              onLongPress={() => confirmDelete(entry.id)}
-              accessibilityRole="button"
-              accessibilityHint={t('private.longPressDelete')}
-              className="gap-1 rounded-2xl border border-border bg-card px-4 py-3"
-            >
-              <View className="flex-row items-center justify-between">
-                <Text className="font-sora-medium text-foreground">
-                  {format(parseISO(entry.date), 'd MMM yyyy')}
-                </Text>
-                {entry.flow ? (
-                  <Text variant="caption" style={{ color: TINT }}>
-                    {t(`private.flow_${entry.flow}`)}
+            <Well key={entry.id} style={{ gap: 4 }}>
+              <Pressable
+                onLongPress={() => confirmDelete(entry.id)}
+                accessibilityRole="button"
+                accessibilityLabel={format(parseISO(entry.date), 'd MMM yyyy')}
+                accessibilityHint={t('private.longPressDelete')}
+                style={{ gap: 4 }}
+              >
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <Text className="font-sora-medium text-sm" style={{ color: vault.ink }}>
+                    {format(parseISO(entry.date), 'd MMM yyyy')}
+                  </Text>
+                  {entry.flow ? (
+                    <Text className="text-xs" style={{ color: TINT }}>
+                      {t(`private.flow_${entry.flow}`)}
+                    </Text>
+                  ) : null}
+                </View>
+                {entry.symptoms.length > 0 ? (
+                  <Text className="text-xs" style={{ color: vault.mute, lineHeight: 17 }}>
+                    {entry.symptoms.map((s) => t(`private.symptom_${s}`)).join(' · ')}
                   </Text>
                 ) : null}
-              </View>
-              {entry.symptoms.length > 0 ? (
-                <Text variant="caption">
-                  {entry.symptoms.map((s) => t(`private.symptom_${s}`)).join(' · ')}
-                </Text>
-              ) : null}
-              {entry.note ? <Text variant="caption">{entry.note}</Text> : null}
-            </Pressable>
+                {entry.note ? (
+                  <Text className="text-xs" style={{ color: vault.mute, lineHeight: 17 }}>
+                    {entry.note}
+                  </Text>
+                ) : null}
+              </Pressable>
+            </Well>
           ))}
         </View>
       ) : null}

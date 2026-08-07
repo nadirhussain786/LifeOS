@@ -6,9 +6,9 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/ui/text';
-import { colors } from '@/constants/theme';
+import { tinted, useVaultTheme } from '@/features/private/components/vault-theme';
+import { Lamp, VaultStamp } from '@/features/private/components/well';
 import { usePrivateStore } from '@/features/private/store/private-store';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 
 /**
  * The shell every private module screen sits in.
@@ -18,21 +18,34 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
  * whoever picks the phone up. Putting it in one shell means a new private
  * module cannot forget it, which is the kind of thing that gets forgotten
  * exactly once.
+ *
+ * ## Why the header is built rather than reused
+ *
+ * `ScreenHeader` is the app's, and it is the right component everywhere else —
+ * which is precisely why it cannot be here. Its title, back chip and spacing
+ * are the same on the budget screen, so a private module wearing it announced
+ * that nothing about this place was different.
+ *
+ * This header is quieter: the module's name is the largest thing, the tint
+ * lights the room from above rather than colouring the text, and a stamp above
+ * the title states which module you are inside. All four modules share it, so
+ * they read as four rooms in one building rather than four unrelated screens.
  */
 type Props = {
   title: string;
   subtitle?: string;
   tint: string;
+  /** Small uppercase word above the title — what this room is for. */
+  stamp?: string;
   children: ReactNode;
-  /** Rendered under the header, outside the scroll area (e.g. an add button). */
+  /** Rendered under the scroll area, over the ground (e.g. an add button). */
   footer?: ReactNode;
 };
 
-export function PrivateScreen({ title, subtitle, tint, children, footer }: Props) {
+export function PrivateScreen({ title, subtitle, tint, stamp, children, footer }: Props) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const scheme = useColorScheme() ?? 'light';
-  const theme = colors[scheme];
+  const vault = useVaultTheme();
   const key = usePrivateStore((s) => s.key);
 
   useEffect(() => {
@@ -42,30 +55,63 @@ export function PrivateScreen({ title, subtitle, tint, children, footer }: Props
   if (!key) return null;
 
   return (
-    <View className="flex-1 bg-background">
+    <View style={{ flex: 1, backgroundColor: vault.void }}>
+      {/* Each room is lit by its own module's colour. */}
+      <Lamp tint={tint} />
+
       <View
-        className="flex-row items-center gap-3 px-5 pb-3"
-        style={{ paddingTop: insets.top + 8 }}
+        style={{
+          flexDirection: 'row',
+          alignItems: 'flex-start',
+          gap: 14,
+          paddingHorizontal: 20,
+          paddingTop: insets.top + 10,
+          paddingBottom: 14,
+        }}
       >
         <Pressable
           accessibilityRole="button"
+          accessibilityLabel={title}
           onPress={() => router.back()}
           hitSlop={10}
-          className="h-10 w-10 items-center justify-center rounded-full border border-border bg-surface"
+          style={({ pressed }) => ({
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginTop: 2,
+            backgroundColor: pressed ? tinted(tint, 0.18) : vault.well,
+            borderTopWidth: 1,
+            borderTopColor: vault.wellEdge,
+          })}
         >
-          <ChevronLeft size={20} color={theme.foreground} />
+          <ChevronLeft size={19} color={vault.mute} strokeWidth={2} />
         </Pressable>
-        <View className="flex-1">
-          <Text className="font-sora-extrabold text-2xl tracking-tight" style={{ color: tint }}>
+
+        <View style={{ flex: 1, gap: 2 }}>
+          {stamp ? <VaultStamp label={stamp} tint={tinted(tint, 0.9)} /> : null}
+          <Text
+            className="font-sora-extrabold text-[26px]"
+            style={{ color: vault.ink, letterSpacing: -0.6 }}
+          >
             {title}
           </Text>
-          {subtitle ? <Text variant="caption">{subtitle}</Text> : null}
+          {subtitle ? (
+            <Text className="text-xs" style={{ color: vault.faint, lineHeight: 17 }}>
+              {subtitle}
+            </Text>
+          ) : null}
         </View>
       </View>
 
       <ScrollView
-        contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}
-        contentContainerClassName="gap-5 px-5 pt-2"
+        contentContainerStyle={{
+          paddingBottom: insets.bottom + 32,
+          paddingHorizontal: 20,
+          paddingTop: 4,
+          gap: 18,
+        }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
@@ -73,16 +119,21 @@ export function PrivateScreen({ title, subtitle, tint, children, footer }: Props
       </ScrollView>
 
       {footer ? (
-        <View className="px-5" style={{ paddingBottom: insets.bottom + 12 }}>
-          {footer}
-        </View>
+        <View style={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 14 }}>{footer}</View>
       ) : null}
     </View>
   );
 }
 
-/** A row of selectable chips — used for symptoms, triggers and tags, which are
- * the same interaction three times over. */
+/**
+ * A row of selectable chips — used for symptoms, triggers and tags, which are
+ * the same interaction three times over.
+ *
+ * Unselected chips have no border here, only a recessed ground: on near-black a
+ * ring of hairlines reads as a grid of empty boxes, and the eye has to work to
+ * find the two that are on. Selection is carried by the tint filling the chip,
+ * which is the one thing that reads instantly at a glance.
+ */
 export function ChipRow<T extends string>({
   options,
   selected,
@@ -96,11 +147,10 @@ export function ChipRow<T extends string>({
   tint: string;
   labelFor: (value: T) => string;
 }) {
-  const scheme = useColorScheme() ?? 'light';
-  const theme = colors[scheme];
+  const vault = useVaultTheme();
 
   return (
-    <View className="flex-row flex-wrap gap-2">
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
       {options.map((option) => {
         const active = selected.includes(option);
         return (
@@ -109,15 +159,23 @@ export function ChipRow<T extends string>({
             accessibilityRole="checkbox"
             accessibilityState={{ checked: active }}
             onPress={() => onToggle(option)}
-            className="rounded-full border px-3.5 py-2"
-            style={{
-              borderColor: active ? tint : theme.border,
-              backgroundColor: active ? `${tint}22` : 'transparent',
-            }}
+            style={({ pressed }) => ({
+              borderRadius: 999,
+              paddingHorizontal: 15,
+              minHeight: 38,
+              justifyContent: 'center',
+              backgroundColor: active
+                ? tinted(tint, 0.22)
+                : pressed
+                  ? tinted(tint, 0.1)
+                  : vault.well,
+              borderTopWidth: 1,
+              borderTopColor: active ? tinted(tint, 0.4) : vault.wellEdge,
+            })}
           >
             <Text
               className="font-sora-medium text-sm"
-              style={{ color: active ? tint : theme.foreground }}
+              style={{ color: active ? tint : vault.mute }}
             >
               {labelFor(option)}
             </Text>

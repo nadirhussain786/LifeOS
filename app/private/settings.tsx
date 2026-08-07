@@ -3,11 +3,11 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, Switch, View } from 'react-native';
 
-import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
-import { colors } from '@/constants/theme';
 import { HUB_SECTIONS } from '@/features/hub/config/modules';
 import { PinPad } from '@/features/private/components/pin-pad';
+import { tinted, useVaultTheme } from '@/features/private/components/vault-theme';
+import { VaultButton, VaultLabel, Well } from '@/features/private/components/well';
 import { PrivateScreen } from '@/features/private/components/private-screen';
 import { PRIVATE_MODULES } from '@/features/private/config/private-modules';
 import {
@@ -25,7 +25,6 @@ import {
 } from '@/features/private/services/vault-keys';
 import { usePrivateStore } from '@/features/private/store/private-store';
 import { reportError } from '@/lib/error-reporting';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 import { confirm } from '@/lib/dialog-store';
 
 /** Ordinary Hub modules that may be moved behind the vault. Settings is
@@ -37,10 +36,12 @@ const MOVABLE_MODULES = HUB_SECTIONS.flatMap((section) => section.modules).filte
 
 type Mode = 'menu' | 'change-current' | 'change-next' | 'decoy';
 
+/** Settings belong to the space as a whole, so they take the vault's colour. */
+const VAULT_TINT = '#7c6cf0';
+
 export default function PrivateSettingsScreen() {
   const router = useRouter();
-  const scheme = useColorScheme() ?? 'light';
-  const theme = colors[scheme];
+  const vault = useVaultTheme();
   const { t } = useTranslation();
 
   const space = usePrivateStore((s) => s.space);
@@ -156,32 +157,38 @@ export default function PrivateSettingsScreen() {
     return (
       <PrivateScreen
         title={isChange ? t('private.changePin') : t('private.setDecoy')}
-        tint={theme.accent}
+        tint={VAULT_TINT}
         footer={
           <View className="gap-2">
-            <Button
-              variant="accent"
-              size="lg"
+            <VaultButton
               label={t('common.continue')}
+              tint={VAULT_TINT}
               disabled={busy || value.length < MIN_PIN_LENGTH}
               onPress={() => void submit()}
             />
-            <Button
-              variant="ghost"
-              size="lg"
-              label={t('common.cancel')}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('common.cancel')}
               onPress={() => {
                 setCurrentPin('');
                 setNextPin('');
                 setError(null);
                 setMode('menu');
               }}
-            />
+              style={{ minHeight: 48, alignItems: 'center', justifyContent: 'center' }}
+            >
+              <Text className="font-sora-medium text-sm" style={{ color: vault.mute }}>
+                {t('common.cancel')}
+              </Text>
+            </Pressable>
           </View>
         }
       >
-        <View className="items-center gap-6 pt-6">
-          <Text variant="muted" className="text-center">
+        <View className="items-center gap-7 pt-6">
+          <Text
+            className="text-center text-sm"
+            style={{ color: error ? vault.alarm : vault.mute, lineHeight: 20, maxWidth: 270 }}
+          >
             {error ??
               (mode === 'change-current'
                 ? t('private.enterCurrentPin')
@@ -189,71 +196,79 @@ export default function PrivateSettingsScreen() {
                   ? t('private.enterNewPin')
                   : t('private.decoyHint'))}
           </Text>
-          <PinPad value={value} onChange={setValue} disabled={busy} dotCount={MIN_PIN_LENGTH} />
+          <PinPad
+            value={value}
+            onChange={setValue}
+            disabled={busy}
+            dotCount={MIN_PIN_LENGTH}
+            tint={VAULT_TINT}
+          />
         </View>
       </PrivateScreen>
     );
   }
 
   return (
-    <PrivateScreen title={t('private.spaceSettings')} tint={theme.accent}>
+    <PrivateScreen title={t('private.spaceSettings')} tint={VAULT_TINT}>
       <View className="gap-3">
-        <Text variant="micro">{t('private.whatIsInHere')}</Text>
-        <View className="rounded-2xl border border-border bg-card px-4">
+        <VaultLabel>{t('private.whatIsInHere')}</VaultLabel>
+        <Well style={{ paddingVertical: 4, paddingHorizontal: 16 }}>
           {PRIVATE_MODULES.map((module, index) => (
             <View
               key={module.id}
-              className={
-                index === 0
-                  ? 'flex-row items-center gap-3 py-3.5'
-                  : 'flex-row items-center gap-3 border-t border-border py-3.5'
-              }
+              className="flex-row items-center gap-3 py-3.5"
+              style={index === 0 ? undefined : { borderTopWidth: 1, borderTopColor: vault.line }}
             >
               <View className="flex-1">
-                <Text className="font-sora-medium text-foreground">{t(module.titleKey)}</Text>
-                <Text variant="caption">{t(module.subtitleKey)}</Text>
+                <Text className="font-sora-medium text-sm" style={{ color: vault.ink }}>
+                  {t(module.titleKey)}
+                </Text>
+                <Text className="text-xs" style={{ color: vault.faint, lineHeight: 16 }}>
+                  {t(module.subtitleKey)}
+                </Text>
               </View>
               <Switch
                 value={enabled.includes(module.id)}
                 onValueChange={() => confirmToggle(module.id)}
-                trackColor={{ true: theme.accent, false: theme.border }}
+                trackColor={{ true: tinted(VAULT_TINT, 0.6), false: vault.line }}
               />
             </View>
           ))}
-        </View>
+        </Well>
       </View>
 
       <View className="gap-3">
-        <Text variant="micro">{t('private.moveModules')}</Text>
-        <View className="rounded-2xl border border-border bg-card px-4">
+        <VaultLabel>{t('private.moveModules')}</VaultLabel>
+        <Well style={{ paddingVertical: 4, paddingHorizontal: 16 }}>
           {MOVABLE_MODULES.map((module, index) => (
             <View
               key={module.id}
-              className={
-                index === 0
-                  ? 'flex-row items-center gap-3 py-3.5'
-                  : 'flex-row items-center gap-3 border-t border-border py-3.5'
-              }
+              className="flex-row items-center gap-3 py-3.5"
+              style={index === 0 ? undefined : { borderTopWidth: 1, borderTopColor: vault.line }}
             >
               <View className="flex-1">
-                <Text className="font-sora-medium text-foreground">{t(module.titleKey)}</Text>
-                <Text variant="caption">{t(module.subtitleKey)}</Text>
+                <Text className="font-sora-medium text-sm" style={{ color: vault.ink }}>
+                  {t(module.titleKey)}
+                </Text>
+                <Text className="text-xs" style={{ color: vault.faint, lineHeight: 16 }}>
+                  {t(module.subtitleKey)}
+                </Text>
               </View>
               <Switch
                 value={privatised.includes(module.id)}
                 onValueChange={() => togglePrivatised(module.id)}
-                trackColor={{ true: theme.accent, false: theme.border }}
+                trackColor={{ true: tinted(VAULT_TINT, 0.6), false: vault.line }}
               />
             </View>
           ))}
-        </View>
+        </Well>
         {/*
           The honest caveat, stated where the switch is rather than buried in a
           policy. Moving a module here hides it and gates it behind the PIN —
           it does not re-encrypt rows that already live in ordinary tables, and
           the word "private" invites people to assume it does.
         */}
-        <Text variant="caption" className="px-1">
+        <Text className="px-1 text-xs" style={{ color: vault.faint, lineHeight: 17 }}>
           {t('private.moveModulesNote')}
         </Text>
       </View>
@@ -265,15 +280,27 @@ export default function PrivateSettingsScreen() {
       */}
       {space === 'real' ? (
         <View className="gap-3">
-          <Text variant="micro">{t('private.security')}</Text>
+          <VaultLabel>{t('private.security')}</VaultLabel>
           <View className="gap-2">
             <Pressable
               accessibilityRole="button"
               onPress={() => setMode('change-current')}
-              className="rounded-2xl border border-border bg-card px-4 py-3.5"
+              style={{
+                borderRadius: 16,
+                paddingHorizontal: 16,
+                paddingVertical: 14,
+                gap: 2,
+                backgroundColor: vault.well,
+                borderTopWidth: 1,
+                borderTopColor: vault.wellEdge,
+              }}
             >
-              <Text className="font-sora-medium text-foreground">{t('private.changePin')}</Text>
-              <Text variant="caption">{t('private.changePinHint')}</Text>
+              <Text className="font-sora-medium text-sm" style={{ color: vault.ink }}>
+                {t('private.changePin')}
+              </Text>
+              <Text className="text-xs" style={{ color: vault.faint, lineHeight: 16 }}>
+                {t('private.changePinHint')}
+              </Text>
             </Pressable>
 
             <Pressable
@@ -294,29 +321,48 @@ export default function PrivateSettingsScreen() {
                   setMode('decoy');
                 }
               }}
-              className="rounded-2xl border border-border bg-card px-4 py-3.5"
+              style={{
+                borderRadius: 16,
+                paddingHorizontal: 16,
+                paddingVertical: 14,
+                gap: 2,
+                backgroundColor: vault.well,
+                borderTopWidth: 1,
+                borderTopColor: vault.wellEdge,
+              }}
             >
-              <Text className="font-sora-medium text-foreground">
+              <Text className="font-sora-medium text-sm" style={{ color: vault.ink }}>
                 {decoyExists ? t('private.removeDecoy') : t('private.setDecoy')}
               </Text>
-              <Text variant="caption">{t('private.decoyExplainer')}</Text>
+              <Text className="text-xs" style={{ color: vault.faint, lineHeight: 16 }}>
+                {t('private.decoyExplainer')}
+              </Text>
             </Pressable>
           </View>
         </View>
       ) : null}
 
       <View className="gap-3">
-        <Text variant="micro">{t('private.dangerZone')}</Text>
+        <VaultLabel>{t('private.dangerZone')}</VaultLabel>
         <Pressable
           accessibilityRole="button"
           onPress={destroy}
-          className="rounded-2xl border px-4 py-3.5"
-          style={{ borderColor: theme.destructive }}
+          style={{
+            borderRadius: 16,
+            paddingHorizontal: 16,
+            paddingVertical: 14,
+            gap: 2,
+            backgroundColor: tinted(vault.alarm, 0.1),
+            borderTopWidth: 1,
+            borderTopColor: tinted(vault.alarm, 0.3),
+          }}
         >
-          <Text className="font-sora-medium" style={{ color: theme.destructive }}>
+          <Text className="font-sora-semibold text-sm" style={{ color: vault.alarm }}>
             {t('private.destroySpace')}
           </Text>
-          <Text variant="caption">{t('private.destroyHint')}</Text>
+          <Text className="text-xs" style={{ color: vault.mute, lineHeight: 16 }}>
+            {t('private.destroyHint')}
+          </Text>
         </Pressable>
       </View>
     </PrivateScreen>

@@ -1,12 +1,12 @@
 import { format, parseISO } from 'date-fns';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, TextInput, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
-import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
-import { colors } from '@/constants/theme';
 import { ChipRow, PrivateScreen } from '@/features/private/components/private-screen';
+import { tinted, useVaultTheme } from '@/features/private/components/vault-theme';
+import { VaultButton, VaultField, VaultLabel, Well } from '@/features/private/components/well';
 import { privateModule } from '@/features/private/config/private-modules';
 import {
   INTIMACY_TAGS,
@@ -15,15 +15,12 @@ import {
   removeIntimacyEntry,
   type IntimacyTag,
 } from '@/features/private/services/intimacy';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { alpha } from '@/lib/color';
 import { confirm } from '@/lib/dialog-store';
 
 const TINT = privateModule('intimacy')?.tint ?? '#d4653f';
 
 export default function IntimacyScreen() {
-  const scheme = useColorScheme() ?? 'light';
-  const theme = colors[scheme];
+  const vault = useVaultTheme();
   const { t } = useTranslation();
 
   // See cycle.tsx: explicit reload rather than a counter dependency.
@@ -65,18 +62,18 @@ export default function IntimacyScreen() {
       title={t('private.intimacyTitle')}
       subtitle={t('private.intimacySubtitle')}
       tint={TINT}
+      stamp={t('private.stampIntimacy')}
       footer={
-        <Button
-          variant="accent"
-          size="lg"
+        <VaultButton
           label={t('private.saveEntry')}
+          tint={TINT}
           disabled={mood === null && tags.length === 0 && !note.trim()}
           onPress={save}
         />
       }
     >
       <View className="gap-3">
-        <Text variant="micro">{t('private.howWasToday')}</Text>
+        <VaultLabel>{t('private.howWasToday')}</VaultLabel>
         <View className="flex-row gap-2">
           {[1, 2, 3, 4, 5].map((level) => {
             const active = mood === level;
@@ -86,16 +83,18 @@ export default function IntimacyScreen() {
                 accessibilityRole="radio"
                 accessibilityState={{ selected: active }}
                 onPress={() => setMood(active ? null : level)}
-                className="flex-1 items-center rounded-2xl border py-3.5"
                 style={{
-                  borderColor: active ? TINT : theme.border,
-                  backgroundColor: active ? alpha(TINT, 0.12) : 'transparent',
+                  flex: 1,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minHeight: 50,
+                  borderRadius: 14,
+                  backgroundColor: active ? tinted(TINT, 0.22) : vault.well,
+                  borderTopWidth: 1,
+                  borderTopColor: active ? tinted(TINT, 0.4) : vault.wellEdge,
                 }}
               >
-                <Text
-                  className="font-sora-medium"
-                  style={{ color: active ? TINT : theme.foreground }}
-                >
+                <Text className="font-sora-medium" style={{ color: active ? TINT : vault.mute }}>
                   {level}
                 </Text>
               </Pressable>
@@ -105,7 +104,7 @@ export default function IntimacyScreen() {
       </View>
 
       <View className="gap-3">
-        <Text variant="micro">{t('private.whatHappened')}</Text>
+        <VaultLabel>{t('private.whatHappened')}</VaultLabel>
         <ChipRow
           options={INTIMACY_TAGS}
           selected={tags}
@@ -117,44 +116,56 @@ export default function IntimacyScreen() {
         />
       </View>
 
-      <TextInput
+      <VaultField
         value={note}
         onChangeText={setNote}
         placeholder={t('private.intimacyNotePlaceholder')}
-        placeholderTextColor={theme.mutedForeground}
+        accessibilityLabel={t('private.intimacyNotePlaceholder')}
         multiline
-        className="min-h-[120px] rounded-2xl border border-border bg-card px-4 py-3 text-foreground"
-        style={{ fontFamily: 'Sora_400Regular', textAlignVertical: 'top' }}
+        tint={TINT}
+        containerStyle={{ minHeight: 124 }}
       />
 
       {entries.length > 0 ? (
         <View className="gap-3">
-          <Text variant="micro">{t('private.history')}</Text>
+          <VaultLabel>{t('private.history')}</VaultLabel>
           {entries.slice(0, 30).map((entry) => (
-            <Pressable
-              key={entry.id}
-              onLongPress={() => confirmDelete(entry.id)}
-              accessibilityRole="button"
-              accessibilityHint={t('private.longPressDelete')}
-              className="gap-1 rounded-2xl border border-border bg-card px-4 py-3"
-            >
-              <View className="flex-row items-center justify-between">
-                <Text className="font-sora-medium text-foreground">
-                  {format(parseISO(entry.date), 'd MMM yyyy')}
-                </Text>
-                {entry.mood !== null ? (
-                  <Text variant="caption" style={{ color: TINT }}>
-                    {entry.mood}/5
+            <Well key={entry.id}>
+              <Pressable
+                onLongPress={() => confirmDelete(entry.id)}
+                accessibilityRole="button"
+                accessibilityLabel={format(parseISO(entry.date), 'd MMM yyyy')}
+                accessibilityHint={t('private.longPressDelete')}
+                style={{ gap: 4 }}
+              >
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <Text className="font-sora-medium text-sm" style={{ color: vault.ink }}>
+                    {format(parseISO(entry.date), 'd MMM yyyy')}
+                  </Text>
+                  {entry.mood !== null ? (
+                    <Text className="text-xs" style={{ color: TINT }}>
+                      {entry.mood}/5
+                    </Text>
+                  ) : null}
+                </View>
+                {entry.tags.length > 0 ? (
+                  <Text className="text-xs" style={{ color: vault.mute, lineHeight: 17 }}>
+                    {entry.tags.map((x) => t(`private.intimacyTag_${x}`)).join(' · ')}
                   </Text>
                 ) : null}
-              </View>
-              {entry.tags.length > 0 ? (
-                <Text variant="caption">
-                  {entry.tags.map((x) => t(`private.intimacyTag_${x}`)).join(' · ')}
-                </Text>
-              ) : null}
-              {entry.note ? <Text className="text-foreground">{entry.note}</Text> : null}
-            </Pressable>
+                {entry.note ? (
+                  <Text className="text-sm" style={{ color: vault.ink, lineHeight: 20 }}>
+                    {entry.note}
+                  </Text>
+                ) : null}
+              </Pressable>
+            </Well>
           ))}
         </View>
       ) : null}

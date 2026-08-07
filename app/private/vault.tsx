@@ -5,8 +5,9 @@ import { useTranslation } from 'react-i18next';
 import { Dimensions, Pressable, View } from 'react-native';
 
 import { Text } from '@/components/ui/text';
-import { colors } from '@/constants/theme';
 import { PrivateScreen } from '@/features/private/components/private-screen';
+import { tinted, useVaultTheme } from '@/features/private/components/vault-theme';
+import { VaultStamp } from '@/features/private/components/well';
 import { privateModule } from '@/features/private/config/private-modules';
 import { MAX_VAULT_MB, pickIntoVault } from '@/features/private/services/vault-files';
 import {
@@ -16,8 +17,6 @@ import {
   vaultItemDataUri,
   type VaultItem,
 } from '@/features/private/services/vault-items';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { alpha } from '@/lib/color';
 import { confirm } from '@/lib/dialog-store';
 import { toast } from '@/lib/toast-store';
 
@@ -33,8 +32,7 @@ const GAP = 8;
  * the results only for the life of this screen.
  */
 export default function VaultScreen() {
-  const scheme = useColorScheme() ?? 'light';
-  const theme = colors[scheme];
+  const vault = useVaultTheme();
   const { t } = useTranslation();
 
   // See cycle.tsx: explicit reload rather than a counter dependency.
@@ -84,14 +82,26 @@ export default function VaultScreen() {
       title={t('private.vaultTitle')}
       subtitle={t('private.itemCount', { count: items.length })}
       tint={TINT}
+      stamp={t('private.stampVault')}
       footer={
         <View className="flex-row gap-2">
           <Pressable
             accessibilityRole="button"
             disabled={busy}
             onPress={() => void add('library')}
-            className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl py-4"
-            style={{ backgroundColor: alpha(TINT, 0.16), opacity: busy ? 0.5 : 1 }}
+            style={{
+              flex: 1,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+              minHeight: 52,
+              borderRadius: 16,
+              backgroundColor: tinted(TINT, 0.2),
+              borderTopWidth: 1,
+              borderTopColor: tinted(TINT, 0.35),
+              opacity: busy ? 0.5 : 1,
+            }}
           >
             <ImagePlus size={19} color={TINT} strokeWidth={1.9} />
             <Text className="font-sora-medium" style={{ color: TINT }}>
@@ -103,8 +113,17 @@ export default function VaultScreen() {
             accessibilityLabel={t('private.takePhoto')}
             disabled={busy}
             onPress={() => void add('camera')}
-            className="h-[52px] w-[52px] items-center justify-center rounded-2xl"
-            style={{ backgroundColor: alpha(TINT, 0.16), opacity: busy ? 0.5 : 1 }}
+            style={{
+              width: 52,
+              height: 52,
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: 16,
+              backgroundColor: tinted(TINT, 0.2),
+              borderTopWidth: 1,
+              borderTopColor: tinted(TINT, 0.35),
+              opacity: busy ? 0.5 : 1,
+            }}
           >
             <Camera size={20} color={TINT} strokeWidth={1.9} />
           </Pressable>
@@ -112,9 +131,17 @@ export default function VaultScreen() {
       }
     >
       {items.length === 0 ? (
-        <View className="items-center gap-2 py-16">
-          <Text variant="subheading">{t('private.vaultEmptyTitle')}</Text>
-          <Text variant="muted" className="text-center">
+        // An empty vault is a normal state, not an error, so it gets the same
+        // quiet treatment as a full one rather than an illustration.
+        <View style={{ alignItems: 'center', gap: 10, paddingVertical: 72 }}>
+          <VaultStamp label={t('private.stampEmpty')} tint={tinted(TINT, 0.8)} />
+          <Text className="font-sora-semibold text-base" style={{ color: vault.ink }}>
+            {t('private.vaultEmptyTitle')}
+          </Text>
+          <Text
+            className="text-center text-xs"
+            style={{ color: vault.faint, lineHeight: 18, maxWidth: 250 }}
+          >
             {t('private.vaultEmptyBody')}
           </Text>
         </View>
@@ -138,17 +165,29 @@ export default function VaultScreen() {
           accessibilityRole="button"
           onPress={() => setSelected(null)}
           className="absolute inset-0 items-center justify-center px-4"
-          style={{ backgroundColor: alpha(theme.background, 0.97) }}
+          // Solid black, not a translucent wash: anything showing through
+          // behind a vault image is the vault leaking round its own viewer.
+          style={{ backgroundColor: '#000000' }}
         >
           <VaultFullImage item={selected} />
           <Pressable
             accessibilityRole="button"
             onPress={() => confirmDelete(selected)}
-            className="mt-5 flex-row items-center gap-2 rounded-full border px-4 py-2.5"
-            style={{ borderColor: alpha(theme.destructive, 0.5) }}
+            style={{
+              marginTop: 22,
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 8,
+              minHeight: 44,
+              paddingHorizontal: 18,
+              borderRadius: 999,
+              backgroundColor: tinted(vault.alarm, 0.14),
+            }}
           >
-            <Trash2 size={17} color={theme.destructive} />
-            <Text style={{ color: theme.destructive }}>{t('common.delete')}</Text>
+            <Trash2 size={16} color={vault.alarm} strokeWidth={1.9} />
+            <Text className="font-sora-medium text-sm" style={{ color: vault.alarm }}>
+              {t('common.delete')}
+            </Text>
           </Pressable>
         </Pressable>
       ) : null}
@@ -175,8 +214,15 @@ function VaultThumbnail({
       accessibilityRole="imagebutton"
       onPress={onPress}
       onLongPress={onLongPress}
-      style={{ width: size, height: size }}
-      className="overflow-hidden rounded-xl bg-surface"
+      style={{
+        width: size,
+        height: size,
+        borderRadius: 14,
+        overflow: 'hidden',
+        // The empty tile is a recess, so a still-decrypting thumbnail reads as
+        // a slot waiting rather than as a missing image.
+        backgroundColor: '#05070699',
+      }}
     >
       {uri ? (
         <Image
