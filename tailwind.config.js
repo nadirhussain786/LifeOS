@@ -68,6 +68,11 @@ module.exports = {
         gallery: 'hsl(var(--gallery) / <alpha-value>)',
         music: 'hsl(var(--music) / <alpha-value>)',
         notes: 'hsl(var(--notes) / <alpha-value>)',
+        // the private space — same colour language, reached only via the vault
+        vault: 'hsl(var(--vault) / <alpha-value>)',
+        cycle: 'hsl(var(--cycle) / <alpha-value>)',
+        recovery: 'hsl(var(--recovery) / <alpha-value>)',
+        intimacy: 'hsl(var(--intimacy) / <alpha-value>)',
         border: 'hsl(var(--border) / <alpha-value>)',
         input: 'hsl(var(--input) / <alpha-value>)',
         ring: 'hsl(var(--ring) / <alpha-value>)',

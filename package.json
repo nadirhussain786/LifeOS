@@ -12,6 +12,7 @@
     "assets": "node scripts/make-brand-assets.mjs",
     "version:bump": "node scripts/bump-version.mjs",
     "check:migrations": "node scripts/check-migrations.mjs",
+    "check:tokens": "node scripts/check-tokens.mjs",
     "test:sql": "node scripts/test-migrations.mjs",
     "migrate": "node scripts/migrate.mjs",
     "migrate:status": "node scripts/migrate.mjs --status",

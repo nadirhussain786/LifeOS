@@ -66,6 +66,12 @@
     --music: 86 78% 27%;
     --notes: 48 95% 33%;
 
+    /* private space — same language, reached only through the vault */
+    --vault: 247 82% 68%;
+    --cycle: 336 70% 60%;
+    --recovery: 157 54% 40%;
+    --intimacy: 15 63% 54%;
+
     --border: 156 13% 90%;
     --input: 156 13% 90%;
     --ring: 158 70% 32%;
@@ -113,6 +119,11 @@
     --gallery: 292 91% 73%;
     --music: 83 78% 55%;
     --notes: 45 93% 47%;
+
+    --vault: 249 85% 79%;
+    --cycle: 337 77% 75%;
+    --recovery: 156 50% 56%;
+    --intimacy: 18 72% 67%;
 
     --border: 156 9% 20%;
     --input: 156 9% 20%;
