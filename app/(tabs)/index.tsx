@@ -1,17 +1,22 @@
 import { type BottomSheetModal } from '@gorhom/bottom-sheet';
 import { useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RefreshControl, ScrollView, View } from 'react-native';
 
 import { Defer } from '@/components/ui/defer';
+import { RadialMenu } from '@/components/ui/radial-menu';
 import { Fab } from '@/components/ui/fab';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import { WIDGET_REGISTRY } from '@/features/dashboard/config/widget-registry';
 import { DashboardHeader } from '@/features/dashboard/components/dashboard-header';
 import { FocusShortcuts } from '@/features/dashboard/components/focus-shortcuts';
-import { QuickActionsSheet } from '@/features/dashboard/components/quick-actions-sheet';
+import {
+  QuickActionsSheet,
+  QUICK_ACTIONS,
+} from '@/features/dashboard/components/quick-actions-sheet';
 import { TodayFocusCard } from '@/features/dashboard/components/today-focus-card';
 import { MoodTile, WaterTile } from '@/features/dashboard/components/wellbeing-tiles';
 import type { WidgetId } from '@/features/dashboard/types/dashboard.types';
@@ -53,10 +58,12 @@ function WidgetSection({ label, ids }: { label: string; ids: WidgetId[] }) {
 
 export default function DashboardScreen() {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const { t } = useTranslation();
   const scheme = useColorScheme() ?? 'light';
   const sheetRef = useRef<BottomSheetModal>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [radialOpen, setRadialOpen] = useState(false);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -122,7 +129,22 @@ export default function DashboardScreen() {
         ) : null}
       </ScrollView>
 
-      <Fab onPress={() => sheetRef.current?.present()} />
+      {/* Tap opens the sheet, long-press fans the same actions out under the
+          thumb. The FAB stays because it is the only visible way to create
+          anything — an app whose create affordance is an undiscoverable
+          long-press is a worse app, however modern the gesture is. The arc is
+          the shortcut for people who already know it is there. */}
+      <Fab onPress={() => sheetRef.current?.present()} onLongPress={() => setRadialOpen(true)} />
+      <RadialMenu
+        open={radialOpen}
+        onClose={() => setRadialOpen(false)}
+        actions={QUICK_ACTIONS.map((action) => ({
+          key: action.labelKey,
+          label: t(action.labelKey),
+          icon: action.icon,
+          onPress: () => router.push(action.getHref() as never),
+        }))}
+      />
       <QuickActionsSheet ref={sheetRef} />
     </View>
   );

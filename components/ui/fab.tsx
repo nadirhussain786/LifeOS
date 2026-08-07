@@ -1,3 +1,4 @@
+import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Plus } from 'lucide-react-native';
 import { Pressable, StyleSheet } from 'react-native';
@@ -12,10 +13,15 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 type Props = {
   onPress: () => void;
+  /**
+   * Fans the same actions out in an arc under the thumb instead of opening the
+   * sheet. Optional: without it the FAB behaves exactly as it always has.
+   */
+  onLongPress?: () => void;
   accessibilityLabel?: string;
 };
 
-export function Fab({ onPress, accessibilityLabel = 'Quick actions' }: Props) {
+export function Fab({ onPress, onLongPress, accessibilityLabel = 'Quick actions' }: Props) {
   const insets = useSafeAreaInsets();
   const scheme = useColorScheme() ?? 'light';
   const scale = useSharedValue(1);
@@ -25,6 +31,17 @@ export function Fab({ onPress, accessibilityLabel = 'Quick actions' }: Props) {
   return (
     <AnimatedPressable
       onPress={onPress}
+      onLongPress={
+        onLongPress &&
+        (() => {
+          // Heavier than a tap: the gesture does more, and the haptic is the
+          // only thing that tells you the long-press registered before the
+          // arc has finished animating out.
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          onLongPress();
+        })
+      }
+      delayLongPress={220}
       onPressIn={() => {
         scale.value = withTiming(0.92, { duration: 100 });
       }}
