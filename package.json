@@ -13,6 +13,7 @@
     "version:bump": "node scripts/bump-version.mjs",
     "check:migrations": "node scripts/check-migrations.mjs",
     "check:tokens": "node scripts/check-tokens.mjs",
+    "docs:design": "node scripts/gen-design-doc.mjs && prettier --write docs/design-system.md --log-level warn",
     "test:sql": "node scripts/test-migrations.mjs",
     "migrate": "node scripts/migrate.mjs",
     "migrate:status": "node scripts/migrate.mjs --status",
