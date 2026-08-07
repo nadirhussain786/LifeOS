@@ -46,6 +46,7 @@ import { useAppLock } from '@/features/security/hooks/use-app-lock';
 import { useAuthStore } from '@/features/auth/services/auth-store';
 import { useAuthGate } from '@/features/auth/hooks/use-auth-gate';
 import { useUsageReporter } from '@/features/analytics/hooks/use-usage-reporter';
+import { AmbientBackground } from '@/components/ui/ambient-background';
 import { DialogHost } from '@/components/ui/dialog-host';
 import { Grain } from '@/components/ui/grain';
 import { UsageConsentCard } from '@/features/analytics/components/usage-consent-card';
@@ -314,10 +315,16 @@ export default function RootLayout() {
               <MiniPlayerBar />
               <DevErrorBanner />
             </ErrorBoundary>
-            {/* Directly above the navigator and below every overlay: the grain
-                is a property of the app's surface, so it sits over the content
-                but must never fall across a dialog, a toast or the lock shield
-                — those are separate planes floating in front of it. */}
+            {/* Two ambient layers, both directly above the navigator and below
+                every overlay. They are properties of the app's surface, so they
+                sit over content but must never fall across a dialog, a toast or
+                the lock shield — those are separate planes in front of them.
+
+                Overlays rather than backdrops on purpose: every screen paints an
+                opaque `bg-background`, so anything mounted behind the navigator
+                would be invisible. The wash goes first and the grain on top, so
+                the grain dithers the wash's own gradient as well as the app's. */}
+            <AmbientBackground />
             <Grain />
             {/* Above the navigator so a toast raised by a delete outlives the
                 router.back() that immediately follows it. */}
