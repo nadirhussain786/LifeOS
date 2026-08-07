@@ -18,7 +18,7 @@
  * a second system.
  */
 
-import { colors as tokens } from '@/constants/design-tokens';
+import { colors as tokens, contentPalette } from '@/constants/design-tokens';
 
 export const colors = {
   light: {
@@ -78,14 +78,10 @@ export type ThemeName = keyof typeof colors;
  * screen rendering a category name in its color must pass it through
  * `readableTint()` from design-tokens first.
  */
-export const categoryColorPalette = [
-  '#f97316', // orange
-  '#eab308', // yellow
-  '#22c55e', // green
-  '#0ea5e9', // sky
-  '#8b5cf6', // violet
-  '#ec4899', // pink
-] as const;
+export const categoryColorPalette = contentPalette.map((pair) => pair.light);
+
+/** The same six, per theme — prefer this in new code. */
+export const categoryColorPairs = contentPalette;
 
 /**
  * Task priority as a traffic-light ladder (calm blue → amber caution → red

@@ -232,6 +232,57 @@ export function resolveTint(pair: TintPair, theme: ThemeName): string {
 }
 
 /**
+ * Swatches for user-facing CONTENT — budget categories, goal categories, mood,
+ * savings-goal colours, confetti. Deliberately separate from the module tints
+ * and the semantic set: these identify a thing the user picked, not a state the
+ * app is in, and reusing a module hue here is fine because the two never
+ * compete for the same meaning.
+ *
+ * Named and paired for two reasons.
+ *
+ * They were duplicated. `CONFETTI_COLORS` was character-for-character the same
+ * six values as `categoryColorPalette`, `SAVINGS_COLORS` was five of the same
+ * six in a different order, and the budget, goal and mood tables each re-typed
+ * their own overlapping subset — six lists, one palette, no link between them.
+ *
+ * And they had no dark column. Every module tint got a dark variant and every
+ * one of these did not, so a budget donut drew the same #eab308 on a white card
+ * and on a near-black one. The light values here are unchanged — light mode
+ * looks exactly as it did — and the dark ones are new.
+ */
+export const contentTints = {
+  orange: { light: '#f97316', dark: '#fb923c' },
+  yellow: { light: '#eab308', dark: '#facc15' },
+  green: { light: '#22c55e', dark: '#4ade80' },
+  sky: { light: '#0ea5e9', dark: '#38bdf8' },
+  violet: { light: '#8b5cf6', dark: '#a78bfa' },
+  pink: { light: '#ec4899', dark: '#f472b6' },
+  indigo: { light: '#6366f1', dark: '#818cf8' },
+  lime: { light: '#84cc16', dark: '#a3e635' },
+  teal: { light: '#14b8a6', dark: '#2dd4bf' },
+  red: { light: '#ef4444', dark: '#f87171' },
+  purple: { light: '#a855f7', dark: '#c084fc' },
+  /** "Other" / uncategorised. The emerald-biased neutral, not a flat grey. */
+  neutral: moduleTints.settings,
+} as const satisfies Record<string, TintPair>;
+
+export type ContentTintName = keyof typeof contentTints;
+
+/**
+ * The six-swatch picker offered for user-created content (task categories,
+ * note folders). A subset of `contentTints` — the picker stays small on
+ * purpose, while the tables above can reach the full set.
+ */
+export const contentPalette = [
+  contentTints.orange,
+  contentTints.yellow,
+  contentTints.green,
+  contentTints.sky,
+  contentTints.violet,
+  contentTints.pink,
+] as const;
+
+/**
  * The budget ledger's three-way colour: money in, money out, money set aside.
  *
  * Derived from the semantic set rather than given its own hexes, because that

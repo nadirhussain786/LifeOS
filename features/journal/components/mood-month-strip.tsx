@@ -5,6 +5,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 
 import { cardClass } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
+import { resolveTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { MOOD_TINT } from '@/features/journal/constants';
 import type { JournalEntry, MoodOption } from '@/features/journal/types/journal.types';
@@ -68,7 +69,7 @@ export function MoodMonthStrip({ monthAnchor, entries, onSelectDate }: Props) {
         {days.map((day) => {
           const dateKey = toDateKey(day);
           const mood = moodByDate.get(dateKey);
-          const tint = mood ? MOOD_TINT[mood] : undefined;
+          const tint = mood ? resolveTint(MOOD_TINT[mood], scheme) : undefined;
           const today = isToday(day);
           const isFuture = dateKey > todayKey;
 

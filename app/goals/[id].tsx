@@ -56,7 +56,7 @@ export default function GoalDetailScreen() {
 
   if (!goal) return null;
 
-  const meta = goalCategoryMeta(goal.category);
+  const meta = goalCategoryMeta(goal.category, scheme);
   const Icon = meta.icon;
   const isCompleted = goal.status === 'completed';
   const isMilestones = goal.progressMode === 'milestones';

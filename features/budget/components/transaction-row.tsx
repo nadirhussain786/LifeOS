@@ -19,7 +19,7 @@ type Props = {
 
 export function TransactionRow({ transaction, currency, onPress }: Props) {
   const scheme = useColorScheme() ?? 'light';
-  const meta = categoryMetaFor(transaction.type, transaction.category);
+  const meta = categoryMetaFor(transaction.type, transaction.category, scheme);
   const Icon = meta.icon;
 
   return (

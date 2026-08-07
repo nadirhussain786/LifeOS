@@ -25,7 +25,7 @@ type Props = {
 export function GoalCard({ goal, onPress }: Props) {
   const scheme = useColorScheme() ?? 'light';
   const { t } = useTranslation();
-  const meta = goalCategoryMeta(goal.category);
+  const meta = goalCategoryMeta(goal.category, scheme);
   const Icon = meta.icon;
   const isCompleted = goal.status === 'completed';
   const scale = useSharedValue(1);

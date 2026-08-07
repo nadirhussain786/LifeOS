@@ -30,7 +30,7 @@ export default function LogProgressScreen() {
   const [note, setNote] = useState('');
 
   if (!goal) return null;
-  const meta = goalCategoryMeta(goal.category);
+  const meta = goalCategoryMeta(goal.category, scheme);
   const isCount = goal.progressMode === 'count';
 
   // Percent mode works on a 0–1 fraction; count mode adds to currentValue.
