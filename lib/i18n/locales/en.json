@@ -1816,5 +1816,14 @@
     "weeklyReview": "Weekly review",
     "planTomorrow": "Plan tomorrow tonight",
     "unitMinutes": "minutes"
+  },
+  "widget": {
+    "today": "TODAY",
+    "tasksDue_one": "{{count}} task due",
+    "tasksDue_other": "{{count}} tasks due",
+    "habitsLeft_one": "{{count}} habit left",
+    "habitsLeft_other": "{{count}} habits left",
+    "water": "{{current}} / {{goal}} L water",
+    "openApp": "Open LifeOS"
   }
 }

@@ -1816,5 +1816,14 @@
     "weeklyReview": "साप्ताहिक समीक्षा",
     "planTomorrow": "रात में कल की योजना",
     "unitMinutes": "मिनट"
+  },
+  "widget": {
+    "today": "आज",
+    "tasksDue_one": "{{count}} काम बाकी",
+    "tasksDue_other": "{{count}} काम बाकी",
+    "habitsLeft_one": "{{count}} आदत बाकी",
+    "habitsLeft_other": "{{count}} आदतें बाकी",
+    "water": "{{current}} / {{goal}} ली॰ पानी",
+    "openApp": "LifeOS खोलें"
   }
 }

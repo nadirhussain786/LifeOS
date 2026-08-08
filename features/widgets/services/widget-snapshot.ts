@@ -27,6 +27,29 @@ export type TodaySnapshot = {
    * handler only draws.
    */
   show: { tasks: boolean; habits: boolean; water: boolean };
+  /**
+   * The rendered strings, already in the user's language and already
+   * pluralised.
+   *
+   * The widget was the only English-only surface in an app that ships Arabic,
+   * Hindi and Urdu. It could not simply call `t()` for the same reason it cannot
+   * read the database: its task handler runs headless, and initialising i18next
+   * there means loading four locale bundles and expo-localization in a context
+   * that may not survive it — for text the app can perfectly well format itself.
+   *
+   * So the same trick as `show`: the app decides, the handler draws. This also
+   * gets real plural rules for free, where the widget previously did
+   * `count === 1 ? 'task' : 'tasks'` — a rule that is wrong in Arabic, which has
+   * six plural forms, and wrong in Urdu for the number zero.
+   */
+  text: {
+    heading: string;
+    tasks: string;
+    habits: string;
+    water: string;
+    /** Shown when every row is hidden or nothing has synced yet. */
+    empty: string;
+  };
   /** Epoch ms of the last write; 0 means the app has never synced yet. */
   updatedAt: number;
 };
@@ -34,12 +57,18 @@ export type TodaySnapshot = {
 const STORAGE_KEY = 'lifeos.widget.today.v1';
 
 /**
- * Also the fallback for a snapshot written before `show` existed, since the
- * read below spreads the stored object over this one. Everything defaults to
- * hidden, which is the safe direction for the upgrade: a user who had already
- * privatised a module stops leaking it the moment this build runs, rather than
- * on their next app launch. The cost is a widget that says "open LifeOS" until
- * then, which is honest — it genuinely does not know today's numbers yet.
+ * Also the fallback for a snapshot written before `show` and `text` existed,
+ * since the read below spreads the stored object over this one. Everything
+ * defaults to hidden, which is the safe direction for the upgrade: a user who
+ * had already privatised a module stops leaking it the moment this build runs,
+ * rather than on their next app launch. The cost is a widget that says "open
+ * LifeOS" until then, which is honest — it genuinely does not know today's
+ * numbers yet.
+ *
+ * The English in here is the only English left, and it is only ever seen before
+ * the first sync — which happens on the next app launch, and cannot happen at
+ * all until the app has run once. A blank widget would be the alternative, and
+ * that reads as broken.
  */
 export const EMPTY_SNAPSHOT: TodaySnapshot = {
   tasksDue: 0,
@@ -47,6 +76,7 @@ export const EMPTY_SNAPSHOT: TodaySnapshot = {
   waterMl: 0,
   waterGoalMl: 2000,
   show: { tasks: false, habits: false, water: false },
+  text: { heading: 'TODAY', tasks: '', habits: '', water: '', empty: 'Open LifeOS' },
   updatedAt: 0,
 };
 

@@ -24,10 +24,6 @@ const C = {
   water: '#38bdf8',
 } satisfies Record<string, HexColor>;
 
-function liters(ml: number): string {
-  return (ml / 1000).toFixed(1);
-}
-
 function Row({ color, text, uri }: { color: HexColor; text: string; uri: string }) {
   return (
     <FlexWidget
@@ -52,7 +48,7 @@ function Row({ color, text, uri }: { color: HexColor; text: string; uri: string 
 }
 
 export function TodayWidget({ snapshot }: { snapshot: TodaySnapshot }) {
-  const { tasksDue, habitsLeft, waterMl, waterGoalMl, show } = snapshot;
+  const { show, text } = snapshot;
   const anyVisible = show.tasks || show.habits || show.water;
 
   return (
@@ -70,31 +66,17 @@ export function TodayWidget({ snapshot }: { snapshot: TodaySnapshot }) {
         paddingVertical: 16,
       }}
     >
+      {/* Every string arrives already translated and already pluralised. This
+          component does no formatting at all, because it renders in a headless
+          context where i18next is not safe to initialise — see the `text` field
+          in widget-snapshot.ts. */}
       <TextWidget
-        text="TODAY"
+        text={text.heading}
         style={{ fontSize: 12, color: C.muted, fontFamily: 'sans-serif-medium', letterSpacing: 1 }}
       />
-      {show.tasks ? (
-        <Row
-          color={C.tasks}
-          uri={WIDGET_LINKS.tasks}
-          text={`${tasksDue} ${tasksDue === 1 ? 'task' : 'tasks'} due`}
-        />
-      ) : null}
-      {show.habits ? (
-        <Row
-          color={C.habits}
-          uri={WIDGET_LINKS.habits}
-          text={`${habitsLeft} ${habitsLeft === 1 ? 'habit' : 'habits'} left`}
-        />
-      ) : null}
-      {show.water ? (
-        <Row
-          color={C.water}
-          uri={WIDGET_LINKS.water}
-          text={`${liters(waterMl)} / ${liters(waterGoalMl)} L water`}
-        />
-      ) : null}
+      {show.tasks ? <Row color={C.tasks} uri={WIDGET_LINKS.tasks} text={text.tasks} /> : null}
+      {show.habits ? <Row color={C.habits} uri={WIDGET_LINKS.habits} text={text.habits} /> : null}
+      {show.water ? <Row color={C.water} uri={WIDGET_LINKS.water} text={text.water} /> : null}
       {/*
         Every row hidden. This is what a widget shows when all three modules are
         private, switched off, or simply not synced yet, and it deliberately
@@ -104,7 +86,7 @@ export function TodayWidget({ snapshot }: { snapshot: TodaySnapshot }) {
       */}
       {anyVisible ? null : (
         <TextWidget
-          text="Open LifeOS"
+          text={text.empty}
           style={{ fontSize: 15, color: C.muted, fontFamily: 'sans-serif-medium', marginTop: 6 }}
         />
       )}

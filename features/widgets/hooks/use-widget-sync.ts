@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 
 import { useModuleFlagsStore } from '@/features/module-flags/store/module-flags-store';
 import { usePrivateStore } from '@/features/private/store/private-store';
+import { useLanguageStore } from '@/features/settings/store/language-store';
 import { syncTodayWidget } from '@/features/widgets/services/widget-data';
 import { queryClient } from '@/lib/query-client';
 
@@ -45,11 +46,20 @@ export function useWidgetSync() {
       if (state.flags !== previous.flags) schedule();
     });
 
+    // The widget's strings are formatted by the app and stored in the snapshot,
+    // so a language change has to rewrite it. Without this the home screen keeps
+    // yesterday's language indefinitely — nothing else in the app would ever
+    // invalidate it, and the user has no way to force one.
+    const unsubscribeLanguage = useLanguageStore.subscribe((state, previous) => {
+      if (state.language !== previous.language) schedule();
+    });
+
     return () => {
       if (timer) clearTimeout(timer);
       unsubscribeCache();
       unsubscribePrivate();
       unsubscribeFlags();
+      unsubscribeLanguage();
     };
   }, []);
 }

@@ -1928,5 +1928,22 @@
     "weeklyReview": "مراجعة أسبوعية",
     "planTomorrow": "تخطيط الغد الليلة",
     "unitMinutes": "دقيقة"
+  },
+  "widget": {
+    "today": "اليوم",
+    "tasksDue_zero": "لا مهام مستحقة",
+    "tasksDue_one": "مهمة واحدة مستحقة",
+    "tasksDue_two": "مهمتان مستحقتان",
+    "tasksDue_few": "{{count}} مهام مستحقة",
+    "tasksDue_many": "{{count}} مهمة مستحقة",
+    "tasksDue_other": "{{count}} مهمة مستحقة",
+    "habitsLeft_zero": "لا عادات متبقية",
+    "habitsLeft_one": "عادة واحدة متبقية",
+    "habitsLeft_two": "عادتان متبقيتان",
+    "habitsLeft_few": "{{count}} عادات متبقية",
+    "habitsLeft_many": "{{count}} عادة متبقية",
+    "habitsLeft_other": "{{count}} عادة متبقية",
+    "water": "{{current}} / {{goal}} لتر ماء",
+    "openApp": "افتح LifeOS"
   }
 }

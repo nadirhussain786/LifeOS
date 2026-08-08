@@ -14,6 +14,8 @@ import { listTasks } from '@/features/tasks/services/tasks-repository';
 import { getDailyTotal } from '@/features/water-intake/services/water-intake-repository';
 import { useWaterSettingsStore } from '@/features/water-intake/store/water-settings-store';
 import { toDateKey } from '@/lib/date';
+import i18n from '@/lib/i18n';
+import { deviceLocale } from '@/lib/locale';
 
 /**
  * Reads today's counts from the app's databases/stores. Runs only in the app's
@@ -63,7 +65,37 @@ export function buildTodaySnapshot(): TodaySnapshot {
   }
   const waterGoalMl = show.water ? (useWaterSettingsStore.getState().goalMl ?? 2000) : 0;
 
-  return { tasksDue, habitsLeft, waterMl, waterGoalMl, show, updatedAt: Date.now() };
+  // Formatted here, in the app, because the headless task handler cannot safely
+  // initialise i18next — see the `text` field's note in widget-snapshot.ts. Using
+  // i18n.t with `count` also means real plural rules rather than the `=== 1`
+  // ternary this used to render, which is wrong in Arabic and wrong at zero in
+  // Urdu.
+  const text = {
+    heading: i18n.t('widget.today'),
+    tasks: i18n.t('widget.tasksDue', { count: tasksDue }),
+    habits: i18n.t('widget.habitsLeft', { count: habitsLeft }),
+    water: i18n.t('widget.water', {
+      current: formatLitres(waterMl),
+      goal: formatLitres(waterGoalMl),
+    }),
+    empty: i18n.t('widget.openApp'),
+  };
+
+  return { tasksDue, habitsLeft, waterMl, waterGoalMl, show, text, updatedAt: Date.now() };
+}
+
+/** Litres to one decimal, in the device's locale — so a German phone reads
+ *  "1,5 L" rather than "1.5 L". */
+function formatLitres(ml: number): string {
+  const litres = ml / 1000;
+  try {
+    return new Intl.NumberFormat(deviceLocale(), {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1,
+    }).format(litres);
+  } catch {
+    return litres.toFixed(1);
+  }
 }
 
 /**
