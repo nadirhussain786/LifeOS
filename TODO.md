@@ -83,11 +83,14 @@ Still to do here:
       resumable upload queue, per-user quotas and a download-on-demand cache —
       and at ten million users it is the line item that dominates the bill, so
       it wants a quota and an opt-in before it wants code.
-- [ ] **The expense-group policies still use membership functions** that take a
-      per-row argument and so cannot be hoisted the way 0017 hoisted the owner
-      policies. Making those cheap means turning the membership check into a
-      join the planner can see through — worth doing, easy to get wrong in a way
-      that leaks between groups.
+- [x] **The expense-group policies are hoistable now** (0023). Inverted rather
+      than optimised: instead of "is the caller in _this row's_ group?" per row,
+      "which groups is the caller in?" once per statement, tested with
+      `group_id in (select public.my_expense_group_ids())`. Same predicate, so
+      the whole existing 0003–0021 group suite passes unchanged — which is the
+      evidence that mattered, given how this could have leaked. Three new tests
+      cover the failure the new shape could introduce: a set that spans groups
+      instead of scoping to one.
 - [ ] **Nothing here has run against a real Supabase project or a real device.**
       The migrations are executed by `npm run test:sql` against WASM Postgres and
       the local schema by `npm test`; neither proves behaviour on hardware.
@@ -128,10 +131,16 @@ Still to do here:
 - [ ] **Wipe needs a cooperating client.** A modified build can decline to run
       it. The server-side denial cannot be declined; the local wipe can. Worth
       stating in any T&S policy rather than implying devices are controllable.
-- [ ] **Appeals have no route back in.** The block screen offers an email link.
-      A blocked user cannot read their own data to export it, so a data-access
-      request has to be served by an admin running `admin_user_rows` by hand —
-      which is a GDPR obligation currently met by a person remembering to.
+- [x] **A blocked account can get its own data** (0022). "Download my data" on
+      the block screen calls `export_own_data`, which is SECURITY DEFINER so it
+      sees past the block, includes the soft-deleted rows a purge left behind,
+      and takes **no user id at all** — it reads `auth.uid()` and nothing else,
+      which is the whole of its safety argument. A test asserts no overload
+      taking a uuid exists, so adding one fails the build rather than review.
+      `private_entries` stays out and the exported file says why: the server
+      holds ciphertext sealed to a key it never had.
+- [ ] **Appeals are still a mailto.** The data-access half is automated now;
+      deciding an appeal is not, and probably should not be.
 - [ ] **No staging project exists yet.** The runner supports one; nothing has
       been run against either database.
 
@@ -253,9 +262,6 @@ the UI:
 
 ## 🎛 Module switches (0011 shipped — these finish it)
 
-- [ ] **Admin UI for the switches.** Today it is
-      `select public.admin_set_module_enabled('split', false, 'reason');` in the
-      SQL editor. Fine for one operator, poor under pressure at 3am.
 - [x] **Privatised modules no longer write legible notifications.** A privatised
       module's reminders still fire and still deep-link, with text that names
       nothing ("You have a reminder") — dropping them would penalise somebody
@@ -269,28 +275,41 @@ the UI:
       where those stores are not reliably available. `EMPTY_SNAPSHOT` defaults
       every row to hidden so an upgrade stops leaking immediately rather than on
       next launch.
-- [ ] **The widget is the only English-only surface in a four-language app.** It
-      hardcodes "task"/"tasks"/"habits left" and pluralises with a ternary. The
-      fix is the same mechanism as above — format the strings in the app and put
-      them in the snapshot — because i18next is not safe to initialise in the
-      headless context.
-- [ ] **Per-user switches.** 0011 is global. A per-account override would allow
-      staged rollouts and one-off support fixes; needs a second table and a
-      merge rule (user override wins, absence falls through to global).
+- [x] **The widget speaks all four languages.** Strings are formatted in the app
+      with i18next's own plural rules and put in the snapshot, for the same
+      reason `show` is — i18next is not safe to initialise in the headless task
+      handler. A language change rewrites the snapshot, because nothing else
+      would ever invalidate it.
+- [x] **Per-user switches** (0024). A user override wins; absence falls through
+      to the global switch; absence of both means enabled. The override is a
+      tri-state rather than a boolean, which is the load-bearing part — without
+      a middle value there is no way to say "on for this account while off
+      globally", and that is exactly what a staged rollout is. The client reads
+      the merged `my_module_flags()` instead of the table. The internal
+      per-account note is never returned to its subject; only the global row's
+      user-facing `message` is.
+- [ ] **Admin UI for the switches** (global and per-user) — still SQL in the
+      editor. See the operator-console note below: it is the same decision.
 
 ## 📊 Operator surface (0010 shipped — these finish it)
 
 - [ ] **Seed the admin roster** — `insert into public.admins (user_id, note) values ('<your-uuid>', 'owner');`
       from the SQL editor. Nothing in `admin_*` works until this row exists, and
       the table is invisible to clients by design.
-- [ ] **Hard block should also ban in GoTrue** — `account_status = 'blocked'`
-      stops the shared surfaces via RLS and pauses sync in the app, but the JWT
-      stays valid. An edge function calling
-      `auth.admin.updateUserById(uid, { ban_duration })` is what actually kills
-      live sessions. Until then, blocking is defence-in-depth, not a hard stop.
+- [x] **A hard block now ends the session** —
+      `supabase/functions/ban-account` calls
+      `auth.admin.updateUserById(uid, { ban_duration })`, which is what actually
+      invalidates the token a blocked account is already holding. It reads the
+      caller's JWT and asks the database `is_admin()` _as that caller_, so a
+      client cannot claim its own privileges; banning yourself is refused,
+      because it locks the only account that could unban anybody. **Needs
+      `supabase functions deploy ban-account`.**
 - [ ] **Admin dashboard** — point Metabase (or a small internal page) at
       `admin_active_users()` / `admin_module_reach()`. Don't build a custom UI
-      before there are numbers worth looking at.
+      before there are numbers worth looking at. Same reasoning parks the
+      operator console and the module-switch UI: every capability behind them is
+      callable from the SQL editor today, and this account has no users yet, so
+      a bespoke console would be built against imagined usage.
 - [ ] **Tune the thresholds** — 20 invitations/hr and 10 groups/day are guesses.
       Check `abuse_counters` against real traffic after a week before trusting
       them.
@@ -308,7 +327,14 @@ the UI:
 
 - [ ] Media **bytes** via Supabase Storage (see the sync-hardening section above:
       wants quotas and an opt-in before it wants code).
-- [ ] Conflict surfacing (currently silent last-write-wins).
+- [x] **Conflict surfacing.** Last-write-wins still wins — losing is just no
+      longer silent. A local edit overwritten by a newer one from another device
+      is recorded with a snapshot and offered back from Settings → Sync.
+      Detection keys off the set of rows the push _just uploaded_, which is
+      exactly "edited here since the last sync"; without that, every ordinary
+      remote update would read as a conflict. Restoring stamps `updated_at` to
+      now so the other device converges, rather than being undone by the next
+      pull.
 
 ## 🚀 First run (rebuilt — what is left)
 
@@ -317,8 +343,11 @@ the UI:
       not that it runs.
 - [ ] **Starter habits are a guess.** Thirteen suggestions across nine focus
       areas, written blind. Worth revisiting once anyone has actually used them.
-- [ ] **The old `finishSetup` string is now unused** but left in the locales
-      rather than deleted mid-flight. Sweep with any other dead keys.
+- [x] **Dead locale keys swept**, and `npm run check:i18n` now fails the build on
+      a key used in code that no locale defines, or a key English has that
+      another language does not. Its first run found six of the former — four of
+      which predated the onboarding rewrite, including a gender step that had
+      been rendering `onboarding.genderQuestion` on screen as literal text.
 
 ---
 
@@ -341,4 +370,11 @@ the UI:
 ## 🔵 Later / optional
 
 - [ ] **FCM (server push)** — only if we add remote/server-driven notifications. Local reminders don't need it.
-- [ ] **Re-enable Goals/Study/Streak categories** — currently hidden (no scheduler). Build goal-deadline & study reminders to bring their toggles back.
+- [x] **Goals and Study categories are back.** Both have schedulers now:
+      `features/goals/services/goal-reminders.ts` (one dated reminder per goal
+      with a due date, capped at twelve and horizoned at 120 days, because iOS
+      silently discards past 64 pending) and
+      `features/study/services/study-reminders.ts` (one weekly trigger per
+      selected weekday, not a daily one — a DAILY trigger nags on the days it
+      was told not to). `streak` stays hidden, and its exclusion now carries the
+      reason in the code: it genuinely needs to evaluate state at fire time.
