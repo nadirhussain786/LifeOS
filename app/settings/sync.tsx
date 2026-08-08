@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import {
   CheckCircle2,
+  CloudUpload,
   CloudOff,
   GitMerge,
   LogOut,
@@ -243,6 +244,21 @@ export default function SyncSettingsScreen() {
             would be noise on a screen that is already dense, and it would teach
             people to ignore the one place this ever matters.
           */}
+          {/* Its own screen, because it is a materially different decision:
+              everything else here is text measured in kilobytes, and that is
+              somebody's photo library. */}
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => router.push('/settings/media')}
+            className={cardClass({ padding: 'md' }, 'flex-row items-center gap-3')}
+          >
+            <CloudUpload size={18} color={theme.mutedForeground} />
+            <View className="flex-1">
+              <Text className="font-sora-medium text-foreground">{t('media.title')}</Text>
+              <Text variant="caption">{t('media.rowHint')}</Text>
+            </View>
+          </Pressable>
+
           {conflictCount > 0 ? (
             <Pressable
               accessibilityRole="button"

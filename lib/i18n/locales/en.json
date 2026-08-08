@@ -1850,5 +1850,26 @@
     "thu": "Thursday",
     "fri": "Friday",
     "sat": "Saturday"
+  },
+  "media": {
+    "title": "Photos & files",
+    "rowHint": "Back up the files themselves, not just their details",
+    "needsAccount": "An account is needed for this",
+    "needsAccountBody": "Files are backed up to your account. Sign in first — everything already on this device stays exactly where it is.",
+    "backUpFiles": "Back up photos and files",
+    "backUpFilesHint": "Uploads the files themselves so another device can open them. Off by default.",
+    "wifiOnly": "Only on Wi-Fi",
+    "wifiOnlyHint": "Uploading a video library over mobile data is somebody’s month.",
+    "storageUsed": "Storage used",
+    "usageOf": "{{used}} of {{quota}}",
+    "pendingCount_one": "{{count}} file waiting to upload",
+    "pendingCount_other": "{{count}} files waiting to upload",
+    "quotaReached": "You’ve reached your storage limit. Nothing new is being uploaded.",
+    "downloadedFiles": "Downloaded files",
+    "downloadedFilesHint": "{{size}} of files fetched from your account onto this device.",
+    "clearCache": "Clear downloaded files",
+    "clearCacheTitle": "Clear downloaded files?",
+    "clearCacheBody": "This only removes files this device downloaded — anything imported here stays. They can be fetched again whenever you need them.",
+    "limitsNote": "Your private space is never backed up. Its files are encrypted with a key that only exists on this device, so uploading them would achieve nothing."
   }
 }

@@ -3454,6 +3454,119 @@ await test('0025 the escrow blob is still unreadable by its own owner', async ()
   });
 });
 
+// ---------------------------------------------------------------------------
+console.log('\n0026 media storage');
+// ---------------------------------------------------------------------------
+
+/**
+ * The bytes are the most sensitive thing this app will ever store — somebody's
+ * photographs — and the entire isolation model is one predicate: the first path
+ * segment is your own uid. These hold it, and hold the quota, which is the only
+ * thing standing between this feature and an unbounded bill.
+ */
+const put = (uid, path, size) =>
+  db.query(
+    `insert into storage.objects (bucket_id, name, metadata)
+     values ('media', $1, jsonb_build_object('size', $2::bigint))`,
+    [`${uid}/${path}`, size],
+  );
+
+await test('0026 you can store and read your own media', async () => {
+  const M1 = 'aaaabbbb-0000-0000-0000-000000000001';
+  await createUser(db, M1, 'media1@example.com');
+  await asUser(db, M1, async () => {
+    await put(M1, 'gallery_photos/p1.jpg', 1024);
+    expectEqual(
+      await count(`select count(*)::int n from storage.objects where bucket_id = 'media'`),
+      1,
+      'own objects visible',
+    );
+  });
+});
+
+await test('0026 one account cannot read another account’s media', async () => {
+  // The whole point of the feature and the whole risk of it, in one assertion.
+  const M2 = 'aaaabbbb-0000-0000-0000-000000000002';
+  await createUser(db, M2, 'media2@example.com');
+  await asUser(db, M2, async () => {
+    expectEqual(
+      await count(`select count(*)::int n from storage.objects where bucket_id = 'media'`),
+      0,
+      'somebody else’s objects are invisible',
+    );
+  });
+});
+
+await test('0026 you cannot write into another account’s folder', async () => {
+  const M3 = 'aaaabbbb-0000-0000-0000-000000000003';
+  const VICTIM = 'aaaabbbb-0000-0000-0000-000000000001';
+  await createUser(db, M3, 'media3@example.com');
+  await asUser(db, M3, async () => {
+    await expectRejection(() => put(VICTIM, 'gallery_photos/forged.jpg', 10), 'row-level security');
+  });
+});
+
+await test('0026 you cannot delete another account’s media', async () => {
+  const M4 = 'aaaabbbb-0000-0000-0000-000000000004';
+  const VICTIM = 'aaaabbbb-0000-0000-0000-000000000001';
+  await createUser(db, M4, 'media4@example.com');
+  await asUser(db, M4, async () => {
+    await db.query(`delete from storage.objects where name like $1`, [`${VICTIM}/%`]);
+  });
+  expectEqual(
+    await count(`select count(*)::int n from storage.objects where name like $1`, [`${VICTIM}/%`]),
+    1,
+    'the victim’s object survives',
+  );
+});
+
+await test('0026 the quota is enforced on the server', async () => {
+  // A limit the client alone enforces is a suggestion to anyone who has not
+  // modified the client. This is the one that costs money.
+  const M5 = 'aaaabbbb-0000-0000-0000-000000000005';
+  await createUser(db, M5, 'media5@example.com');
+  const quota = Number((await one(`select public.media_quota_bytes() as q`)).q);
+
+  await asUser(db, M5, async () => {
+    await put(M5, 'gallery_photos/big.jpg', quota - 100);
+    await expectRejection(
+      () => put(M5, 'gallery_photos/over.jpg', 200),
+      'media storage quota exceeded',
+    );
+  });
+});
+
+await test('0026 usage is reported to the account it belongs to', async () => {
+  // A quota nobody can see is a quota that only ever appears as an unexplained
+  // failure, so the app has to be able to show it.
+  const M6 = 'aaaabbbb-0000-0000-0000-000000000006';
+  await createUser(db, M6, 'media6@example.com');
+  await asUser(db, M6, async () => {
+    await put(M6, 'songs/a.mp3', 500);
+    await put(M6, 'songs/b.mp3', 250);
+    expectEqual(Number((await one(`select public.media_bytes_used() as b`)).b), 750, 'bytes used');
+  });
+});
+
+await test('0026 usage counts only your own bytes', async () => {
+  const M7 = 'aaaabbbb-0000-0000-0000-000000000007';
+  await createUser(db, M7, 'media7@example.com');
+  await asUser(db, M7, async () => {
+    expectEqual(
+      Number((await one(`select public.media_bytes_used() as b`)).b),
+      0,
+      'a new account starts at zero however much anyone else stores',
+    );
+  });
+});
+
+await test('0026 the bucket is private', async () => {
+  // A public bucket would make every path a guessable URL, and the paths are
+  // derived from row ids that travel in the metadata sync.
+  const bucket = await one(`select public from storage.buckets where id = 'media'`);
+  expectEqual(bucket?.public, false, 'bucket is not public');
+});
+
 await test('0023 the hoisted sets are scoped to the caller', async () => {
   // Direct assertions on the functions themselves, so a failure names the cause
   // rather than a downstream policy.

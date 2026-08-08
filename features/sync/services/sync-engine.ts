@@ -1,6 +1,7 @@
 import { getRawDb } from '@/database/client';
 import { trackModuleWrites } from '@/features/analytics/store/usage-store';
 import { useAuthStore } from '@/features/auth/services/auth-store';
+import { uploadPendingMedia } from '@/features/media-sync/services/media-uploader';
 import { currentStatus } from '@/features/moderation/services/account-standing';
 import { recordConflict } from '@/features/sync/services/conflict-repository';
 import {
@@ -496,6 +497,17 @@ async function runSync(force: boolean): Promise<void> {
     useSyncStore.getState().setStatus('idle');
     useSyncStore.getState().setLastSyncedAt(Date.now());
     useSyncStore.getState().setNextAttemptAt(null);
+
+    /**
+     * Bytes last, and outside the try that owns sync's status.
+     *
+     * Media is the least urgent thing here and the most likely to fail — a big
+     * file, a slow connection, a quota. Running it after the cursors are
+     * committed and the status is `idle` means an upload problem cannot make a
+     * successful row sync look failed, and cannot roll back cursors that
+     * legitimately advanced. It no-ops unless the user opted in.
+     */
+    void uploadPendingMedia().catch(() => undefined);
   } catch (e) {
     const failures = useSyncStore.getState().consecutiveFailures + 1;
     useSyncStore.getState().commitCursors(cursors);
