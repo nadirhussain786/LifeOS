@@ -78,11 +78,17 @@ Still to do here:
       leaked-password protection. `features/auth/services/password-policy.ts` is
       advisory until that is done — it improves the choice, it does not stop a
       crafted request.
-- [ ] **Media bytes.** `remote_path` exists on every media table and nothing
-      writes it. Uploading the files needs Storage buckets with per-user RLS, a
-      resumable upload queue, per-user quotas and a download-on-demand cache —
-      and at ten million users it is the line item that dominates the bill, so
-      it wants a quota and an opt-in before it wants code.
+- [x] **Media bytes** (0026). A private bucket, four isolation policies on one
+      predicate (the first path segment is your own uid), a per-account quota
+      enforced by a trigger rather than a policy, an opt-in that is off by
+      default, and download-on-demand. Resumable by construction: each file is
+      one request and `remote_path` is the record that it succeeded, so an
+      interrupted run resumes by finding the rows whose column is still null.
+- [ ] ⚠️ **Set the media quota.** `public.media_quota_bytes()` returns 2 GiB,
+      which is a placeholder chosen to be obviously finite, not a costed
+      decision. At a million accounts the difference between 2 GB and 20 GB is
+      the difference between a hobby bill and a funding round. One statement to
+      change, and it is the number the app and the trigger both read.
 - [x] **The expense-group policies are hoistable now** (0023). Inverted rather
       than optimised: instead of "is the caller in _this row's_ group?" per row,
       "which groups is the caller in?" once per statement, tested with
@@ -125,9 +131,18 @@ Still to do here:
       screen to undo one. Enforcement is server-side across all three contact
       routes. `features/moderation/moderation-wiring.test.ts` fails if any of it
       becomes unreachable again.
-- [ ] **Operator console UI.** All of this is SQL in the editor today. Fine for
-      one owner; poor for a moderator working a queue, and worse at 3am.
-      `operator_report_queue()` is the screen that wants building first.
+- [x] **Operator console** — `app/settings/operator.tsx`. The report queue
+      (already triaged by open-report count) and the global module switches,
+      which asked for a uuid typed by hand until now. Deliberately a view over
+      the existing RPCs and not a second permission system: the report gate, the
+      admin/staff split and every audit row stay in the database, because rules
+      the console enforced itself would be rules anybody could bypass with
+      `curl`. The row is hidden unless `is_staff()` says otherwise, and defaults
+      to hidden if the check fails.
+- [ ] **An account page inside the console.** The queue hands over each uuid to
+      copy, because acting on an account still means an RPC. Per-account module
+      overrides (0024), status changes and report resolution all want that
+      screen rather than a uuid field bolted onto a global list.
 - [ ] **Wipe needs a cooperating client.** A modified build can decline to run
       it. The server-side denial cannot be declined; the local wipe can. Worth
       stating in any T&S policy rather than implying devices are controllable.
@@ -264,6 +279,18 @@ the UI:
 - [ ] Invite carries the space key **out of band** — a QR code or a link
       fragment that never reaches the server. This is the whole design; anything
       that posts the key to Supabase silently converts this to server-readable.
+      **The mechanism for this now exists**: `features/private/services/key-transfer.ts`
+      is exactly a two-channel out-of-band key handoff, built for moving a vault
+      between one person's devices, and a space invite is the same protocol with
+      a different key. Reuse it rather than writing a second one.
+- [ ] ⚠️ **DECIDE FIRST: what actually goes in a shared space.** This is the
+      open question, and it is a product one rather than a cryptographic one.
+      The key exchange, the ciphertext-at-rest pattern and the viewer all exist
+      or are specified; what does not exist is an answer to "a couple shares…
+      what?" — a note, a photo album, a whole module, a chat. The table shape,
+      the sync rules and the revocation story all follow from that answer and
+      none of them can be sensibly designed before it. Building the storage
+      first would mean guessing, and a guess here is a migration to undo.
 - [ ] Viewer: `SecureContentView` is already built (screenshot block, watermark,
       no save/share, report button). Wire it to real shared content.
 - [ ] ⚠️ **Revocation is partial and must be said so in the UI.** Removing a
@@ -271,13 +298,27 @@ the UI:
       they already hold, so anything they already downloaded stays readable.
       Rotating the key on removal fixes future content only.
 
-**E2E sync for private modules** — same key-exchange problem:
+**E2E sync for private modules** — ✅ done, and most of it already was:
 
-- [ ] `sensitive: true` in `sync-tables.ts` was built for this. Upload ciphertext
-      only; the server column is opaque.
-- [ ] Needs the vault key on the second device, which means QR-based transfer
-      between two devices the user holds. Do not add a "recover my vault" server
-      path — that is escrow by another name.
+- [x] `private_entries.payload` has been `base64(nonce || AES-GCM(...))` since
+      the vault was built, 0015 gave the server a table with per-user RLS, and
+      the sync engine moves it like any other row. **Private modules have always
+      synced end-to-end**; this entry was describing work that was finished.
+- [x] **The vault key now moves between devices** — the part that was genuinely
+      missing, and without which the second device receives ciphertext it can
+      only ever render as noise. Two channels: the payload (the key wrapped
+      under PBKDF2(one-time code, fresh salt)) travels however the user likes,
+      and the code travels separately, ideally spoken. Neither reaches our
+      server. `adoptVault` installs it under this device's own PIN — reusing
+      `setUpVault` would mint a fresh master key and leave every already-synced
+      private row permanently unreadable while looking like it worked.
+- [x] No "recover my vault" server path, as instructed. It would be escrow by
+      another name, and this app already has one escrow scheme it is honest
+      about.
+- [ ] **QR instead of paste.** The payload is already QR-sized, so this is a
+      rendering change rather than a redesign — it needs `expo-camera` for
+      scanning, which is a native module that cannot be verified without a
+      device build. Same call as native Google sign-in.
 
 ## 🎛 Module switches (0011 shipped — these finish it)
 
@@ -307,8 +348,9 @@ the UI:
       the merged `my_module_flags()` instead of the table. The internal
       per-account note is never returned to its subject; only the global row's
       user-facing `message` is.
-- [ ] **Admin UI for the switches** (global and per-user) — still SQL in the
-      editor. See the operator-console note below: it is the same decision.
+- [x] **Admin UI for the global switches** — now in the operator console, with a
+      confirmation and a field for the message users will see. Per-account
+      overrides still want an account page; see the operator section.
 
 ## 📊 Operator surface (0010 shipped — these finish it)
 
@@ -344,8 +386,8 @@ the UI:
 > metadata all sync, and account-switch handling shipped as
 > `features/sync/services/account-reconcile.ts`. What is genuinely left:
 
-- [ ] Media **bytes** via Supabase Storage (see the sync-hardening section above:
-      wants quotas and an opt-in before it wants code).
+- [x] Media **bytes** via Supabase Storage (0026) — see the sync-hardening
+      section above for the design and the one number still to set.
 - [x] **Conflict surfacing.** Last-write-wins still wins — losing is just no
       longer silent. A local edit overwritten by a newer one from another device
       is recorded with a snapshot and offered back from Settings → Sync.
