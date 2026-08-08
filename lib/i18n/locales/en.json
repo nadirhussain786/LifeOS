@@ -37,7 +37,9 @@
     "markNotDone": "Mark “{{name}}” as not done",
     "more": "More actions",
     "undo": "Undo",
-    "ok": "OK"
+    "ok": "OK",
+    "or": "or",
+    "optional": "Optional"
   },
   "reminder": {
     "in1Hour": "In 1 hour",
@@ -132,7 +134,35 @@
     "noBiometrics": "Biometric lock isn’t set up on this device. You can enable it later from Settings once you’ve added Face ID or a fingerprint.",
     "enableMethod": "Enable {{method}}",
     "notNow": "Not now",
-    "finishSetup": "Finish setup"
+    "finishSetup": "Finish setup",
+    "haveAccount": "Already have an account?",
+    "accountEyebrow": "Your account",
+    "accountTitle": "Keep it, wherever you are",
+    "accountBody": "An account backs everything up and keeps your phone and tablet in step. You can also just start — nothing here needs one.",
+    "continueOnThisDevice": "Not now — keep it on this device",
+    "continueOnThisDeviceHint": "You can add an account any time.",
+    "useEmail": "Use email instead",
+    "accountUnavailable": "This build has no cloud credentials, so accounts are switched off. Everything else works on this device.",
+    "perkSync": "Your notes, habits and money stay in step across every device you sign in on.",
+    "perkNothingLost": "Starting without one costs nothing — sign in later and everything you have already written comes with you.",
+    "shapeEyebrow": "Make it yours",
+    "shapeTitle": "Let’s set a few things up",
+    "shapeBody": "Based on what you picked. None of it is fixed — all of it moves later.",
+    "starterHabits": "Habits to start with",
+    "starterHabitsNote": "Pick none if you would rather add your own. These are editable any time.",
+    "waterGoal": "Daily water goal",
+    "currency": "Currency",
+    "currencyNote": "Guessed from your phone’s region. Ninety more live in Budget settings.",
+    "confirmMethod": "Confirm {{method}}",
+    "readyTitle": "You’re all set",
+    "readyTitleNamed": "You’re all set, {{name}}",
+    "readyBody": "Here’s what’s waiting for you.",
+    "readyBodyEmpty": "Nothing to set up. LifeOS is ready when you are.",
+    "readyHabits_one": "{{count}} habit added to your day",
+    "readyHabits_other": "{{count}} habits added to your day",
+    "readyWater": "Water goal set to {{amount}} L a day",
+    "readyCurrency": "Budget set to {{currency}}",
+    "openLifeOS": "Open LifeOS"
   },
   "fields": {
     "priority": "Priority",
@@ -641,7 +671,8 @@
     "usernameRequired": "Pick an available username first.",
     "usernameJustTaken": "Someone just took that name — try another.",
     "usernameClaimFailed": "Your account was created, but the username couldn't be saved. You can set it in Settings.",
-    "usernameCheckFailed": "Couldn't check that name right now — you can still continue."
+    "usernameCheckFailed": "Couldn't check that name right now — you can still continue.",
+    "continueWithGoogle": "Continue with Google"
   },
   "language": {
     "en": "English",
@@ -1769,5 +1800,21 @@
     "reportEvidenceNote": "The item you’re reporting is sent with this report so it can be reviewed. Nothing else from this space is.",
     "reportSubmit": "Send report",
     "reportNotePlaceholder": "Anything else we should know? (optional)"
+  },
+  "starterHabit": {
+    "makeBed": "Make the bed",
+    "tidyTen": "Ten-minute tidy",
+    "moveDaily": "Move my body",
+    "stretch": "Stretch",
+    "lightsOut": "Lights out on time",
+    "noScreens": "No screens before bed",
+    "waterOnWaking": "Water when I wake up",
+    "threeLines": "Write three lines",
+    "oneGoodThing": "Note one good thing",
+    "studyBlock": "One focused study block",
+    "logSpending": "Log today’s spending",
+    "weeklyReview": "Weekly review",
+    "planTomorrow": "Plan tomorrow tonight",
+    "unitMinutes": "minutes"
   }
 }
