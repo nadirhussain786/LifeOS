@@ -156,6 +156,18 @@ export default function PrivateSetupScreen() {
             disabled={chosen.length === 0}
             onPress={() => setStep('pin')}
           />
+          {/*
+            Offered here because this is where somebody who already has a vault
+            elsewhere will arrive, and creating a second one is the mistake that
+            cannot be undone: a fresh master key leaves every already-synced
+            private row permanently unreadable, while looking like it worked.
+          */}
+          <Button
+            variant="ghost"
+            size="lg"
+            label={t('receive.entry')}
+            onPress={() => router.push('/private/receive')}
+          />
         </>
       ) : null}
 

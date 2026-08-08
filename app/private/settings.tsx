@@ -311,6 +311,20 @@ export default function PrivateSettingsScreen() {
               />
             </View>
 
+            {/*
+              The other half of end-to-end sync. Private rows have always
+              travelled as ciphertext; without moving the key, a second device
+              receives them and can only ever show noise.
+            */}
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => router.push('/private/transfer')}
+              className={cardClass({ padding: 'rowLg' })}
+            >
+              <Text className="font-sora-medium text-foreground">{t('transfer.entry')}</Text>
+              <Text variant="caption">{t('transfer.entryHint')}</Text>
+            </Pressable>
+
             <Pressable
               accessibilityRole="button"
               onPress={() => setMode('change-current')}

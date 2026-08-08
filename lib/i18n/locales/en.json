@@ -1871,5 +1871,40 @@
     "clearCacheTitle": "Clear downloaded files?",
     "clearCacheBody": "This only removes files this device downloaded — anything imported here stays. They can be fetched again whenever you need them.",
     "limitsNote": "Your private space is never backed up. Its files are encrypted with a key that only exists on this device, so uploading them would achieve nothing."
+  },
+  "transfer": {
+    "title": "Add another device",
+    "entry": "Add another device",
+    "entryHint": "Open this private space on a second phone or tablet",
+    "intro": "Your private notes already travel to your other devices — but only as sealed text, because the key to open them has never left this phone. This moves the key.",
+    "stepCode": "1 · Read this code out",
+    "codeHint": "Say it aloud, or type it on the other device. Do not send it in the same message as the sealed text below.",
+    "stepPayload": "2 · Send this separately",
+    "payloadHint": "Message it, AirDrop it, paste it — it is sealed and worth nothing on its own.",
+    "copyPayload": "Copy",
+    "copied": "Copied",
+    "warnTitle": "Send the two parts separately",
+    "warnBody": "If the code and the sealed text travel in the same message, anyone reading that message has your private space. Separately, neither half is worth anything.",
+    "expiryNote": "Generate a fresh code for each device. An old code stops working the moment you make a new one.",
+    "newCode": "Generate a new code",
+    "unavailable": "Unlock your private space first."
+  },
+  "receive": {
+    "title": "Open an existing space",
+    "entry": "I already have a private space on another device",
+    "intro": "Bring the key across from the device that already has this space. Nothing is sent through our servers — you move both parts yourself.",
+    "stepPayload": "1 · Paste the sealed text",
+    "payloadPlaceholder": "Paste what the other device gave you",
+    "paste": "Paste from clipboard",
+    "stepCode": "2 · Enter the code",
+    "codeHint": "The six groups the other device is showing.",
+    "stepPin": "3 · Choose a PIN for this device",
+    "pinHint": "It can be different from the one on your other device — only the key underneath is shared.",
+    "checking": "Checking…",
+    "finish": "Open the space",
+    "done": "Your private space is now on this device",
+    "errorCode": "That code does not open this text. Check it on the other device.",
+    "errorPayload": "That does not look like a transfer. Copy it again from the other device.",
+    "errorVersion": "This transfer was made by a newer version of LifeOS. Update this device first."
   }
 }

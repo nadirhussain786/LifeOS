@@ -139,6 +139,32 @@ export async function setUpVault(pin: string): Promise<Uint8Array> {
 }
 
 /**
+ * Creates the real space around a master key that already exists.
+ *
+ * The second half of a device transfer (`key-transfer.ts`). Identical to
+ * `setUpVault` except that the key is given rather than generated, which is the
+ * whole point: the ciphertext already syncing to this device was sealed under
+ * that key, and a freshly generated one would leave it permanently unreadable
+ * while looking like a working vault.
+ *
+ * The PIN and salt are this device's own. Two phones holding the same vault do
+ * not have to share a PIN, and their keystores never hold the same bytes — only
+ * the key underneath is common.
+ */
+export async function adoptVault(pin: string, masterKey: Uint8Array): Promise<void> {
+  const salt = randomBytes(16);
+  const kek = await deriveKek(pin, salt);
+
+  await writeItem(SALT_KEY, toBase64(salt));
+  await writeItem(REAL_KEY, toBase64(encryptBytes(kek, masterKey)));
+  // Any decoy from a previous vault on this device belonged to a different
+  // master key and could never be opened again; leaving it would be a PIN that
+  // silently fails forever.
+  await SecureStore.deleteItemAsync(DECOY_KEY).catch(() => undefined);
+  await clearFailures();
+}
+
+/**
  * Adds the decoy space. Shares the salt (so the two derivations cost the same
  * and neither can be told apart by timing) but wraps an entirely separate
  * master key.
