@@ -2,8 +2,10 @@ import { isToday } from 'date-fns';
 import { Platform } from 'react-native';
 import { requestWidgetUpdate } from 'react-native-android-widget';
 
+import { HabitsWidget } from '@/features/widgets/components/habits-widget';
+import { DARK, LIGHT } from '@/features/widgets/components/palette';
 import { TodayWidget } from '@/features/widgets/components/today-widget';
-import { WIDGET_NAME } from '@/features/widgets/config';
+import { HABITS_WIDGET_NAME, WIDGET_NAME } from '@/features/widgets/config';
 import {
   writeTodaySnapshot,
   type TodaySnapshot,
@@ -12,7 +14,10 @@ import { listHabitsWithToday } from '@/features/habits/services/habits-repositor
 import { moduleMayBeNamed } from '@/features/notifications/services/notification-visibility';
 import { listTasks } from '@/features/tasks/services/tasks-repository';
 import { getDailyTotal } from '@/features/water-intake/services/water-intake-repository';
-import { useWaterSettingsStore } from '@/features/water-intake/store/water-settings-store';
+import {
+  GLASS_ML,
+  useWaterSettingsStore,
+} from '@/features/water-intake/store/water-settings-store';
 import { toDateKey } from '@/lib/date';
 import i18n from '@/lib/i18n';
 import { deviceLocale } from '@/lib/locale';
@@ -39,6 +44,7 @@ export function buildTodaySnapshot(): TodaySnapshot {
   let tasksDue = 0;
   let habitsLeft = 0;
   let waterMl = 0;
+  let habits: TodaySnapshot['habits'] = [];
 
   if (show.tasks) {
     try {
@@ -51,7 +57,15 @@ export function buildTodaySnapshot(): TodaySnapshot {
   }
   if (show.habits) {
     try {
-      habitsLeft = listHabitsWithToday().filter((h) => h.todayStatus === 'not_yet').length;
+      const today = listHabitsWithToday();
+      habitsLeft = today.filter((h) => h.todayStatus === 'not_yet').length;
+      // Only what is actually due today. A check-off list that offers habits
+      // scheduled for Thursday is a list people learn to distrust, and the
+      // widget has room for a handful at most.
+      habits = today
+        .filter((h) => h.todayStatus !== 'not_scheduled')
+        .slice(0, MAX_WIDGET_HABITS)
+        .map((h) => ({ id: h.id, name: h.name, done: h.todayStatus === 'done' }));
     } catch {
       /* table not ready */
     }
@@ -81,8 +95,23 @@ export function buildTodaySnapshot(): TodaySnapshot {
     empty: i18n.t('widget.openApp'),
   };
 
-  return { tasksDue, habitsLeft, waterMl, waterGoalMl, show, text, updatedAt: Date.now() };
+  return {
+    tasksDue,
+    habitsLeft,
+    waterMl,
+    waterGoalMl,
+    show,
+    habits,
+    waterGlassMl: GLASS_ML,
+    text,
+    updatedAt: Date.now(),
+  };
 }
+
+/** A home-screen widget is a glance, not a screen. Beyond about five rows it
+ *  stops being readable at widget sizes and starts being a list nobody scrolls
+ *  because it cannot scroll. */
+const MAX_WIDGET_HABITS = 5;
 
 /** Litres to one decimal, in the device's locale — so a German phone reads
  *  "1,5 L" rather than "1.5 L". */
@@ -109,12 +138,30 @@ export async function syncTodayWidget(): Promise<void> {
 
   const snapshot = buildTodaySnapshot();
   await writeTodaySnapshot(snapshot);
-  await requestWidgetUpdate({
-    widgetName: WIDGET_NAME,
-    renderWidget: () => <TodayWidget snapshot={snapshot} />,
-    widgetNotFound: () => {
-      // No widget placed on the home screen — the snapshot is still saved so
-      // it's correct the moment the user adds one.
-    },
-  }).catch(() => undefined);
+
+  // Both widgets read the same snapshot, so both are refreshed together. Only
+  // pushing to "Today" would leave a placed Habits widget showing whatever it
+  // was last rendered with until the half-hourly tick — including right after a
+  // habit was ticked in the app, which is the moment it most obviously matters.
+  await Promise.all([
+    requestWidgetUpdate({
+      widgetName: WIDGET_NAME,
+      renderWidget: () => ({
+        light: <TodayWidget snapshot={snapshot} palette={LIGHT} />,
+        dark: <TodayWidget snapshot={snapshot} palette={DARK} />,
+      }),
+      widgetNotFound: () => {
+        // No widget placed on the home screen — the snapshot is still saved so
+        // it's correct the moment the user adds one.
+      },
+    }).catch(() => undefined),
+    requestWidgetUpdate({
+      widgetName: HABITS_WIDGET_NAME,
+      renderWidget: () => ({
+        light: <HabitsWidget snapshot={snapshot} palette={LIGHT} />,
+        dark: <HabitsWidget snapshot={snapshot} palette={DARK} />,
+      }),
+      widgetNotFound: () => undefined,
+    }).catch(() => undefined),
+  ]);
 }

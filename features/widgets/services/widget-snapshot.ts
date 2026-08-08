@@ -28,6 +28,18 @@ export type TodaySnapshot = {
    */
   show: { tasks: boolean; habits: boolean; water: boolean };
   /**
+   * Today's habits, for the check-off widget.
+   *
+   * Carries ids because a tap has to name what it completed — the list's order
+   * can change between the render and the tap, so an index would occasionally
+   * tick the wrong habit. Empty whenever `show.habits` is false, so a hidden
+   * module contributes no names here either.
+   */
+  habits: { id: string; name: string; done: boolean }[];
+  /** How much one tap of "+1" logs. Read from the app's own quick-add size so
+   *  the widget and the water screen cannot disagree about what a glass is. */
+  waterGlassMl: number;
+  /**
    * The rendered strings, already in the user's language and already
    * pluralised.
    *
@@ -76,6 +88,8 @@ export const EMPTY_SNAPSHOT: TodaySnapshot = {
   waterMl: 0,
   waterGoalMl: 2000,
   show: { tasks: false, habits: false, water: false },
+  habits: [],
+  waterGlassMl: 250,
   text: { heading: 'TODAY', tasks: '', habits: '', water: '', empty: 'Open LifeOS' },
   updatedAt: 0,
 };

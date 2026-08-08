@@ -1,6 +1,7 @@
 import { FlexWidget, TextWidget } from 'react-native-android-widget';
 
-import { WIDGET_LINKS } from '@/features/widgets/config';
+import { DARK, type HexColor, type WidgetPalette } from '@/features/widgets/components/palette';
+import { WIDGET_ACTIONS, WIDGET_LINKS } from '@/features/widgets/config';
 import type { TodaySnapshot } from '@/features/widgets/services/widget-snapshot';
 
 /**
@@ -8,47 +9,64 @@ import type { TodaySnapshot } from '@/features/widgets/services/widget-snapshot'
  * progress. Built with react-native-android-widget primitives (NOT React Native
  * View/Text) — this tree is rendered by the OS, so only widget components,
  * numeric dp sizes, Android system font families, and hex colors are allowed.
- * Tapping anywhere opens the app (clickAction OPEN_APP).
+ *
+ * Tapping a row deep-links into its screen; tapping the card opens the app. The
+ * one exception is the water row's "+1", which does the work in place — see
+ * `widget-actions.ts` for why a tap cannot simply write to the database.
  */
 
-// Self-contained dark palette — the widget can't read the app's theme tokens at
-// render time, and a dark card reads well over most wallpapers.
-type HexColor = `#${string}`;
-
-const C = {
-  bg: '#0f172a',
-  muted: '#94a3b8',
-  text: '#f8fafc',
-  tasks: '#818cf8',
-  habits: '#34d399',
-  water: '#38bdf8',
-} satisfies Record<string, HexColor>;
-
-function Row({ color, text, uri }: { color: HexColor; text: string; uri: string }) {
+function Row({
+  color,
+  text,
+  uri,
+  palette,
+  trailing,
+}: {
+  color: HexColor;
+  text: string;
+  uri: string;
+  palette: WidgetPalette;
+  trailing?: React.JSX.Element;
+}) {
   return (
-    <FlexWidget
-      clickAction="OPEN_URI"
-      clickActionData={{ uri }}
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        width: 'match_parent',
-        paddingVertical: 4,
-      }}
-    >
+    <FlexWidget style={{ flexDirection: 'row', alignItems: 'center', width: 'match_parent' }}>
       <FlexWidget
-        style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: color, marginRight: 10 }}
-      />
-      <TextWidget
-        text={text}
-        style={{ fontSize: 15, color: C.text, fontFamily: 'sans-serif-medium' }}
-      />
+        clickAction="OPEN_URI"
+        clickActionData={{ uri }}
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          flex: 1,
+          paddingVertical: 4,
+        }}
+      >
+        <FlexWidget
+          style={{
+            width: 10,
+            height: 10,
+            borderRadius: 5,
+            backgroundColor: color,
+            marginRight: 10,
+          }}
+        />
+        <TextWidget
+          text={text}
+          style={{ fontSize: 15, color: palette.text, fontFamily: 'sans-serif-medium' }}
+        />
+      </FlexWidget>
+      {trailing ?? <FlexWidget style={{ width: 0, height: 0 }} />}
     </FlexWidget>
   );
 }
 
-export function TodayWidget({ snapshot }: { snapshot: TodaySnapshot }) {
-  const { show, text } = snapshot;
+export function TodayWidget({
+  snapshot,
+  palette = DARK,
+}: {
+  snapshot: TodaySnapshot;
+  palette?: WidgetPalette;
+}) {
+  const { show, text, waterGlassMl } = snapshot;
   const anyVisible = show.tasks || show.habits || show.water;
 
   return (
@@ -60,7 +78,7 @@ export function TodayWidget({ snapshot }: { snapshot: TodaySnapshot }) {
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'flex-start',
-        backgroundColor: C.bg,
+        backgroundColor: palette.bg,
         borderRadius: 20,
         paddingHorizontal: 18,
         paddingVertical: 16,
@@ -72,11 +90,59 @@ export function TodayWidget({ snapshot }: { snapshot: TodaySnapshot }) {
           in widget-snapshot.ts. */}
       <TextWidget
         text={text.heading}
-        style={{ fontSize: 12, color: C.muted, fontFamily: 'sans-serif-medium', letterSpacing: 1 }}
+        style={{
+          fontSize: 12,
+          color: palette.muted,
+          fontFamily: 'sans-serif-medium',
+          letterSpacing: 1,
+        }}
       />
-      {show.tasks ? <Row color={C.tasks} uri={WIDGET_LINKS.tasks} text={text.tasks} /> : null}
-      {show.habits ? <Row color={C.habits} uri={WIDGET_LINKS.habits} text={text.habits} /> : null}
-      {show.water ? <Row color={C.water} uri={WIDGET_LINKS.water} text={text.water} /> : null}
+      {show.tasks ? (
+        <Row color={palette.tasks} uri={WIDGET_LINKS.tasks} text={text.tasks} palette={palette} />
+      ) : null}
+      {show.habits ? (
+        <Row
+          color={palette.habits}
+          uri={WIDGET_LINKS.habits}
+          text={text.habits}
+          palette={palette}
+        />
+      ) : null}
+      {show.water ? (
+        <Row
+          color={palette.water}
+          uri={WIDGET_LINKS.water}
+          text={text.water}
+          palette={palette}
+          trailing={
+            /* The only control on this widget. Logging a glass is the single
+               most repeated action in the app and the one least worth opening
+               the app for — which is exactly what a widget is for. */
+            <FlexWidget
+              clickAction={WIDGET_ACTIONS.addWater}
+              clickActionData={{ ml: waterGlassMl }}
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 16,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: palette.card,
+                marginLeft: 8,
+              }}
+            >
+              <TextWidget
+                text="+1"
+                style={{
+                  fontSize: 13,
+                  color: palette.water,
+                  fontFamily: 'sans-serif-medium',
+                }}
+              />
+            </FlexWidget>
+          }
+        />
+      ) : null}
       {/*
         Every row hidden. This is what a widget shows when all three modules are
         private, switched off, or simply not synced yet, and it deliberately
@@ -87,7 +153,12 @@ export function TodayWidget({ snapshot }: { snapshot: TodaySnapshot }) {
       {anyVisible ? null : (
         <TextWidget
           text={text.empty}
-          style={{ fontSize: 15, color: C.muted, fontFamily: 'sans-serif-medium', marginTop: 6 }}
+          style={{
+            fontSize: 15,
+            color: palette.muted,
+            fontFamily: 'sans-serif-medium',
+            marginTop: 6,
+          }}
         />
       )}
     </FlexWidget>

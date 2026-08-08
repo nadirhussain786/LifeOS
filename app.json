@@ -197,6 +197,16 @@
               "targetCellHeight": 2,
               "description": "Tasks due, habits left, and water at a glance",
               "updatePeriodMillis": 1800000
+            },
+            {
+              "name": "LifeOSHabits",
+              "label": "LifeOS · Habits",
+              "minWidth": "180dp",
+              "minHeight": "180dp",
+              "targetCellWidth": 3,
+              "targetCellHeight": 3,
+              "description": "Tick today's habits off without opening the app",
+              "updatePeriodMillis": 1800000
             }
           ]
         }

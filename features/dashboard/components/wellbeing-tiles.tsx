@@ -13,13 +13,15 @@ import {
   useTodayWaterTotal,
   useWaterIntakeMutations,
 } from '@/features/water-intake/hooks/use-water-intake';
-import { useWaterSettingsStore } from '@/features/water-intake/store/water-settings-store';
+import {
+  GLASS_ML,
+  useWaterSettingsStore,
+} from '@/features/water-intake/store/water-settings-store';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { alpha } from '@/lib/color';
 import { toDateKey } from '@/lib/date';
 import type { MoodOption } from '@/features/dashboard/types/dashboard.types';
 
-const GLASS_ML = 250;
 const MAX_SEGMENTS = 8;
 
 /**

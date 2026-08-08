@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
+import { AppState } from 'react-native';
 
 import { useModuleFlagsStore } from '@/features/module-flags/store/module-flags-store';
+import { drainWidgetActionsIntoDb } from '@/features/widgets/services/drain-widget-actions';
 import { usePrivateStore } from '@/features/private/store/private-store';
 import { useLanguageStore } from '@/features/settings/store/language-store';
 import { syncTodayWidget } from '@/features/widgets/services/widget-data';
@@ -54,12 +56,29 @@ export function useWidgetSync() {
       if (state.language !== previous.language) schedule();
     });
 
+    /**
+     * Taps made on the widget while the app was closed.
+     *
+     * Drained on mount and on every foreground, because those are the two
+     * moments the app is running and the queue may be non-empty — somebody adds
+     * three glasses across the morning and the app finds them all when it next
+     * opens. The drain invalidates the caches it touched, which this same hook
+     * is subscribed to, so the snapshot is rewritten from the database
+     * afterwards and any optimistic number the widget guessed is replaced by a
+     * real one.
+     */
+    void drainWidgetActionsIntoDb();
+    const appState = AppState.addEventListener('change', (state) => {
+      if (state === 'active') void drainWidgetActionsIntoDb();
+    });
+
     return () => {
       if (timer) clearTimeout(timer);
       unsubscribeCache();
       unsubscribePrivate();
       unsubscribeFlags();
       unsubscribeLanguage();
+      appState.remove();
     };
   }, []);
 }
