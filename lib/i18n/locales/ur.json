@@ -1610,7 +1610,12 @@
     "notNow": "ابھی نہیں",
     "someone": "یہ شخص",
     "reportMember": "رپورٹ کریں",
-    "reportGroupLabel": "گروپ: {{name}}"
+    "reportGroupLabel": "گروپ: {{name}}",
+    "downloadData": "میرا ڈیٹا ڈاؤن لوڈ کریں",
+    "downloadingData": "تیار کیا جا رہا ہے…",
+    "downloadFailedTitle": "سب کچھ ڈاؤن لوڈ نہ ہو سکا",
+    "downloadFailedBody": "ابھی آپ کے ڈیٹا تک نہیں پہنچ سکے۔ دوبارہ کوشش کریں، یا اپیل ای میل کا جواب دیں اور ہم آپ کو بھیج دیں گے۔",
+    "downloadPartial": "آپ کے ڈیٹا کا {{count}} حصہ شامل نہ ہو سکا۔ باقی سب محفوظ کر لیا گیا ہے۔"
   },
   "usage": {
     "title": "استعمال کے اعداد و شمار",

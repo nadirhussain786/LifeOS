@@ -1610,7 +1610,12 @@
     "notNow": "Not now",
     "someone": "This person",
     "reportMember": "Report",
-    "reportGroupLabel": "Group: {{name}}"
+    "reportGroupLabel": "Group: {{name}}",
+    "downloadData": "Download my data",
+    "downloadingData": "Preparing…",
+    "downloadFailedTitle": "Could not download everything",
+    "downloadFailedBody": "We could not reach your data right now. Please try again, or reply to your appeal email and we will send it to you.",
+    "downloadPartial": "{{count}} part of your data could not be included. Everything else has been saved."
   },
   "usage": {
     "title": "Usage statistics",

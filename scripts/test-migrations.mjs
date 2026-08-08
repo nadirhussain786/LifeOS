@@ -2995,4 +2995,121 @@ await test('0021 blocks die with either account', async () => {
   );
 });
 
+// ---------------------------------------------------------------------------
+console.log('\n0022 self-service data access');
+// ---------------------------------------------------------------------------
+
+/**
+ * The whole safety argument for `export_own_data` is that it takes no user id —
+ * it is SECURITY DEFINER so it can see past a block, and the only thing keeping
+ * it from being a universal reader is that there is nothing to point it at.
+ * These hold that.
+ */
+await test('0022 gives you your own rows', async () => {
+  const OWNER = 'dddddddd-0000-0000-0000-000000000001';
+  await createUser(db, OWNER, 'owner@example.com');
+
+  await asUser(db, OWNER, async () => {
+    await db.query(
+      `insert into public.tasks (id, user_id, title, updated_at, created_at)
+       values ('t-own-1', $1, 'mine', 1, 1)`,
+      [OWNER],
+    );
+  });
+
+  await asUser(db, OWNER, async () => {
+    const { rows } = await db.query(`select * from public.export_own_data('tasks', 100)`);
+    expectEqual(rows.length, 1, 'own rows returned');
+    expectEqual(rows[0].row_data.title, 'mine', 'own row content');
+  });
+});
+
+await test('0022 still works while the account is blocked', async () => {
+  // The entire reason this exists: 0019 denies a blocked account every read,
+  // and GDPR Art. 15 does not pause because we blocked somebody.
+  const BLOCKED = 'dddddddd-0000-0000-0000-000000000002';
+  await createUser(db, BLOCKED, 'blocked@example.com');
+
+  await asUser(db, BLOCKED, async () => {
+    await db.query(
+      `insert into public.tasks (id, user_id, title, updated_at, created_at)
+       values ('t-blk-1', $1, 'still mine', 1, 1)`,
+      [BLOCKED],
+    );
+  });
+
+  await db.query(
+    `insert into public.account_status (user_id, status, reason, auto, updated_at)
+     values ($1, 'blocked', 'test', false, now())
+     on conflict (user_id) do update set status = 'blocked'`,
+    [BLOCKED],
+  );
+
+  await asUser(db, BLOCKED, async () => {
+    // Confirm the block really is in force, so the next assertion means
+    // something rather than passing because nothing was blocking anyway.
+    const direct = await db.query(`select count(*)::int n from public.tasks`);
+    expectEqual(Number(direct.rows[0].n), 0, 'ordinary reads are denied while blocked');
+
+    const { rows } = await db.query(`select * from public.export_own_data('tasks', 100)`);
+    expectEqual(rows.length, 1, 'export still returns own rows while blocked');
+  });
+});
+
+await test('0022 cannot be pointed at anybody else', async () => {
+  // There is no user-id argument, so the only way to ask for another account is
+  // to call an overload that does not exist. If one is ever added, this fails.
+  const { rows } = await db.query(
+    `select count(*)::int n from pg_proc p
+       join pg_namespace n on n.oid = p.pronamespace
+      where n.nspname = 'public' and p.proname = 'export_own_data'
+        and 'uuid'::regtype = any (p.proargtypes::oid[]::regtype[])`,
+  );
+  expectEqual(Number(rows[0].n), 0, 'export_own_data overloads taking a uuid');
+});
+
+await test('0022 refuses a table outside the exportable set', async () => {
+  await asUser(db, ALICE, async () => {
+    await expectRejection(
+      () => db.query(`select * from public.export_own_data('admin_audit_log', 10)`),
+      'not exportable',
+    );
+    // The vault is deliberately out: the server only holds ciphertext sealed to
+    // a key it never derived, so returning it satisfies the letter of a request
+    // with bytes nobody can open.
+    await expectRejection(
+      () => db.query(`select * from public.export_own_data('private_entries', 10)`),
+      'not exportable',
+    );
+  });
+});
+
+await test('0022 records every request', async () => {
+  const LOGGED = 'dddddddd-0000-0000-0000-000000000003';
+  await createUser(db, LOGGED, 'logged@example.com');
+
+  await asUser(db, LOGGED, async () => {
+    await db.query(`select * from public.export_own_data('tasks', 10)`);
+    const seen = await count(
+      `select count(*)::int n from public.data_access_log where user_id = $1`,
+      [LOGGED],
+    );
+    expectEqual(seen, 1, 'requests logged');
+  });
+});
+
+await test('0022 nobody can edit the access log, including its subject', async () => {
+  // "We provided the data" is the claim that has to be evidenced, and a log the
+  // subject can rewrite is not evidence.
+  await asUser(db, ALICE, async () => {
+    await expectRejection(
+      () =>
+        db.query(`insert into public.data_access_log (user_id, table_name) values ($1, 'tasks')`, [
+          ALICE,
+        ]),
+      'violates row-level security policy',
+    );
+  });
+});
+
 summary();

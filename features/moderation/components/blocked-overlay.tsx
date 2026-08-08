@@ -1,5 +1,6 @@
 import { format } from 'date-fns';
 import { ShieldAlert } from 'lucide-react-native';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Linking, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,8 +11,10 @@ import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import { useAuthStore } from '@/features/auth/services/auth-store';
 import { useAccountStanding } from '@/features/moderation/hooks/use-account-standing';
+import { exportOwnServerData } from '@/features/moderation/services/self-data-export';
 import { useModerationStore } from '@/features/moderation/store/moderation-store';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { notify } from '@/lib/dialog-store';
 
 const APPEAL_EMAIL = 'nh262464@gmail.com';
 
@@ -38,6 +41,26 @@ export function BlockedOverlay() {
   const { standing, status } = useAccountStanding();
   const wipeOutcome = useModerationStore((s) => s.wipeOutcome);
   const signOut = useAuthStore((s) => s.signOut);
+  const [exporting, setExporting] = useState(false);
+
+  const handleDownload = () => {
+    setExporting(true);
+    void exportOwnServerData()
+      .then((result) => {
+        if (result.ok) return;
+        // Partial or total failure both get said out loud. Somebody exercising a
+        // data-access right needs to know whether they have all of it.
+        void notify({
+          title: t('moderation.downloadFailedTitle'),
+          message:
+            result.exported.length > 0
+              ? t('moderation.downloadPartial', { count: result.failed.length })
+              : t('moderation.downloadFailedBody'),
+          confirmLabel: t('common.ok'),
+        });
+      })
+      .finally(() => setExporting(false));
+  };
 
   if (status !== 'blocked') return null;
 
@@ -105,6 +128,22 @@ export function BlockedOverlay() {
                 `mailto:${APPEAL_EMAIL}?subject=${encodeURIComponent(t('moderation.appealSubject'))}`,
               )
             }
+          />
+          {/*
+            The obligation the block would otherwise break. A blocked account has
+            had its device wiped and has every server read refused, so it holds
+            no copy of its data and has no way to fetch one — while GDPR Art. 15
+            still entitles it to exactly that. Being blocked by us is not a
+            lawful basis for withholding somebody's own data, and "email us and
+            an admin will run some SQL" is an obligation discharged by somebody
+            remembering to. This goes straight through migration 0022.
+          */}
+          <Button
+            variant="secondary"
+            size="lg"
+            label={exporting ? t('moderation.downloadingData') : t('moderation.downloadData')}
+            disabled={exporting}
+            onPress={handleDownload}
           />
           <Button
             variant="ghost"

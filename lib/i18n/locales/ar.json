@@ -1742,7 +1742,12 @@
     "notNow": "ليس الآن",
     "someone": "هذا الشخص",
     "reportMember": "إبلاغ",
-    "reportGroupLabel": "المجموعة: {{name}}"
+    "reportGroupLabel": "المجموعة: {{name}}",
+    "downloadData": "تنزيل بياناتي",
+    "downloadingData": "جارٍ التحضير…",
+    "downloadFailedTitle": "تعذّر تنزيل كل شيء",
+    "downloadFailedBody": "تعذّر الوصول إلى بياناتك الآن. حاول مرة أخرى، أو ردّ على رسالة الاعتراض وسنرسلها إليك.",
+    "downloadPartial": "تعذّر تضمين {{count}} جزء من بياناتك. حُفظ كل ما عداه."
   },
   "usage": {
     "title": "إحصاءات الاستخدام",
