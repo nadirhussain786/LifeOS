@@ -200,7 +200,11 @@ method is not switched on for this project yet." Email and guest are unaffected.
       `sync-tables.ts` was built for this: upload ciphertext only, so the server
       cannot read it. Requires key transfer between devices, which is its own
       design problem (QR-based key exchange is the usual answer).
-- [ ] **Private media is not covered by the media-metadata sync.** Vault images
+- [ ] **Private media is not covered by the media-metadata sync** — and cannot
+      be until the key-exchange question below is answered, since syncing it
+      means either uploading ciphertext the other device cannot open or
+      uploading the key. Belongs with "E2E sync for private modules", not with
+      the media work. Vault images
       live in `private-vault/` and are encrypted field-by-field; they are not in
       `gallery_photos` and nothing in 0016 touches them.
 
@@ -225,12 +229,27 @@ been rewritten to say so.
 - [ ] **Store review will ask.** Cycle/intimacy data is GDPR Art. 9
       special-category and App Store 5.1.3 governs the health parts. Expect to
       justify operator access in the review notes and the data-safety form.
-- [ ] **Escrow is not written for accounts that create a vault while signed out,
-      or for vaults created before 0015.** Those stay unreadable. Decide whether
-      to backfill on next unlock or leave them alone.
-- [ ] **Deleting a vault locally does not remove the server escrow.** It goes
-      with the account. Consider wiring `destroyVaultKeys()` to also delete the
-      `vault_escrow` row, or say so in the UI.
+- [ ] 🔴 **DECIDE: escrow has never once been written, and 0025 makes it start.**
+      `vault_escrow` has no SELECT policy by design, and Postgres refuses
+      `INSERT … ON CONFLICT DO UPDATE` against a table the caller cannot select
+      from — regardless of whether a conflicting row exists. PostgREST's
+      `.upsert()` emits exactly that, `uploadEscrow()` was the only writer, and
+      `setup.tsx` never checked its result. **The table is empty. Every private
+      space to date has been accidentally end-to-end encrypted**, while
+      PRIVACY.md, the setup copy and this file all said the opposite.
+      0025 repairs the mechanism, so operator access begins working on the next
+      deploy. If you would rather keep the accidental privacy, unset
+      `EXPO_PUBLIC_VAULT_ESCROW_PUBLIC_KEY` — escrow then no-ops by design — and
+      rewrite PRIVACY.md instead. What must not stand is the current state,
+      where the policy claims one thing and the database does another.
+- [x] **Escrow is backfilled on unlock** for a vault created while signed out or
+      before 0015. Real space only: sealing the decoy's key would escrow the
+      wrong vault, and a row that changes between unlocks is itself evidence a
+      second space exists.
+- [x] **Destroying a vault removes the server escrow** (`delete_own_vault_escrow`).
+      It cleared the local keystore and nothing else, so the most explicit
+      "I want this gone" the app offers left the space unreadable to its owner
+      and readable to an operator.
 
 ## 🤝 Sharing & E2E sync — DESIGNED, NOT BUILT
 
@@ -354,10 +373,23 @@ the UI:
 ## 🟢 Buildable next (verifiable only on a device build)
 
 - [ ] **iOS widget** — "Today at a glance" via `expo-widgets` (SwiftUI/Expo UI).
-- [ ] **Water "+1 glass" widget** — quick-add button (needs headless background-write wiring).
-- [ ] **Habits check-off widget** — Streaks-style tappable habit list.
-- [ ] **Widget polish** — picker preview image; light/dark render variants.
-- [ ] **Instant widget refresh** on more events (currently launch + mutations + 30-min tick).
+      Still blocked on the paid Apple Developer account.
+- [x] **Water "+1 glass"** — a button on the Today widget. The headless handler
+      cannot write to SQLite, so a tap queues an intent and nudges the snapshot;
+      the app turns intents into rows on its next run. The action carries the
+      **local date of the tap**, so a glass logged at 11:50pm is not filed
+      against tomorrow.
+- [x] **Habits check-off widget** — its own widget (`LifeOSHabits`), because a
+      list needs height and a glance needs none. Marks done; does not un-tick —
+      a home-screen control has no undo, and `logHabit`'s upsert is what makes
+      the safe direction replay-proof.
+- [x] **Light/dark render variants** — `renderWidget` takes `{ light, dark }`
+      and the launcher picks. The light accents are darkened rather than
+      inverted, because #34d399 on white is about 1.8:1.
+- [ ] **Widget picker preview image** — still needs a real PNG asset, which is
+      an asset question rather than a code one.
+- [x] **Both widgets refresh together** on every sync, so ticking a habit in the
+      app does not leave a placed Habits widget stale until the half-hour tick.
 
 ---
 
