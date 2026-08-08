@@ -36,13 +36,26 @@ const VANDAL = '77777777-7777-7777-7777-777777777777';
 // clean slate — ALICE already collects reports in the 0010 rate-limit tests.
 const SUBJECT = '88888888-8888-8888-8888-888888888888';
 
-/** Today as the server sees it — the window checks in record_usage are relative
- * to current_date, so the test has to speak the same calendar. */
-const TODAY = new Date().toISOString().slice(0, 10);
-
 const { db, files } = await bootDatabase();
 const one = async (sql, params = []) => (await db.query(sql, params)).rows[0];
 const count = async (sql, params = []) => Number((await one(sql, params)).n);
+
+/**
+ * Today as the server sees it — the window checks in `record_usage` are relative
+ * to `current_date`, so the test has to speak the same calendar.
+ *
+ * It is asked for rather than computed. This was
+ * `new Date().toISOString().slice(0, 10)`, which is the date in UTC, while
+ * `current_date` resolves in the session's timezone — so on any machine not set
+ * to UTC the two disagree for part of every day, `record_anon_activity` filed
+ * its row under one date and the dashboard was queried for the other, and
+ * "0010 an admin sees both halves of the active population" failed with zero
+ * installs. CI runs in UTC and has never seen it.
+ *
+ * Asking the database removes the assumption instead of correcting it: whatever
+ * `current_date` means here, that is what the tests use.
+ */
+const TODAY = (await one(`select current_date::text as d`)).d;
 
 console.log(`applied ${files.length} migrations\n`);
 
