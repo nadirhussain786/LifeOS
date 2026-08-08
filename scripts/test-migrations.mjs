@@ -3328,6 +3328,132 @@ await test('0024 clearing an override falls back to the global switch', async ()
   });
 });
 
+await test('0025 escrow can actually be written — the bug this migration fixes', async () => {
+  // Before 0025 this was impossible, and nothing said so. `vault_escrow` has no
+  // SELECT policy by design, and Postgres refuses `INSERT … ON CONFLICT DO
+  // UPDATE` against a table the caller cannot select from — whether or not a
+  // conflicting row exists. PostgREST's `.upsert()` emits exactly that, so every
+  // upload since 0015 failed silently and the table stayed empty. The
+  // capability PRIVACY.md describes did not exist.
+  const FRESH = 'ffffffff-0000-0000-0000-000000000001';
+  await createUser(db, FRESH, 'escrow-fresh@example.com');
+
+  await asUser(db, FRESH, async () => {
+    await db.query(`select public.set_own_vault_escrow(1, 'eph-1', 'wrapped-1')`);
+    // Twice, because a scheme that works once is what the old code looked like.
+    await db.query(`select public.set_own_vault_escrow(1, 'eph-2', 'wrapped-2')`);
+  });
+
+  const row = await one(
+    `select ephemeral_public_key, wrapped_key from public.vault_escrow where user_id = $1`,
+    [FRESH],
+  );
+  expectEqual(row?.wrapped_key, 'wrapped-2', 'the second upload replaced the first');
+});
+
+await test('0025 the direct upsert is still refused, which is why the RPC exists', async () => {
+  await asUser(db, ALICE, async () => {
+    await expectRejection(
+      () =>
+        db.query(
+          `insert into public.vault_escrow (user_id, ephemeral_public_key, wrapped_key)
+           values ($1::uuid, 'e2', 'w2')
+           on conflict (user_id) do update set wrapped_key = 'w2'`,
+          [ALICE],
+        ),
+      'row-level security',
+    );
+  });
+});
+
+await test('0025 a filtered update or delete silently matches nothing', async () => {
+  // The other half of the same gap, and the reason a policy-only fix was not
+  // available: a WHERE clause cannot see the row it filters on, so both of
+  // these report success and change nothing — the worst possible answer for a
+  // "remove my key from your servers" button.
+  const V = 'ffffffff-0000-0000-0000-000000000002';
+  await createUser(db, V, 'escrow-victim@example.com');
+  await asUser(db, V, async () => {
+    await db.query(`select public.set_own_vault_escrow(1, 'eph', 'ORIGINAL')`);
+    await db.query(`update public.vault_escrow set wrapped_key = 'CHANGED' where user_id = $1`, [
+      V,
+    ]);
+    await db.query(`delete from public.vault_escrow where user_id = $1`, [V]);
+  });
+
+  const row = await one(`select wrapped_key from public.vault_escrow where user_id = $1`, [V]);
+  expectEqual(row?.wrapped_key, 'ORIGINAL', 'the filtered update changed nothing');
+});
+
+await test('0025 destroying a vault removes its escrow', async () => {
+  // The most explicit "I want this gone" the app offers used to clear the local
+  // keystore and leave the sealed key on the server — the space became
+  // unreadable to its owner while staying readable to an operator.
+  const D = 'ffffffff-0000-0000-0000-000000000003';
+  await createUser(db, D, 'escrow-destroy@example.com');
+
+  await asUser(db, D, async () => {
+    await db.query(`select public.set_own_vault_escrow(1, 'eph', 'wrapped')`);
+    await db.query(`select public.delete_own_vault_escrow()`);
+  });
+
+  expectEqual(
+    await count(`select count(*)::int n from public.vault_escrow where user_id = $1`, [D]),
+    0,
+    'own escrow row deleted',
+  );
+});
+
+await test('0025 neither RPC can be pointed at anybody else', async () => {
+  // Same shape as `export_own_data` in 0022: no user id to get wrong. Both read
+  // auth.uid() and nothing else, which is the whole safety argument for a
+  // SECURITY DEFINER function that writes a key-escrow table.
+  const OTHER = 'ffffffff-0000-0000-0000-000000000004';
+  await createUser(db, OTHER, 'escrow-other@example.com');
+  await asUser(db, OTHER, async () => {
+    await db.query(`select public.set_own_vault_escrow(1, 'eph-other', 'wrapped-other')`);
+  });
+
+  await asUser(db, ALICE, async () => {
+    await db.query(`select public.delete_own_vault_escrow()`);
+  });
+
+  expectEqual(
+    await count(`select count(*)::int n from public.vault_escrow where user_id = $1`, [OTHER]),
+    1,
+    'another account’s escrow survives',
+  );
+
+  const { rows } = await db.query(
+    `select count(*)::int n from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
+      where ns.nspname = 'public'
+        and p.proname in ('set_own_vault_escrow', 'delete_own_vault_escrow')
+        and 'uuid'::regtype = any (p.proargtypes::oid[]::regtype[])`,
+  );
+  expectEqual(Number(rows[0].n), 0, 'overloads taking a uuid');
+});
+
+await test('0025 an anonymous caller is refused', async () => {
+  await expectRejection(
+    () => db.query(`select public.set_own_vault_escrow(1, 'e', 'w')`),
+    'sign in first',
+  );
+});
+
+await test('0025 the escrow blob is still unreadable by its own owner', async () => {
+  // Deliberately no SELECT policy: the client writes the blob and forgets it,
+  // and `uploadEscrow` upserts rather than reading first. Only
+  // `admin_fetch_vault_escrow` returns it, behind the admin gate and an audit
+  // row. A select policy added "for symmetry" would quietly widen that.
+  await asUser(db, BOB, async () => {
+    expectEqual(
+      await count(`select count(*)::int n from public.vault_escrow`),
+      0,
+      'no select policy, so the blob reads as absent',
+    );
+  });
+});
+
 await test('0023 the hoisted sets are scoped to the caller', async () => {
   // Direct assertions on the functions themselves, so a failure names the cause
   // rather than a downstream policy.
