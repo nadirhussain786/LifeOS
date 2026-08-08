@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
+import { cardClass } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import { MOOD_EMOJI, MOOD_TINT } from '@/features/journal/constants';
@@ -25,7 +26,7 @@ export function DayCard({ entry, onPress }: Props) {
       <Pressable
         accessibilityRole="button"
         onPress={onPress}
-        className="flex-row items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3.5"
+        className={cardClass({ padding: 'rowLg' }, 'flex-row items-center gap-3')}
       >
         <View className="w-11 items-center">
           <Text variant="micro" className="font-sora-semibold">

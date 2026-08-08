@@ -36,13 +36,26 @@ const VANDAL = '77777777-7777-7777-7777-777777777777';
 // clean slate — ALICE already collects reports in the 0010 rate-limit tests.
 const SUBJECT = '88888888-8888-8888-8888-888888888888';
 
-/** Today as the server sees it — the window checks in record_usage are relative
- * to current_date, so the test has to speak the same calendar. */
-const TODAY = new Date().toISOString().slice(0, 10);
-
 const { db, files } = await bootDatabase();
 const one = async (sql, params = []) => (await db.query(sql, params)).rows[0];
 const count = async (sql, params = []) => Number((await one(sql, params)).n);
+
+/**
+ * Today as the server sees it — the window checks in `record_usage` are relative
+ * to `current_date`, so the test has to speak the same calendar.
+ *
+ * It is asked for rather than computed. This was
+ * `new Date().toISOString().slice(0, 10)`, which is the date in UTC, while
+ * `current_date` resolves in the session's timezone — so on any machine not set
+ * to UTC the two disagree for part of every day, `record_anon_activity` filed
+ * its row under one date and the dashboard was queried for the other, and
+ * "0010 an admin sees both halves of the active population" failed with zero
+ * installs. CI runs in UTC and has never seen it.
+ *
+ * Asking the database removes the assumption instead of correcting it: whatever
+ * `current_date` means here, that is what the tests use.
+ */
+const TODAY = (await one(`select current_date::text as d`)).d;
 
 console.log(`applied ${files.length} migrations\n`);
 
@@ -2980,6 +2993,597 @@ await test('0021 blocks die with either account', async () => {
     1,
     'only the blocker’s own rows removed',
   );
+});
+
+// ---------------------------------------------------------------------------
+console.log('\n0022 self-service data access');
+// ---------------------------------------------------------------------------
+
+/**
+ * The whole safety argument for `export_own_data` is that it takes no user id —
+ * it is SECURITY DEFINER so it can see past a block, and the only thing keeping
+ * it from being a universal reader is that there is nothing to point it at.
+ * These hold that.
+ */
+await test('0022 gives you your own rows', async () => {
+  const OWNER = 'dddddddd-0000-0000-0000-000000000001';
+  await createUser(db, OWNER, 'owner@example.com');
+
+  await asUser(db, OWNER, async () => {
+    await db.query(
+      `insert into public.tasks (id, user_id, title, updated_at, created_at)
+       values ('t-own-1', $1, 'mine', 1, 1)`,
+      [OWNER],
+    );
+  });
+
+  await asUser(db, OWNER, async () => {
+    const { rows } = await db.query(`select * from public.export_own_data('tasks', 100)`);
+    expectEqual(rows.length, 1, 'own rows returned');
+    expectEqual(rows[0].row_data.title, 'mine', 'own row content');
+  });
+});
+
+await test('0022 still works while the account is blocked', async () => {
+  // The entire reason this exists: 0019 denies a blocked account every read,
+  // and GDPR Art. 15 does not pause because we blocked somebody.
+  const BLOCKED = 'dddddddd-0000-0000-0000-000000000002';
+  await createUser(db, BLOCKED, 'blocked@example.com');
+
+  await asUser(db, BLOCKED, async () => {
+    await db.query(
+      `insert into public.tasks (id, user_id, title, updated_at, created_at)
+       values ('t-blk-1', $1, 'still mine', 1, 1)`,
+      [BLOCKED],
+    );
+  });
+
+  await db.query(
+    `insert into public.account_status (user_id, status, reason, auto, updated_at)
+     values ($1, 'blocked', 'test', false, now())
+     on conflict (user_id) do update set status = 'blocked'`,
+    [BLOCKED],
+  );
+
+  await asUser(db, BLOCKED, async () => {
+    // Confirm the block really is in force, so the next assertion means
+    // something rather than passing because nothing was blocking anyway.
+    const direct = await db.query(`select count(*)::int n from public.tasks`);
+    expectEqual(Number(direct.rows[0].n), 0, 'ordinary reads are denied while blocked');
+
+    const { rows } = await db.query(`select * from public.export_own_data('tasks', 100)`);
+    expectEqual(rows.length, 1, 'export still returns own rows while blocked');
+  });
+});
+
+await test('0022 cannot be pointed at anybody else', async () => {
+  // There is no user-id argument, so the only way to ask for another account is
+  // to call an overload that does not exist. If one is ever added, this fails.
+  const { rows } = await db.query(
+    `select count(*)::int n from pg_proc p
+       join pg_namespace n on n.oid = p.pronamespace
+      where n.nspname = 'public' and p.proname = 'export_own_data'
+        and 'uuid'::regtype = any (p.proargtypes::oid[]::regtype[])`,
+  );
+  expectEqual(Number(rows[0].n), 0, 'export_own_data overloads taking a uuid');
+});
+
+await test('0022 refuses a table outside the exportable set', async () => {
+  await asUser(db, ALICE, async () => {
+    await expectRejection(
+      () => db.query(`select * from public.export_own_data('admin_audit_log', 10)`),
+      'not exportable',
+    );
+    // The vault is deliberately out: the server only holds ciphertext sealed to
+    // a key it never derived, so returning it satisfies the letter of a request
+    // with bytes nobody can open.
+    await expectRejection(
+      () => db.query(`select * from public.export_own_data('private_entries', 10)`),
+      'not exportable',
+    );
+  });
+});
+
+await test('0022 records every request', async () => {
+  const LOGGED = 'dddddddd-0000-0000-0000-000000000003';
+  await createUser(db, LOGGED, 'logged@example.com');
+
+  await asUser(db, LOGGED, async () => {
+    await db.query(`select * from public.export_own_data('tasks', 10)`);
+    const seen = await count(
+      `select count(*)::int n from public.data_access_log where user_id = $1`,
+      [LOGGED],
+    );
+    expectEqual(seen, 1, 'requests logged');
+  });
+});
+
+await test('0022 nobody can edit the access log, including its subject', async () => {
+  // "We provided the data" is the claim that has to be evidenced, and a log the
+  // subject can rewrite is not evidence.
+  await asUser(db, ALICE, async () => {
+    await expectRejection(
+      () =>
+        db.query(`insert into public.data_access_log (user_id, table_name) values ($1, 'tasks')`, [
+          ALICE,
+        ]),
+      'violates row-level security policy',
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+console.log('\n0023 group RLS, rewritten');
+// ---------------------------------------------------------------------------
+
+/**
+ * 0023 swapped every group policy from a correlated per-row membership call to
+ * a hoisted `x in (select my_*_ids())`. The whole point is that the predicate is
+ * unchanged, so the pre-existing 0003–0021 group tests passing is the primary
+ * evidence. These add the case that shape could plausibly get wrong: a set-based
+ * test that accidentally spans groups rather than scoping to one.
+ */
+await test('0023 one group cannot see another group', async () => {
+  const A_OWNER = 'eeeeeeee-0000-0000-0000-000000000001';
+  const B_OWNER = 'eeeeeeee-0000-0000-0000-000000000002';
+  await createUser(db, A_OWNER, 'ga@example.com');
+  await createUser(db, B_OWNER, 'gb@example.com');
+
+  const mkGroup = async (uid, gid) => {
+    await asUser(db, uid, async () => {
+      await db.query(`select public.create_expense_group($1, $2, 'trip', '$', $3, null, $4, 1)`, [
+        gid,
+        `name-${gid}`,
+        `m-${gid}`,
+        `act-${gid}`,
+      ]);
+      await db.query(
+        `insert into public.expense_group_expenses
+           (id, group_id, paid_by_member_id, description, amount_cents, currency, spent_at,
+            created_by, created_at, updated_at)
+         values ($1, $2, $3, 'dinner', 1000, '$', 1, $4, 1, 1)`,
+        [`x-${gid}`, gid, `m-${gid}`, uid],
+      );
+      await db.query(
+        `insert into public.expense_group_shares
+           (id, expense_id, member_id, share_cents, created_at, updated_at)
+         values ($1, $2, $3, 1000, 1, 1)`,
+        [`s-${gid}`, `x-${gid}`, `m-${gid}`],
+      );
+    });
+  };
+
+  await mkGroup(A_OWNER, 'grp-a');
+  await mkGroup(B_OWNER, 'grp-b');
+
+  await asUser(db, A_OWNER, async () => {
+    // The membership set is per-caller. If `my_expense_group_ids()` ever
+    // stopped filtering on auth.uid(), every one of these becomes 2 and the
+    // whole ledger leaks between unrelated households.
+    expectEqual(await count(`select count(*)::int n from public.expense_groups`), 1, 'groups');
+    expectEqual(
+      await count(`select count(*)::int n from public.expense_group_expenses`),
+      1,
+      'expenses',
+    );
+    expectEqual(
+      await count(`select count(*)::int n from public.expense_group_shares`),
+      1,
+      'shares (reached through my_expense_ids, the widest of the new sets)',
+    );
+    expectEqual(
+      await count(`select count(*)::int n from public.expense_group_members`),
+      1,
+      'members',
+    );
+  });
+});
+
+await test('0023 leaving a group closes the door immediately', async () => {
+  // The membership set is computed per statement, so a soft-deleted membership
+  // row has to drop out of it on the very next query — not on the next session.
+  const OWNER = 'eeeeeeee-0000-0000-0000-000000000003';
+  const GUEST = 'eeeeeeee-0000-0000-0000-000000000004';
+  await createUser(db, OWNER, 'go@example.com');
+  await createUser(db, GUEST, 'gg@example.com');
+
+  await asUser(db, OWNER, async () => {
+    await db.query(
+      `select public.create_expense_group('grp-c', 'c', 'home', '$', 'm-c-owner', null, 'act-c', 1)`,
+    );
+    await db.query(
+      `insert into public.expense_group_members
+         (id, group_id, user_id, display_name, role, joined_at, created_at, updated_at)
+       values ('m-c-guest', 'grp-c', $1, 'guest', 'member', 1, 1, 1)`,
+      [GUEST],
+    );
+  });
+
+  await asUser(db, GUEST, async () => {
+    expectEqual(await count(`select count(*)::int n from public.expense_groups`), 1, 'in');
+    await db.query(`update public.expense_group_members set deleted_at = 1 where user_id = $1`, [
+      GUEST,
+    ]);
+    expectEqual(await count(`select count(*)::int n from public.expense_groups`), 0, 'out');
+  });
+});
+
+await test('0024 with no override, the global switch decides', async () => {
+  await db.query(
+    `insert into public.module_flags (module, enabled, message, updated_at)
+     values ('budget', false, 'maintenance', now())
+     on conflict (module) do update set enabled = false, message = 'maintenance'`,
+  );
+  await asUser(db, ALICE, async () => {
+    const { rows } = await db.query(`select * from public.my_module_flags()`);
+    const budget = rows.find((r) => r.module === 'budget');
+    expectEqual(budget?.enabled, false, 'global off reaches a user with no override');
+    expectEqual(budget?.message, 'maintenance', 'the operator message travels');
+  });
+});
+
+await test('0024 a user override wins, including re-enabling', async () => {
+  // The staged-rollout case: on for this account while off for everyone else.
+  // Without a tri-state override, per-user flags could only ever take away.
+  await asUser(db, ADMIN, async () => {
+    await db.query(
+      `select public.admin_set_user_module($1::uuid, 'budget', true, 'early access')`,
+      [BOB],
+    );
+  });
+  await asUser(db, BOB, async () => {
+    const { rows } = await db.query(`select * from public.my_module_flags()`);
+    expectEqual(
+      rows.find((r) => r.module === 'budget'),
+      undefined,
+      'an override re-enables a globally disabled module',
+    );
+  });
+  await asUser(db, ALICE, async () => {
+    const { rows } = await db.query(`select * from public.my_module_flags()`);
+    expectEqual(
+      rows.find((r) => r.module === 'budget')?.enabled,
+      false,
+      "somebody else's override does not reach this account",
+    );
+  });
+});
+
+await test('0024 an override can switch one account off on its own', async () => {
+  // The support-fix case. `notes` has no global row at all, so this also proves
+  // the join reaches an override with no global counterpart.
+  await asUser(db, ADMIN, async () => {
+    await db.query(`select public.admin_set_user_module($1::uuid, 'notes', false, 'crash loop')`, [
+      BOB,
+    ]);
+  });
+  await asUser(db, BOB, async () => {
+    const { rows } = await db.query(`select * from public.my_module_flags()`);
+    expectEqual(rows.find((r) => r.module === 'notes')?.enabled, false, 'off for this account');
+  });
+  await asUser(db, ALICE, async () => {
+    const { rows } = await db.query(`select * from public.my_module_flags()`);
+    expectEqual(
+      rows.find((r) => r.module === 'notes'),
+      undefined,
+      'and on for everybody else',
+    );
+  });
+});
+
+await test('0024 the internal note is never shown to its subject', async () => {
+  // `message` is the operator's user-facing explanation and only ever lives on
+  // the global row. The per-user note is internal — "crash loop", "abusive" —
+  // and must not be rendered to the account it is about.
+  await asUser(db, BOB, async () => {
+    const { rows } = await db.query(`select * from public.my_module_flags()`);
+    expectEqual(rows.find((r) => r.module === 'notes')?.message, null, 'per-user note withheld');
+  });
+});
+
+await test('0024 a user cannot switch their own modules back on', async () => {
+  // An override its subject can edit is an override that means nothing.
+  //
+  // Note the shape of the first assertion. There is no DELETE policy on the
+  // table, and RLS answers a missing DELETE policy by making the rows invisible
+  // to the statement rather than by raising — so the DELETE *succeeds* and
+  // removes nothing. Asserting a rejection would have failed for the right
+  // reason and taught the wrong lesson; the property that matters is that the
+  // row is still there afterwards.
+  await asUser(db, BOB, async () => {
+    await db.query(`delete from public.module_flags_user where user_id = $1`, [BOB]);
+    await expectRejection(
+      () => db.query(`select public.admin_set_user_module($1::uuid, 'notes', true, 'nope')`, [BOB]),
+      'not an administrator',
+    );
+  });
+
+  expectEqual(
+    await count(
+      `select count(*)::int n from public.module_flags_user
+        where user_id = $1 and module = 'notes'`,
+      [BOB],
+    ),
+    1,
+    'the override survives its subject trying to delete it',
+  );
+
+  await asUser(db, BOB, async () => {
+    const { rows } = await db.query(`select * from public.my_module_flags()`);
+    expectEqual(
+      rows.find((r) => r.module === 'notes')?.enabled,
+      false,
+      'and the module is still switched off for them',
+    );
+  });
+});
+
+await test('0024 clearing an override falls back to the global switch', async () => {
+  await asUser(db, ADMIN, async () => {
+    await db.query(`select public.admin_clear_user_module($1::uuid, 'budget')`, [BOB]);
+  });
+  await asUser(db, BOB, async () => {
+    const { rows } = await db.query(`select * from public.my_module_flags()`);
+    expectEqual(rows.find((r) => r.module === 'budget')?.enabled, false, 'back to global');
+  });
+});
+
+await test('0025 escrow can actually be written — the bug this migration fixes', async () => {
+  // Before 0025 this was impossible, and nothing said so. `vault_escrow` has no
+  // SELECT policy by design, and Postgres refuses `INSERT … ON CONFLICT DO
+  // UPDATE` against a table the caller cannot select from — whether or not a
+  // conflicting row exists. PostgREST's `.upsert()` emits exactly that, so every
+  // upload since 0015 failed silently and the table stayed empty. The
+  // capability PRIVACY.md describes did not exist.
+  const FRESH = 'ffffffff-0000-0000-0000-000000000001';
+  await createUser(db, FRESH, 'escrow-fresh@example.com');
+
+  await asUser(db, FRESH, async () => {
+    await db.query(`select public.set_own_vault_escrow(1, 'eph-1', 'wrapped-1')`);
+    // Twice, because a scheme that works once is what the old code looked like.
+    await db.query(`select public.set_own_vault_escrow(1, 'eph-2', 'wrapped-2')`);
+  });
+
+  const row = await one(
+    `select ephemeral_public_key, wrapped_key from public.vault_escrow where user_id = $1`,
+    [FRESH],
+  );
+  expectEqual(row?.wrapped_key, 'wrapped-2', 'the second upload replaced the first');
+});
+
+await test('0025 the direct upsert is still refused, which is why the RPC exists', async () => {
+  await asUser(db, ALICE, async () => {
+    await expectRejection(
+      () =>
+        db.query(
+          `insert into public.vault_escrow (user_id, ephemeral_public_key, wrapped_key)
+           values ($1::uuid, 'e2', 'w2')
+           on conflict (user_id) do update set wrapped_key = 'w2'`,
+          [ALICE],
+        ),
+      'row-level security',
+    );
+  });
+});
+
+await test('0025 a filtered update or delete silently matches nothing', async () => {
+  // The other half of the same gap, and the reason a policy-only fix was not
+  // available: a WHERE clause cannot see the row it filters on, so both of
+  // these report success and change nothing — the worst possible answer for a
+  // "remove my key from your servers" button.
+  const V = 'ffffffff-0000-0000-0000-000000000002';
+  await createUser(db, V, 'escrow-victim@example.com');
+  await asUser(db, V, async () => {
+    await db.query(`select public.set_own_vault_escrow(1, 'eph', 'ORIGINAL')`);
+    await db.query(`update public.vault_escrow set wrapped_key = 'CHANGED' where user_id = $1`, [
+      V,
+    ]);
+    await db.query(`delete from public.vault_escrow where user_id = $1`, [V]);
+  });
+
+  const row = await one(`select wrapped_key from public.vault_escrow where user_id = $1`, [V]);
+  expectEqual(row?.wrapped_key, 'ORIGINAL', 'the filtered update changed nothing');
+});
+
+await test('0025 destroying a vault removes its escrow', async () => {
+  // The most explicit "I want this gone" the app offers used to clear the local
+  // keystore and leave the sealed key on the server — the space became
+  // unreadable to its owner while staying readable to an operator.
+  const D = 'ffffffff-0000-0000-0000-000000000003';
+  await createUser(db, D, 'escrow-destroy@example.com');
+
+  await asUser(db, D, async () => {
+    await db.query(`select public.set_own_vault_escrow(1, 'eph', 'wrapped')`);
+    await db.query(`select public.delete_own_vault_escrow()`);
+  });
+
+  expectEqual(
+    await count(`select count(*)::int n from public.vault_escrow where user_id = $1`, [D]),
+    0,
+    'own escrow row deleted',
+  );
+});
+
+await test('0025 neither RPC can be pointed at anybody else', async () => {
+  // Same shape as `export_own_data` in 0022: no user id to get wrong. Both read
+  // auth.uid() and nothing else, which is the whole safety argument for a
+  // SECURITY DEFINER function that writes a key-escrow table.
+  const OTHER = 'ffffffff-0000-0000-0000-000000000004';
+  await createUser(db, OTHER, 'escrow-other@example.com');
+  await asUser(db, OTHER, async () => {
+    await db.query(`select public.set_own_vault_escrow(1, 'eph-other', 'wrapped-other')`);
+  });
+
+  await asUser(db, ALICE, async () => {
+    await db.query(`select public.delete_own_vault_escrow()`);
+  });
+
+  expectEqual(
+    await count(`select count(*)::int n from public.vault_escrow where user_id = $1`, [OTHER]),
+    1,
+    'another account’s escrow survives',
+  );
+
+  const { rows } = await db.query(
+    `select count(*)::int n from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
+      where ns.nspname = 'public'
+        and p.proname in ('set_own_vault_escrow', 'delete_own_vault_escrow')
+        and 'uuid'::regtype = any (p.proargtypes::oid[]::regtype[])`,
+  );
+  expectEqual(Number(rows[0].n), 0, 'overloads taking a uuid');
+});
+
+await test('0025 an anonymous caller is refused', async () => {
+  await expectRejection(
+    () => db.query(`select public.set_own_vault_escrow(1, 'e', 'w')`),
+    'sign in first',
+  );
+});
+
+await test('0025 the escrow blob is still unreadable by its own owner', async () => {
+  // Deliberately no SELECT policy: the client writes the blob and forgets it,
+  // and `uploadEscrow` upserts rather than reading first. Only
+  // `admin_fetch_vault_escrow` returns it, behind the admin gate and an audit
+  // row. A select policy added "for symmetry" would quietly widen that.
+  await asUser(db, BOB, async () => {
+    expectEqual(
+      await count(`select count(*)::int n from public.vault_escrow`),
+      0,
+      'no select policy, so the blob reads as absent',
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+console.log('\n0026 media storage');
+// ---------------------------------------------------------------------------
+
+/**
+ * The bytes are the most sensitive thing this app will ever store — somebody's
+ * photographs — and the entire isolation model is one predicate: the first path
+ * segment is your own uid. These hold it, and hold the quota, which is the only
+ * thing standing between this feature and an unbounded bill.
+ */
+const put = (uid, path, size) =>
+  db.query(
+    `insert into storage.objects (bucket_id, name, metadata)
+     values ('media', $1, jsonb_build_object('size', $2::bigint))`,
+    [`${uid}/${path}`, size],
+  );
+
+await test('0026 you can store and read your own media', async () => {
+  const M1 = 'aaaabbbb-0000-0000-0000-000000000001';
+  await createUser(db, M1, 'media1@example.com');
+  await asUser(db, M1, async () => {
+    await put(M1, 'gallery_photos/p1.jpg', 1024);
+    expectEqual(
+      await count(`select count(*)::int n from storage.objects where bucket_id = 'media'`),
+      1,
+      'own objects visible',
+    );
+  });
+});
+
+await test('0026 one account cannot read another account’s media', async () => {
+  // The whole point of the feature and the whole risk of it, in one assertion.
+  const M2 = 'aaaabbbb-0000-0000-0000-000000000002';
+  await createUser(db, M2, 'media2@example.com');
+  await asUser(db, M2, async () => {
+    expectEqual(
+      await count(`select count(*)::int n from storage.objects where bucket_id = 'media'`),
+      0,
+      'somebody else’s objects are invisible',
+    );
+  });
+});
+
+await test('0026 you cannot write into another account’s folder', async () => {
+  const M3 = 'aaaabbbb-0000-0000-0000-000000000003';
+  const VICTIM = 'aaaabbbb-0000-0000-0000-000000000001';
+  await createUser(db, M3, 'media3@example.com');
+  await asUser(db, M3, async () => {
+    await expectRejection(() => put(VICTIM, 'gallery_photos/forged.jpg', 10), 'row-level security');
+  });
+});
+
+await test('0026 you cannot delete another account’s media', async () => {
+  const M4 = 'aaaabbbb-0000-0000-0000-000000000004';
+  const VICTIM = 'aaaabbbb-0000-0000-0000-000000000001';
+  await createUser(db, M4, 'media4@example.com');
+  await asUser(db, M4, async () => {
+    await db.query(`delete from storage.objects where name like $1`, [`${VICTIM}/%`]);
+  });
+  expectEqual(
+    await count(`select count(*)::int n from storage.objects where name like $1`, [`${VICTIM}/%`]),
+    1,
+    'the victim’s object survives',
+  );
+});
+
+await test('0026 the quota is enforced on the server', async () => {
+  // A limit the client alone enforces is a suggestion to anyone who has not
+  // modified the client. This is the one that costs money.
+  const M5 = 'aaaabbbb-0000-0000-0000-000000000005';
+  await createUser(db, M5, 'media5@example.com');
+  const quota = Number((await one(`select public.media_quota_bytes() as q`)).q);
+
+  await asUser(db, M5, async () => {
+    await put(M5, 'gallery_photos/big.jpg', quota - 100);
+    await expectRejection(
+      () => put(M5, 'gallery_photos/over.jpg', 200),
+      'media storage quota exceeded',
+    );
+  });
+});
+
+await test('0026 usage is reported to the account it belongs to', async () => {
+  // A quota nobody can see is a quota that only ever appears as an unexplained
+  // failure, so the app has to be able to show it.
+  const M6 = 'aaaabbbb-0000-0000-0000-000000000006';
+  await createUser(db, M6, 'media6@example.com');
+  await asUser(db, M6, async () => {
+    await put(M6, 'songs/a.mp3', 500);
+    await put(M6, 'songs/b.mp3', 250);
+    expectEqual(Number((await one(`select public.media_bytes_used() as b`)).b), 750, 'bytes used');
+  });
+});
+
+await test('0026 usage counts only your own bytes', async () => {
+  const M7 = 'aaaabbbb-0000-0000-0000-000000000007';
+  await createUser(db, M7, 'media7@example.com');
+  await asUser(db, M7, async () => {
+    expectEqual(
+      Number((await one(`select public.media_bytes_used() as b`)).b),
+      0,
+      'a new account starts at zero however much anyone else stores',
+    );
+  });
+});
+
+await test('0026 the bucket is private', async () => {
+  // A public bucket would make every path a guessable URL, and the paths are
+  // derived from row ids that travel in the metadata sync.
+  const bucket = await one(`select public from storage.buckets where id = 'media'`);
+  expectEqual(bucket?.public, false, 'bucket is not public');
+});
+
+await test('0023 the hoisted sets are scoped to the caller', async () => {
+  // Direct assertions on the functions themselves, so a failure names the cause
+  // rather than a downstream policy.
+  const SOLO = 'eeeeeeee-0000-0000-0000-000000000005';
+  await createUser(db, SOLO, 'solo@example.com');
+  await asUser(db, SOLO, async () => {
+    expectEqual(
+      await count(`select count(*)::int n from public.my_expense_group_ids()`),
+      0,
+      'a user in no groups sees no group ids',
+    );
+    expectEqual(
+      await count(`select count(*)::int n from public.my_expense_ids()`),
+      0,
+      'a user in no groups sees no expense ids',
+    );
+  });
 });
 
 summary();

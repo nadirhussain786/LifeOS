@@ -7,7 +7,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Search, UserCircle } from 'lucide-react-native';
 
+import { cardClass } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
+import { resolveTint } from '@/constants/design-tokens';
 import { colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { ModuleCard } from '@/features/hub/components/module-card';
@@ -222,18 +224,19 @@ export default function HubScreen() {
             <View className="gap-2">
               {privateSection.map((module) => {
                 const Icon = module.icon;
+                const tint = resolveTint(module.tint, scheme);
                 return (
                   <Pressable
                     key={module.id}
                     accessibilityRole="button"
                     onPress={() => router.push(module.route as never)}
-                    className="flex-row items-center gap-3.5 rounded-2xl border border-border bg-card px-4 py-3.5"
+                    className={cardClass({ padding: 'rowLg' }, 'flex-row items-center gap-3.5')}
                   >
                     <View
                       className="h-11 w-11 items-center justify-center rounded-2xl"
-                      style={{ backgroundColor: alpha(module.tint, 0.16) }}
+                      style={{ backgroundColor: alpha(tint, 0.16) }}
                     >
-                      <Icon size={20} color={module.tint} strokeWidth={1.9} />
+                      <Icon size={20} color={tint} strokeWidth={1.9} />
                     </View>
                     <View className="flex-1">
                       <Text className="font-sora-medium text-foreground">{t(module.titleKey)}</Text>

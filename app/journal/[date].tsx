@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
+import { cardClass } from '@/components/ui/card';
 import { AttachmentStrip } from '@/components/ui/attachment-strip';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
@@ -181,7 +182,7 @@ export default function JournalEntryScreen() {
           placeholder={t('journal.howWasToday')}
           placeholderTextColor={colors[scheme].mutedForeground}
           style={{ fontFamily: 'Literata_400Regular', fontSize: 17, lineHeight: 25 }}
-          className="min-h-32 rounded-2xl border border-border bg-card p-4 text-foreground"
+          className={cardClass({ padding: 'md' }, 'min-h-32 text-foreground')}
           textAlignVertical="top"
         />
 
