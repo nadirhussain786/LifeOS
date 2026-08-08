@@ -135,6 +135,28 @@ Still to do here:
 - [ ] **No staging project exists yet.** The runner supports one; nothing has
       been run against either database.
 
+## 🔑 Sign-in providers (code done, consoles are yours) — docs/AUTH_PROVIDERS.md
+
+Google and Apple sign-in are built and bundle clean. **Neither has run against a
+real provider**, and cannot from here. Until the consoles are configured both
+buttons appear (whenever the Supabase vars are set) and fail with "That sign-in
+method is not switched on for this project yet." Email and guest are unaffected.
+
+- [ ] **Google Cloud** — OAuth consent screen + a **Web** OAuth client whose
+      redirect URI is `https://<project-ref>.supabase.co/auth/v1/callback`. That
+      is Supabase's URL, not the app's; Google redirects to Supabase and Supabase
+      redirects to the app.
+- [ ] **Supabase → Providers → Google** — client id + secret.
+- [ ] **Supabase → URL Configuration → Redirect URLs** — add both
+      `lifeos://auth/callback` and `lifeos:///auth/callback`. An unlisted
+      redirect is refused before the user sees anything.
+- [ ] **Apple** — needs the paid developer account (same one blocking the iOS
+      widget): App ID capability, a Sign in with Apple key (`.p8`, one download
+      only), a Services ID, then Supabase → Providers → Apple.
+- [ ] ⚠️ **Guideline 4.8**: Sign in with Apple must be offered wherever another
+      third-party login is. Shipping Google to iOS without Apple is a rejection —
+      they go live together. Android can ship Google alone.
+
 ## 🔒 Needs you (blocked on account / asset / decision)
 
 - [ ] **Supabase projects** — create **two** (staging and production). Export
@@ -158,9 +180,11 @@ Still to do here:
 - [ ] **SQLCipher underneath it** (`docs/SQLCIPHER.md`). Private rows are already
       encrypted field-by-field, so this is defence in depth rather than a
       prerequisite — but it would also cover the _other_ modules' data at rest.
-- [ ] **Hidden entry point.** The Settings row reveals the feature exists (not
-      what is in it). A "hide from Settings" option with a re-entry gesture
-      (long-press the version number) would close that gap.
+- [x] **Hidden entry point.** The private-space row can now be removed from
+      Settings, from inside the space itself. The way back is a long-press on
+      the version number under Settings → About — wired up unconditionally,
+      hidden or not, so the gesture can become habit before it becomes the only
+      route. The confirmation names it and asks you to try it once.
 - [ ] **Vault video support.** Images only today — the 8 MB ceiling exists
       because encryption runs in JavaScript. Needs a native crypto module.
 - [ ] **Encrypted E2E sync for private modules.** The `sensitive` flag in
@@ -232,13 +256,24 @@ the UI:
 - [ ] **Admin UI for the switches.** Today it is
       `select public.admin_set_module_enabled('split', false, 'reason');` in the
       SQL editor. Fine for one operator, poor under pressure at 3am.
-- [ ] **Privatised modules still write notifications.** Reminders are scheduled
-      by module, and a privatised module's reminder text would name its content
-      on a lock screen. Either suppress those reminders while a module is
-      privatised, or fall back to generic text.
-- [ ] **Widget respects neither switch yet.** The Android widget reads tasks /
-      habits / water directly; if one of those is privatised or disabled it will
-      keep rendering. Needs the same check as the route guard.
+- [x] **Privatised modules no longer write legible notifications.** A privatised
+      module's reminders still fire and still deep-link, with text that names
+      nothing ("You have a reminder") — dropping them would penalise somebody
+      for using a privacy feature. An operator-_disabled_ module is suppressed
+      outright instead, which is a different problem with a different answer.
+      Both flip a full reminder resync, because the OS owns the text of anything
+      already queued and will not let us edit it. See
+      `features/notifications/services/notification-visibility.ts`.
+- [x] **Widget respects both switches.** Visibility is decided in the app and
+      baked into the snapshot, since the widget's task handler runs headless
+      where those stores are not reliably available. `EMPTY_SNAPSHOT` defaults
+      every row to hidden so an upgrade stops leaking immediately rather than on
+      next launch.
+- [ ] **The widget is the only English-only surface in a four-language app.** It
+      hardcodes "task"/"tasks"/"habits left" and pluralises with a ternary. The
+      fix is the same mechanism as above — format the strings in the app and put
+      them in the snapshot — because i18next is not safe to initialise in the
+      headless context.
 - [ ] **Per-user switches.** 0011 is global. A per-account override would allow
       staged rollouts and one-off support fixes; needs a second table and a
       merge rule (user override wins, absence falls through to global).
@@ -266,11 +301,24 @@ the UI:
 
 ## 🔁 Sync v2 (deeper coverage)
 
-- [ ] Sync child/log tables (habit logs & skips, note tags/links, goal milestones & progress logs, journal reflections, study sessions, water logs, entry links) — need `updated_at` + a change strategy for append/join tables.
-- [ ] Sync per-module settings rows (sleep/study/budget settings — single-row, no id).
-- [ ] Media sync via Supabase Storage (gallery photos/videos, note & journal attachments, music files).
-- [ ] Account switch handling (clear-and-pull when a different uid signs in on a device).
+> Most of this list was **already delivered by 0016/0017** and the section had
+> not been updated — child/log tables, per-module settings rows and media
+> metadata all sync, and account-switch handling shipped as
+> `features/sync/services/account-reconcile.ts`. What is genuinely left:
+
+- [ ] Media **bytes** via Supabase Storage (see the sync-hardening section above:
+      wants quotas and an opt-in before it wants code).
 - [ ] Conflict surfacing (currently silent last-write-wins).
+
+## 🚀 First run (rebuilt — what is left)
+
+- [ ] **Nothing here has been seen on a device.** The seeding writes real habit
+      rows and real settings on a real database; `expo export` proves it bundles,
+      not that it runs.
+- [ ] **Starter habits are a guess.** Thirteen suggestions across nine focus
+      areas, written blind. Worth revisiting once anyone has actually used them.
+- [ ] **The old `finishSetup` string is now unused** but left in the locales
+      rather than deleted mid-flight. Sweep with any other dead keys.
 
 ---
 
