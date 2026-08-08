@@ -609,7 +609,11 @@
     "importMissingMedia_other": "{{count}} میڈیا فائلیں غائب ہیں — بیک اپ میں میڈیا محفوظ نہیں ہوتا۔",
     "terms": "سروس کی شرائط",
     "support": "سپورٹ سے رابطہ",
-    "supportSubtitle": "سوالات، اپیلیں اور ڈیٹا کی درخواستیں"
+    "supportSubtitle": "سوالات، اپیلیں اور ڈیٹا کی درخواستیں",
+    "goalReminders": "اہداف کی آخری تاریخ",
+    "goalRemindersSubtitle": "تاریخ سے پہلے ہدف کی یاد دہانی",
+    "studyReminders": "مطالعے کی یاد دہانی",
+    "studyRemindersSubtitle": "جن دنوں آپ پڑھتے ہیں اُن دنوں اشارہ"
   },
   "auth": {
     "welcomeBack": "خوش آمدید",
@@ -777,7 +781,22 @@
     "dueInDays_other": "{{count}} دن میں مقرر",
     "dueOn": "{{date}} کو مقرر",
     "overdueByDays_one": "{{count}} دن تاخیر",
-    "overdueByDays_other": "{{count}} دن تاخیر"
+    "overdueByDays_other": "{{count}} دن تاخیر",
+    "reminderTitle": "آخری تاریخ کی یاد دہانیاں",
+    "reminderRowLabel": "آخری تاریخ کی یاد دہانیاں",
+    "deadlineNudge": "تاریخ قریب آنے پر اہداف کی یاد دہانی",
+    "howFarAhead": "کتنا پہلے",
+    "onTheDay": "اسی دن",
+    "daysBefore_one": "{{count}} دن پہلے",
+    "daysBefore_other": "{{count}} دن پہلے",
+    "reminderSummary_one": "ہر ہدف کے لیے ایک یاد دہانی، تاریخ سے {{count}} دن پہلے، {{time}} بجے۔",
+    "reminderSummary_other": "ہر ہدف کے لیے ایک یاد دہانی، تاریخ سے {{count}} دن پہلے، {{time}} بجے۔",
+    "reminderSummaryToday": "ہر ہدف کے لیے ایک یاد دہانی، اسی دن، {{time}} بجے۔",
+    "reminderNote": "صرف تاریخ والے اہداف کو یاد دہانی ملتی ہے، اور صرف پہلے سے — تاریخ گزر جانے کے بعد کچھ تنگ نہیں کرتا۔",
+    "reminderNotifTitle": "{{title}}",
+    "reminderNotifToday": "آج کی تاریخ ہے۔",
+    "reminderNotifBody_one": "{{count}} دن میں۔",
+    "reminderNotifBody_other": "{{count}} دن میں۔"
   },
   "sleep": {
     "title": "نیند",
@@ -936,7 +955,18 @@
     "silencePhoneBody": "LifeOS پہلے ہی آپ کی موسیقی روک دیتا ہے اور اپنی یاد دہانیاں تھام لیتا ہے۔ کالیں اور دوسری ایپس اس کی پہنچ سے باہر ہیں — کوئی ایپ آپ کے لیے ڈسٹرب نہ کریں آن نہیں کر سکتی، اس لیے یہ آپ کو خود کرنا ہوگا۔",
     "openDndSettings": "ڈسٹرب نہ کریں کھولیں",
     "dndUnavailableTitle": "کھولا نہیں جا سکا",
-    "dndUnavailableBody": "اس کے بجائے فون کی ترتیبات سے ڈسٹرب نہ کریں کھولیں۔"
+    "dndUnavailableBody": "اس کے بجائے فون کی ترتیبات سے ڈسٹرب نہ کریں کھولیں۔",
+    "reminderTitle": "مطالعے کی یاد دہانی",
+    "reminderRowLabel": "مطالعے کی یاد دہانی",
+    "nudgeToStudy": "بیٹھ کر شروع کرنے کا اشارہ",
+    "whichDays": "کن دنوں",
+    "pickADay": "کم از کم ایک دن منتخب کریں، یا یاد دہانی بند کر دیں۔",
+    "reminderSummary_one": "ہفتے میں {{count}} دن، {{time}} بجے۔",
+    "reminderSummary_other": "ہفتے میں {{count}} دن، {{time}} بجے۔",
+    "reminderNote": "یہ نہیں جان سکتا کہ آپ پڑھ چکے ہیں — یاد دہانی کا متن شیڈول کرتے وقت طے ہو جاتا ہے — اس لیے یہ اُس شام بھی آ سکتی ہے جب آپ پڑھ چکے ہوں۔",
+    "reminderNotifTitle": "پڑھنے کا وقت",
+    "reminderNotifBody": "ایک نشست کے لیے تیار؟",
+    "enableNotifBody": "یہ یاد دہانی پانے کے لیے LifeOS کی اطلاعات آن کریں۔"
   },
   "music": {
     "title": "موسیقی",
@@ -1825,5 +1855,14 @@
     "habitsLeft_other": "{{count}} عادات باقی",
     "water": "{{current}} / {{goal}} لیٹر پانی",
     "openApp": "LifeOS کھولیں"
+  },
+  "weekdays": {
+    "sun": "اتوار",
+    "mon": "پیر",
+    "tue": "منگل",
+    "wed": "بدھ",
+    "thu": "جمعرات",
+    "fri": "جمعہ",
+    "sat": "ہفتہ"
   }
 }

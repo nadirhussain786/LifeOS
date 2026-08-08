@@ -609,7 +609,11 @@
     "importMissingMedia_other": "{{count}} मीडिया फ़ाइलें गायब हैं — बैकअप में मीडिया संग्रहीत नहीं होता।",
     "terms": "सेवा की शर्तें",
     "support": "सहायता से संपर्क करें",
-    "supportSubtitle": "सवाल, अपील और डेटा अनुरोध"
+    "supportSubtitle": "सवाल, अपील और डेटा अनुरोध",
+    "goalReminders": "लक्ष्य की समय-सीमा",
+    "goalRemindersSubtitle": "तारीख़ से पहले लक्ष्य की याद",
+    "studyReminders": "पढ़ाई का अनुस्मारक",
+    "studyRemindersSubtitle": "जिन दिनों आप पढ़ते हैं उन दिनों इशारा"
   },
   "auth": {
     "welcomeBack": "वापसी पर स्वागत है",
@@ -777,7 +781,22 @@
     "dueInDays_other": "{{count}} दिन में नियत",
     "dueOn": "{{date}} को नियत",
     "overdueByDays_one": "{{count}} दिन विलंबित",
-    "overdueByDays_other": "{{count}} दिन विलंबित"
+    "overdueByDays_other": "{{count}} दिन विलंबित",
+    "reminderTitle": "समय-सीमा अनुस्मारक",
+    "reminderRowLabel": "समय-सीमा अनुस्मारक",
+    "deadlineNudge": "तारीख़ पास आने पर लक्ष्यों की याद दिलाएँ",
+    "howFarAhead": "कितना पहले",
+    "onTheDay": "उसी दिन",
+    "daysBefore_one": "{{count}} दिन पहले",
+    "daysBefore_other": "{{count}} दिन पहले",
+    "reminderSummary_one": "हर लक्ष्य के लिए एक अनुस्मारक, तारीख़ से {{count}} दिन पहले, {{time}} बजे।",
+    "reminderSummary_other": "हर लक्ष्य के लिए एक अनुस्मारक, तारीख़ से {{count}} दिन पहले, {{time}} बजे।",
+    "reminderSummaryToday": "हर लक्ष्य के लिए एक अनुस्मारक, उसी दिन, {{time}} बजे।",
+    "reminderNote": "सिर्फ़ तारीख़ वाले लक्ष्यों को अनुस्मारक मिलता है, और सिर्फ़ पहले से — समय बीत जाने के बाद कुछ परेशान नहीं करता।",
+    "reminderNotifTitle": "{{title}}",
+    "reminderNotifToday": "आज की तारीख़ है।",
+    "reminderNotifBody_one": "{{count}} दिन में।",
+    "reminderNotifBody_other": "{{count}} दिन में।"
   },
   "sleep": {
     "title": "नींद",
@@ -936,7 +955,18 @@
     "silencePhoneBody": "LifeOS पहले ही आपका संगीत रोक देता है और अपने रिमाइंडर थाम लेता है। कॉल और दूसरे ऐप उसकी पहुँच से बाहर हैं — कोई ऐप आपके लिए डू नॉट डिस्टर्ब चालू नहीं कर सकता, इसलिए यह आपको ख़ुद करना होगा।",
     "openDndSettings": "डू नॉट डिस्टर्ब खोलें",
     "dndUnavailableTitle": "खोला नहीं जा सका",
-    "dndUnavailableBody": "इसके बजाय फ़ोन सेटिंग से डू नॉट डिस्टर्ब खोलें।"
+    "dndUnavailableBody": "इसके बजाय फ़ोन सेटिंग से डू नॉट डिस्टर्ब खोलें।",
+    "reminderTitle": "पढ़ाई का अनुस्मारक",
+    "reminderRowLabel": "पढ़ाई का अनुस्मारक",
+    "nudgeToStudy": "बैठकर शुरू करने का इशारा",
+    "whichDays": "किन दिनों",
+    "pickADay": "कम से कम एक दिन चुनें, या अनुस्मारक बंद कर दें।",
+    "reminderSummary_one": "हफ़्ते में {{count}} दिन, {{time}} बजे।",
+    "reminderSummary_other": "हफ़्ते में {{count}} दिन, {{time}} बजे।",
+    "reminderNote": "यह नहीं जान सकता कि आपने पढ़ लिया है — अनुस्मारक का पाठ शेड्यूल करते समय तय हो जाता है — इसलिए यह उस शाम भी आ सकता है जब आप पढ़ चुके हों।",
+    "reminderNotifTitle": "पढ़ने का समय",
+    "reminderNotifBody": "एक सत्र के लिए तैयार?",
+    "enableNotifBody": "यह अनुस्मारक पाने के लिए LifeOS के नोटिफ़िकेशन चालू करें।"
   },
   "music": {
     "title": "संगीत",
@@ -1825,5 +1855,14 @@
     "habitsLeft_other": "{{count}} आदतें बाकी",
     "water": "{{current}} / {{goal}} ली॰ पानी",
     "openApp": "LifeOS खोलें"
+  },
+  "weekdays": {
+    "sun": "रविवार",
+    "mon": "सोमवार",
+    "tue": "मंगलवार",
+    "wed": "बुधवार",
+    "thu": "गुरुवार",
+    "fri": "शुक्रवार",
+    "sat": "शनिवार"
   }
 }

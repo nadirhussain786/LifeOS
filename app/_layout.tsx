@@ -245,10 +245,12 @@ export default function RootLayout() {
                 <Stack.Screen name="goals/[id]" />
                 <Stack.Screen name="goals/[id]/edit" options={{ presentation: 'modal' }} />
                 <Stack.Screen name="goals/[id]/log" options={{ presentation: 'modal' }} />
+                <Stack.Screen name="goals/reminder-settings" />
                 <Stack.Screen name="sleep/index" />
                 <Stack.Screen name="sleep/settings" />
                 <Stack.Screen name="study/index" />
                 <Stack.Screen name="study/settings" />
+                <Stack.Screen name="study/reminder-settings" />
                 <Stack.Screen name="study/timer" options={{ gestureEnabled: false }} />
                 <Stack.Screen name="budget/index" />
                 <Stack.Screen name="budget/transactions" />

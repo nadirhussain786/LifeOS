@@ -609,7 +609,11 @@
     "importMissingMedia_other": "{{count}} photo and audio files are missing — media is not stored in the backup.",
     "terms": "Terms of Service",
     "support": "Contact support",
-    "supportSubtitle": "Questions, appeals, and data requests"
+    "supportSubtitle": "Questions, appeals, and data requests",
+    "goalReminders": "Goal deadlines",
+    "goalRemindersSubtitle": "Hear about a goal before its date",
+    "studyReminders": "Study reminder",
+    "studyRemindersSubtitle": "A nudge on the days you study"
   },
   "auth": {
     "welcomeBack": "Welcome back",
@@ -777,7 +781,22 @@
     "dueInDays_other": "Due in {{count}} days",
     "dueOn": "Due {{date}}",
     "overdueByDays_one": "Overdue by {{count}} day",
-    "overdueByDays_other": "Overdue by {{count}} days"
+    "overdueByDays_other": "Overdue by {{count}} days",
+    "reminderTitle": "Deadline reminders",
+    "reminderRowLabel": "Deadline reminders",
+    "deadlineNudge": "Hear about goals as their date approaches",
+    "howFarAhead": "How far ahead",
+    "onTheDay": "On the day",
+    "daysBefore_one": "{{count}} day before",
+    "daysBefore_other": "{{count}} days before",
+    "reminderSummary_one": "One reminder per goal, {{count}} day before its date, at {{time}}.",
+    "reminderSummary_other": "One reminder per goal, {{count}} days before its date, at {{time}}.",
+    "reminderSummaryToday": "One reminder per goal, on the day it is due, at {{time}}.",
+    "reminderNote": "Only goals with a due date get one, and only ahead of time — nothing nags you after a deadline passes.",
+    "reminderNotifTitle": "{{title}}",
+    "reminderNotifToday": "Due today.",
+    "reminderNotifBody_one": "Due in {{count}} day.",
+    "reminderNotifBody_other": "Due in {{count}} days."
   },
   "sleep": {
     "title": "Sleep",
@@ -936,7 +955,18 @@
     "silencePhoneBody": "LifeOS already pauses your music and holds its own reminders. Calls and other apps are outside its reach — no app can switch Do Not Disturb on for you, so you'll need to flip it yourself.",
     "openDndSettings": "Open Do Not Disturb",
     "dndUnavailableTitle": "Couldn't open it",
-    "dndUnavailableBody": "Open Do Not Disturb from your phone settings instead."
+    "dndUnavailableBody": "Open Do Not Disturb from your phone settings instead.",
+    "reminderTitle": "Study reminder",
+    "reminderRowLabel": "Study reminder",
+    "nudgeToStudy": "A nudge to sit down and start",
+    "whichDays": "Which days",
+    "pickADay": "Pick at least one day, or turn the reminder off.",
+    "reminderSummary_one": "On {{count}} day a week, at {{time}}.",
+    "reminderSummary_other": "On {{count}} days a week, at {{time}}.",
+    "reminderNote": "It cannot tell whether you have already studied — a reminder’s text is fixed when it is scheduled — so it may arrive on an evening you are already done.",
+    "reminderNotifTitle": "Time to study",
+    "reminderNotifBody": "Ready for a session?",
+    "enableNotifBody": "Turn notifications on for LifeOS to get this reminder."
   },
   "music": {
     "title": "Music",
@@ -1825,5 +1855,14 @@
     "habitsLeft_other": "{{count}} habits left",
     "water": "{{current}} / {{goal}} L water",
     "openApp": "Open LifeOS"
+  },
+  "weekdays": {
+    "sun": "Sunday",
+    "mon": "Monday",
+    "tue": "Tuesday",
+    "wed": "Wednesday",
+    "thu": "Thursday",
+    "fri": "Friday",
+    "sat": "Saturday"
   }
 }

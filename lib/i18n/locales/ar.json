@@ -641,7 +641,11 @@
     "importMissingMedia_other": "{{count}} ملف وسائط مفقود — الوسائط غير مخزّنة في النسخة الاحتياطية.",
     "terms": "شروط الخدمة",
     "support": "التواصل مع الدعم",
-    "supportSubtitle": "الأسئلة والاعتراضات وطلبات البيانات"
+    "supportSubtitle": "الأسئلة والاعتراضات وطلبات البيانات",
+    "goalReminders": "مواعيد الأهداف",
+    "goalRemindersSubtitle": "اسمع عن الهدف قبل موعده",
+    "studyReminders": "تذكير الدراسة",
+    "studyRemindersSubtitle": "تنبيه في أيام دراستك"
   },
   "auth": {
     "welcomeBack": "مرحبًا بعودتك",
@@ -821,7 +825,34 @@
     "overdueByDays_two": "متأخر بيومين",
     "overdueByDays_few": "متأخر بـ {{count}} أيام",
     "overdueByDays_many": "متأخر بـ {{count}} يومًا",
-    "overdueByDays_other": "متأخر بـ {{count}} يوم"
+    "overdueByDays_other": "متأخر بـ {{count}} يوم",
+    "reminderTitle": "تذكيرات المواعيد",
+    "reminderRowLabel": "تذكيرات المواعيد",
+    "deadlineNudge": "اسمع عن أهدافك مع اقتراب موعدها",
+    "howFarAhead": "قبل الموعد بكم",
+    "onTheDay": "في اليوم نفسه",
+    "daysBefore_zero": "في اليوم نفسه",
+    "daysBefore_one": "قبل يوم واحد",
+    "daysBefore_two": "قبل يومين",
+    "daysBefore_few": "قبل {{count}} أيام",
+    "daysBefore_many": "قبل {{count}} يومًا",
+    "daysBefore_other": "قبل {{count}} يوم",
+    "reminderSummary_zero": "تذكير واحد لكل هدف، في يوم استحقاقه، الساعة {{time}}.",
+    "reminderSummary_one": "تذكير واحد لكل هدف، قبل موعده بيوم، الساعة {{time}}.",
+    "reminderSummary_two": "تذكير واحد لكل هدف، قبل موعده بيومين، الساعة {{time}}.",
+    "reminderSummary_few": "تذكير واحد لكل هدف، قبل موعده بـ{{count}} أيام، الساعة {{time}}.",
+    "reminderSummary_many": "تذكير واحد لكل هدف، قبل موعده بـ{{count}} يومًا، الساعة {{time}}.",
+    "reminderSummary_other": "تذكير واحد لكل هدف، قبل موعده بـ{{count}} يوم، الساعة {{time}}.",
+    "reminderSummaryToday": "تذكير واحد لكل هدف، في يوم استحقاقه، الساعة {{time}}.",
+    "reminderNote": "تحصل الأهداف ذات المواعيد فقط على تذكير، وقبل الموعد فقط — لا شيء يلاحقك بعد فوات الموعد.",
+    "reminderNotifTitle": "{{title}}",
+    "reminderNotifToday": "مستحق اليوم.",
+    "reminderNotifBody_zero": "مستحق اليوم.",
+    "reminderNotifBody_one": "مستحق خلال يوم واحد.",
+    "reminderNotifBody_two": "مستحق خلال يومين.",
+    "reminderNotifBody_few": "مستحق خلال {{count}} أيام.",
+    "reminderNotifBody_many": "مستحق خلال {{count}} يومًا.",
+    "reminderNotifBody_other": "مستحق خلال {{count}} يوم."
   },
   "sleep": {
     "title": "النوم",
@@ -988,7 +1019,22 @@
     "silencePhoneBody": "يوقف LifeOS موسيقاك ويحجز تذكيراته بالفعل. أما المكالمات والتطبيقات الأخرى فخارج نطاقه — لا يمكن لأي تطبيق تشغيل «عدم الإزعاج» نيابة عنك، لذا عليك تفعيله بنفسك.",
     "openDndSettings": "فتح «عدم الإزعاج»",
     "dndUnavailableTitle": "تعذّر الفتح",
-    "dndUnavailableBody": "افتح «عدم الإزعاج» من إعدادات هاتفك بدلًا من ذلك."
+    "dndUnavailableBody": "افتح «عدم الإزعاج» من إعدادات هاتفك بدلًا من ذلك.",
+    "reminderTitle": "تذكير الدراسة",
+    "reminderRowLabel": "تذكير الدراسة",
+    "nudgeToStudy": "تنبيه للجلوس والبدء",
+    "whichDays": "في أي أيام",
+    "pickADay": "اختر يومًا واحدًا على الأقل، أو أوقف التذكير.",
+    "reminderSummary_zero": "لا أيام محددة.",
+    "reminderSummary_one": "في يوم واحد أسبوعيًا، الساعة {{time}}.",
+    "reminderSummary_two": "في يومين أسبوعيًا، الساعة {{time}}.",
+    "reminderSummary_few": "في {{count}} أيام أسبوعيًا، الساعة {{time}}.",
+    "reminderSummary_many": "في {{count}} يومًا أسبوعيًا، الساعة {{time}}.",
+    "reminderSummary_other": "في {{count}} يوم أسبوعيًا، الساعة {{time}}.",
+    "reminderNote": "لا يمكنه معرفة ما إذا كنت قد درست بالفعل — نص التذكير يُحدَّد عند جدولته — لذا قد يصلك في مساء أنهيت فيه دراستك.",
+    "reminderNotifTitle": "حان وقت الدراسة",
+    "reminderNotifBody": "مستعد لجلسة؟",
+    "enableNotifBody": "فعّل الإشعارات لتطبيق LifeOS لتصلك هذه التذكيرات."
   },
   "music": {
     "title": "الموسيقى",
@@ -1945,5 +1991,14 @@
     "habitsLeft_other": "{{count}} عادة متبقية",
     "water": "{{current}} / {{goal}} لتر ماء",
     "openApp": "افتح LifeOS"
+  },
+  "weekdays": {
+    "sun": "الأحد",
+    "mon": "الاثنين",
+    "tue": "الثلاثاء",
+    "wed": "الأربعاء",
+    "thu": "الخميس",
+    "fri": "الجمعة",
+    "sat": "السبت"
   }
 }

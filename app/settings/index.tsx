@@ -8,10 +8,12 @@ import {
   Download,
   Droplet,
   FileText,
+  GraduationCap,
   Info,
   Languages,
   LifeBuoy,
   Scale,
+  Target,
   Upload,
   UserCircle,
   Laptop,
@@ -294,6 +296,18 @@ export default function SettingsScreen() {
               label={t('settings.journalReminder')}
               subtitle={t('settings.journalReminderSubtitle')}
               onPress={() => router.push('/journal/reminder-settings')}
+            />
+            <SettingsRow
+              icon={Target}
+              label={t('settings.goalReminders')}
+              subtitle={t('settings.goalRemindersSubtitle')}
+              onPress={() => router.push('/goals/reminder-settings')}
+            />
+            <SettingsRow
+              icon={GraduationCap}
+              label={t('settings.studyReminders')}
+              subtitle={t('settings.studyRemindersSubtitle')}
+              onPress={() => router.push('/study/reminder-settings')}
             />
           </View>
           <Text variant="caption" className="px-1">
