@@ -5,8 +5,8 @@ Derived from `TODO.md` on 2026-08-07. Two parts, and the split is the point:
 - **Part A** — work I can do from here. Ordered into waves by dependency.
 - **Part B** — work only you can do. Accounts, paid assets, secrets, decisions.
 
-They are not independent. Part A wave 4 onward is mostly *writable* but not
-*verifiable* until Part B items 1 and 2 land, because nothing in notifications,
+They are not independent. Part A wave 4 onward is mostly _writable_ but not
+_verifiable_ until Part B items 1 and 2 land, because nothing in notifications,
 widgets, sync or auth has ever been observed running on hardware. Where that is
 the case it is said so per item rather than left implied.
 
@@ -29,8 +29,8 @@ is that there is no parameter to get wrong. Nothing calls it. Needs:
 a service in `features/moderation/` or `features/settings/`, a Settings → Privacy
 → "Export my data" row, and — the reason it was written — a route to it from the
 blocked screen, which today offers only an email link.
-*Closes:* TODO "Appeals have no route back in".
-*Verify:* `npm run test:sql` (the migration), `npm test` + `npm run typecheck`
+_Closes:_ TODO "Appeals have no route back in".
+_Verify:_ `npm run test:sql` (the migration), `npm test` + `npm run typecheck`
 (the wiring), plus a wiring test in the shape of
 `features/moderation/moderation-wiring.test.ts` so the route cannot silently
 disappear again — that file already exists as the pattern for exactly this.
@@ -39,13 +39,13 @@ disappear again — that file already exists as the pattern for exactly this.
 unchecked: widget i18n (`150dcbd`), Goals + Study schedulers (`45e8521`), and
 conflict surfacing (`ae4e3a8`). Leave the Streak category unchecked — it has no
 scheduler and is deferred by design.
-*Verify:* read it back; no tooling involved.
+_Verify:_ read it back; no tooling involved.
 
 **A3. Sweep dead locale keys.** `finishSetup` is unused and was left in the
 locales mid-flight. `npm run check:i18n` exists now (added in `c2cc353`) and
 found six raw-rendering keys; extend or re-run it to catch the reverse case —
 keys present in locales that nothing reads.
-*Verify:* `npm run check:i18n`, `npm test`.
+_Verify:_ `npm run check:i18n`, `npm test`.
 
 **A4. Hoist the expense-group RLS policies.** The 0017 pass made owner policies
 cheap by replacing per-row `auth.uid()` with `(select auth.uid())`. The
@@ -55,15 +55,15 @@ check into a join the planner can see through.
 This is the one item in wave 1 that is **easy to get wrong in a way that leaks
 between groups**, so it wants adversarial tests before it wants cleverness:
 assert that member A cannot read group B's rows, for every policy touched, and
-run those tests against the *old* policies first to confirm they fail closed.
-*Verify:* `npm run test:sql` against WASM Postgres, `npm run check:migrations`.
+run those tests against the _old_ policies first to confirm they fail closed.
+_Verify:_ `npm run test:sql` against WASM Postgres, `npm run check:migrations`.
 
 **A5. Edge function for the GoTrue ban.** `account_status = 'blocked'` stops the
 shared surfaces via RLS and pauses sync, but the JWT stays valid until it
 expires — so blocking is defence-in-depth, not a hard stop. An edge function
 calling `auth.admin.updateUserById(uid, { ban_duration })` is what kills live
 sessions. I can write and test it; **deploying it needs Part B item 1.**
-*Verify:* unit tests locally; real behaviour is unverifiable from here.
+_Verify:_ unit tests locally; real behaviour is unverifiable from here.
 
 ### Wave 2 — needs wave 1, still no hardware
 
@@ -71,13 +71,13 @@ sessions. I can write and test it; **deploying it needs Part B item 1.**
 per-account overrides plus the merge rule (user override wins; absence falls
 through to global), then thread it through `features/module-flags/`. This is what
 makes staged rollouts and one-off support fixes possible.
-*Verify:* `npm run test:sql`, `npm test`, `npm run typecheck`.
+_Verify:_ `npm run test:sql`, `npm test`, `npm run typecheck`.
 
 **A7. Operator console UI — `operator_report_queue()` first.** All moderation is
 SQL in the editor today: fine for one owner, poor for a moderator working a queue
 at 3am. Build the report queue screen before the module-switch admin UI or the
 metrics dashboard, because it is the one with a live person waiting on it.
-*Decision needed from you first — see B9.*
+_Decision needed from you first — see B9._
 
 **A8. Admin UI for module switches.** Today: `select
 public.admin_set_module_enabled('split', false, 'reason');`. Same host decision
@@ -111,7 +111,7 @@ wants code.** Not started until that answer exists.
 
 **A14. SQLCipher underneath the private space** (`docs/SQLCIPHER.md`). Private
 rows are already encrypted field-by-field, so this is defence in depth — but it
-also covers every *other* module's data at rest, which is the real argument for
+also covers every _other_ module's data at rest, which is the real argument for
 it. Sequenced after A13 only because it touches the database everything else is
 mid-flight on.
 
@@ -131,15 +131,16 @@ without the server ever seeing the key.** QR-based transfer is the usual answer.
 Neither should start before the other work is stable, and neither is a week.
 
 **A17. Secure shared spaces (couples / groups).**
+
 - Space gets a random symmetric key; content encrypted under it, uploaded as
   ciphertext the server cannot read.
-- Invite carries the key **out of band** — QR or link fragment. *This is the
-  whole design.* Anything that posts the key to Supabase silently converts this
+- Invite carries the key **out of band** — QR or link fragment. _This is the
+  whole design._ Anything that posts the key to Supabase silently converts this
   into a server-readable feature while looking identical in the UI.
 - Wire the already-built `SecureContentView` (screenshot block, watermark, no
   save/share, report button) to real shared content.
 - ⚠️ Revocation is partial and the UI must say so: removing a member stops them
-  fetching *new* content; it cannot un-know the key they hold. Rotating on
+  fetching _new_ content; it cannot un-know the key they hold. Rotating on
   removal fixes future content only.
 
 **A18. E2E sync for private modules.** `sensitive: true` in `sync-tables.ts` was
@@ -170,17 +171,17 @@ and documented.
 
 Ordered by how much each unblocks.
 
-**B1. Create two Supabase projects — staging and production.** *Unblocks
-everything: auth, sync, A5's deployment, and B2.*
+**B1. Create two Supabase projects — staging and production.** _Unblocks
+everything: auth, sync, A5's deployment, and B2._
 Export `SUPABASE_DB_URL_STAGING` / `SUPABASE_DB_URL_PRODUCTION` **in your shell,
 never in `.env`** — Expo inlines `.env` into the app bundle. Then
 `npm run migrate:staging`, verify, `npm run migrate:production`. Put the project
 URL + anon key in `.env` (placeholders today).
-⚠️ 0016 drops columns that older builds still push, so apply it *during* a
+⚠️ 0016 drops columns that older builds still push, so apply it _during_ a
 release, not ahead of one — a stale client's sync fails loudly.
 
-**B2. Device validation.** *The #1 item. Everything below "verifiable only on a
-device" in Part A is waiting on this.*
+**B2. Device validation.** _The #1 item. Everything below "verifiable only on a
+device" in Part A is waiting on this._
 `eas login && eas init && eas build -p android --profile development`, install the
 APK, confirm: reminders fire, widget renders, sign-in and sync work. Then the
 private-space checks — PBKDF2 unlock latency on a mid-range Android (target
@@ -196,12 +197,13 @@ plaintext, and the database it opens is a far likelier breach target than a key
 kept offline.
 
 **B4. Throw the two bootstrap switches, before anyone else has access.**
+
 - `insert into public.admin_allowed_origins (id, ip_range, label) …` — until the
   first row exists the allowlist is **inert** and admin access is unrestricted.
 - `insert into public.admins (user_id, note) values ('<your-uuid>', 'owner');` —
   nothing in `admin_*` works until this row exists.
-Both must be done before adding any staff account, since a staff account would
-otherwise be usable from anywhere.
+  Both must be done before adding any staff account, since a staff account would
+  otherwise be usable from anywhere.
 
 **B5. Raise the server-side password floor.** Supabase → Auth →
 `password_min_length` = 10, and consider leaked-password protection.
@@ -210,6 +212,7 @@ the choice, it does not stop a crafted request.
 
 **B6. Google sign-in consoles.** Code is done and bundles clean; it has never run
 against a real provider.
+
 - Google Cloud: OAuth consent screen + a **Web** OAuth client whose redirect URI
   is `https://<project-ref>.supabase.co/auth/v1/callback`. That is Supabase's
   URL, not the app's.
@@ -227,6 +230,7 @@ third-party login is. Shipping Google to iOS without Apple is a rejection — th
 go live together. Android can ship Google alone.
 
 **B8. Two assets before any store submission.**
+
 - Notification status-bar icon: 96×96 white-on-transparent PNG in `assets/`,
   then I wire `"icon"` into the `expo-notifications` plugin.
 - Real bundle identifier: replace the `com.lifeos.app` placeholder.

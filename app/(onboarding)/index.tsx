@@ -153,11 +153,10 @@ export default function OnboardingScreen() {
     if (step !== index) setStep(index);
   }, [step, index, setStep]);
 
-  const goNext = useCallback(() => setStep(Math.min(index + 1, steps.length - 1)), [
-    index,
-    steps.length,
-    setStep,
-  ]);
+  const goNext = useCallback(
+    () => setStep(Math.min(index + 1, steps.length - 1)),
+    [index, steps.length, setStep],
+  );
   const goBack = useCallback(() => setStep(Math.max(index - 1, 0)), [index, setStep]);
 
   /**
