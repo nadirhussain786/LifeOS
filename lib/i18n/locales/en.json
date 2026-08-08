@@ -1375,7 +1375,20 @@
     "notConfiguredBody": "Accounts and cloud sync are switched off — everything still works offline. For an EAS build, set these in the environment the build profile uses, then rebuild.",
     "envMissing": "missing",
     "failedToast": "Sync didn’t finish. Your data is safe on this device.",
-    "mediaNote": "Gallery and Music sync your albums, playlists and details — not the photo, video and audio files themselves. Those stay on the device that imported them, and appear elsewhere as “Not on this device”."
+    "mediaNote": "Gallery and Music sync your albums, playlists and details — not the photo, video and audio files themselves. Those stay on the device that imported them, and appear elsewhere as “Not on this device”.",
+    "conflictsTitle": "Replaced edits",
+    "conflictsIntro": "These were changed on another device after you changed them here. The newer version won — you can put yours back.",
+    "conflictsEmptyTitle": "Nothing was replaced",
+    "conflictsEmptyBody": "When an edit here is overwritten by a newer one from another device, it shows up here so you can get it back.",
+    "conflictsRow_one": "{{count}} edit was replaced",
+    "conflictsRow_other": "{{count}} edits were replaced",
+    "conflictsRowHint": "Changed on another device after you changed it here",
+    "conflictWhen": "Replaced {{ago}}",
+    "conflictRestoreMine": "Restore mine",
+    "conflictKeepTheirs": "Keep theirs",
+    "conflictDismissAll": "Keep all the newer versions",
+    "conflictDismissAllTitle": "Keep the newer versions?",
+    "conflictDismissAllBody": "This clears the list. Your replaced versions are not recoverable afterwards."
   },
   "syncModule": {
     "tasks": "Tasks",

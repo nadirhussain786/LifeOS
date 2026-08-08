@@ -4,6 +4,7 @@ import * as Haptics from 'expo-haptics';
 import {
   CheckCircle2,
   CloudOff,
+  GitMerge,
   LogOut,
   Trash2,
   TriangleAlert,
@@ -22,6 +23,7 @@ import { useUsageStore } from '@/features/analytics/store/usage-store';
 import { useAuthStore } from '@/features/auth/services/auth-store';
 import { SYNC_MODULES } from '@/features/sync/config/sync-tables';
 import { useSyncStatus } from '@/features/sync/hooks/use-sync';
+import { useOpenConflictCount } from '@/features/sync/hooks/use-sync-conflicts';
 import { syncNow } from '@/features/sync/services/sync-engine';
 import { useSyncStore } from '@/features/sync/store/sync-store';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -49,6 +51,7 @@ export default function SyncSettingsScreen() {
   const deleteAccount = useAuthStore((s) => s.deleteAccount);
 
   const { status, lastSyncedAt, lastError } = useSyncStatus();
+  const conflictCount = useOpenConflictCount();
   const autoSync = useSyncStore((s) => s.autoSync);
   const setAutoSync = useSyncStore((s) => s.setAutoSync);
   const modules = useSyncStore((s) => s.modules);
@@ -234,6 +237,27 @@ export default function SyncSettingsScreen() {
               />
             </View>
           </View>
+
+          {/*
+            Only when there is something to say. A permanent "0 conflicts" row
+            would be noise on a screen that is already dense, and it would teach
+            people to ignore the one place this ever matters.
+          */}
+          {conflictCount > 0 ? (
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => router.push('/settings/sync-conflicts')}
+              className={cardClass({ padding: 'md' }, 'flex-row items-center gap-3')}
+            >
+              <GitMerge size={18} color={theme.warning} />
+              <View className="flex-1">
+                <Text className="font-sora-medium text-foreground">
+                  {t('sync.conflictsRow', { count: conflictCount })}
+                </Text>
+                <Text variant="caption">{t('sync.conflictsRowHint')}</Text>
+              </View>
+            </Pressable>
+          ) : null}
         </View>
 
         {/* What syncs */}

@@ -279,6 +279,7 @@ export default function RootLayout() {
                 <Stack.Screen name="settings/index" />
                 <Stack.Screen name="settings/notifications" />
                 <Stack.Screen name="settings/sync" />
+                <Stack.Screen name="settings/sync-conflicts" />
                 <Stack.Screen name="settings/blocked" />
                 {/* The private space brings its own layout (screenshot block,
                     no swipe-back), so it is registered as one route here. */}
