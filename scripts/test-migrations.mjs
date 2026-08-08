@@ -3112,4 +3112,119 @@ await test('0022 nobody can edit the access log, including its subject', async (
   });
 });
 
+// ---------------------------------------------------------------------------
+console.log('\n0023 group RLS, rewritten');
+// ---------------------------------------------------------------------------
+
+/**
+ * 0023 swapped every group policy from a correlated per-row membership call to
+ * a hoisted `x in (select my_*_ids())`. The whole point is that the predicate is
+ * unchanged, so the pre-existing 0003–0021 group tests passing is the primary
+ * evidence. These add the case that shape could plausibly get wrong: a set-based
+ * test that accidentally spans groups rather than scoping to one.
+ */
+await test('0023 one group cannot see another group', async () => {
+  const A_OWNER = 'eeeeeeee-0000-0000-0000-000000000001';
+  const B_OWNER = 'eeeeeeee-0000-0000-0000-000000000002';
+  await createUser(db, A_OWNER, 'ga@example.com');
+  await createUser(db, B_OWNER, 'gb@example.com');
+
+  const mkGroup = async (uid, gid) => {
+    await asUser(db, uid, async () => {
+      await db.query(`select public.create_expense_group($1, $2, 'trip', '$', $3, null, $4, 1)`, [
+        gid,
+        `name-${gid}`,
+        `m-${gid}`,
+        `act-${gid}`,
+      ]);
+      await db.query(
+        `insert into public.expense_group_expenses
+           (id, group_id, paid_by_member_id, description, amount_cents, currency, spent_at,
+            created_by, created_at, updated_at)
+         values ($1, $2, $3, 'dinner', 1000, '$', 1, $4, 1, 1)`,
+        [`x-${gid}`, gid, `m-${gid}`, uid],
+      );
+      await db.query(
+        `insert into public.expense_group_shares
+           (id, expense_id, member_id, share_cents, created_at, updated_at)
+         values ($1, $2, $3, 1000, 1, 1)`,
+        [`s-${gid}`, `x-${gid}`, `m-${gid}`],
+      );
+    });
+  };
+
+  await mkGroup(A_OWNER, 'grp-a');
+  await mkGroup(B_OWNER, 'grp-b');
+
+  await asUser(db, A_OWNER, async () => {
+    // The membership set is per-caller. If `my_expense_group_ids()` ever
+    // stopped filtering on auth.uid(), every one of these becomes 2 and the
+    // whole ledger leaks between unrelated households.
+    expectEqual(await count(`select count(*)::int n from public.expense_groups`), 1, 'groups');
+    expectEqual(
+      await count(`select count(*)::int n from public.expense_group_expenses`),
+      1,
+      'expenses',
+    );
+    expectEqual(
+      await count(`select count(*)::int n from public.expense_group_shares`),
+      1,
+      'shares (reached through my_expense_ids, the widest of the new sets)',
+    );
+    expectEqual(
+      await count(`select count(*)::int n from public.expense_group_members`),
+      1,
+      'members',
+    );
+  });
+});
+
+await test('0023 leaving a group closes the door immediately', async () => {
+  // The membership set is computed per statement, so a soft-deleted membership
+  // row has to drop out of it on the very next query — not on the next session.
+  const OWNER = 'eeeeeeee-0000-0000-0000-000000000003';
+  const GUEST = 'eeeeeeee-0000-0000-0000-000000000004';
+  await createUser(db, OWNER, 'go@example.com');
+  await createUser(db, GUEST, 'gg@example.com');
+
+  await asUser(db, OWNER, async () => {
+    await db.query(
+      `select public.create_expense_group('grp-c', 'c', 'home', '$', 'm-c-owner', null, 'act-c', 1)`,
+    );
+    await db.query(
+      `insert into public.expense_group_members
+         (id, group_id, user_id, display_name, role, joined_at, created_at, updated_at)
+       values ('m-c-guest', 'grp-c', $1, 'guest', 'member', 1, 1, 1)`,
+      [GUEST],
+    );
+  });
+
+  await asUser(db, GUEST, async () => {
+    expectEqual(await count(`select count(*)::int n from public.expense_groups`), 1, 'in');
+    await db.query(`update public.expense_group_members set deleted_at = 1 where user_id = $1`, [
+      GUEST,
+    ]);
+    expectEqual(await count(`select count(*)::int n from public.expense_groups`), 0, 'out');
+  });
+});
+
+await test('0023 the hoisted sets are scoped to the caller', async () => {
+  // Direct assertions on the functions themselves, so a failure names the cause
+  // rather than a downstream policy.
+  const SOLO = 'eeeeeeee-0000-0000-0000-000000000005';
+  await createUser(db, SOLO, 'solo@example.com');
+  await asUser(db, SOLO, async () => {
+    expectEqual(
+      await count(`select count(*)::int n from public.my_expense_group_ids()`),
+      0,
+      'a user in no groups sees no group ids',
+    );
+    expectEqual(
+      await count(`select count(*)::int n from public.my_expense_ids()`),
+      0,
+      'a user in no groups sees no expense ids',
+    );
+  });
+});
+
 summary();
