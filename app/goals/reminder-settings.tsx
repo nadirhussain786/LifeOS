@@ -73,7 +73,11 @@ export default function GoalReminderSettingsScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <ScreenHeader title={t('goals.reminderTitle')} eyebrow={t('hubModule.goals')} tint={tint} />
+      <ScreenHeader
+        title={t('goals.reminderTitle')}
+        eyebrow={t('hubModule.goalsTitle')}
+        tint={tint}
+      />
 
       <ScrollView
         contentContainerClassName="gap-6 px-5 pt-3 pb-10"

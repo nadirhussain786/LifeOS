@@ -71,7 +71,11 @@ export default function StudyReminderSettingsScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <ScreenHeader title={t('study.reminderTitle')} eyebrow={t('hubModule.study')} tint={tint} />
+      <ScreenHeader
+        title={t('study.reminderTitle')}
+        eyebrow={t('hubModule.studyTitle')}
+        tint={tint}
+      />
 
       <ScrollView
         contentContainerClassName="gap-6 px-5 pt-3 pb-10"

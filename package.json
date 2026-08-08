@@ -14,6 +14,7 @@
     "version:bump": "node scripts/bump-version.mjs",
     "check:migrations": "node scripts/check-migrations.mjs",
     "check:tokens": "node scripts/check-tokens.mjs",
+    "check:i18n": "node scripts/check-i18n.mjs",
     "docs:design": "node scripts/gen-design-doc.mjs && prettier --write docs/design-system.md --log-level warn",
     "test:sql": "node scripts/test-migrations.mjs",
     "migrate": "node scripts/migrate.mjs",
