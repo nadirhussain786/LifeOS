@@ -32,11 +32,24 @@ async function runRefresh(): Promise<void> {
   if (!isSupabaseConfigured) return;
 
   try {
-    const { data, error } = await supabase.from('module_flags').select('module, enabled, message');
+    /**
+     * `my_module_flags()` (migration 0024), not the `module_flags` table.
+     *
+     * The RPC merges the global switches with this account's own overrides —
+     * user wins, absence falls through to global, absence of both means
+     * enabled — so staged rollouts and one-account support fixes stop meaning
+     * "take the feature away from everybody". It returns only the modules that
+     * are *off*, which is why an empty response and a failed request can go on
+     * being treated identically.
+     *
+     * A guest has no session and so no overrides; the RPC returns the global
+     * set for them, which is the same answer the table gave.
+     */
+    const { data, error } = await supabase.rpc('my_module_flags');
     if (error || !data) return;
 
     const flags: Record<string, ModuleFlag> = {};
-    for (const row of data) {
+    for (const row of data as { module?: unknown; enabled?: unknown; message?: unknown }[]) {
       const module = typeof row.module === 'string' ? row.module : null;
       if (!module) continue;
       flags[module] = {

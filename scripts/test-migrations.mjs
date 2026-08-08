@@ -3208,6 +3208,126 @@ await test('0023 leaving a group closes the door immediately', async () => {
   });
 });
 
+await test('0024 with no override, the global switch decides', async () => {
+  await db.query(
+    `insert into public.module_flags (module, enabled, message, updated_at)
+     values ('budget', false, 'maintenance', now())
+     on conflict (module) do update set enabled = false, message = 'maintenance'`,
+  );
+  await asUser(db, ALICE, async () => {
+    const { rows } = await db.query(`select * from public.my_module_flags()`);
+    const budget = rows.find((r) => r.module === 'budget');
+    expectEqual(budget?.enabled, false, 'global off reaches a user with no override');
+    expectEqual(budget?.message, 'maintenance', 'the operator message travels');
+  });
+});
+
+await test('0024 a user override wins, including re-enabling', async () => {
+  // The staged-rollout case: on for this account while off for everyone else.
+  // Without a tri-state override, per-user flags could only ever take away.
+  await asUser(db, ADMIN, async () => {
+    await db.query(
+      `select public.admin_set_user_module($1::uuid, 'budget', true, 'early access')`,
+      [BOB],
+    );
+  });
+  await asUser(db, BOB, async () => {
+    const { rows } = await db.query(`select * from public.my_module_flags()`);
+    expectEqual(
+      rows.find((r) => r.module === 'budget'),
+      undefined,
+      'an override re-enables a globally disabled module',
+    );
+  });
+  await asUser(db, ALICE, async () => {
+    const { rows } = await db.query(`select * from public.my_module_flags()`);
+    expectEqual(
+      rows.find((r) => r.module === 'budget')?.enabled,
+      false,
+      "somebody else's override does not reach this account",
+    );
+  });
+});
+
+await test('0024 an override can switch one account off on its own', async () => {
+  // The support-fix case. `notes` has no global row at all, so this also proves
+  // the join reaches an override with no global counterpart.
+  await asUser(db, ADMIN, async () => {
+    await db.query(`select public.admin_set_user_module($1::uuid, 'notes', false, 'crash loop')`, [
+      BOB,
+    ]);
+  });
+  await asUser(db, BOB, async () => {
+    const { rows } = await db.query(`select * from public.my_module_flags()`);
+    expectEqual(rows.find((r) => r.module === 'notes')?.enabled, false, 'off for this account');
+  });
+  await asUser(db, ALICE, async () => {
+    const { rows } = await db.query(`select * from public.my_module_flags()`);
+    expectEqual(
+      rows.find((r) => r.module === 'notes'),
+      undefined,
+      'and on for everybody else',
+    );
+  });
+});
+
+await test('0024 the internal note is never shown to its subject', async () => {
+  // `message` is the operator's user-facing explanation and only ever lives on
+  // the global row. The per-user note is internal — "crash loop", "abusive" —
+  // and must not be rendered to the account it is about.
+  await asUser(db, BOB, async () => {
+    const { rows } = await db.query(`select * from public.my_module_flags()`);
+    expectEqual(rows.find((r) => r.module === 'notes')?.message, null, 'per-user note withheld');
+  });
+});
+
+await test('0024 a user cannot switch their own modules back on', async () => {
+  // An override its subject can edit is an override that means nothing.
+  //
+  // Note the shape of the first assertion. There is no DELETE policy on the
+  // table, and RLS answers a missing DELETE policy by making the rows invisible
+  // to the statement rather than by raising — so the DELETE *succeeds* and
+  // removes nothing. Asserting a rejection would have failed for the right
+  // reason and taught the wrong lesson; the property that matters is that the
+  // row is still there afterwards.
+  await asUser(db, BOB, async () => {
+    await db.query(`delete from public.module_flags_user where user_id = $1`, [BOB]);
+    await expectRejection(
+      () => db.query(`select public.admin_set_user_module($1::uuid, 'notes', true, 'nope')`, [BOB]),
+      'not an administrator',
+    );
+  });
+
+  expectEqual(
+    await count(
+      `select count(*)::int n from public.module_flags_user
+        where user_id = $1 and module = 'notes'`,
+      [BOB],
+    ),
+    1,
+    'the override survives its subject trying to delete it',
+  );
+
+  await asUser(db, BOB, async () => {
+    const { rows } = await db.query(`select * from public.my_module_flags()`);
+    expectEqual(
+      rows.find((r) => r.module === 'notes')?.enabled,
+      false,
+      'and the module is still switched off for them',
+    );
+  });
+});
+
+await test('0024 clearing an override falls back to the global switch', async () => {
+  await asUser(db, ADMIN, async () => {
+    await db.query(`select public.admin_clear_user_module($1::uuid, 'budget')`, [BOB]);
+  });
+  await asUser(db, BOB, async () => {
+    const { rows } = await db.query(`select * from public.my_module_flags()`);
+    expectEqual(rows.find((r) => r.module === 'budget')?.enabled, false, 'back to global');
+  });
+});
+
 await test('0023 the hoisted sets are scoped to the caller', async () => {
   // Direct assertions on the functions themselves, so a failure names the cause
   // rather than a downstream policy.
