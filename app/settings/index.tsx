@@ -13,6 +13,7 @@ import {
   Languages,
   LifeBuoy,
   Scale,
+  ShieldAlert,
   Target,
   Upload,
   UserCircle,
@@ -41,6 +42,7 @@ import { clearAllData } from '@/lib/data-management';
 import { queryClient } from '@/lib/query-client';
 import { confirm, notify } from '@/lib/dialog-store';
 import { toast } from '@/lib/toast-store';
+import { isOperator as checkOperator } from '@/features/operator/services/operator-repository';
 import { isVaultSetUp } from '@/features/private/services/vault-keys';
 import { usePrivateStore } from '@/features/private/store/private-store';
 import { useProfileStore } from '@/features/profile/store/profile-store';
@@ -92,6 +94,16 @@ export default function SettingsScreen() {
   const privateHidden = usePrivateStore((state) => state.hiddenFromSettings);
 
   /**
+   * Whether to show the operator console at all.
+   *
+   * Asked of the server, not inferred from anything local. A row that appears
+   * for everybody and errors for most is worse than no row: it tells every user
+   * the console exists and invites them to poke at it. The answer defaults to
+   * no, so a failed check hides it rather than revealing it.
+   */
+  const [isOperator, setIsOperator] = useState(false);
+
+  /**
    * The way into the private space.
    *
    * Called by the visible row and — always, hidden or not — by a long-press on
@@ -113,6 +125,7 @@ export default function SettingsScreen() {
     isBiometricAvailable().then(setBioAvailable);
     getBiometricLabel().then(setBioLabel);
     void isVaultSetUp().then(setPrivateSetUp);
+    void checkOperator().then(setIsOperator);
   }, []);
 
   const toggleAppLock = async (next: boolean) => {
@@ -436,6 +449,16 @@ export default function SettingsScreen() {
               subtitle={t('moderation.blockedAccountsSubtitle')}
               onPress={() => router.push('/settings/blocked')}
             />
+            {/* Only for accounts the server confirms are operators. Everyone
+                else never learns the screen exists. */}
+            {isOperator ? (
+              <SettingsRow
+                icon={ShieldAlert}
+                label={t('operator.title')}
+                subtitle={t('operator.rowHint')}
+                onPress={() => router.push('/settings/operator')}
+              />
+            ) : null}
             <SettingsRow
               icon={FileText}
               label={t('settings.privacyPolicy')}

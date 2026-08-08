@@ -34,7 +34,8 @@
     "undo": "Undo",
     "ok": "OK",
     "or": "or",
-    "optional": "Optional"
+    "optional": "Optional",
+    "loadingEllipsis": "Loading…"
   },
   "reminder": {
     "in1Hour": "In 1 hour",
@@ -1906,5 +1907,21 @@
     "errorCode": "That code does not open this text. Check it on the other device.",
     "errorPayload": "That does not look like a transfer. Copy it again from the other device.",
     "errorVersion": "This transfer was made by a newer version of LifeOS. Update this device first."
+  },
+  "operator": {
+    "title": "Operator console",
+    "eyebrow": "Staff",
+    "rowHint": "Report queue and module switches",
+    "noAccess": "No operator access",
+    "reportQueue": "Open reports",
+    "queueEmptyTitle": "Nothing waiting",
+    "queueEmptyBody": "Accounts with open reports appear here, worst first.",
+    "moduleSwitches": "Module switches",
+    "messagePlaceholder": "What users should see when a module is off",
+    "messageHint": "Shown on the Hub card of a disabled module. Leaving it blank means the module simply vanishes with no explanation.",
+    "disableTitle": "Switch this module off?",
+    "disableBody": "This takes the module away from every user of every device, immediately. Their data is untouched and comes back when you switch it on again.",
+    "disableConfirm": "Switch it off",
+    "perUserNote": "Per-account overrides exist (they beat these global switches) but belong on an account’s own page rather than a uuid field bolted to this list."
   }
 }
